@@ -6,9 +6,7 @@ Configuration of the HH → bb𝜏𝜏 analysis.
 
 import os
 import re
-from collections import OrderedDict
 
-import yaml
 from scinum import Number
 import law
 import order as od
