@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+tm_update_submodules() {
+    # Updates all git submodules in case no local changes are found.
+    #
+    # Required environment variables:
+    #   TM_BASE:
+    #       The repository base path.
+    #   CF_BASE:
+    #       The columnflow base path.
+
+    # load cf setup helpers
+    CF_SKIP_SETUP="1" source "${CF_BASE}/setup.sh" "" || return "$?"
+
+    # update columnflow submodules
+    if [ -d "${CF_BASE}/.git" ] || [ -f "${CF_BASE}/.git" ]; then
+        for m in $( ls -1q "${CF_BASE}/modules" ); do
+            echo "checking columnflow submodule ${m}"
+            cf_init_submodule "${CF_BASE}" "modules/${m}"
+        done
+    fi
+
+    # update topmass submodules
+    if [ -d "${TM_BASE}/.git" ]; then
+        for m in $( ls -1q "${TM_BASE}/modules" ); do
+            echo "checking topmass submodule ${m}"
+            cf_init_submodule "${TM_BASE}" "modules/${m}"
+        done
+    fi
+}
+
+tm_update_submodules "$@"
