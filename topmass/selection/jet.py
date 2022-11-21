@@ -10,6 +10,9 @@ from columnflow.util import maybe_import
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
+def masked_sorted_indices(mask: ak.Array, sort_var: ak.Array, ascending: bool = False) -> ak.Array:
+    indices = ak.argsort(sort_var, axis=-1, ascending=ascending)
+    return indices[mask[indices]]
 
 @selector(
     uses={
@@ -35,8 +38,8 @@ def jet_selection(
     )
 
     # pt sorted indices to convert mask
-    sorted_indices = ak.argsort(events.Jet.pt, axis=-1, ascending=False)
-    jet_indices = sorted_indices[default_mask[sorted_indices]]
+    #sorted_indices = ak.argsort(events.Jet.pt, axis=-1, ascending=False)
+    jet_indices = masked_sorted_indices(default_mask,events.Jet.pt)
 
     # final event selection, just pick events with 2 or mor ejets
     jet_sel = ak.sum(default_mask, axis=1) >= 2
