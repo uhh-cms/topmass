@@ -13,7 +13,7 @@ ak = maybe_import("awkward")
 
 @selector(
     uses={
-        "nJet", "Jet.pt", "Jet.eta", "Jet.jetId", "Jet.puId",
+        "nJet", "Jet.pt", "Jet.eta", "Jet.jetId", "Jet.puId","Jet.btagDeepFlavB"
     },
 )
 def jet_selection(
@@ -41,14 +41,22 @@ def jet_selection(
     # final event selection, just pick events with 2 or mor ejets
     jet_sel = ak.sum(default_mask, axis=1) >= 2
 
+    # b-tagged jets, medium working point
+    wp_med = self.config_inst.x.btag_working_points.deepcsv.medium
+    bjet_mask = (default_mask) & (events.Jet.btagDeepFlavB >= wp_med)
+    bjet_sel = ak.sum(bjet_mask, axis=1) >= 1
+
+    # sort jets after b-score and define b-jets as the two b-score leading jets
+    bjet_indices = masked_sorted_indices(default_mask, events.Jet.btagDeepFlavB)[:, :2]
+    
     # build and return selection results plus new columns (src -> dst -> indices)
     return events, SelectionResult(
         steps={
-            "jet": jet_sel,
+            "jet": jet_sel, "Bjet": bjet_sel
         },
         objects={
             "Jet": {
-                "Jet": jet_indices,
+                "Jet": jet_indices, "Bjet": bjet_indices
             },
         },
         aux={
