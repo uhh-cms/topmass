@@ -40,6 +40,14 @@ def add_variables(config: od.Config) -> None:
         binning=(33, -3.3, 3.3),
         x_title=r"MET $\phi$",
     )
+    config.add_variable(
+        name="Bjet1_pt",
+        expression="Bjet.pt[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0., 400.),
+        unit="GeV",
+        x_title=r"BJet 1 $p_{T}$",
+    )
 
     # weights
     config.add_variable(
