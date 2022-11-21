@@ -267,6 +267,21 @@ cfg.x.versions = {
 cfg.add_channel(name="mu", id=1)
 cfg.add_channel(name="e", id=2)
 
+# 2017 b-tag working points
+# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
+cfg.x.btag_working_points = DotDict.wrap({
+    "deepjet": {
+        "loose": 0.0532,
+        "medium": 0.3040,
+        "tight": 0.7476,
+    },
+    "deepcsv": {
+        "loose": 0.1355,
+        "medium": 0.4506,
+        "tight": 0.7738,
+    },
+})
+
 # add categories
 add_categories(cfg)
 
