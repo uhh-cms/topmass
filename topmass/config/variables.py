@@ -20,6 +20,12 @@ def add_variables(config: od.Config) -> None:
         x_title="Number of jets",
     )
     config.add_variable(
+        name="n_bjet",
+        expression="n_bjet",
+        binning=(11, -0.5, 10.5),
+        x_title="Number of Bjets",
+    )
+    config.add_variable(
         name="ht",
         binning=[0, 80, 120, 160, 200, 240, 280, 320, 400, 500, 600, 800],
         unit="GeV",
@@ -41,7 +47,7 @@ def add_variables(config: od.Config) -> None:
         x_title=r"MET $\phi$",
     )
     config.add_variable(
-        name="Bjet1_pt",
+        name="bjet1_pt",
         expression="Bjet.pt[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0., 400.),

@@ -12,20 +12,20 @@ from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
 
 ak = maybe_import("awkward")
 
-
 @producer(
     uses={
-        "Jet.pt",
+        "Jet.pt","Bjet.pt",
     },
     produces={
-        "ht", "n_jet",
+        "ht", "n_jet", "n_bjet",
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=1))
     events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1))
-
+    events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=1))
     return events
+
 
 
 @producer(
@@ -45,3 +45,4 @@ def cutflow_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT))
 
     return events
+

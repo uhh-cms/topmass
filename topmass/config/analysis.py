@@ -129,7 +129,7 @@ cfg.x.default_producer = "default"
 cfg.x.default_ml_model = None
 cfg.x.default_inference_model = None
 cfg.x.default_categories = ("incl",)
-cfg.x.default_variables = ("n_jet", "ht")
+cfg.x.default_variables = ("n_jet", "ht", "n_bjet")
 
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)
@@ -240,7 +240,8 @@ cfg.x.keep_columns = DotDict.wrap({
         "run", "luminosityBlock", "event",
         # object info
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB", "Jet.hadronFlavour",
-        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
+        "Bjet.pt", "Bjet.eta", "Bjet.phi", "Bjet.mass", "Bjet.btagDeepFlavB", "n_bjet",
+        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "normalization_weight",
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
         "MET.pt", "MET.phi",
         "PV.npvs",

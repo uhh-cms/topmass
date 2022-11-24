@@ -42,26 +42,22 @@ def jet_selection(
     jet_indices = masked_sorted_indices(default_mask,events.Jet.pt)
 
     # final event selection, just pick events with 2 or mor ejets
-    jet_sel = ak.sum(default_mask, axis=1) >= 2
+    jet_sel = ak.sum(default_mask, axis=1) >= 1
 
     # b-tagged jets, medium working point
-    wp_med = self.config_inst.x.btag_working_points.deepcsv.medium
-    bjet_mask = (default_mask) & (events.Jet.btagDeepFlavB >= wp_med)
+    wp_tight = self.config_inst.x.btag_working_points.deepcsv.tight
+    bjet_mask = (default_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
     bjet_sel = ak.sum(bjet_mask, axis=1) >= 1
 
     # sort jets after b-score and define b-jets as the two b-score leading jets
-    bjet_indices = masked_sorted_indices(default_mask, events.Jet.btagDeepFlavB)[:, :2]
-    
+    bjet_indices = masked_sorted_indices(bjet_mask, events.Jet.btagDeepFlavB)
+    bjet_indices = ak.argsort(events.Jet.pt, axis=-1, ascending=False)
     # build and return selection results plus new columns (src -> dst -> indices)
     return events, SelectionResult(
-        steps={
-            "jet": jet_sel, "Bjet": bjet_sel
-        },
-        objects={
-            "Jet": {
-                "Jet": jet_indices, "Bjet": bjet_indices
-            },
-        },
+        steps={"jet": jet_sel, "Bjet": bjet_sel},
+        
+        objects={"Jet": {"Jet": jet_indices, "Bjet": bjet_indices},},
+        
         aux={
             # jet mask that lead to the jet_indices
             # "jet_mask": default_mask,  TODO: needed?
