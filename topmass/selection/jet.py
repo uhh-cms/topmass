@@ -36,18 +36,17 @@ def jet_selection(
     # pt sorted indices to convert mask
     indices = ak.argsort(events.Jet.pt, axis=-1, ascending=False)
     jet_indices = indices[default_mask]
-    jet_sel = ak.sum(default_mask, axis=1) >= 1
+    jet_sel = ak.sum(default_mask, axis=1) >= 2
 
     # b-tagged jets, medium working point
     wp_tight = self.config_inst.x.btag_working_points.deepcsv.tight
     bjet_mask = ((default_mask) & (events.Jet.btagDeepFlavB >= wp_tight))
-    bjet_sel = ak.sum(bjet_mask, axis=1) >= 1
-
-    bjet_indices = indices[bjet_mask]
-
+    bjet_indices = indices[bjet_mask][:,:2]
+    bjet_sel = ak.sum(bjet_mask, axis=1) >= 2
+    
     # build and return selection results plus new columns (src -> dst -> indices)
     return events, SelectionResult(
-        steps={"jet": jet_sel, "Bjet": bjet_sel},
+        steps={"jet": jet_sel, "bjet": bjet_sel},
         
         objects={"Jet": {"Jet": jet_indices, "Bjet": bjet_indices},},
         

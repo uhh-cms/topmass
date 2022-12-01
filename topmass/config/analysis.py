@@ -82,33 +82,37 @@ stylize_processes(cfg)
 
 # add datasets we need to study
 dataset_names = [
-    # data
-    "data_e_b",
-    "data_e_c",
-    "data_e_d",
-    "data_e_e",
-    "data_e_f",
-    "data_mu_b",
-    "data_mu_c",
-    "data_mu_d",
-    "data_mu_e",
-    "data_mu_f",
-    # backgrounds
-    "tt_sl_powheg",
     "tt_dl_powheg",
-    "tt_fh_powheg",
-    "st_tchannel_t_powheg",
-    "st_tchannel_tbar_powheg",
-    "st_twchannel_t_powheg",
-    "st_twchannel_tbar_powheg",
-    "st_schannel_lep_amcatnlo",
-    "st_schannel_had_amcatnlo",
-    "dy_lep_pt50To100_amcatnlo",
-    "dy_lep_pt100To250_amcatnlo",
-    "dy_lep_pt250To400_amcatnlo",
-    "dy_lep_pt400To650_amcatnlo",
-    "dy_lep_pt650_amcatnlo",
-]
+    
+    ]
+"""
+# data
+"data_e_b",
+"data_e_c",
+"data_e_d",
+"data_e_e",
+"data_e_f",
+"data_mu_b",
+"data_mu_c",
+"data_mu_d",
+"data_mu_e",
+"data_mu_f",
+# backgrounds
+"tt_sl_powheg",
+"tt_dl_powheg",
+"tt_fh_powheg",
+"st_tchannel_t_powheg",
+"st_tchannel_tbar_powheg",
+"st_twchannel_t_powheg",
+"st_twchannel_tbar_powheg",
+"st_schannel_lep_amcatnlo",
+"st_schannel_had_amcatnlo",
+"dy_lep_pt50To100_amcatnlo",
+"dy_lep_pt100To250_amcatnlo",
+"dy_lep_pt250To400_amcatnlo",
+"dy_lep_pt400To650_amcatnlo",
+"dy_lep_pt650_amcatnlo",
+"""
 for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign_run2_2017_nano_v9.get_dataset(dataset_name))
 
@@ -241,8 +245,8 @@ cfg.x.keep_columns = DotDict.wrap({
         # object info
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB", "Jet.hadronFlavour",
         "Bjet.pt", "Bjet.eta", "Bjet.phi", "Bjet.mass", "Bjet.btagDeepFlavB", "n_bjet",
-        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "normalization_weight",
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
+        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "normalization_weight","Electron.charge",
+        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass","m_min_lb",
         "MET.pt", "MET.phi",
         "PV.npvs",
         # columns added during selection

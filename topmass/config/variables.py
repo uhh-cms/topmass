@@ -40,6 +40,14 @@ def add_variables(config: od.Config) -> None:
         x_title=r"Jet 1 $p_{T}$",
     )
     config.add_variable(
+        name="m_min_lb",
+        expression="m_min_lb",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0., 200.),
+        unit="GeV",
+        x_title="Minimal Lepton + B-quark mass",
+    )
+    config.add_variable(
         name="met_phi",
         expression="MET.phi",
         null_value=EMPTY_FLOAT,
