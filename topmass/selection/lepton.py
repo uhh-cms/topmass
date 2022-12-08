@@ -15,6 +15,7 @@ ak = maybe_import("awkward")
         "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass","Electron.charge"
     },
 )
+
 def electron_selection(
     self: Selector,
     events: ak.Array,
@@ -22,18 +23,36 @@ def electron_selection(
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
 
-    electron_mask = (events.Electron.pt > electron_min_pt) & (abs(events.Electron.eta) < 2.4) & (events.Electron.charge == 1)
+    default_mask = (events.Electron.pt > electron_min_pt) & (abs(events.Electron.eta) < 2.4) 
+    positron_mask = (events.Electron.charge == 1) & default_mask
+    electron_mask = (events.Electron.charge == -1) & default_mask
     
     # pt sorted indices to convert mask
-    e_indices = ak.argsort(events.Electron.pt, axis=-1, ascending=False)
-    electron_indices = e_indices[electron_mask][:,:2]
-    electron_sel = ak.num(electron_indices, axis=-1) >= 2
+    indices = ak.argsort(events.Electron.pt, axis=-1, ascending=False)
+    
+    positron_indices = indices[positron_mask][:,:1]
+    positron_sel = ak.num(positron_indices, axis=-1) >= 1
+    
+    electron_indices = indices[electron_mask][:,:1]
+    electron_sel = ak.num(electron_indices, axis=-1) >= 1
+    
+    
+    print(positron_indices[:30])
+    print(electron_indices[:30])
+    print(ak.concatenate([positron_indices, electron_indices], axis=1)[:30])
+    
+    print(ak.max(ak.num(ak.concatenate([positron_indices, electron_indices]),axis=1)))
+    print(ak.size(ak.zip([positron_indices, electron_indices], depth_limit=1), axis=0))
+    
+    e_pair_indices = indices[ak.concatenate([positron_indices, electron_indices], axis=1)] 
+    e_pair_sel = ak.num(e_pair_indices, axis=-1) >= 2 
+    #e_pair_indices = e_pair_indices[e_pair_sel]
     
     # build and return selection results plus new columns (src -> dst -> indices)
     return events, SelectionResult(
-        steps={"electron": electron_sel},
+        steps={"electron": e_pair_sel},
         
-        objects={"Electron": {"Electron": electron_indices},},
+        objects={"Electron": {"Electron": e_pair_indices},},
     )
 
 @selector(

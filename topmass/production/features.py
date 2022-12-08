@@ -50,16 +50,14 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         
     if ak.any(ak.num(events.Electron, axis=-1) != 2):
         raise Exception("In features.py: there should be exactly 2 leptons in each event")
-
-    m_min_lb = [0,0,0,0]
-    m_min_lb[0] = (events.Bjet[:, 0] + events.Electron[:, 0]).mass
-    m_min_lb[1] = (events.Bjet[:, 1] + events.Electron[:, 0]).mass
-    m_min_lb[2] = (events.Bjet[:, 0] + events.Electron[:, 1]).mass
-    m_min_lb[3] = (events.Bjet[:, 1] + events.Electron[:, 1]).mass
+    
+    m_bjet_e=[events.Bjet, events.Electron]
+    mleft, mright = ak.unzip(ak.cartesian(m_bjet_e, axis=1))
+    m_min_lb = ak.min((mleft+mright).mass, axis=1)
 
     #m=(events.Bjet[:, 0] + events.Electron[:, 1]).mass
     
-    events = set_ak_column(events, "m_min_lb", ak.min(m_min_lb,axis=0))
+    events = set_ak_column(events, "m_min_lb", m_min_lb)
     
     return events
 
