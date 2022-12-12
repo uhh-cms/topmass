@@ -26,6 +26,18 @@ def add_variables(config: od.Config) -> None:
         x_title="Number of Bjets",
     )
     config.add_variable(
+        name="n_e_e",
+        expression="n_e_e",
+        binning=(11, -0.5, 10.5),
+        x_title="Number of e_e",
+    )
+    config.add_variable(
+        name="n_e_mu",
+        expression="n_e_mu",
+        binning=(11, -0.5, 10.5),
+        x_title="Number of electron-mu-pairs",
+    )
+    config.add_variable(
         name="ht",
         binning=[0, 80, 120, 160, 200, 240, 280, 320, 400, 500, 600, 800],
         unit="GeV",

@@ -245,10 +245,13 @@ cfg.x.keep_columns = DotDict.wrap({
         # object info
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB", "Jet.hadronFlavour",
         "Bjet.pt", "Bjet.eta", "Bjet.phi", "Bjet.mass", "Bjet.btagDeepFlavB", "n_bjet",
-        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "normalization_weight","Electron.charge",
+        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "Electron.charge",
+        "E_Mu.pt", "E_Mu.eta", "E_Mu.phi", "E_Mu.mass", "E_Mu.charge",
+        "E_E.pt", "E_E.eta", "E_E.phi", "E_E.mass", "E_E.charge",
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass","m_min_lb",
         "MET.pt", "MET.phi",
         "PV.npvs",
+        "normalization_weight",
         # columns added during selection
         "channel", "process_id", "category_ids", "mc_weight", "deterministic_seed", "cutflow.*",
     },
