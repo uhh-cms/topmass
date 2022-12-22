@@ -16,7 +16,7 @@ from columnflow.util import maybe_import
 
 from topmass.selection.met import met_filter_selection
 from topmass.selection.jet import jet_selection
-from topmass.selection.lepton import e_mu_selection
+from topmass.selection.lepton import l_l_selection
 from topmass.production.features import cutflow_features
 
 np = maybe_import("numpy")
@@ -85,11 +85,11 @@ def increment_stats(
 
 @selector(
     uses={
-        attach_coffea_behavior, mc_weight, met_filter_selection,e_mu_selection, jet_selection, process_ids,
+        attach_coffea_behavior, mc_weight, met_filter_selection,l_l_selection, jet_selection, process_ids,
         cutflow_features, increment_stats,
     },
     produces={
-        mc_weight, met_filter_selection, jet_selection, process_ids, cutflow_features,e_mu_selection,
+        mc_weight, met_filter_selection, jet_selection, process_ids, cutflow_features,l_l_selection,
         increment_stats,
     },
     exposed=True,
@@ -118,12 +118,14 @@ def default(
     results += jet_results
     
     # electron selection
-    events, e_mu_results = self[e_mu_selection](events, electron_min_pt = 12, muon_min_pt = 7,**kwargs)
-    results += e_mu_results
+    events, l_l_results = self[l_l_selection](events,**kwargs)
+    results += l_l_results
     
     #events, e_mu_results = self[e_mu_selection](events, electron_min_pt = 12, muon_min_pt = 7, **kwargs)
     #results += e_mu_results
     
+    #import IPython
+    #IPython.embed()
     # combined event selection after all steps
     event_sel = reduce(and_, results.steps.values())
     results.main["event"] = event_sel

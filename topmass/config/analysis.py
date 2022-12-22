@@ -133,7 +133,7 @@ cfg.x.default_producer = "default"
 cfg.x.default_ml_model = None
 cfg.x.default_inference_model = None
 cfg.x.default_categories = ("incl",)
-cfg.x.default_variables = ("n_jet", "ht", "n_bjet")
+cfg.x.default_variables = ("n_l")
 
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)
@@ -245,18 +245,17 @@ cfg.x.keep_columns = DotDict.wrap({
         # object info
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB", "Jet.hadronFlavour",
         "Bjet.pt", "Bjet.eta", "Bjet.phi", "Bjet.mass", "Bjet.btagDeepFlavB", "n_bjet",
-        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "Electron.charge",
-        "E_Mu.pt", "E_Mu.eta", "E_Mu.phi", "E_Mu.mass", "E_Mu.charge",
-        "E_E.pt", "E_E.eta", "E_E.phi", "E_E.mass", "E_E.charge",
+        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "Electron.charge",       
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass","m_min_lb",
         "MET.pt", "MET.phi",
         "PV.npvs",
         "normalization_weight",
         # columns added during selection
-        "channel", "process_id", "category_ids", "mc_weight", "deterministic_seed", "cutflow.*",
-    },
+        "channel", "process_id", "category_ids",
+        "mc_weight", "channel_id","deterministic_seed", "cutflow.*",
+},
     "cf.MergeSelectionMasks": {
-        "mc_weight", "normalization_weight", "process_id", "category_ids", "cutflow.*",
+        "mc_weight", "normalization_weight", "process_id", "category_ids", "cutflow.*","channel_id"
     },
 })
 
@@ -272,8 +271,9 @@ cfg.x.versions = {
 }
 
 # cannels
-cfg.add_channel(name="mu", id=1)
-cfg.add_channel(name="e", id=2)
+cfg.add_channel(name="ee", id=1)
+cfg.add_channel(name="mumu", id=2)
+cfg.add_channel(name="emu", id=3)
 
 # 2017 b-tag working points
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15

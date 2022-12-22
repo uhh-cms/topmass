@@ -26,16 +26,16 @@ def add_variables(config: od.Config) -> None:
         x_title="Number of Bjets",
     )
     config.add_variable(
-        name="n_e_e",
-        expression="n_e_e",
+        name="n_electron",
+        expression="n_electron",
         binning=(11, -0.5, 10.5),
-        x_title="Number of e_e",
+        x_title="Number of electrons",
     )
     config.add_variable(
-        name="n_e_mu",
-        expression="n_e_mu",
+        name="n_muon",
+        expression="n_muon",
         binning=(11, -0.5, 10.5),
-        x_title="Number of electron-mu-pairs",
+        x_title="Number of muons",
     )
     config.add_variable(
         name="ht",

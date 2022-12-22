@@ -16,50 +16,25 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 
 @producer(
     uses={
-        "Jet.pt","Bjet.pt", "E_Mu.pt",
+        "Jet.pt","Bjet.pt", "Electron.pt","Muon.pt",
     },
     produces={
-        "ht", "n_jet", "n_bjet", "n_e_e", "n_e_mu",
+        "ht", "n_jet", "n_bjet", "n_electron","n_muon",
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=1))
     events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1))
     events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=1))
-    events = set_ak_column(events, "n_e_e", ak.num(events.E_Mu.pt, axis=1))
-    events = set_ak_column(events, "n_e_mu", ak.num(events.E_Mu.pt, axis=1))
+    events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=1))
+    events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=1))
     return events
+
+
 
 @producer(
     uses={
-        "Bjet.pt", "Electron.pt","Bjet.mass","Electron.mass"
-    },
-    produces={"2"
-    },
-)
-def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-
-    return events
-"""
-@producer(
-    uses={
-        "Jet.pt","Bjet.pt", "E_Mu.pt","E_E.pt",
-    },
-    produces={
-        "ht", "n_jet", "n_bjet", "n_e_e", "n_e_mu",
-    },
-)
-def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-    events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=1))
-    events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1))
-    events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=1))
-    events = set_ak_column(events, "n_e_e", ak.num(events.E_E.pt, axis=1))
-    events = set_ak_column(events, "n_e_mu", ak.num(events.E_Mu.pt, axis=1))
-    return events
-    
-@producer(
-    uses={
-        "Bjet.pt", "Electron.pt","Bjet.mass","Electron.mass"
+        "Bjet.pt","Bjet.mass","channel_id", "Electron.pt", "Electron.mass", "Muon.pt", "Muon.mass",
     },
     produces={
         "m_min_lb",
@@ -67,28 +42,35 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 )
 def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     
+    ch_ee = self.config_inst.get_channel("ee")
+
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Bjet"] = ak.with_name(events.Bjet, "PtEtaPhiMLorentzVector")
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
-    events["E_Mu"] = ak.with_name(events.E_Mu, "PtEtaPhiMLorentzVector")
+    events["Electron"] = ak.with_name(events.Electron, "PtEtaPhiMLorentzVector")
+    events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
+    events["Muon"] = ak.with_name(events.Muon, "PtEtaPhiMLorentzVector")
     
+    leptons = ak.concatenate((events.Electron,events.Muon),axis=1)
+
     if ak.any(ak.num(events.Bjet, axis=-1) != 2):
         raise Exception("In features.py: there should be exactly 2 bjets in each B_jet")
-        
-        
-    if ak.any(ak.num(events.E_Mu, axis=-1) != 2):
-        raise Exception("In features.py: there should be exactly 2 leptons in each E_pair")
     
-    m_bjet_e=[events.Bjet, events.E_Mu]
-    mleft, mright = ak.unzip(ak.cartesian(m_bjet_e, axis=1))
+    
+    if ak.any(ak.num(leptons, axis=-1) != 2):
+        raise Exception("In features.py: there should be exactly 2 leptons in each lepton pair")
+
+    bjet_l=[events.Bjet, leptons]
+    
+    mleft, mright = ak.unzip(ak.cartesian(bjet_l, axis=1))
     m_min_lb = ak.min((mleft+mright).mass, axis=1)
 
     #m=(events.Bjet[:, 0] + events.Electron[:, 1]).mass
-    
+
     events = set_ak_column(events, "m_min_lb", m_min_lb)
     
     return events
-"""
+
 
 @producer(
     uses={

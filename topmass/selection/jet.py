@@ -27,7 +27,7 @@ def jet_selection(
 
     # common ak4 jet mask for normal and vbf jets
     default_mask = (
-        (events.Jet.pt > 20.0) &
+        (events.Jet.pt > 30.0) &
         (abs(events.Jet.eta) < 2.4) &
         (events.Jet.jetId == 6) &  # tight plus lepton veto
         ((events.Jet.pt >= 50.0) | (events.Jet.puId == (1 if is_2016 else 4)))  # flipped in 2016
