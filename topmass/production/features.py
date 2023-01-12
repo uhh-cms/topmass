@@ -55,8 +55,6 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 )
 def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
-    ch_ee = self.config_inst.get_channel("ee")
-
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Bjet"] = ak.with_name(events.Bjet, "PtEtaPhiMLorentzVector")
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
