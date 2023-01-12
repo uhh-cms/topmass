@@ -66,7 +66,9 @@ def increment_stats(
 
         # sums per process id and again per jet multiplicity
         stats.setdefault(f"sum_{name}_per_process", defaultdict(float))
-        stats.setdefault(f"sum_{name}_per_process_and_njet", defaultdict(lambda: defaultdict(float)))
+        stats.setdefault(
+            f"sum_{name}_per_process_and_njet", defaultdict(lambda: defaultdict(float))
+        )
         for p in unique_process_ids:
             stats[f"sum_{name}_per_process"][int(p)] += ak.sum(
                 weights[(events.process_id == p) & joinable_mask],
@@ -74,9 +76,9 @@ def increment_stats(
             for n in unique_n_jets:
                 stats[f"sum_{name}_per_process_and_njet"][int(p)][int(n)] += ak.sum(
                     weights[
-                        (events.process_id == p) &
-                        (results.x.n_central_jets == n) &
-                        joinable_mask
+                        (events.process_id == p)
+                        & (results.x.n_central_jets == n)
+                        & joinable_mask
                     ],
                 )
 
@@ -85,11 +87,22 @@ def increment_stats(
 
 @selector(
     uses={
-        attach_coffea_behavior, mc_weight, met_filter_selection,l_l_selection, jet_selection, process_ids,
-        cutflow_features, increment_stats,
+        attach_coffea_behavior,
+        mc_weight,
+        met_filter_selection,
+        l_l_selection,
+        jet_selection,
+        process_ids,
+        cutflow_features,
+        increment_stats,
     },
     produces={
-        mc_weight, met_filter_selection, jet_selection, process_ids, cutflow_features,l_l_selection,
+        mc_weight,
+        met_filter_selection,
+        jet_selection,
+        process_ids,
+        cutflow_features,
+        l_l_selection,
         increment_stats,
     },
     exposed=True,
@@ -116,16 +129,16 @@ def default(
     # jet selection
     events, jet_results = self[jet_selection](events, **kwargs)
     results += jet_results
-    
+
     # electron selection
-    events, l_l_results = self[l_l_selection](events,**kwargs)
+    events, l_l_results = self[l_l_selection](events, **kwargs)
     results += l_l_results
-    
-    #events, e_mu_results = self[e_mu_selection](events, electron_min_pt = 12, muon_min_pt = 7, **kwargs)
-    #results += e_mu_results
-    
-    #import IPython
-    #IPython.embed()
+
+    # events, e_mu_results = self[e_mu_selection](events, electron_min_pt = 12, muon_min_pt = 7, **kwargs)
+    # results += e_mu_results
+
+    # import IPython
+    # IPython.embed()
     # combined event selection after all steps
     event_sel = reduce(and_, results.steps.values())
     results.main["event"] = event_sel
