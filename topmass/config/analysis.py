@@ -63,7 +63,9 @@ ana.x.config_groups = {}
 #
 
 # copy the campaign, which in turn copies datasets and processes
-campaign_run2_2017_nano_v9 = cmsdb.campaigns.run2_2017_nano_v9.campaign_run2_2017_nano_v9.copy()
+campaign_run2_2017_nano_v9 = (
+    cmsdb.campaigns.run2_2017_nano_v9.campaign_run2_2017_nano_v9.copy()
+)
 
 # get all root processes
 procs = get_root_processes_from_campaign(campaign_run2_2017_nano_v9)
@@ -83,8 +85,7 @@ stylize_processes(cfg)
 # add datasets we need to study
 dataset_names = [
     "tt_dl_powheg",
-    
-    ]
+]
 """
 # data
 "data_e_b",
@@ -133,7 +134,7 @@ cfg.x.default_producer = "default"
 cfg.x.default_ml_model = None
 cfg.x.default_inference_model = None
 cfg.x.default_categories = ("incl",)
-cfg.x.default_variables = ("n_l")
+cfg.x.default_variables = "n_l"
 
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)
@@ -163,11 +164,14 @@ cfg.x.selector_step_groups = {
 
 # 2017 luminosity with values in inverse pb and uncertainties taken from
 # https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM?rev=176#LumiComb
-cfg.x.luminosity = Number(41480, {
-    "lumi_13TeV_2017": 0.02j,
-    "lumi_13TeV_1718": 0.006j,
-    "lumi_13TeV_correlated": 0.009j,
-})
+cfg.x.luminosity = Number(
+    41480,
+    {
+        "lumi_13TeV_2017": 0.02j,
+        "lumi_13TeV_1718": 0.006j,
+        "lumi_13TeV_correlated": 0.009j,
+    },
+)
 
 # 2018 minimum bias cross section in mb (milli) for creating PU weights, values from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
@@ -175,18 +179,20 @@ cfg.x.minbias_xs = Number(69.2, 0.046j)
 
 # b-tag working points
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
-cfg.x.btag_working_points = DotDict.wrap({
-    "deepjet": {
-        "loose": 0.0532,
-        "medium": 0.3040,
-        "tight": 0.7476,
-    },
-    "deepcsv": {
-        "loose": 0.1355,
-        "medium": 0.4506,
-        "tight": 0.7738,
-    },
-})
+cfg.x.btag_working_points = DotDict.wrap(
+    {
+        "deepjet": {
+            "loose": 0.0532,
+            "medium": 0.3040,
+            "tight": 0.7476,
+        },
+        "deepcsv": {
+            "loose": 0.1355,
+            "medium": 0.4506,
+            "tight": 0.7738,
+        },
+    }
+)
 
 
 # helper to add column aliases for both shifts of a source
@@ -200,8 +206,12 @@ def add_aliases(
         shift = cfg.get_shift(od.Shift.join_name(shift_source, direction))
         _aliases = shift.x(aux_key, {})
         # format keys and values
-        inject_shift = lambda s: re.sub(r"\{([^_])", r"{_\1", s).format(**shift.__dict__)
-        _aliases.update({inject_shift(key): inject_shift(value) for key, value in aliases.items()})
+        inject_shift = lambda s: re.sub(r"\{([^_])", r"{_\1", s).format(
+            **shift.__dict__
+        )
+        _aliases.update(
+            {inject_shift(key): inject_shift(value) for key, value in aliases.items()}
+        )
         # extend existing or register new column aliases
         shift.set_aux(aux_key, _aliases)
 
@@ -215,60 +225,118 @@ cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nomina
 
 
 # external files
-cfg.x.external_files = DotDict.wrap({
-    # files from TODO
-    "lumi": {
-        "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
-        "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
-    },
-
-    # files from https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
-    "pu": {
-        "json": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/pileup_latest.txt", "v1"),  # noqa
-        "mc_profile": ("https://raw.githubusercontent.com/cms-sw/cmssw/435f0b04c0e318c1036a6b95eb169181bbbe8344/SimGeneral/MixingModule/python/mix_2017_25ns_UltraLegacy_PoissonOOTPU_cfi.py", "v1"),  # noqa
-        "data_profile": {
-            "nominal": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-69200ub-99bins.root", "v1"),  # noqa
-            "minbias_xs_up": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-72400ub-99bins.root", "v1"),  # noqa
-            "minbias_xs_down": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root", "v1"),  # noqa
+cfg.x.external_files = DotDict.wrap(
+    {
+        # files from TODO
+        "lumi": {
+            "golden": (
+                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
+                "v1",
+            ),  # noqa
+            "normtag": (
+                "/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json",
+                "v1",
+            ),
         },
-    },
-})
+        # files from https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
+        "pu": {
+            "json": (
+                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/pileup_latest.txt",
+                "v1",
+            ),  # noqa
+            "mc_profile": (
+                "https://raw.githubusercontent.com/cms-sw/cmssw/435f0b04c0e318c1036a6b95eb169181bbbe8344/SimGeneral/MixingModule/python/mix_2017_25ns_UltraLegacy_PoissonOOTPU_cfi.py",
+                "v1",
+            ),  # noqa
+            "data_profile": {
+                "nominal": (
+                    "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-69200ub-99bins.root",
+                    "v1",
+                ),  # noqa
+                "minbias_xs_up": (
+                    "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-72400ub-99bins.root",
+                    "v1",
+                ),  # noqa
+                "minbias_xs_down": (
+                    "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root",
+                    "v1",
+                ),  # noqa
+            },
+        },
+    }
+)
 
 # target file size after MergeReducedEvents in MB
 cfg.x.reduced_file_size = 512.0
 
 # columns to keep after certain steps
-cfg.x.keep_columns = DotDict.wrap({
-    "cf.ReduceEvents": {
-        # general event info
-        "run", "luminosityBlock", "event",
-        # object info
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB", "Jet.hadronFlavour",
-        "Bjet.pt", "Bjet.eta", "Bjet.phi", "Bjet.mass", "Bjet.btagDeepFlavB", "n_bjet",
-        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "Electron.charge",       
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass","m_min_lb",
-        "MET.pt", "MET.phi",
-        "PV.npvs",
-        "normalization_weight",
-        # columns added during selection
-        "channel", "process_id", "category_ids",
-        "mc_weight", "channel_id","deterministic_seed", "cutflow.*",
-},
-    "cf.MergeSelectionMasks": {
-        "mc_weight", "normalization_weight", "process_id", "category_ids", "cutflow.*","channel_id"
-    },
-})
+cfg.x.keep_columns = DotDict.wrap(
+    {
+        "cf.ReduceEvents": {
+            # general event info
+            "run",
+            "luminosityBlock",
+            "event",
+            # object info
+            "Jet.pt",
+            "Jet.eta",
+            "Jet.phi",
+            "Jet.mass",
+            "Jet.btagDeepFlavB",
+            "Jet.hadronFlavour",
+            "Bjet.pt",
+            "Bjet.eta",
+            "Bjet.phi",
+            "Bjet.mass",
+            "Bjet.btagDeepFlavB",
+            "n_bjet",
+            "Electron.pt",
+            "Electron.eta",
+            "Electron.phi",
+            "Electron.mass",
+            "Electron.charge",
+            "Muon.pt",
+            "Muon.eta",
+            "Muon.phi",
+            "Muon.mass",
+            "m_min_lb",
+            "MET.pt",
+            "MET.phi",
+            "PV.npvs",
+            "normalization_weight",
+            "Muon.pfRelIso04_all",
+            "Electron.mvaFall17V2Iso_WP80"
+            # columns added during selection
+            "channel",
+            "process_id",
+            "category_ids",
+            "mc_weight",
+            "channel_id",
+            "deterministic_seed",
+            "cutflow.*",
+        },
+        "cf.MergeSelectionMasks": {
+            "mc_weight",
+            "normalization_weight",
+            "process_id",
+            "category_ids",
+            "cutflow.*",
+            "channel_id",
+        },
+    }
+)
 
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
-get_shifts = lambda *names: sum(([cfg.get_shift(f"{name}_up"), cfg.get_shift(f"{name}_down")] for name in names), [])
+get_shifts = lambda *names: sum(
+    ([cfg.get_shift(f"{name}_up"), cfg.get_shift(f"{name}_down")] for name in names), []
+)
 cfg.x.event_weights = DotDict()
 cfg.x.event_weights["normalization_weight"] = []
 
 
 # versions per task family and optionally also dataset and shift
 # None can be used as a key to define a default value
-cfg.x.versions = {
-}
+cfg.x.versions = {}
 
 # cannels
 cfg.add_channel(name="ee", id=1)
@@ -277,18 +345,20 @@ cfg.add_channel(name="emu", id=3)
 
 # 2017 b-tag working points
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
-cfg.x.btag_working_points = DotDict.wrap({
-    "deepjet": {
-        "loose": 0.0532,
-        "medium": 0.3040,
-        "tight": 0.7476,
-    },
-    "deepcsv": {
-        "loose": 0.1355,
-        "medium": 0.4506,
-        "tight": 0.7738,
-    },
-})
+cfg.x.btag_working_points = DotDict.wrap(
+    {
+        "deepjet": {
+            "loose": 0.0532,
+            "medium": 0.3040,
+            "tight": 0.7476,
+        },
+        "deepcsv": {
+            "loose": 0.1355,
+            "medium": 0.4506,
+            "tight": 0.7738,
+        },
+    }
+)
 
 # add categories
 add_categories(cfg)

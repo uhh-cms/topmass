@@ -15,17 +15,14 @@ ak = maybe_import("awkward")
 
 
 @producer(
-    uses={
-        features, category_ids, event_weights,lb_features
-    },
-    produces={
-        features, category_ids, event_weights,lb_features
-    },)
+    uses={features, category_ids, event_weights, lb_features},
+    produces={features, category_ids, event_weights, lb_features},
+)
 def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # features
     events = self[features](events, **kwargs)
     events = self[lb_features](events, **kwargs)
-    
+
     # category ids
     events = self[category_ids](events, **kwargs)
 
@@ -33,6 +30,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = self[event_weights](events, **kwargs)
 
     return events
+
 
 """
 @producer(
