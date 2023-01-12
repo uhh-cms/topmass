@@ -191,7 +191,7 @@ cfg.x.btag_working_points = DotDict.wrap(
             "medium": 0.4506,
             "tight": 0.7738,
         },
-    }
+    },
 )
 
 
