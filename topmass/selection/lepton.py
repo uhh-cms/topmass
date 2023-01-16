@@ -37,10 +37,10 @@ def invariant_mass(events: ak.Array):
 def electron_selection(self: Selector, events: ak.Array, **kwargs):
 
     mask = (
-        (events.Electron.pt > 20)
-        & (abs(events.Electron.eta) < 2.4)
-        & ((abs(events.Electron.eta) < 1.4442) | (abs(events.Electron.eta) > 1.5660))
-        & (events.Electron.mvaFall17V2Iso_WP80 == 1)
+        (events.Electron.pt > 20) &
+        (abs(events.Electron.eta) < 2.4) &
+        ((abs(events.Electron.eta) < 1.4442) | (abs(events.Electron.eta) > 1.5660)) &
+        (events.Electron.mvaFall17V2Iso_WP80 == 1)
     )
 
     # pt sorted indices to convert mask
@@ -64,10 +64,10 @@ def electron_selection(self: Selector, events: ak.Array, **kwargs):
 def muon_selection(self: Selector, events: ak.Array, **kwargs):
 
     mask = (
-        (events.Muon.pt > 20)
-        & (abs(events.Muon.eta) < 2.4)
-        & (events.Muon.tightId == 1)
-        & (events.Muon.pfRelIso04_all < 0.15)
+        (events.Muon.pt > 20) &
+        (abs(events.Muon.eta) < 2.4) &
+        (events.Muon.tightId == 1) &
+        (events.Muon.pfRelIso04_all < 0.15)
     )
 
     # pt sorted indices to convert mask
@@ -118,11 +118,11 @@ def l_l_selection(
     inv_ee_mass = invariant_mass(events.Electron[:, :2])
 
     where_ee = (
-        (ak.num(electron_indices, axis=1) == 2)
-        & (ak.num(muon_indices, axis=1) == 0)
-        & (ak.sum(events.Electron.charge, axis=1) == 0)
-        & (inv_ee_mass > 20)
-        & ((inv_ee_mass > 106) | (inv_ee_mass < 76))
+        (ak.num(electron_indices, axis=1) == 2) &
+        (ak.num(muon_indices, axis=1) == 0) &
+        (ak.sum(events.Electron.charge, axis=1) == 0) &
+        (inv_ee_mass > 20) &
+        ((inv_ee_mass > 106) | (inv_ee_mass < 76))
     )
 
     # IPython.embed()
@@ -132,11 +132,11 @@ def l_l_selection(
     # exact two muons of oppsosite charge and no electrons
     inv_mumu_mass = invariant_mass(events.Muon[:, :2])
     where_mumu = (
-        (ak.num(muon_indices, axis=1) == 2)
-        & (ak.num(electron_indices, axis=1) == 0)
-        & (ak.sum(events.Muon.charge, axis=1) == 0)
-        & (inv_mumu_mass > 20)
-        & ((inv_mumu_mass > 106) | (inv_mumu_mass < 76))
+        (ak.num(muon_indices, axis=1) == 2) &
+        (ak.num(electron_indices, axis=1) == 0) &
+        (ak.sum(events.Muon.charge, axis=1) == 0) &
+        (inv_mumu_mass > 20) &
+        ((inv_mumu_mass > 106) | (inv_mumu_mass < 76))
     )
 
     channel_id = ak.where(where_mumu, ch_mumu.id, channel_id)
@@ -146,10 +146,10 @@ def l_l_selection(
     leptons = ak.concatenate((events.Electron[:, :1], events.Muon[:, :1]), axis=1)
     inv_emu_mass = invariant_mass(leptons)
     where_emu = (
-        (ak.num(electron_indices, axis=1) == 1)
-        & (ak.num(muon_indices, axis=1) == 1)
-        & (ak.sum(leptons.charge, axis=1) == 0)
-        & (inv_emu_mass > 20)
+        (ak.num(electron_indices, axis=1) == 1) &
+        (ak.num(muon_indices, axis=1) == 1) &
+        (ak.sum(leptons.charge, axis=1) == 0) &
+        (inv_emu_mass > 20)
     )
 
     channel_id = ak.where(where_emu, ch_emu.id, channel_id)

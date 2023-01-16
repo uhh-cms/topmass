@@ -44,7 +44,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # features
     events = self[features](events, **kwargs)
-    
+
     # category ids
     events = self[category_ids](events, **kwargs)
 

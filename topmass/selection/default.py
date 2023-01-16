@@ -76,9 +76,9 @@ def increment_stats(
             for n in unique_n_jets:
                 stats[f"sum_{name}_per_process_and_njet"][int(p)][int(n)] += ak.sum(
                     weights[
-                        (events.process_id == p)
-                        & (results.x.n_central_jets == n)
-                        & joinable_mask
+                        (events.process_id == p) &
+                        (results.x.n_central_jets == n) &
+                        joinable_mask
                     ],
                 )
 
