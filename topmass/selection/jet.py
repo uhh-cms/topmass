@@ -40,7 +40,7 @@ def jet_selection(
     jet_sel = ak.sum(default_mask, axis=1) >= 2
 
     # b-tagged jets, medium working point
-    wp_tight = self.config_inst.x.btag_working_points.deepcsv.tight
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     bjet_mask = (default_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
     bjet_indices = indices[bjet_mask][:, :2]
     bjet_sel = ak.sum(bjet_mask, axis=1) >= 2
