@@ -128,7 +128,7 @@ def l_l_selection(
 
     # IPython.embed()
     channel_id = ak.where(where_ee, ch_ee.id, channel_id)
-    m_ll = ak.where(m_ll, inv_ee_mass, m_ll)
+    m_ll = ak.where(where_ee, inv_ee_mass, m_ll)
     sel_electron_indices = ak.where(where_ee, electron_indices, sel_electron_indices)
 
     # exact two muons of oppsosite charge and no electrons
