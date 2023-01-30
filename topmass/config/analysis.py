@@ -90,6 +90,12 @@ dataset_names = [
     "tt_dl_powheg",
     "tt_fh_powheg",
     # backgrounds
+    "st_tchannel_t_powheg",
+    "st_tchannel_tbar_powheg",
+    "st_twchannel_t_powheg",
+    "st_twchannel_tbar_powheg",
+    "st_schannel_lep_amcatnlo",
+    "st_schannel_had_amcatnlo",
     "w_lnu_madgraph",
     "dy_lep_m50_ht200to400_madgraph",
     "dy_lep_m50_ht400to600_madgraph",
