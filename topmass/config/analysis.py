@@ -85,7 +85,11 @@ stylize_processes(cfg)
 
 # add datasets we need to study
 dataset_names = [
+    # signal
+    "tt_sl_powheg",
     "tt_dl_powheg",
+    "tt_fh_powheg",
+    # backgrounds
     "w_lnu_madgraph",
     "dy_lep_m50_ht200to400_madgraph",
     "dy_lep_m50_ht400to600_madgraph",
