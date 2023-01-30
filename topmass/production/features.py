@@ -28,6 +28,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "n_bjet",
         "n_electron",
         "n_muon",
+        "lepton_pt"
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -36,6 +37,13 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=1))
     events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=1))
     events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=1))
+    
+    lepton_pt = ak.concatenate((events.Muon.pt,events.Electron.pt), axis=1)
+    lepton_pt = ak.sort(lepton_pt,axis=-1, ascending=False)
+    
+    events = set_ak_column(events, "lepton_pt", lepton_pt)
+
+    
     return events
 
 
@@ -61,7 +69,7 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events["Electron"] = ak.with_name(events.Electron, "PtEtaPhiMLorentzVector")
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Muon"] = ak.with_name(events.Muon, "PtEtaPhiMLorentzVector")
-
+    
     leptons = ak.concatenate((events.Electron, events.Muon), axis=1)
 
     if ak.any(ak.num(events.Bjet, axis=-1) != 2):

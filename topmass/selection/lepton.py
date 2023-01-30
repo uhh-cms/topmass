@@ -92,7 +92,7 @@ def muon_selection(self: Selector, events: ak.Array, **kwargs):
         "Muon.mass",
         "Muon.charge",
     },
-    produces={"channel_id"},
+    produces={"m_ll","channel_id"},
 )
 def l_l_selection(
     self: Selector, events: ak.Array, **kwargs
@@ -111,6 +111,7 @@ def l_l_selection(
     empty_events = ak.zeros_like(1 * events.event, dtype=np.uint16)
     empty_indicies = empty_events[..., None][..., :0]
     channel_id = empty_events
+    m_ll = empty_events
     sel_muon_indices = empty_indicies
     sel_electron_indices = empty_indicies
 
@@ -127,6 +128,7 @@ def l_l_selection(
 
     # IPython.embed()
     channel_id = ak.where(where_ee, ch_ee.id, channel_id)
+    m_ll = ak.where(m_ll, inv_ee_mass, m_ll)
     sel_electron_indices = ak.where(where_ee, electron_indices, sel_electron_indices)
 
     # exact two muons of oppsosite charge and no electrons
@@ -140,6 +142,7 @@ def l_l_selection(
     )
 
     channel_id = ak.where(where_mumu, ch_mumu.id, channel_id)
+    m_ll = ak.where(where_mumu, inv_mumu_mass, m_ll)
     sel_muon_indices = ak.where(where_mumu, muon_indices, sel_muon_indices)
 
     # exact on electron and one muon of total charge 0
@@ -153,11 +156,13 @@ def l_l_selection(
     )
 
     channel_id = ak.where(where_emu, ch_emu.id, channel_id)
+    m_ll = ak.where(where_emu, inv_emu_mass, m_ll)
     sel_electron_indices = ak.where(where_emu, electron_indices, sel_electron_indices)
     sel_muon_indices = ak.where(where_emu, muon_indices, sel_muon_indices)
 
     events = set_ak_column(events, "channel_id", channel_id)
-
+    events = set_ak_column(events, "m_ll", m_ll)
+    
     return events, SelectionResult(
         steps={"leptons": channel_id != 0},
         objects={

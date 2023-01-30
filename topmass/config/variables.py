@@ -47,7 +47,7 @@ def add_variables(config: od.Config) -> None:
         name="jet1_pt",
         expression="Jet.pt[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0., 400.),
+        binning=[0,50,100,400],
         unit="GeV",
         x_title=r"Jet 1 $p_{T}$",
     )
@@ -58,6 +58,14 @@ def add_variables(config: od.Config) -> None:
         binning=(40, 0., 200.),
         unit="GeV",
         x_title="Minimal Lepton + B-quark mass",
+    )
+    config.add_variable(
+        name="m_ll",
+        expression="m_ll",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0., 200.),
+        unit="GeV",
+        x_title="Minimal Lepton + Lepton mass",
     )
     config.add_variable(
         name="met_phi",
@@ -73,6 +81,22 @@ def add_variables(config: od.Config) -> None:
         binning=(40, 0., 400.),
         unit="GeV",
         x_title=r"BJet 1 $p_{T}$",
+    )
+    config.add_variable(
+        name="lepton1_pt",
+        expression="lepton_pt[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0., 200.),
+        unit="GeV",
+        x_title=r"Lepton 1 $p_{T}$",
+    )
+    config.add_variable(
+        name="lepton2_pt",
+        expression="lepton_pt[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0., 200.),
+        unit="GeV",
+        x_title=r"Lepton 2 $p_{T}$",
     )
 
     # weights
