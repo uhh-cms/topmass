@@ -78,6 +78,7 @@ cfg.add_process(procs.n.data)
 cfg.add_process(procs.n.tt)
 cfg.add_process(procs.n.st)
 cfg.add_process(procs.n.dy)
+cfg.add_process(procs.n.w_lnu)
 
 # configure colors, labels, etc
 stylize_processes(cfg)
@@ -85,6 +86,7 @@ stylize_processes(cfg)
 # add datasets we need to study
 dataset_names = [
     "tt_dl_powheg",
+    "w_lnu_madgraph",
 ]
 """
 # data
