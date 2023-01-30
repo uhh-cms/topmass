@@ -313,6 +313,7 @@ cfg.x.keep_columns = DotDict.wrap(
             "category_ids",
             "mc_weight",
             "channel_id",
+            "m_ll",
             "deterministic_seed",
             "cutflow.*",
         },
