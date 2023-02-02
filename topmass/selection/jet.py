@@ -12,11 +12,12 @@ ak = maybe_import("awkward")
 
 
 @selector(
-    uses={"nJet", "Jet.pt", "Jet.eta", "Jet.jetId", "Jet.puId", "Jet.btagDeepFlavB"},
+    uses={"nJet", "Jet.pt", "Jet.phi", "Jet.eta", "Jet.jetId", "Jet.puId", "Jet.btagDeepFlavB"},
 )
 def jet_selection(
     self: Selector,
     events: ak.Array,
+    lepton_results: SelectionResult,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """
@@ -31,7 +32,8 @@ def jet_selection(
         (events.Jet.jetId == 6) &
         (  # tight plus lepton veto
             (events.Jet.pt >= 50.0) | (events.Jet.puId == (1 if is_2016 else 4))
-        )  # flipped in 2016
+        ) &
+        ak.all(events.Jet.metric_table(lepton_results.x.lepton_pair) > 0.5, axis=2)
     )
 
     # pt sorted indices to convert mask
@@ -39,17 +41,20 @@ def jet_selection(
     jet_indices = indices[default_mask]
     jet_sel = ak.sum(default_mask, axis=1) >= 2
 
-    # b-tagged jets, medium working point
+    # b-tagged jets, tight working point
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     bjet_mask = (default_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
-    bjet_indices = indices[bjet_mask][:, :2]
-    bjet_sel = ak.sum(bjet_mask, axis=1) >= 2
-
+    bjet_indices = indices[bjet_mask][:,:2]
+    bjet_sel = (ak.sum(bjet_mask, axis=1) >= 2) & (ak.sum(default_mask[:,:2], axis=1) == ak.sum(bjet_mask[:,:2], axis=1)) 
+    
+    veto_mask = (default_mask) & (events.Jet.btagDeepFlavB < wp_tight)
+    veto_indices = indices[veto_mask]
+    veto_sel = (ak.sum(veto_mask, axis=1) >= 1) & bjet_sel
     # build and return selection results plus new columns (src -> dst -> indices)
     return events, SelectionResult(
         steps={"jet": jet_sel, "bjet": bjet_sel},
         objects={
-            "Jet": {"Jet": jet_indices, "Bjet": bjet_indices},
+            "Jet": {"Jet": jet_indices, "Bjet": bjet_indices ,"VetoBjet": veto_indices},
         },
         aux={
             # jet mask that lead to the jet_indices

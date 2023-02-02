@@ -125,14 +125,15 @@ def default(
     # met filter selection
     events, met_filter_results = self[met_filter_selection](events, **kwargs)
     results += met_filter_results
-
+    
+    events, l_l_results = self[l_l_selection](events, **kwargs)
+    results += l_l_results
     # jet selection
-    events, jet_results = self[jet_selection](events, **kwargs)
+    events, jet_results = self[jet_selection](events,l_l_results, **kwargs)
     results += jet_results
 
     # electron selection
-    events, l_l_results = self[l_l_selection](events, **kwargs)
-    results += l_l_results
+    
 
     # events, e_mu_results = self[e_mu_selection](events, electron_min_pt = 12, muon_min_pt = 7, **kwargs)
     # results += e_mu_results

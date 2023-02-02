@@ -66,6 +66,7 @@ def muon_selection(self: Selector, events: ak.Array, **kwargs):
     mask = (
         (events.Muon.pt > 20) &
         (abs(events.Muon.eta) < 2.4) &
+        ((abs(events.Muon.eta) < 1.4442) | (abs(events.Muon.eta) > 1.5660)) &
         (events.Muon.tightId == 1) &
         (events.Muon.pfRelIso04_all < 0.15)
     )
@@ -168,5 +169,15 @@ def l_l_selection(
         objects={
             "Muon": {"Muon": sel_muon_indices},
             "Electron": {"Electron": sel_electron_indices},
+        },aux={
+            # save the selected lepton pair for the duration of the selection
+            # multiplication of a coffea particle with 1 yields the lorentz vector
+            "lepton_pair": ak.concatenate(
+                [
+                    events.Electron[sel_electron_indices] * 1,
+                    events.Muon[sel_muon_indices] * 1,
+                ],
+                axis=1,
+            ),
         },
     )

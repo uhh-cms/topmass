@@ -21,6 +21,8 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "Bjet.pt",
         "Electron.pt",
         "Muon.pt",
+        "Electron.eta",
+        "Muon.eta",
     },
     produces={
         "ht",
@@ -28,7 +30,8 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "n_bjet",
         "n_electron",
         "n_muon",
-        "lepton_pt"
+        "lepton_pt",
+        "lepton_eta",
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -39,11 +42,13 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=1))
     
     lepton_pt = ak.concatenate((events.Muon.pt,events.Electron.pt), axis=1)
-    lepton_pt = ak.sort(lepton_pt,axis=-1, ascending=False)
+    lepton_eta = ak.concatenate((events.Muon.eta,events.Electron.eta), axis=1)
     
-    events = set_ak_column(events, "lepton_pt", lepton_pt)
+    sort = ak.argsort(lepton_pt,axis=-1, ascending=False)
+    
+    events = set_ak_column(events, "lepton_pt", lepton_pt[sort])
+    events = set_ak_column(events, "lepton_eta", lepton_eta[sort])
 
-    
     return events
 
 
@@ -91,7 +96,24 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     return events
 
+@producer(
+    uses={
+        "VetoBjet.pt",
+    },
+    produces={
+        "trailing_pt",
+    },
+)
+def jet_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    events = set_ak_column(events, "trailing_pt", ak.sum(events.VetoBjet.pt, axis=1))
 
+    
+    
+    return events
+
+    
+    
+    
 @producer(
     uses={
         mc_weight,

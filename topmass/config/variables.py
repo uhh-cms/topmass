@@ -47,9 +47,25 @@ def add_variables(config: od.Config) -> None:
         name="jet1_pt",
         expression="Jet.pt[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=[0,50,100,400],
+        binning=(15, 0., 300.),
         unit="GeV",
         x_title=r"Jet 1 $p_{T}$",
+    )
+    config.add_variable(
+        name="jet2_pt",
+        expression="Jet.pt[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 0., 300.),
+        unit="GeV",
+        x_title=r"Jet 2 $p_{T}$",
+    )
+    config.add_variable(
+        name="jet3_pt",
+        expression="Jet.pt[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 0., 300.),
+        unit="GeV",
+        x_title=r"Jet 3 $p_{T}$",
     )
     config.add_variable(
         name="m_min_lb",
@@ -63,7 +79,7 @@ def add_variables(config: od.Config) -> None:
         name="m_ll",
         expression="m_ll",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0., 200.),
+        binning=(15, 0., 300.),
         unit="GeV",
         x_title="Minimal Lepton + Lepton mass",
     )
@@ -78,15 +94,23 @@ def add_variables(config: od.Config) -> None:
         name="bjet1_pt",
         expression="Bjet.pt[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0., 400.),
+        binning=(15, 0., 300.),
         unit="GeV",
         x_title=r"BJet 1 $p_{T}$",
+    )
+    config.add_variable(
+        name="bjet2_pt",
+        expression="Bjet.pt[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 0., 300.),
+        unit="GeV",
+        x_title=r"BJet 2 $p_{T}$",
     )
     config.add_variable(
         name="lepton1_pt",
         expression="lepton_pt[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0., 200.),
+        binning=(10, 0., 200.),
         unit="GeV",
         x_title=r"Lepton 1 $p_{T}$",
     )
@@ -94,9 +118,30 @@ def add_variables(config: od.Config) -> None:
         name="lepton2_pt",
         expression="lepton_pt[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0., 200.),
+        binning=(10, 0., 200.),
         unit="GeV",
         x_title=r"Lepton 2 $p_{T}$",
+    )
+    config.add_variable(
+        name="lepton1_eta",
+        expression="lepton_eta[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(20, -2.5, 2.5),
+        x_title=r"Lepton 1 $eta$",
+    )
+    config.add_variable(
+        name="lepton2_eta",
+        expression="lepton_eta[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(20, -2.5, 2.5),
+        x_title=r"Lepton 2 $eta$",
+    )
+    config.add_variable(
+        name="trailing_pt",
+        expression="trailing_pt",
+        null_value=EMPTY_FLOAT,
+        binning=(20, 0., 200.),
+        x_title=r"trailing jet $p_{T}$",
     )
 
     # weights
