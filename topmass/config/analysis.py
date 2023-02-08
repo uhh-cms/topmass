@@ -6,6 +6,7 @@ Configuration of the HH → bb𝜏𝜏 analysis.
 
 import os
 import re
+import functools
 
 from scinum import Number
 import law
@@ -13,7 +14,8 @@ import order as od
 import cmsdb
 import cmsdb.campaigns.run2_2017_nano_v9
 
-from columnflow.util import DotDict, get_root_processes_from_campaign
+from columnflow.util import DotDict
+from columnflow.config_util import get_root_processes_from_campaign, get_shifts_from_sources
 
 from topmass.config.styles import stylize_processes
 from topmass.config.categories import add_categories
@@ -212,28 +214,6 @@ cfg.x.btag_working_points = DotDict.wrap(
     },
 )
 
-
-# helper to add column aliases for both shifts of a source
-def add_aliases(
-    shift_source: str,
-    aliases: dict,
-    selection_dependent: bool = False,
-):
-    aux_key = "column_aliases" + ("_selection_dependent" if selection_dependent else "")
-    for direction in ["up", "down"]:
-        shift = cfg.get_shift(od.Shift.join_name(shift_source, direction))
-        _aliases = shift.x(aux_key, {})
-        # format keys and values
-        inject_shift = lambda s: re.sub(r"\{([^_])", r"{_\1", s).format(
-            **shift.__dict__
-        )
-        _aliases.update(
-            {inject_shift(key): inject_shift(value) for key, value in aliases.items()}
-        )
-        # extend existing or register new column aliases
-        shift.set_aux(aux_key, _aliases)
-
-
 # register shifts
 cfg.add_shift(name="nominal", id=0)
 cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal"})
@@ -354,9 +334,7 @@ cfg.x.keep_columns = DotDict.wrap(
 )
 
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
-get_shifts = lambda *names: sum(
-    ([cfg.get_shift(f"{name}_up"), cfg.get_shift(f"{name}_down")] for name in names), []
-)
+get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict()
 cfg.x.event_weights["normalization_weight"] = []
 
