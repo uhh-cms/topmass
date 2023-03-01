@@ -5,7 +5,6 @@ Configuration of the HH → bb𝜏𝜏 analysis.
 """
 
 import os
-import re
 import functools
 
 from scinum import Number
@@ -340,7 +339,7 @@ cfg.x.keep_columns = DotDict.wrap(
     },
 )
 
-get_shifts = functools.partial(get_shifts_from_sources, cfg)l
+get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict()
 cfg.x.event_weights["normalization_weight"] = []
 

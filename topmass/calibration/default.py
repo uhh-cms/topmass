@@ -5,8 +5,8 @@ Calibration methods.
 """
 
 from columnflow.calibration import Calibrator, calibrator
-from columnflow.production.mc_weight import mc_weight
-from columnflow.production.seeds import deterministic_seeds
+from columnflow.production.cms.mc_weight import mc_weight
+from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.util import maybe_import
 
 ak = maybe_import("awkward")

@@ -9,7 +9,7 @@ from functools import reduce
 from collections import defaultdict, OrderedDict
 
 from columnflow.selection import Selector, SelectionResult, selector
-from columnflow.production.mc_weight import mc_weight
+from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.processes import process_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.util import maybe_import
