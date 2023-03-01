@@ -67,7 +67,7 @@ def increment_stats(
         # sums per process id and again per jet multiplicity
         stats.setdefault(f"sum_{name}_per_process", defaultdict(float))
         stats.setdefault(
-            f"sum_{name}_per_process_and_njet", defaultdict(lambda: defaultdict(float))
+            f"sum_{name}_per_process_and_njet", defaultdict(lambda: defaultdict(float)),
         )
         for p in unique_process_ids:
             stats[f"sum_{name}_per_process"][int(p)] += ak.sum(

@@ -32,7 +32,7 @@ def invariant_mass(events: ak.Array):
         "Electron.mass",
         "Electron.charge",
         "Electron.mvaFall17V2Iso_WP80",
-    }
+    },
 )
 def electron_selection(self: Selector, events: ak.Array, **kwargs):
 
@@ -59,7 +59,7 @@ def electron_selection(self: Selector, events: ak.Array, **kwargs):
         "Muon.charge",
         "Muon.tightId",
         "Muon.pfRelIso04_all",
-    }
+    },
 )
 def muon_selection(self: Selector, events: ak.Array, **kwargs):
 
@@ -96,7 +96,7 @@ def muon_selection(self: Selector, events: ak.Array, **kwargs):
     produces={"m_ll", "channel_id"},
 )
 def l_l_selection(
-    self: Selector, events: ak.Array, **kwargs
+    self: Selector, events: ak.Array, **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
 
     # get channels from the config

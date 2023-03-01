@@ -59,7 +59,6 @@ def jet_selection(
 
     veto_mask = (default_mask) & (events.Jet.btagDeepFlavB < wp_tight)
     veto_indices = indices[veto_mask]
-    veto_sel = (ak.sum(veto_mask, axis=1) >= 1) & bjet_sel
     # build and return selection results plus new columns (src -> dst -> indices)
     return events, SelectionResult(
         steps={"jet": jet_sel, "bjet": bjet_sel},
