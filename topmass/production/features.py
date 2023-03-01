@@ -82,7 +82,7 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     if ak.any(ak.num(leptons, axis=-1) != 2):
         raise Exception(
-            "In features.py: there should be exactly 2 leptons in each lepton pair"
+            "In features.py: there should be exactly 2 leptons in each lepton pair",
         )
 
     bjet_l = [events.Bjet, leptons]
@@ -132,7 +132,7 @@ def cutflow_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "cutflow.n_jet", ak.num(events.Jet, axis=1))
     events = set_ak_column(events, "cutflow.ht", ak.sum(events.Jet.pt, axis=1))
     events = set_ak_column(
-        events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT)
+        events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT),
     )
 
     return events

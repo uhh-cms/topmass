@@ -34,7 +34,7 @@ def patch_bundle_repo_exclude_files():
             ".setups",
             ".data",
             ".github",
-        ]
+        ],
     )
 
     # overwrite them
