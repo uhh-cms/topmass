@@ -225,10 +225,10 @@ def add_aliases(
         _aliases = shift.x(aux_key, {})
         # format keys and values
         inject_shift = lambda s: re.sub(r"\{([^_])", r"{_\1", s).format(
-            **shift.__dict__
+            **shift.__dict__,
         )
         _aliases.update(
-            {inject_shift(key): inject_shift(value) for key, value in aliases.items()}
+            {inject_shift(key): inject_shift(value) for key, value in aliases.items()},
         )
         # extend existing or register new column aliases
         shift.set_aux(aux_key, _aliases)
@@ -248,7 +248,8 @@ cfg.x.external_files = DotDict.wrap(
         # files from TODO
         "lumi": {
             "golden": (
-                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
+                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017"\
+                "/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
                 "v1",
             ),  # noqa
             "normtag": (
@@ -260,29 +261,35 @@ cfg.x.external_files = DotDict.wrap(
         # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
         "pu": {
             "json": (
-                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/pileup_latest.txt",
+                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp"\
+                "/UltraLegacy/pileup_latest.txt",
                 "v1",
             ),  # noqa
             "mc_profile": (
-                "https://raw.githubusercontent.com/cms-sw/cmssw/435f0b04c0e318c1036a6b95eb169181bbbe8344/SimGeneral/MixingModule/python/mix_2017_25ns_UltraLegacy_PoissonOOTPU_cfi.py",
+                "https://raw.githubusercontent.com/cms-sw/cmssw"\
+                "/435f0b04c0e318c1036a6b95eb169181bbbe8344/SimGeneral/MixingModule/python"\
+                "/mix_2017_25ns_UltraLegacy_PoissonOOTPU_cfi.py",
                 "v1",
             ),  # noqa
             "data_profile": {
                 "nominal": (
-                    "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-69200ub-99bins.root",
+                    "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp"\
+                    "/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-69200ub-99bins.root",
                     "v1",
                 ),  # noqa
                 "minbias_xs_up": (
-                    "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-72400ub-99bins.root",
+                    "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp"\
+                    "/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-72400ub-99bins.root",
                     "v1",
                 ),  # noqa
                 "minbias_xs_down": (
-                    "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root",
+                    "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp"\
+                    "/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root",
                     "v1",
                 ),  # noqa
             },
         },
-    }
+    },
 )
 
 # target file size after MergeReducedEvents in MB
@@ -350,12 +357,12 @@ cfg.x.keep_columns = DotDict.wrap(
             "cutflow.*",
             "channel_id",
         },
-    }
+    },
 )
 
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 get_shifts = lambda *names: sum(
-    ([cfg.get_shift(f"{name}_up"), cfg.get_shift(f"{name}_down")] for name in names), []
+    ([cfg.get_shift(f"{name}_up"), cfg.get_shift(f"{name}_down")] for name in names), [],
 )
 cfg.x.event_weights = DotDict()
 cfg.x.event_weights["normalization_weight"] = []
@@ -384,7 +391,7 @@ cfg.x.btag_working_points = DotDict.wrap(
             "medium": 0.4506,
             "tight": 0.7738,
         },
-    }
+    },
 )
 
 # add categories
