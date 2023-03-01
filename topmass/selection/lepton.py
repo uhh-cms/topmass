@@ -93,7 +93,7 @@ def muon_selection(self: Selector, events: ak.Array, **kwargs):
         "Muon.mass",
         "Muon.charge",
     },
-    produces={"m_ll","channel_id"},
+    produces={"m_ll", "channel_id"},
 )
 def l_l_selection(
     self: Selector, events: ak.Array, **kwargs
@@ -163,13 +163,14 @@ def l_l_selection(
 
     events = set_ak_column(events, "channel_id", channel_id)
     events = set_ak_column(events, "m_ll", m_ll)
-    
+
     return events, SelectionResult(
         steps={"leptons": channel_id != 0},
         objects={
             "Muon": {"Muon": sel_muon_indices},
             "Electron": {"Electron": sel_electron_indices},
-        },aux={
+        },
+        aux={
             # save the selected lepton pair for the duration of the selection
             # multiplication of a coffea particle with 1 yields the lorentz vector
             "lepton_pair": ak.concatenate(

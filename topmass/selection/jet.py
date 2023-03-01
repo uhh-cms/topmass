@@ -12,7 +12,15 @@ ak = maybe_import("awkward")
 
 
 @selector(
-    uses={"nJet", "Jet.pt", "Jet.phi", "Jet.eta", "Jet.jetId", "Jet.puId", "Jet.btagDeepFlavB"},
+    uses={
+        "nJet",
+        "Jet.pt",
+        "Jet.phi",
+        "Jet.eta",
+        "Jet.jetId",
+        "Jet.puId",
+        "Jet.btagDeepFlavB",
+    },
 )
 def jet_selection(
     self: Selector,
@@ -44,9 +52,11 @@ def jet_selection(
     # b-tagged jets, tight working point
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     bjet_mask = (default_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
-    bjet_indices = indices[bjet_mask][:,:2]
-    bjet_sel = (ak.sum(bjet_mask, axis=1) >= 2) & (ak.sum(default_mask[:,:2], axis=1) == ak.sum(bjet_mask[:,:2], axis=1)) 
-    
+    bjet_indices = indices[bjet_mask][:, :2]
+    bjet_sel = (ak.sum(bjet_mask, axis=1) >= 2) & (
+        ak.sum(default_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1)
+    )
+
     veto_mask = (default_mask) & (events.Jet.btagDeepFlavB < wp_tight)
     veto_indices = indices[veto_mask]
     veto_sel = (ak.sum(veto_mask, axis=1) >= 1) & bjet_sel
@@ -54,7 +64,7 @@ def jet_selection(
     return events, SelectionResult(
         steps={"jet": jet_sel, "bjet": bjet_sel},
         objects={
-            "Jet": {"Jet": jet_indices, "Bjet": bjet_indices ,"VetoBjet": veto_indices},
+            "Jet": {"Jet": jet_indices, "Bjet": bjet_indices, "VetoBjet": veto_indices},
         },
         aux={
             # jet mask that lead to the jet_indices

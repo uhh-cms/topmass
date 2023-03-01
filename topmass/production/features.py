@@ -40,12 +40,12 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=1))
     events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=1))
     events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=1))
-    
-    lepton_pt = ak.concatenate((events.Muon.pt,events.Electron.pt), axis=1)
-    lepton_eta = ak.concatenate((events.Muon.eta,events.Electron.eta), axis=1)
-    
-    sort = ak.argsort(lepton_pt,axis=-1, ascending=False)
-    
+
+    lepton_pt = ak.concatenate((events.Muon.pt, events.Electron.pt), axis=1)
+    lepton_eta = ak.concatenate((events.Muon.eta, events.Electron.eta), axis=1)
+
+    sort = ak.argsort(lepton_pt, axis=-1, ascending=False)
+
     events = set_ak_column(events, "lepton_pt", lepton_pt[sort])
     events = set_ak_column(events, "lepton_eta", lepton_eta[sort])
 
@@ -74,7 +74,7 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events["Electron"] = ak.with_name(events.Electron, "PtEtaPhiMLorentzVector")
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Muon"] = ak.with_name(events.Muon, "PtEtaPhiMLorentzVector")
-    
+
     leptons = ak.concatenate((events.Electron, events.Muon), axis=1)
 
     if ak.any(ak.num(events.Bjet, axis=-1) != 2):
@@ -96,6 +96,7 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     return events
 
+
 @producer(
     uses={
         "VetoBjet.pt",
@@ -107,13 +108,9 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 def jet_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "trailing_pt", ak.sum(events.VetoBjet.pt, axis=1))
 
-    
-    
     return events
 
-    
-    
-    
+
 @producer(
     uses={
         mc_weight,

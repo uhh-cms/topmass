@@ -8,15 +8,15 @@ from columnflow.production import Producer, producer
 from columnflow.production.categories import category_ids
 from columnflow.util import maybe_import
 
-from topmass.production.features import features, lb_features,jet_features
+from topmass.production.features import features, lb_features, jet_features
 from topmass.production.weights import event_weights
 
 ak = maybe_import("awkward")
 
 
 @producer(
-    uses={features, category_ids, event_weights, lb_features,jet_features},
-    produces={features, category_ids, event_weights, lb_features,jet_features},
+    uses={features, category_ids, event_weights, lb_features, jet_features},
+    produces={features, category_ids, event_weights, lb_features, jet_features},
 )
 def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # features

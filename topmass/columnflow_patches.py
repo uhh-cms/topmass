@@ -24,9 +24,18 @@ def patch_bundle_repo_exclude_files():
     exclude_files = [os.path.join(cf_rel, path) for path in BundleRepo.exclude_files]
 
     # add additional files
-    exclude_files.extend([
-        "docs", "tests", "data", "assets", ".law", ".setups", ".data", ".github",
-    ])
+    exclude_files.extend(
+        [
+            "docs",
+            "tests",
+            "data",
+            "assets",
+            ".law",
+            ".setups",
+            ".data",
+            ".github",
+        ]
+    )
 
     # overwrite them
     BundleRepo.exclude_files[:] = exclude_files
