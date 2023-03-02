@@ -49,6 +49,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "lepton_pt", lepton_pt[sort])
     events = set_ak_column(events, "lepton_eta", lepton_eta[sort])
 
+
     return events
 
 
