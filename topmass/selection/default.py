@@ -13,6 +13,11 @@ from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.processes import process_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.util import maybe_import
+from columnflow.production.cms.mc_weight import mc_weight
+from columnflow.production.cms.pileup import pu_weight
+from columnflow.production.cms.pdf import pdf_weights
+from columnflow.production.cms.scale import murmuf_weights
+from columnflow.production.cms.btag import btag_weights
 
 from topmass.selection.met import met_filter_selection
 from topmass.selection.jet import jet_selection
@@ -84,7 +89,6 @@ def increment_stats(
 
     return events
 
-
 @selector(
     uses={
         attach_coffea_behavior,
@@ -99,11 +103,11 @@ def increment_stats(
     produces={
         mc_weight,
         met_filter_selection,
+        l_l_selection,
         jet_selection,
         process_ids,
         cutflow_features,
-        l_l_selection,
-        increment_stats,
+        increment_stats,   
     },
     exposed=True,
 )
@@ -146,10 +150,20 @@ def default(
     # create process ids
     events = self[process_ids](events, **kwargs)
 
+    # pdf weights
+    #events = self[pdf_weights](events, **kwargs)
+
+    # renormalization/factorization scale weights
+    #events = self[murmuf_weights](events, **kwargs)
+
+    # pileup weights
+    #events = self[pu_weight](events, **kwargs)
+        
     # increment stats
     events = self[increment_stats](events, results, stats, **kwargs)
 
     # some cutflow features
     events = self[cutflow_features](events, **kwargs)
-
+    
+    hiwekke
     return events, results

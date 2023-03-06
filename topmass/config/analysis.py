@@ -223,8 +223,7 @@ cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nomina
 
 # external files
 cfg.x.external_files = DotDict.wrap(
-    {
-        # files from TODO
+    {# files from TODO
         "lumi": {
             "golden": (
                 "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017"\
@@ -270,6 +269,37 @@ cfg.x.external_files = DotDict.wrap(
         },
     },
 )
+
+json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-878881a8"
+year = "2017"
+corr_postfix=""
+
+cfg.x.external_files.update(DotDict.wrap({
+        # jet energy correction
+        "jet_jerc": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
+
+        # tau energy correction and scale factors
+        "tau_sf": (f"{json_mirror}/POG/TAU/{year}{corr_postfix}_UL/tau.json.gz", "v1"),
+
+        # electron scale factors
+        "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
+
+        # muon scale factors
+        "muon_sf": (f"{json_mirror}/POG/MUO/{year}{corr_postfix}_UL/muon_Z.json.gz", "v1"),
+
+        # btag scale factor
+        "btag_sf_corr": (f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz", "v1"),
+
+        # met phi corrector
+        "met_phi_corr": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/met.json.gz", "v1"),
+
+        # hh-btag repository (lightweight) with TF saved model directories
+        "hh_btag_repo": ("https://github.com/hh-italian-group/HHbtag/archive/1dc426053418e1cab2aec021802faf31ddf3c5cd.tar.gz", "v1"),  # noqa
+    }))
+
+cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL",)
+cfg.x.btag_sf = ("deepJet_shape", ["Absolute", "FlavorQCD",],)
+cfg.x.electron_sf_names = ("UL-Electron-ID-SF", "2017", "wp80iso")
 
 # target file size after MergeReducedEvents in MB
 cfg.x.reduced_file_size = 512.0
@@ -353,22 +383,6 @@ cfg.add_channel(name="ee", id=1)
 cfg.add_channel(name="mumu", id=2)
 cfg.add_channel(name="emu", id=3)
 
-# 2017 b-tag working points
-# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
-cfg.x.btag_working_points = DotDict.wrap(
-    {
-        "deepjet": {
-            "loose": 0.0532,
-            "medium": 0.3040,
-            "tight": 0.7476,
-        },
-        "deepcsv": {
-            "loose": 0.1355,
-            "medium": 0.4506,
-            "tight": 0.7738,
-        },
-    },
-)
 
 # add categories
 add_categories(cfg)
