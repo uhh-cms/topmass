@@ -13,11 +13,14 @@ from columnflow.production.cms.btag import btag_weights
 from columnflow.production.cms.scale import murmuf_weights
 from columnflow.production.cms.pileup import pu_weight
 from columnflow.util import maybe_import, safe_div
+from columnflow.columnar_util import set_ak_column
+
+import functools
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
 
-
+set_ak_column_f32 = functools.partial(set_ak_column, value_type=np.float32)
 
 
 @producer(
@@ -115,6 +118,8 @@ def normalized_pdf_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Arra
     for postfix in ["", "_up", "_down"]:
         # create the normalized weight
         avg = self.average_pdf_weights[postfix]
+        
+        
         normalized_weight = events[f"pdf_weight{postfix}"] / avg
 
         # store it
@@ -227,7 +232,10 @@ def normalized_btag_weights(self: Producer, events: ak.Array, **kwargs) -> ak.Ar
         # store them
         events = set_ak_column_f32(events, f"normalized_{weight_name}", norm_weight_per_pid)
         events = set_ak_column_f32(events, f"normalized_njet_{weight_name}", norm_weight_per_pid_njet)
-
+        
+    #import IPython
+    #IPython.embed()
+        
     return events
 
 

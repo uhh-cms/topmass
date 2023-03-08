@@ -30,5 +30,5 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # event weights
     events = self[event_weights](events, **kwargs)
-    
+
     return events

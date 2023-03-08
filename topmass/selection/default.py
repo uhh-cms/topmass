@@ -27,8 +27,9 @@ from topmass.production.features import cutflow_features
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
-
-@selector()
+@selector(
+    uses={btag_weights, pu_weight},
+)
 def increment_stats(
     self: Selector,
     events: ak.Array,
@@ -42,6 +43,7 @@ def increment_stats(
     """
     # get event masks
     event_mask = results.main.event
+    event_mask_no_bjet = results.steps.all_but_bjet
 
     # increment plain counts
     stats["n_events"] += len(events)
@@ -62,6 +64,44 @@ def increment_stats(
         # mc weight for selected events
         weight_map["mc_weight_selected"] = (events.mc_weight, event_mask)
 
+        # mc weight times the pileup weight (with variations) without any selection
+        for name in sorted(self[pu_weight].produces):
+            weight_map[f"mc_weight_{name}"] = (events.mc_weight * events[name], Ellipsis)
+
+        # mc weight for selected events, excluding the bjet selection
+        weight_map["mc_weight_selected_no_bjet"] = (events.mc_weight, event_mask_no_bjet)
+
+        # weights that include standard systematic variations
+        for postfix in ["", "_up", "_down"]:
+            # pdf weight for all events
+            weight_map[f"pdf_weight{postfix}"] = (events[f"pdf_weight{postfix}"], Ellipsis)
+
+            # pdf weight for selected events
+            weight_map[f"pdf_weight{postfix}_selected"] = (events[f"pdf_weight{postfix}"], event_mask)
+
+            # scale weight for all events
+            weight_map[f"murmuf_weight{postfix}"] = (events[f"murmuf_weight{postfix}"], Ellipsis)
+
+            # scale weight for selected events
+            weight_map[f"murmuf_weight{postfix}_selected"] = (events[f"murmuf_weight{postfix}"], event_mask)
+
+        # btag weights
+        for name in sorted(self[btag_weights].produces):
+            if not name.startswith("btag_weight"):
+                continue
+
+            # weights for all events
+            weight_map[name] = (events[name], Ellipsis)
+
+            # weights for selected events
+            weight_map[f"{name}_selected"] = (events[name], event_mask)
+
+            # weights for selected events, excluding the bjet selection
+            weight_map[f"{name}_selected_no_bjet"] = (events[name], event_mask_no_bjet)
+
+            # mc weight times btag weight for selected events, excluding the bjet selection
+            weight_map[f"mc_weight_{name}_selected_no_bjet"] = (events.mc_weight * events[name], event_mask_no_bjet)
+
     # get and store the weights
     for name, (weights, mask) in weight_map.items():
         joinable_mask = True if mask is Ellipsis else mask
@@ -71,9 +111,7 @@ def increment_stats(
 
         # sums per process id and again per jet multiplicity
         stats.setdefault(f"sum_{name}_per_process", defaultdict(float))
-        stats.setdefault(
-            f"sum_{name}_per_process_and_njet", defaultdict(lambda: defaultdict(float)),
-        )
+        stats.setdefault(f"sum_{name}_per_process_and_njet", defaultdict(lambda: defaultdict(float)))
         for p in unique_process_ids:
             stats[f"sum_{name}_per_process"][int(p)] += ak.sum(
                 weights[(events.process_id == p) & joinable_mask],
@@ -99,6 +137,7 @@ def increment_stats(
         process_ids,
         cutflow_features,
         increment_stats,
+        pdf_weights,murmuf_weights,pu_weight,btag_weights,
     },
     produces={
         mc_weight,
@@ -107,7 +146,8 @@ def increment_stats(
         jet_selection,
         process_ids,
         cutflow_features,
-        increment_stats,   
+        increment_stats,
+        pdf_weights,murmuf_weights,pu_weight,btag_weights,
     },
     exposed=True,
 )
@@ -136,34 +176,42 @@ def default(
     events, jet_results = self[jet_selection](events, l_l_results, **kwargs)
     results += jet_results
 
-    # electron selection
-
-    # events, e_mu_results = self[e_mu_selection](events, electron_min_pt = 12, muon_min_pt = 7, **kwargs)
-    # results += e_mu_results
-
-    # import IPython
-    # IPython.embed()
-    # combined event selection after all steps
-    event_sel = reduce(and_, results.steps.values())
-    results.main["event"] = event_sel
-
     # create process ids
     events = self[process_ids](events, **kwargs)
 
     # pdf weights
-    #events = self[pdf_weights](events, **kwargs)
+    events = self[pdf_weights](events, **kwargs)
 
     # renormalization/factorization scale weights
-    #events = self[murmuf_weights](events, **kwargs)
+    events = self[murmuf_weights](events, **kwargs)
 
     # pileup weights
-    #events = self[pu_weight](events, **kwargs)
+    events = self[pu_weight](events, **kwargs)
+
+    # btag weights
+    events = self[btag_weights](events, results.x.jet_mask, **kwargs)
+    
+    
+    # combined event selection after all steps
+    event_sel = reduce(and_, results.steps.values())
+    results.main["event"] = event_sel
         
+
+    
+    results.steps.all_but_bjet = reduce(
+        and_,
+        [mask for step_name, mask in results.steps.items() if step_name != "bjet"],
+    )
+    
+    
     # increment stats
     events = self[increment_stats](events, results, stats, **kwargs)
+    
+    
 
+    
     # some cutflow features
     events = self[cutflow_features](events, **kwargs)
+
     
-    hiwekke
     return events, results

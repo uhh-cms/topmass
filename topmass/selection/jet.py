@@ -70,5 +70,6 @@ def jet_selection(
             # "jet_mask": default_mask,  TODO: needed?
             # used to determine sum of weights in increment_stats
             "n_central_jets": ak.num(jet_indices, axis=1),
+            "jet_mask": default_mask,
         },
     )

@@ -14,7 +14,7 @@ import cmsdb
 import cmsdb.campaigns.run2_2017_nano_v9
 
 from columnflow.util import DotDict
-from columnflow.config_util import get_root_processes_from_campaign, get_shifts_from_sources
+from columnflow.config_util import get_root_processes_from_campaign, get_shifts_from_sources, add_shift_aliases
 
 from topmass.config.styles import stylize_processes
 from topmass.config.categories import add_categories
@@ -215,11 +215,12 @@ cfg.x.btag_working_points = DotDict.wrap(
 
 # register shifts
 cfg.add_shift(name="nominal", id=0)
+
 cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal"})
 cfg.add_shift(name="tune_down", id=2, type="shape", tags={"disjoint_from_nominal"})
+
 cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal"})
 cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal"})
-
 
 # external files
 cfg.x.external_files = DotDict.wrap(
@@ -278,9 +279,6 @@ cfg.x.external_files.update(DotDict.wrap({
         # jet energy correction
         "jet_jerc": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
 
-        # tau energy correction and scale factors
-        "tau_sf": (f"{json_mirror}/POG/TAU/{year}{corr_postfix}_UL/tau.json.gz", "v1"),
-
         # electron scale factors
         "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
 
@@ -290,16 +288,52 @@ cfg.x.external_files.update(DotDict.wrap({
         # btag scale factor
         "btag_sf_corr": (f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz", "v1"),
 
-        # met phi corrector
-        "met_phi_corr": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/met.json.gz", "v1"),
-
-        # hh-btag repository (lightweight) with TF saved model directories
-        "hh_btag_repo": ("https://github.com/hh-italian-group/HHbtag/archive/1dc426053418e1cab2aec021802faf31ddf3c5cd.tar.gz", "v1"),  # noqa
     }))
+
+cfg.x.btag_sf_jec_sources = [
+        "",  # same as "Total"
+        "Absolute",
+        "AbsoluteMPFBias",
+        "AbsoluteScale",
+        "AbsoluteStat",
+        f"Absolute_{year}",
+        "BBEC1",
+        f"BBEC1_{year}",
+        "EC2",
+        f"EC2_{year}",
+        "FlavorQCD",
+        "Fragmentation",
+        "HF",
+        f"HF_{year}",
+        "PileUpDataMC",
+        "PileUpPtBB",
+        "PileUpPtEC1",
+        "PileUpPtEC2",
+        "PileUpPtHF",
+        "PileUpPtRef",
+        "RelativeBal",
+        "RelativeFSR",
+        "RelativeJEREC1",
+        "RelativeJEREC2",
+        "RelativeJERHF",
+        "RelativePtBB",
+        "RelativePtEC1",
+        "RelativePtEC2",
+        "RelativePtHF",
+        "RelativeSample",
+        f"RelativeSample_{year}",
+        "RelativeStatEC",
+        "RelativeStatFSR",
+        "RelativeStatHF",
+        "SinglePionECAL",
+        "SinglePionHCAL",
+        "TimePtEta",
+    ]
 
 cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL",)
 cfg.x.btag_sf = ("deepJet_shape", ["Absolute", "FlavorQCD",],)
 cfg.x.electron_sf_names = ("UL-Electron-ID-SF", "2017", "wp80iso")
+cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources)
 
 # target file size after MergeReducedEvents in MB
 cfg.x.reduced_file_size = 512.0
@@ -334,6 +368,7 @@ cfg.x.keep_columns = DotDict.wrap(
             "Electron.phi",
             "Electron.mass",
             "Electron.charge",
+            "Electron.deltaEtaSC",
             "Muon.pt",
             "Muon.eta",
             "Muon.phi",
@@ -350,6 +385,10 @@ cfg.x.keep_columns = DotDict.wrap(
             "process_id",
             "category_ids",
             "mc_weight",
+            "pdf_weight*",
+            "murmuf_weight*",
+            "pu_weight*",
+            "btag_weight*",
             "channel_id",
             "m_ll",
             "lepton_pt",
@@ -392,3 +431,82 @@ add_variables(cfg)
 
 # add met filters
 add_met_filters(cfg)
+
+cfg.add_shift(name="minbias_xs_up", id=7, type="shape")
+cfg.add_shift(name="minbias_xs_down", id=8, type="shape")
+add_shift_aliases(
+    cfg,
+    "minbias_xs",
+    {
+        "pu_weight": "pu_weight_{name}",
+        "normalized_pu_weight": "normalized_pu_weight_{name}",
+    },
+)
+
+cfg.add_shift(name="top_pt_up", id=9, type="shape")
+cfg.add_shift(name="top_pt_down", id=10, type="shape")
+add_shift_aliases(cfg, "top_pt", {"top_pt_weight": "top_pt_weight_{direction}"})
+
+
+cfg.add_shift(name="e_up", id=90, type="shape")
+cfg.add_shift(name="e_down", id=91, type="shape")
+add_shift_aliases(cfg, "e", {"electron_weight": "electron_weight_{direction}"})
+
+cfg.add_shift(name="mu_up", id=100, type="shape")
+cfg.add_shift(name="mu_down", id=101, type="shape")
+add_shift_aliases(cfg, "mu", {"muon_weight": "muon_weight_{direction}"})
+
+btag_uncs = [
+    "hf", "lf",
+    f"hfstats1_{year}", f"hfstats2_{year}",
+    f"lfstats1_{year}", f"lfstats2_{year}",
+    "cferr1", "cferr2",
+]
+for i, unc in enumerate(btag_uncs):
+    cfg.add_shift(name=f"btag_{unc}_up", id=110 + 2 * i, type="shape")
+    cfg.add_shift(name=f"btag_{unc}_down", id=111 + 2 * i, type="shape")
+    add_shift_aliases(
+        cfg,
+        f"btag_{unc}",
+        {
+            "normalized_btag_weight": f"normalized_btag_weight_{unc}_" + "{direction}",
+            "normalized_njet_btag_weight": f"normalized_njet_btag_weight_{unc}_" + "{direction}",
+        },
+    )
+
+cfg.add_shift(name="pdf_up", id=130, type="shape")
+cfg.add_shift(name="pdf_down", id=131, type="shape")
+add_shift_aliases(
+    cfg,
+    "pdf",
+    {
+        "pdf_weight": "pdf_weight_{direction}",
+        "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
+    },
+)
+
+cfg.add_shift(name="murmuf_up", id=140, type="shape")
+cfg.add_shift(name="murmuf_down", id=141, type="shape")
+add_shift_aliases(
+    cfg,
+    "murmuf",
+    {
+        "murmuf_weight": "murmuf_weight_{direction}",
+        "normalized_murmuf_weight": "normalized_murmuf_weight_{direction}",
+    },
+)
+
+cfg.x.event_weights = DotDict({
+        "normalization_weight": [],
+        "pdf_weight": get_shifts("pdf"),
+        "murmuf_weight": get_shifts("murmuf"),
+        "normalized_pu_weight": get_shifts("minbias_xs"),
+        "normalized_njet_btag_weight": get_shifts(*(f"btag_{unc}" for unc in btag_uncs)),
+        "electron_weight": get_shifts("e"),
+        "muon_weight": get_shifts("mu"),
+    })
+
+    # define per-dataset event weights
+for dataset in cfg.datasets:
+    if dataset.x("is_ttbar", False):
+        dataset.x.event_weights = {"top_pt_weight": get_shifts("top_pt")}

@@ -91,7 +91,42 @@ def add_variables(config: od.Config) -> None:
         x_title=r"MET $\phi$",
     )
     config.add_variable(
-        name="bjet1_pt",
+        name="btag_weight",
+        expression="btag_weight",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0, 2),
+        x_title="btag_weight",
+    )
+    config.add_variable(
+        name="normalized_btag_weight",
+        expression="normalized_btag_weight",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0, 2),
+        x_title="normalized_btag_weight",
+    )
+    config.add_variable(
+        name="normalized_pdf_weight",
+        expression="normalized_pdf_weight",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0, 2),
+        x_title="normalized_pdf_weight",
+    )
+    config.add_variable(
+        name="normalized_murmuf_weight",
+        expression="normalized_murmuf_weight",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0, 2),
+        x_title="normalized_murmuf_weight",
+    )
+    config.add_variable(
+        name="normalized_pu_weight",
+        expression="normalized_pu_weight",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0, 2),
+        x_title="normalized_pu_weight",
+    )
+    config.add_variable(
+        name="event_",
         expression="Bjet.pt[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(15, 0.0, 300.0),
