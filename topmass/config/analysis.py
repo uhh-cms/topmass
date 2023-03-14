@@ -42,6 +42,7 @@ ana.x.versions = {}
 ana.x.bash_sandboxes = [
     "$CF_BASE/sandboxes/cf_prod.sh",
     "$CF_BASE/sandboxes/venv_columnar.sh",
+    "$TM_BASE/sandboxes/venv_columnar_tf.sh",
 ]
 
 # files of cmssw sandboxes that might be required by remote tasks
@@ -506,8 +507,3 @@ cfg.x.event_weights = DotDict({
         "electron_weight": get_shifts("e"),
         "muon_weight": get_shifts("mu"),
     })
-
-    # define per-dataset event weights
-for dataset in cfg.datasets:
-    if dataset.x("is_ttbar", False):
-        dataset.x.event_weights = {"top_pt_weight": get_shifts("top_pt")}
