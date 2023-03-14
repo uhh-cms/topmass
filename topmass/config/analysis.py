@@ -377,6 +377,7 @@ cfg.x.keep_columns = DotDict.wrap(
             "MET.pt",
             "MET.phi",
             "PV.npvs",
+            "PV.npvsGood",
             "normalization_weight",
             "Muon.pfRelIso04_all",
             "Electron.mvaFall17V2Iso_WP80"

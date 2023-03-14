@@ -23,6 +23,9 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "Muon.pt",
         "Electron.eta",
         "Muon.eta",
+        "PV.npvs",
+        "PV.npvsGood",
+
     },
     produces={
         "ht",
@@ -32,6 +35,8 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "n_muon",
         "lepton_pt",
         "lepton_eta",
+        "nPV",
+        "nPVGood",
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -40,7 +45,12 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=1))
     events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=1))
     events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=1))
-
+    
+    
+    events = set_ak_column(events, "nPV", events.PV.npvs)
+    events = set_ak_column(events, "nPVGood", events.PV.npvsGood)
+    
+    
     lepton_pt = ak.concatenate((events.Muon.pt, events.Electron.pt), axis=1)
     lepton_eta = ak.concatenate((events.Muon.eta, events.Electron.eta), axis=1)
 
