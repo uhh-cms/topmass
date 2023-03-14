@@ -57,6 +57,7 @@ setup_topmass() {
     export TM_BASE="${this_dir}"
     export CF_BASE="${this_dir}/modules/columnflow"
     export CF_REPO_BASE="${TM_BASE}"
+    export CF_REPO_BASE_ALIAS="TM_BASE"
     export CF_SETUP_NAME="${setup_name}"
 
     # load cf setup helpers
