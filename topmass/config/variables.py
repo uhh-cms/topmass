@@ -182,14 +182,14 @@ def add_variables(config: od.Config) -> None:
         name="nPV",
         expression="nPV",
         null_value=EMPTY_FLOAT,
-        binning=(20, 0.0, 200.0),
+        binning=(30, 0, 60),
         x_title="Number of primary Vertices",
     )
     config.add_variable(
         name="nPVGood",
         expression="nPVGood",
         null_value=EMPTY_FLOAT,
-        binning=(20, 0.0, 200.0),
+        binning=(30, 0, 60),
         x_title="Number of good primary Vertices",
     )
     # weights
