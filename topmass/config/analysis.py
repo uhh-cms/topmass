@@ -322,8 +322,8 @@ cfg.x.btag_sf_jec_sources = [
     "TimePtEta",
 ]
 
-cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL",)
-cfg.x.btag_sf = ("deepJet_shape", ["Absolute", "FlavorQCD",],)
+cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL")
+cfg.x.btag_sf = ("deepJet_shape", ["Absolute", "FlavorQCD"])
 cfg.x.electron_sf_names = ("UL-Electron-ID-SF", "2017", "wp80iso")
 cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources)
 
