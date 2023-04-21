@@ -118,8 +118,7 @@ def normalized_pdf_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Arra
     for postfix in ["", "_up", "_down"]:
         # create the normalized weight
         avg = self.average_pdf_weights[postfix]
-        
-        
+
         normalized_weight = events[f"pdf_weight{postfix}"] / avg
 
         # store it
@@ -195,6 +194,7 @@ def normalized_murmuf_weight_setup(self: Producer, reqs: dict, inputs: dict) -> 
         for postfix in ["", "_up", "_down"]
     }
 
+
 @producer(
     uses={
         btag_weights.PRODUCES,
@@ -232,10 +232,10 @@ def normalized_btag_weights(self: Producer, events: ak.Array, **kwargs) -> ak.Ar
         # store them
         events = set_ak_column_f32(events, f"normalized_{weight_name}", norm_weight_per_pid)
         events = set_ak_column_f32(events, f"normalized_njet_{weight_name}", norm_weight_per_pid_njet)
-        
-    #import IPython
-    #IPython.embed()
-        
+
+    # import IPython
+    # IPython.embed()
+
     return events
 
 
@@ -317,8 +317,9 @@ def normalized_btag_weights_setup(self: Producer, reqs: dict, inputs: dict) -> N
         if weight_name.startswith("btag_weight")
     }
 
+
 @producer(
-        uses={
+    uses={
         normalization_weights, normalized_pdf_weight,
         normalized_murmuf_weight, normalized_pu_weight, normalized_btag_weights,
         electron_weights, muon_weights,
@@ -330,7 +331,6 @@ def normalized_btag_weights_setup(self: Producer, reqs: dict, inputs: dict) -> N
     },
 )
 def event_weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-    
     """
     Wrapper of several event weight producers.
     """

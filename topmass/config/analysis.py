@@ -216,7 +216,7 @@ cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nomina
 
 # external files
 cfg.x.external_files = DotDict.wrap(
-    {# files from TODO
+    {  # files from TODO
         "lumi": {
             "golden": (
                 "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017"\
@@ -265,62 +265,62 @@ cfg.x.external_files = DotDict.wrap(
 
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-878881a8"
 year = "2017"
-corr_postfix=""
+corr_postfix = ""
 
 cfg.x.external_files.update(DotDict.wrap({
-        # jet energy correction
-        "jet_jerc": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
+    # jet energy correction
+    "jet_jerc": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
 
-        # electron scale factors
-        "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
+    # electron scale factors
+    "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
 
-        # muon scale factors
-        "muon_sf": (f"{json_mirror}/POG/MUO/{year}{corr_postfix}_UL/muon_Z.json.gz", "v1"),
+    # muon scale factors
+    "muon_sf": (f"{json_mirror}/POG/MUO/{year}{corr_postfix}_UL/muon_Z.json.gz", "v1"),
 
-        # btag scale factor
-        "btag_sf_corr": (f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz", "v1"),
+    # btag scale factor
+    "btag_sf_corr": (f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz", "v1"),
 
-    }))
+}))
 
 cfg.x.btag_sf_jec_sources = [
-        "",  # same as "Total"
-        "Absolute",
-        "AbsoluteMPFBias",
-        "AbsoluteScale",
-        "AbsoluteStat",
-        f"Absolute_{year}",
-        "BBEC1",
-        f"BBEC1_{year}",
-        "EC2",
-        f"EC2_{year}",
-        "FlavorQCD",
-        "Fragmentation",
-        "HF",
-        f"HF_{year}",
-        "PileUpDataMC",
-        "PileUpPtBB",
-        "PileUpPtEC1",
-        "PileUpPtEC2",
-        "PileUpPtHF",
-        "PileUpPtRef",
-        "RelativeBal",
-        "RelativeFSR",
-        "RelativeJEREC1",
-        "RelativeJEREC2",
-        "RelativeJERHF",
-        "RelativePtBB",
-        "RelativePtEC1",
-        "RelativePtEC2",
-        "RelativePtHF",
-        "RelativeSample",
-        f"RelativeSample_{year}",
-        "RelativeStatEC",
-        "RelativeStatFSR",
-        "RelativeStatHF",
-        "SinglePionECAL",
-        "SinglePionHCAL",
-        "TimePtEta",
-    ]
+    "",  # same as "Total"
+    "Absolute",
+    "AbsoluteMPFBias",
+    "AbsoluteScale",
+    "AbsoluteStat",
+    f"Absolute_{year}",
+    "BBEC1",
+    f"BBEC1_{year}",
+    "EC2",
+    f"EC2_{year}",
+    "FlavorQCD",
+    "Fragmentation",
+    "HF",
+    f"HF_{year}",
+    "PileUpDataMC",
+    "PileUpPtBB",
+    "PileUpPtEC1",
+    "PileUpPtEC2",
+    "PileUpPtHF",
+    "PileUpPtRef",
+    "RelativeBal",
+    "RelativeFSR",
+    "RelativeJEREC1",
+    "RelativeJEREC2",
+    "RelativeJERHF",
+    "RelativePtBB",
+    "RelativePtEC1",
+    "RelativePtEC2",
+    "RelativePtHF",
+    "RelativeSample",
+    f"RelativeSample_{year}",
+    "RelativeStatEC",
+    "RelativeStatFSR",
+    "RelativeStatHF",
+    "SinglePionECAL",
+    "SinglePionHCAL",
+    "TimePtEta",
+]
 
 cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL",)
 cfg.x.btag_sf = ("deepJet_shape", ["Absolute", "FlavorQCD",],)
@@ -490,11 +490,11 @@ add_shift_aliases(
 )
 
 cfg.x.event_weights = DotDict({
-        "normalization_weight": [],
-        "pdf_weight": get_shifts("pdf"),
-        "murmuf_weight": get_shifts("murmuf"),
-        "normalized_pu_weight": get_shifts("minbias_xs"),
-        "normalized_njet_btag_weight": get_shifts(*(f"btag_{unc}" for unc in btag_uncs)),
-        "electron_weight": get_shifts("e"),
-        "muon_weight": get_shifts("mu"),
-    })
+    "normalization_weight": [],
+    "pdf_weight": get_shifts("pdf"),
+    "murmuf_weight": get_shifts("murmuf"),
+    "normalized_pu_weight": get_shifts("minbias_xs"),
+    "normalized_njet_btag_weight": get_shifts(*(f"btag_{unc}" for unc in btag_uncs)),
+    "electron_weight": get_shifts("e"),
+    "muon_weight": get_shifts("mu"),
+})

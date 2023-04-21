@@ -45,12 +45,10 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=1))
     events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=1))
     events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=1))
-    
-    
+
     events = set_ak_column(events, "nPV", events.PV.npvs)
     events = set_ak_column(events, "nPVGood", events.PV.npvsGood)
-    
-    
+
     lepton_pt = ak.concatenate((events.Muon.pt, events.Electron.pt), axis=1)
     lepton_eta = ak.concatenate((events.Muon.eta, events.Electron.eta), axis=1)
 
@@ -58,7 +56,6 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     events = set_ak_column(events, "lepton_pt", lepton_pt[sort])
     events = set_ak_column(events, "lepton_eta", lepton_eta[sort])
-
 
     return events
 
@@ -92,7 +89,7 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Muon"] = ak.with_name(events.Muon, "PtEtaPhiMLorentzVector")
 
-    leptons = ak.concatenate((1*events.Electron, 1*events.Muon), axis=1)
+    leptons = ak.concatenate((1 * events.Electron, 1 * events.Muon), axis=1)
 
     if ak.any(ak.num(events.Bjet, axis=-1) != 2):
         raise Exception("In features.py: there should be exactly 2 bjets in each B_jet")
@@ -102,8 +99,7 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             "In features.py: there should be exactly 2 leptons in each lepton pair",
         )
 
-    
-    bjet_l = [1*events.Bjet, leptons]
+    bjet_l = [1 * events.Bjet, leptons]
 
     mleft, mright = ak.unzip(ak.cartesian(bjet_l, axis=1))
     m_min_lb = ak.min((mleft + mright).mass, axis=1)
@@ -111,7 +107,7 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # m=(events.Bjet[:, 0] + events.Electron[:, 1]).mass
 
     events = set_ak_column(events, "m_min_lb", m_min_lb)
-    
+
     return events
 
 

@@ -27,6 +27,7 @@ from topmass.production.features import cutflow_features
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
+
 @selector(
     uses={btag_weights, pu_weight},
 )
@@ -127,6 +128,7 @@ def increment_stats(
 
     return events
 
+
 @selector(
     uses={
         attach_coffea_behavior,
@@ -137,7 +139,7 @@ def increment_stats(
         process_ids,
         cutflow_features,
         increment_stats,
-        pdf_weights,murmuf_weights,pu_weight,btag_weights,
+        pdf_weights, murmuf_weights, pu_weight, btag_weights,
     },
     produces={
         mc_weight,
@@ -147,7 +149,7 @@ def increment_stats(
         process_ids,
         cutflow_features,
         increment_stats,
-        pdf_weights,murmuf_weights,pu_weight,btag_weights,
+        pdf_weights, murmuf_weights, pu_weight, btag_weights,
     },
     exposed=True,
 )
@@ -190,28 +192,20 @@ def default(
 
     # btag weights
     events = self[btag_weights](events, results.x.jet_mask, **kwargs)
-    
-    
+
     # combined event selection after all steps
     event_sel = reduce(and_, results.steps.values())
     results.main["event"] = event_sel
-        
 
-    
     results.steps.all_but_bjet = reduce(
         and_,
         [mask for step_name, mask in results.steps.items() if step_name != "bjet"],
     )
-    
-    
+
     # increment stats
     events = self[increment_stats](events, results, stats, **kwargs)
-    
-    
 
-    
     # some cutflow features
     events = self[cutflow_features](events, **kwargs)
 
-    
     return events, results

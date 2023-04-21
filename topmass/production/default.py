@@ -19,12 +19,12 @@ ak = maybe_import("awkward")
     produces={features, category_ids, event_weights, lb_features, jet_features},
 )
 def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-    
+
     # features
     events = self[features](events, **kwargs)
     events = self[lb_features](events, **kwargs)
     events = self[jet_features](events, **kwargs)
-    
+
     # category ids
     events = self[category_ids](events, **kwargs)
 
