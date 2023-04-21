@@ -130,8 +130,8 @@ setup_topmass() {
     #
 
     export LAW_HOME="${TM_BASE}/.law"
-    # export LAW_CONFIG_FILE="${TM_BASE}/law.cfg"
-    export LAW_CONFIG_FILE="${TM_BASE}/law.nocert.cfg"
+    export LAW_CONFIG_FILE="${TM_BASE}/law.cfg"
+    # export LAW_CONFIG_FILE="${TM_BASE}/law.nocert.cfg"
 
 
     if which law &> /dev/null; then

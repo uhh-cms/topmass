@@ -112,9 +112,6 @@ def lb_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     events = set_ak_column(events, "m_min_lb", m_min_lb)
     
-    import IPython
-    IPython.embed()
-    
     return events
 
 

@@ -87,23 +87,14 @@ stylize_processes(cfg)
 # add datasets we need to study
 dataset_names = [
     # signal
+    # backgrounds
     "tt_sl_powheg",
     "tt_dl_powheg",
     "tt_fh_powheg",
-    # backgrounds
     "st_tchannel_t_powheg",
     "st_tchannel_tbar_powheg",
     "st_twchannel_t_powheg",
     "st_twchannel_tbar_powheg",
-    "st_schannel_lep_amcatnlo",
-    "st_schannel_had_amcatnlo",
-    "w_lnu_madgraph",
-    "dy_lep_m50_ht200to400_madgraph",
-    "dy_lep_m50_ht400to600_madgraph",
-    "dy_lep_m50_ht600to800_madgraph",
-    "dy_lep_m50_ht800to1200_madgraph",
-    "dy_lep_m50_ht1200to2500_madgraph",
-    "dy_lep_m50_ht2500_madgraph",
 ]
 """
 # data
@@ -373,7 +364,6 @@ cfg.x.keep_columns = DotDict.wrap(
             "Muon.eta",
             "Muon.phi",
             "Muon.mass",
-            "m_min_lb",
             "MET.pt",
             "MET.phi",
             "PV.npvs",
@@ -384,6 +374,7 @@ cfg.x.keep_columns = DotDict.wrap(
             # columns added during selection
             "channel",
             "process_id",
+            "m_min_lb",
             "category_ids",
             "mc_weight",
             "pdf_weight*",
