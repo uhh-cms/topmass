@@ -107,12 +107,12 @@ dataset_names = [
     # "data_mu_e",
     # "data_mu_f",
     # backgrounds
-    "tt_sl_powheg",
-    "tt_dl_powheg",
-    "st_tchannel_t_powheg",
-    "st_tchannel_tbar_powheg",
-    "st_twchannel_t_powheg",
-    "st_twchannel_tbar_powheg",
+    # "tt_sl_powheg",
+    # "tt_dl_powheg",
+    # "st_tchannel_t_powheg",
+    # "st_tchannel_tbar_powheg",
+    # "st_twchannel_t_powheg",
+    # "st_twchannel_tbar_powheg",
     # These are not in 2017 nano v9:
     # "st_schannel_lep_amcatnlo",
     # "st_schannel_had_amcatnlo",
@@ -388,6 +388,7 @@ cfg.add_variable(
     unit="GeV",
     x_title=r"Jet 2 $p_{T}$",
 )
+
 cfg.add_variable(
     name="jet2_eta",
     expression="Jet.eta[:,1]",
@@ -403,8 +404,99 @@ cfg.add_variable(
     x_title=r"Jet 2 $\phi$",
 )
 cfg.add_variable(
+    name="jet3_pt",
+    expression="Jet.pt[:,2]",
+    null_value=EMPTY_FLOAT,
+    binning=(40, 0.0, 400.0),
+    unit="GeV",
+    x_title=r"Jet 3 $p_{T}$",
+)
+
+cfg.add_variable(
+    name="jet3_eta",
+    expression="Jet.eta[:,2]",
+    null_value=EMPTY_FLOAT,
+    binning=(30, -3.0, 3.0),
+    x_title=r"Jet 3 $\eta$",
+)
+cfg.add_variable(
+    name="jet3_phi",
+    expression="Jet.phi[:,2]",
+    null_value=EMPTY_FLOAT,
+    binning=(40, -3.2, 3.2),
+    x_title=r"Jet 3 $\phi$",
+)
+cfg.add_variable(
+    name="jet4_pt",
+    expression="Jet.pt[:,3]",
+    null_value=EMPTY_FLOAT,
+    binning=(40, 0.0, 400.0),
+    unit="GeV",
+    x_title=r"Jet 4 $p_{T}$",
+)
+
+cfg.add_variable(
+    name="jet4_eta",
+    expression="Jet.eta[:,3]",
+    null_value=EMPTY_FLOAT,
+    binning=(30, -3.0, 3.0),
+    x_title=r"Jet 4 $\eta$",
+)
+cfg.add_variable(
+    name="jet4_phi",
+    expression="Jet.phi[:,3]",
+    null_value=EMPTY_FLOAT,
+    binning=(40, -3.2, 3.2),
+    x_title=r"Jet 4 $\phi$",
+)
+cfg.add_variable(
+    name="jet5_pt",
+    expression="Jet.pt[:,4]",
+    null_value=EMPTY_FLOAT,
+    binning=(40, 0.0, 400.0),
+    unit="GeV",
+    x_title=r"Jet 5 $p_{T}$",
+)
+
+cfg.add_variable(
+    name="jet5_eta",
+    expression="Jet.eta[:,4]",
+    null_value=EMPTY_FLOAT,
+    binning=(30, -3.0, 3.0),
+    x_title=r"Jet 5 $\eta$",
+)
+cfg.add_variable(
+    name="jet5_phi",
+    expression="Jet.phi[:,4]",
+    null_value=EMPTY_FLOAT,
+    binning=(40, -3.2, 3.2),
+    x_title=r"Jet 5 $\phi$",
+)
+cfg.add_variable(
+    name="jet6_pt",
+    expression="Jet.pt[:,5]",
+    null_value=EMPTY_FLOAT,
+    binning=(40, 0.0, 400.0),
+    unit="GeV",
+    x_title=r"Jet 6 $p_{T}$",
+)
+cfg.add_variable(
+    name="jet6_eta",
+    expression="Jet.eta[:,5]",
+    null_value=EMPTY_FLOAT,
+    binning=(30, -3.0, 3.0),
+    x_title=r"Jet 6 $\eta$",
+)
+cfg.add_variable(
+    name="jet6_phi",
+    expression="Jet.phi[:,5]",
+    null_value=EMPTY_FLOAT,
+    binning=(40, -3.2, 3.2),
+    x_title=r"Jet 6 $\phi$",
+)
+cfg.add_variable(
     name="ht",
-    expression=lambda events: ak.sum(events.Jet.pt, axis=1),
+    expression="ht",
     binning=(40, 0.0, 800.0),
     unit="GeV",
     x_title="$H_T$",

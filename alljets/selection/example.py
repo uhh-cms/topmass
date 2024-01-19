@@ -55,6 +55,7 @@ def muon_selection(
 
 @selector(
     uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB", "Jet.jetId", "Jet.puId"},
+    jet_pt=None, jet_trigger=None,
 )
 def jet_selection(
     self: Selector,
@@ -63,7 +64,7 @@ def jet_selection(
 ) -> tuple[ak.Array, SelectionResult]:
     # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
     jet_mask = ((events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4) & (ak.sum(events.Jet.pt, axis=1) >= 450))
-    jet_sel = ak.sum(jet_mask, axis=1) == 6
+    jet_sel = ak.sum(jet_mask, axis=1) >= 6
 
     # pt sorted indices
     # indices = ak.argsort(events.Jet.pt, axis=-1, ascending=False)
@@ -73,13 +74,19 @@ def jet_selection(
     bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
     # bjet_indices = indices[bjet_mask][:, :2]
     bjet_sel = (ak.sum(bjet_mask, axis=1) >= 2) & (ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1))
+    # new dummy mask (untested)
+    ones = ak.ones_like(jet_sel)
+
+    # trigger (untested)
+    jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
     # build and return selection results
     # "objects" maps source columns to new columns and selections to be applied on the old columns
     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
     return events, SelectionResult(
         steps={
-            "jet": jet_sel,
             "bjet": bjet_sel,
+            "jet": jet_sel,
+            "Trigger": jet_trigger_sel,
         },
         objects={
             "Jet": {
@@ -94,33 +101,35 @@ def jet_selection(
     )
 
 
-# @fh_jet_selection.init
-# def fh_jet_selection.init(self: Selector) -> None:
-#     year = self.config_inst.campaign.x.year
-#
-#     # NOTE: the none will not be overwritten later when doing this...
-#     # self.jet_trigger = None
-#
-#     # Jet pt thresholds (if not set manually) based on year (1 pt above trigger threshold)
-#     # When lepton pt thresholds are set manually, don't use any trigger
-#     if not self.jet_pt:
-#         self.jet_pt = {2016: 31, 2017: 33, 2018: 33}[year]
-#
-#         # Trigger choice based on year of data-taking (for now: only single trigger)
-#         self.jet_trigger = {
-#             2016: "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
-# or "HLT_PFHT450_SixJet40_BTagCSV_p056")
-#             2017: "HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
-# or "HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", "HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5")
-#             2018: "HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
-# or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
-#         }[year]
-#         self.uses.add(f"HLT.{self.jet_trigger}")
+# Untested
+@jet_selection.init
+def jet_selection_init(self: Selector) -> None:
+    year = self.config_inst.campaign.x.year
+
+    # NOTE: the none will not be overwritten later when doing this...
+    # self.jet_trigger = None
+
+    # Jet pt thresholds (if not set manually) based on year (1 pt above trigger threshold)
+    # When jet pt thresholds are set manually, don't use any trigger
+    if not self.jet_pt:
+        self.jet_pt = {2016: 31, 2017: 33, 2018: 33}[year]
+
+        # Trigger choice based on year of data-taking (for now: only single trigger)
+        self.jet_trigger = {
+            2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
+            # or "HLT_PFHT450_SixJet40_BTagCSV_p056")
+            2017: "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
+            # or "HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", "HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5")
+            2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
+            # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
+        }[year]
+        self.uses.add(f"HLT.{self.jet_trigger}")
 
 #
 # exposed selectors
 # (those that can be invoked from the command line)
 #
+
 
 @selector(
     uses={
