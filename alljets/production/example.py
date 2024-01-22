@@ -23,7 +23,7 @@ ak = maybe_import("awkward")
 @producer(
     uses={
         # nano columns
-        "Jet.pt", "Bjet.pt"
+        "Jet.pt", "Bjet.pt", "VetoJet.pt",
     },
     produces={
         # new columns
@@ -31,7 +31,7 @@ ak = maybe_import("awkward")
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-    events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=1))
+    events = set_ak_column(events, "ht", (ak.sum(events.Jet.pt, axis=1) + ak.sum(events.VetoJet.pt, axis=1)))
     events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
     events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=1), value_type=np.int32)
 

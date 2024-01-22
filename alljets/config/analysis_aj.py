@@ -257,7 +257,7 @@ cfg.x.keep_columns = DotDict.wrap({
         # general event info
         "run", "luminosityBlock", "event",
         # object info
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Bjet.*", "Jet.btagDeepFlavB", "Jet.hadronFlavour",
+        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Bjet.*", "VetoJet.*", "Jet.btagDeepFlavB", "Jet.hadronFlavour",
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
         "PV.npvs",

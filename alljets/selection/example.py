@@ -65,7 +65,7 @@ def jet_selection(
     # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
     jet_mask = ((events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4) & (ak.sum(events.Jet.pt, axis=1) >= 450))
     jet_sel = ak.sum(jet_mask, axis=1) >= 6
-
+    veto_jet = ((events.Jet.pt < 40.0) & (abs(events.Jet.eta) < 2.4))
     # pt sorted indices
     # indices = ak.argsort(events.Jet.pt, axis=-1, ascending=False)
     # jet_indices = indices[jet_mask]
@@ -92,6 +92,7 @@ def jet_selection(
             "Jet": {
                 "Jet": sorted_indices_from_mask(jet_mask, events.Jet.pt, ascending=False),
                 "Bjet": sorted_indices_from_mask(bjet_mask, events.Jet.pt, ascending=False),
+                "VetoJet": sorted_indices_from_mask(veto_jet, events.Jet.pt, ascending=False),
             },
         },
         aux={
