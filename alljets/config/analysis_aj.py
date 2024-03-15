@@ -66,6 +66,7 @@ ana.x.config_groups = {}
 
 from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
 
+
 # copy the campaign
 # (creates copies of all linked datasets, processes, etc. to allow for encapsulated customization)
 campaign = campaign_run2_2017_nano_v9.copy()
@@ -106,6 +107,16 @@ dataset_names = [
     # "data_mu_d",
     # "data_mu_e",
     # "data_mu_f",
+    # "data_pho_b",
+    # "data_pho_c",
+    # "data_pho_d",
+    # "data_pho_e",
+    # "data_pho_f",
+    # "data_pho_c",
+    # "data_pho_d",
+    # "data_pho_e",
+    # "data_pho_f",
+    "data_jetht",
     # backgrounds
     # "tt_sl_powheg",
     # "tt_dl_powheg",
