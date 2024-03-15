@@ -116,7 +116,12 @@ dataset_names = [
     # "data_pho_d",
     # "data_pho_e",
     # "data_pho_f",
-    "data_jetht",
+    # Trigger does not work for set B
+    # "data_jetht_b",
+    "data_jetht_c",
+    "data_jetht_d",
+    "data_jetht_e",
+    "data_jetht_f",
     # backgrounds
     # "tt_sl_powheg",
     # "tt_dl_powheg",
@@ -197,7 +202,7 @@ cfg.x.luminosity = Number(41480, {
     "lumi_13TeV_correlated": 0.009j,
 })
 
-# b-tag working points (NEW)
+# b-tag working points
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
 cfg.x.btag_working_points = DotDict.wrap(
     {

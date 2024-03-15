@@ -77,14 +77,14 @@ def jet_selection(
     # new dummy mask (untested)
     ones = ak.ones_like(jet_sel)
 
-    # trigger (untested)
+    # trigger
     jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
     # build and return selection results
     # "objects" maps source columns to new columns and selections to be applied on the old columns
     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
     return events, SelectionResult(
         steps={
-            "bjet": bjet_sel,
+            "BTag": bjet_sel,
             "jet": jet_sel,
             "Trigger": jet_trigger_sel,
         },
