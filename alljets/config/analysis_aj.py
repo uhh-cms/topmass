@@ -83,6 +83,7 @@ year = campaign.x.year
 # add processes we are interested in
 process_names = [
     "data",
+    "qcd",
     "tt",
     "st",
 ]
@@ -129,6 +130,15 @@ dataset_names = [
     # "st_tchannel_tbar_powheg",
     # "st_twchannel_t_powheg",
     # "st_twchannel_tbar_powheg",
+    "qcd_ht50to100_madgraph",
+    "qcd_ht100to200_madgraph",
+    "qcd_ht200to300_madgraph",
+    "qcd_ht300to500_madgraph",
+    "qcd_ht500to700_madgraph",
+    "qcd_ht700to1000_madgraph",
+    "qcd_ht1000to1500_madgraph",
+    "qcd_ht1500to2000_madgraph",
+    "qcd_ht2000_madgraph",
     # These are not in 2017 nano v9:
     # "st_schannel_lep_amcatnlo",
     # "st_schannel_had_amcatnlo",
@@ -531,6 +541,20 @@ cfg.add_variable(
     binning=(40, 0.0, 400.0),
     unit="GeV",
     x_title=r"Jet 1 $p_{T}$",
+)
+cfg.add_variable(
+    name="cf_ht",
+    expression="cutflow.ht",
+    binning=(40, 0.0, 800.0),
+    unit="GeV",
+    x_title=r"$H_{T}$",
+)
+cfg.add_variable(
+    name="cf_jet6_pt",
+    expression="cutflow.jet6_pt",
+    binning=(40, 0.0, 400.0),
+    unit="GeV",
+    x_title=r"Jet 6 $p_{T}$",
 )
 # New variables
 cfg.add_variable(

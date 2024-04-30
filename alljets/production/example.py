@@ -47,6 +47,8 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     produces={
         mc_weight, category_ids,
         # new columns
+        "cutflow.jet6_pt",
+        "cutflow.ht",
         "cutflow.jet1_pt",
     },
 )
@@ -66,11 +68,9 @@ def cutflow_features(
     events = self[category_ids](reduced_events, target_events=events, **kwargs)
 
     # add cutflow columns
-    events = set_ak_column(
-        events,
-        "cutflow.jet1_pt",
-        Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT),
-    )
+    events = set_ak_column(events, "cutflow.jet6_pt", Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT))
+    events = set_ak_column(events, "cutflow.ht", ak.sum(events.Jet.pt, axis=1))
+    events = set_ak_column(events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT))
 
     return events
 

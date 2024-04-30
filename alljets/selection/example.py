@@ -63,9 +63,10 @@ def jet_selection(
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
-    jet_mask = ((events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4) & (ak.sum(events.Jet.pt, axis=1) >= 450))
+    ht_sel = (ak.sum(events.Jet.pt, axis=1) >= 450)
+    jet_mask = ((events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4))
     jet_sel = ak.sum(jet_mask, axis=1) >= 6
-    veto_jet = ((events.Jet.pt < 40.0) & (abs(events.Jet.eta) < 2.4))
+    veto_jet = ((events.Jet.pt < 40.0) | (abs(events.Jet.eta) > 2.4))
     # pt sorted indices
     # indices = ak.argsort(events.Jet.pt, axis=-1, ascending=False)
     # jet_indices = indices[jet_mask]
@@ -74,11 +75,13 @@ def jet_selection(
     bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
     # bjet_indices = indices[bjet_mask][:, :2]
     bjet_sel = (ak.sum(bjet_mask, axis=1) >= 2) & (ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1))
-    # new dummy mask (untested)
-    ones = ak.ones_like(jet_sel)
-
+    # Trigger selection step is skipped for QCD MC, which has no Trigger columns
+    if not self.dataset_inst.name.startswith("qcd"):
+        ones = ak.ones_like(jet_sel)
     # trigger
-    jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
+        jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
+    else:
+        jet_trigger_sel = True
     # build and return selection results
     # "objects" maps source columns to new columns and selections to be applied on the old columns
     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
@@ -86,6 +89,7 @@ def jet_selection(
         steps={
             "BTag": bjet_sel,
             "jet": jet_sel,
+            "HT": ht_sel,
             "Trigger": jet_trigger_sel,
         },
         objects={
@@ -102,7 +106,6 @@ def jet_selection(
     )
 
 
-# Untested
 @jet_selection.init
 def jet_selection_init(self: Selector) -> None:
     year = self.config_inst.campaign.x.year
