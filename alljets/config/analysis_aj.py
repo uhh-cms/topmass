@@ -155,8 +155,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-    for info in dataset.info.values():
-        info.n_files = min(info.n_files, 2)
+    # for info in dataset.info.values():
+    #     info.n_files = min(info.n_files, 2)
 
 # verify that the root process of all datasets is part of any of the registered processes
 verify_config_processes(cfg, warn=True)
@@ -169,6 +169,7 @@ cfg.x.default_ml_model = None
 cfg.x.default_inference_model = "example"
 cfg.x.default_categories = ("incl",)
 cfg.x.default_variables = ("n_jet", "jet1_pt")
+cfg.x.default_weight_producer = "all_weights"
 
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)

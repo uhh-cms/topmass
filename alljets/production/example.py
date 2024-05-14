@@ -62,10 +62,15 @@ def cutflow_features(
         events = self[mc_weight](events, **kwargs)
 
     # apply object masks and create new collections
-    reduced_events = create_collections_from_masks(events, object_masks)
+    # reduced_events = create_collections_from_masks(events, object_masks)
 
     # create category ids per event and add categories back to the
-    events = self[category_ids](reduced_events, target_events=events, **kwargs)
+    events = self[category_ids](
+        # reduced_events, 
+        # target_events=events,
+        events,
+        **kwargs
+        )
 
     # add cutflow columns
     events = set_ak_column(events, "cutflow.jet6_pt", Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT))
