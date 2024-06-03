@@ -14,6 +14,7 @@ from columnflow.production.cms.pileup import pu_weight
 from columnflow.production.cms.pdf import pdf_weights
 from columnflow.production.cms.scale import murmuf_weights
 from columnflow.production.cms.btag import btag_weights
+from columnflow.production.util import attach_coffea_behavior
 from columnflow.util import maybe_import
 from alljets.selection.jet import jet_selection
 
@@ -22,7 +23,7 @@ from alljets.production.example import cutflow_features
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
-
+coffea = maybe_import("coffea")
 
 #
 # other unexposed selectors
@@ -70,10 +71,19 @@ def muon_selection(
         muon_selection,
         jet_selection,
         increment_stats,
+        pdf_weights,
+        murmuf_weights,
+        pu_weight,
+        btag_weights,
+        attach_coffea_behavior,
     },
     produces={
         # selectors / producers whose newly created columns should be kept
         mc_weight, cutflow_features, process_ids,
+        pdf_weights,
+        murmuf_weights,
+        pu_weight,
+        btag_weights,
     },
     exposed=True,
 )
@@ -83,6 +93,9 @@ def example(
     stats: defaultdict,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
+    # ensure coffea behavior
+    events = self[attach_coffea_behavior](events, **kwargs)
+
     # prepare the selection results that are updated at every step
     results = SelectionResult()
 
@@ -95,29 +108,31 @@ def example(
     results += jet_results
 
     # combined event selection after all steps
-    results.event = results.steps.muon & results.steps.jet
+    results.event = (results.steps.muon & results.steps.jet &
+                    results.steps.Trigger & results.steps.BTag & results.steps.HT)
 
     # create process ids
     events = self[process_ids](events, **kwargs)
-    
+
     # add the mc weight
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
 
-    #     # create process ids
-    #     events = self[process_ids](events, **kwargs)
+        # create process ids
+        events = self[process_ids](events, **kwargs)
 
-    #     # pdf weights
-    #     events = self[pdf_weights](events, **kwargs)
+        # pdf weights
+        events = self[pdf_weights](events, **kwargs)
 
-    #     # renormalization/factorization scale weights
-    #     events = self[murmuf_weights](events, **kwargs)
+        # renormalization/factorization scale weights
+        events = self[murmuf_weights](events, **kwargs)
 
-    #     # pileup weights
-    #     events = self[pu_weight](events, **kwargs)
+        # pileup weights
+        events = self[pu_weight](events, **kwargs)
 
-    #     # btag weights
-    #     events = self[btag_weights](events, results.x.jet_mask, **kwargs)
+        # btag weights
+        jet_mask = ((events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4))
+        events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)

@@ -6,13 +6,14 @@ Jet selection methods.
 from columnflow.selection import Selector, SelectionResult, selector
 from columnflow.selection.util import sorted_indices_from_mask
 from columnflow.util import maybe_import
+from columnflow.production.util import attach_coffea_behavior
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
 
 @selector(
-    uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB", "Jet.jetId", "Jet.puId"},
+    uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB", "Jet.jetId", "Jet.puId", "Jet.phi", attach_coffea_behavior},
     jet_pt=None, jet_trigger=None,
 )
 def jet_selection(
@@ -24,15 +25,16 @@ def jet_selection(
     ht_sel = (ak.sum(events.Jet.pt, axis=1) >= 450)
     jet_mask = ((events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4))
     jet_sel = ak.sum(jet_mask, axis=1) >= 6
-    veto_jet = ((events.Jet.pt < 40.0) | (abs(events.Jet.eta) > 2.4))
-    # pt sorted indices
-    # indices = ak.argsort(events.Jet.pt, axis=-1, ascending=False)
-    # jet_indices = indices[jet_mask]
-    # b-tagged jets (tight wp)
+    veto_jet = ~jet_mask
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    light_jet = (jet_mask) & (events.Jet.btagDeepFlavB < wp_tight)
+    # b-tagged jets (tight wp)
     bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
     # bjet_indices = indices[bjet_mask][:, :2]
-    bjet_sel = (ak.sum(bjet_mask, axis=1) >= 2) & (ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1))
+    bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2) &
+                (ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1)) &
+                (ak.sum(light_jet, axis=1) >= 4)
+                )
     # Trigger selection step is skipped for QCD MC, which has no Trigger columns
     if not self.dataset_inst.name.startswith("qcd"):
         ones = ak.ones_like(jet_sel)
@@ -40,21 +42,24 @@ def jet_selection(
         jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
     else:
         jet_trigger_sel = True
+    # import IPython
+    # IPython.embed()
     # build and return selection results
     # "objects" maps source columns to new columns and selections to be applied on the old columns
     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
     return events, SelectionResult(
         steps={
-            "BTag": bjet_sel,
-            "jet": jet_sel,
-            "HT": ht_sel,
             "Trigger": jet_trigger_sel,
+            "HT": ht_sel,
+            "jet": jet_sel,
+            "BTag": bjet_sel,
         },
         objects={
             "Jet": {
                 "Jet": sorted_indices_from_mask(jet_mask, events.Jet.pt, ascending=False),
                 "Bjet": sorted_indices_from_mask(bjet_mask, events.Jet.pt, ascending=False),
                 "VetoJet": sorted_indices_from_mask(veto_jet, events.Jet.pt, ascending=False),
+                "LightJet": sorted_indices_from_mask(light_jet, events.Jet.pt, ascending=False),
             },
         },
         aux={
