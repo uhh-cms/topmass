@@ -1,3 +1,5 @@
+![](https://github.com/uhh-cms/topmass/actions/workflows/lint_and_test.yaml/badge.svg)
+
 # topmass_alljets Analysis
 
 
