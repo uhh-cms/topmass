@@ -14,7 +14,6 @@ from columnflow.production.cms.muon import muon_weights
 from columnflow.selection.util import create_collections_from_masks
 from columnflow.util import maybe_import
 from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
-import pyKinFitTest
 
 
 np = maybe_import("numpy")
@@ -36,20 +35,6 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
     events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=1), value_type=np.int32)
 
-    return events
-@producer(
-    uses={"Jet.pt", "Jet.eta","Jet.phi", "Jet.mass", "Jet.btagDeepFlavB"},
-    produces={"FitJet.pt", "FitJet.eta", "FitJet.phi", "FitJet.mass", "FitChi2"},
-    jet_pt=None, jet_trigger=None,
-)
-def kinFit(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-
-    fitData = pyKinFitTest.setBestCombi(events.Jet.pt, events.Jet.eta, events.Jet.phi, events.Jet.mass)
-    events = set_ak_column(events, "FitJet.pt", fitData[0])
-    events = set_ak_column(events, "FitJet.eta", fitData[1])
-    events = set_ak_column(events, "FitJet.phi", fitData[2])
-    events = set_ak_column(events, "FitJet.mass", fitData[3])
-    events = set_ak_column(events, "FitChi2", fitData[4])
     return events
 
 @producer(
