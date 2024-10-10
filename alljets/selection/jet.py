@@ -6,13 +6,15 @@ Jet selection methods.
 from columnflow.selection import Selector, SelectionResult, selector
 from columnflow.selection.util import sorted_indices_from_mask
 from columnflow.util import maybe_import
+import pyKinFitTest
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
 
 @selector(
-    uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB", "Jet.jetId", "Jet.puId"},
+    uses={"Jet.pt", "Jet.eta","Jet.phi", "Jet.mass", "Jet.btagDeepFlavB", "Jet.jetId", "Jet.puId"},
+    produces={""},
     jet_pt=None, jet_trigger=None,
 )
 def jet_selection(
@@ -40,6 +42,7 @@ def jet_selection(
         jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
     else:
         jet_trigger_sel = True
+
     # build and return selection results
     # "objects" maps source columns to new columns and selections to be applied on the old columns
     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
@@ -86,3 +89,31 @@ def jet_selection_init(self: Selector) -> None:
             # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
         }[year]
         self.uses.add(f"HLT.{self.jet_trigger}")
+
+@selector(
+  uses={"Jet.pt", "Jet.eta","Jet.phi", "Jet.mass", "Jet.btagDeepFlavB"},
+    produces={"FitJet.pt", "FitJet.eta", "FitJet.phi", "FitJet.mass", "FitChi2"},
+    jet_pt=None, jet_trigger=None,
+)
+
+def kinFit(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
+
+    fitData = pyKinFitTest.setBestCombi(events.Jet.pt, events.Jet.eta, events.Jet.phi, events.Jet.mass)
+    events = set_ak_column(events, "FitJet.pt", fitData[0])
+    events = set_ak_column(events, "FitJet.eta", fitData[1])
+    events = set_ak_column(events, "FitJet.phi", fitData[2])
+    events = set_ak_column(events, "FitJet.mass", fitData[3])
+    events = set_ak_column(events, "FitChi2", fitData[4])
+    return events,SelectionResult(
+    steps={
+        },
+        objects={
+            "Jet": {
+                "Jet": sorted_indices_from_mask(jet_mask, events.Jet.pt, ascending=False),
+                            },
+        },
+        aux={
+                   },
+    )
+
+

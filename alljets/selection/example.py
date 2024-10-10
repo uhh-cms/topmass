@@ -70,10 +70,11 @@ def muon_selection(
         muon_selection,
         jet_selection,
         increment_stats,
+        kinFit,
     },
     produces={
         # selectors / producers whose newly created columns should be kept
-        mc_weight, cutflow_features, process_ids,
+        mc_weight, cutflow_features, process_ids, kinFit,
     },
     exposed=True,
 )

@@ -155,8 +155,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-    # for info in dataset.info.values():
-    #     info.n_files = min(info.n_files, 2)
+     for info in dataset.info.values():
+         info.n_files = min(info.n_files, 2)
 
 # verify that the root process of all datasets is part of any of the registered processes
 verify_config_processes(cfg, warn=True)
@@ -288,6 +288,7 @@ cfg.x.keep_columns = DotDict.wrap({
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
         "PV.npvs",
+        "FitJet.pt", "FitJet.eta", "FitJet.phi", "FitJet.mass", "fitChi2",
         # columns added during selection
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*",
     },
