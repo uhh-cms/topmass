@@ -6,7 +6,7 @@ Jet selection methods.
 from columnflow.selection import Selector, SelectionResult, selector
 from columnflow.selection.util import sorted_indices_from_mask
 from columnflow.util import maybe_import
-#import pyKinFitTest
+import pyKinFitTest
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -90,7 +90,7 @@ def jet_selection_init(self: Selector) -> None:
         }[year]
         self.uses.add(f"HLT.{self.jet_trigger}")
 
-"""@selector(
+@selector(
   uses={"Jet.pt", "Jet.eta","Jet.phi", "Jet.mass", "Jet.btagDeepFlavB"},
     produces={"FitJet.pt", "FitJet.eta", "FitJet.phi", "FitJet.mass", "FitChi2"},
     jet_pt=None, jet_trigger=None,
@@ -103,7 +103,8 @@ def kinFit(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "FitJet.eta", fitData[1])
     events = set_ak_column(events, "FitJet.phi", fitData[2])
     events = set_ak_column(events, "FitJet.mass", fitData[3])
-    events = set_ak_column(events, "FitChi2", fitData[4]
+    events = set_ak_column(events, "FitChi2", fitData[4])
+
     return events,SelectionResult(
     steps={
         },
@@ -116,4 +117,4 @@ def kinFit(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
                    },
     )
 
-"""
+
