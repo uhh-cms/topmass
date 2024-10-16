@@ -26,21 +26,15 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 @producer(
     uses={
         # nano columns
-        "Jet.pt", "Bjet.pt", "LightJet.pt", "Jet.phi", "Bjet.phi",
+        "Jet.pt", "Bjet.pt", "LightJet*.pt", "Jet.phi", "Bjet.phi",
         "LightJet.phi", "Jet.eta", "Bjet.eta", "LightJet.eta",
         "Jet.mass", "VetoJet.pt", "Bjet.mass", "LightJet.mass",
-        "event", attach_coffea_behavior,
+        "event", attach_coffea_behavior, "HLT.*",
     },
     produces={
         # new columns
-        "ht", "n_jet", "n_bjet",
-        # "deltaR",
-        "deltaRb",
-        "MW1",
-        "MW2",
-        "Mt1",
-        "Mt2",
-        "chi2",
+        "ht", "n_jet", "n_bjet", "maxbtag", "secmaxbtag",
+        # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -57,80 +51,21 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         },
     }
     events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
-    events = set_ak_column(events, "ht", (ak.sum(events.Jet.pt, axis=1) + ak.sum(events.VetoJet.pt, axis=1)))
+    # events = set_ak_column(events, "ht", (ak.sum(events.Jet.pt, axis=1) + ak.sum(events.VetoJet.pt, axis=1)))
+    events = set_ak_column(events, "ht", (ak.sum(events.Jet.pt, axis=1)))
     events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
-    mwref = 80.4
-    mwsig = 12
-    mtref = 172.5
-    mtsig = 15
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    dr = lambda j1, j2: j1.delta_r(j2)
-    m = lambda j1, j2: (j1.add(j2)).mass
-    m3 = lambda j1, j2, j3: (j1.add(j2.add(j3))).mass
-    ljets = ak.combinations(events.LightJet, 4, axis=1)
-    bjets = ak.combinations(events.Bjet, 2, axis=1)
-    # Building combination light jet mass functions
-    def lpermutations(ljets):
-        j1, j2, j3, j4 = ljets
-        return ak.concatenate([ak.zip([j1, j2, j3, j4]), ak.zip([j1, j3, j2, j4]), ak.zip([j1, j4, j2, j3])], axis=1)
-
-    def bpermutations(bjets):
-        j1, j2 = bjets
-        return ak.concatenate([ak.zip([j1, j2]), ak.zip([j2, j1])], axis=1)
-
-    def sixjetcombinations(bjets, ljets):
-        return ak.cartesian([bjets, ljets], axis=1)
-
-    # def mw(j1, j2, j3, j4):
-    #     mw1 = m(j1, j2)
-    #     mw2 = m(j3, j4)
-    #     chi2 = ak.sum([(mw1 - mwref) ** 2, (mw2 - mwref) ** 2], axis=0)
-    #     bestc2 = ak.argmin(chi2, axis=1, keepdims=True)
-    #     return mw1[bestc2], mw2[bestc2]
-
-    def mt(sixjets):
-        b1, b2 = ak.unzip(ak.unzip(sixjets)[0])
-        j1, j2, j3, j4 = ak.unzip(ak.unzip(sixjets)[1])
-        mt1 = m3(b1, j1, j2)
-        mt2 = m3(b2, j3, j4)
-        mw1 = m(j1, j2)
-        mw2 = m(j3, j4)
-        chi2 = ak.sum([
-            ((mw1 - mwref) ** 2) / mwsig,
-            ((mw2 - mwref) ** 2) / mwsig,
-            ((mt1 - mtref) ** 2) / mtsig,
-            ((mt2 - mtref) ** 2) / mtsig],
-            axis=0,
-        )
-        bestc2 = ak.argmin(chi2, axis=1, keepdims=True)
-        return mt1[bestc2], mt2[bestc2], mw1[bestc2], mw2[bestc2], chi2[bestc2]
-
-    # events = set_ak_column(events, "deltaR", ak.min(dr(*ljets), axis=1))
-    events = set_ak_column(events, "deltaRb", ak.min(dr(*ak.unzip(bjets)), axis=1))
-    # Mass of W1
-    # import IPython
-    # IPython.embed()
-    events = set_ak_column(events, "Mt1", mt(sixjetcombinations(bpermutations(ak.unzip(bjets)),
-                                                                lpermutations(ak.unzip(ljets)),
-                                                                ))[0])
-    events = set_ak_column(events, "Mt2", mt(sixjetcombinations(bpermutations(ak.unzip(bjets)),
-                                                                lpermutations(ak.unzip(ljets)),
-                                                                ))[1])
-    events = set_ak_column(events, "MW1", mt(sixjetcombinations(bpermutations(ak.unzip(bjets)),
-                                                                lpermutations(ak.unzip(ljets)),
-                                                                ))[2])
-    events = set_ak_column(events, "MW2", mt(sixjetcombinations(bpermutations(ak.unzip(bjets)),
-                                                                lpermutations(ak.unzip(ljets)),
-                                                                ))[3])
-    events = set_ak_column(events, "chi2", mt(sixjetcombinations(bpermutations(ak.unzip(bjets)),
-                                                                 lpermutations(ak.unzip(ljets)),
-                                                                 ))[4])
     events = set_ak_column(
         events, "n_bjet",
         ak.sum((events.Jet.btagDeepFlavB >= wp_tight), axis=1),
         value_type=np.int32,
     )
-
+    events = set_ak_column(events, "maxbtag", (ak.max(events.Jet.btagDeepFlavB, axis=1)))
+    # Insert dummy value for one jet events
+    secmax = ak.sort(events.Jet.btagDeepFlavB, axis=1, ascending=False)
+    empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
+    events = set_ak_column(events, "secmaxbtag",(ak.concatenate([secmax, empty, empty], axis=1)[:,1]))
+   
     return events
 
 
@@ -191,6 +126,7 @@ def cutflow_features(
 )
 def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # features
+
     events = self[features](events, **kwargs)
 
     # category ids
@@ -208,3 +144,81 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[muon_weights](events, **kwargs)
 
     return events
+
+@producer(
+    produces={"trig_bits", "trig_bits_orth"},
+    channel=["tt_fh"],
+)
+def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    Produces column where each bin corresponds to a certain trigger
+    """
+    
+    arr = ak.singletons(np.zeros(len(events)))
+    arr_orth = ak.singletons(np.zeros(len(events)))
+
+    id = 1
+
+
+    for channel in self.channel:
+        ref_trig = self.config_inst.x.ref_trigger[channel]
+        for trigger in self.config_inst.x.trigger[channel]:
+            trig_passed = ak.singletons(ak.flatten(ak.nan_to_none(ak.unzip(ak.where(events.HLT[trigger], id, np.float64(np.nan))))))
+            trig_passed_orth = ak.flatten(ak.singletons(ak.nan_to_none(ak.where(
+                ak.singletons(ak.flatten(ak.unzip(events.HLT[ref_trig]))) &
+                ak.singletons(ak.flatten(ak.unzip(events.HLT[trigger]))),
+                id,
+                np.float64(np.nan)
+                ))),
+                axis=1)
+            # trig_passed_orth = ak.singletons(ak.nan_to_none(ak.where((events.HLT[ref_trig] & events.HLT[trigger]), id, np.float64(np.nan))))
+            arr = ak.concatenate([arr, trig_passed], axis=1)
+            arr_orth = ak.concatenate([arr_orth, trig_passed_orth], axis=1)
+            id += 1
+
+
+    """ for channel, trig_cols in self.config_inst.x.trigger.items():
+        for trig_col in trig_cols: 
+            trig_passed = ak.singletons(ak.nan_to_none(ak.where(events.HLT[trig_col], id, np.float64(np.nan))))
+            trig_passed_orth = ak.singletons(ak.nan_to_none(ak.where((events.HLT[ref_trig] & events.HLT[trig_col]), id, np.float64(np.nan))))
+            arr = ak.concatenate([arr, trig_passed], axis=1)
+            arr_orth = ak.concatenate([arr_orth, trig_passed_orth], axis=1)
+            id += 1 """
+
+    events = set_ak_column(events, "trig_bits", arr)
+    events = set_ak_column(events, "trig_bits_orth", arr_orth)
+
+    return events
+
+@trigger_prod.init 
+def trigger_prod_init(self: Producer) -> None:
+
+    for channel in self.channel:
+        for trigger in self.config_inst.x.trigger[channel]:
+            self.uses.add(f"HLT.{trigger}")
+        self.uses.add(f"HLT{self.config_inst.x.ref_trigger[channel]}")
+
+# producers for single channels
+tt_fh_trigger_prod = trigger_prod.derive("tt_fh_trigger_prod", cls_dict={"channel": ["tt_fh"]})
+
+# Trigger categories
+#
+# @producer(
+#     uses=category_ids,
+#     produces=category_ids,
+#     version=1,
+# )
+# def trig_cats(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+#     """
+#     Reproduces the category ids to include the trigger categories
+#     """
+
+#     events = self[category_ids](events, **kwargs)
+
+#     return events
+
+
+# @trig_cats.init
+# def trig_cats_init(self: Producer) -> None:
+
+#     add_trigger_categories(self.config_inst)
