@@ -6,18 +6,16 @@ Examples for custom plot functions.
 
 from __future__ import annotations
 
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 
 import law
 
 from columnflow.util import maybe_import
 from columnflow.plotting.plot_all import plot_all
 from columnflow.plotting.plot_util import (
-    prepare_plot_config,
     prepare_style_config,
     remove_residual_axis,
     apply_variable_settings,
-    apply_process_settings,
     apply_density_to_hists,
 )
 
@@ -30,13 +28,14 @@ od = maybe_import("order")
 
 logger = law.logger.get_logger(__name__)
 
-'''
+"""
 law run cf.PlotVariables1D --version v1
---processes tt --variables jet6_pt-trig_bits             
+--processes tt --variables jet6_pt-trig_bits
 --datasets tt_fh_powheg --selector trigger_sel
---producers example,trigger_prod           
---plot-function alljets.plotting.trigger_eff_plot.plot_efficiencies 
-'''
+--producers example,trigger_prod
+--plot-function alljets.plotting.trigger_eff_plot.plot_efficiencies
+"""
+
 
 def plot_efficiencies(
     hists: OrderedDict,
@@ -61,7 +60,6 @@ def plot_efficiencies(
 
     plot_config = OrderedDict()
 
-
     # calculate efficiencies
     eff_bin = int(kwargs.get("bin_sel", 0))
 
@@ -72,12 +70,12 @@ def plot_efficiencies(
 
     if (len(list(hists.keys())) > 2):
         logger.warning(
-            "More than two input processes, only two are considered"
-        ) 
+            "More than two input processes, only two are considered",
+        )
 
     trigger_ref = np.array(config_inst.x.ref_trigger["tt_fh"])
     triggers = np.array(config_inst.x.trigger["tt_fh"])
-    trigger_names = np.hstack((trigger_ref,triggers))
+    trigger_names = np.hstack((trigger_ref, triggers))
 
     # for i in range(len(trigger_names)):
     #     trigger_names[i] = trigger_names[i].replace("PF","")
@@ -93,13 +91,13 @@ def plot_efficiencies(
         trigger_names[eff_bin] = trig_alias
 
     # for updating labels of individual selector steps
-    myhist_0 = hists[list(hists.keys())[0]] #WONG: what if multiple processes?
+    myhist_0 = hists[list(hists.keys())[0]]
     myhist_1 = hists[list(hists.keys())[1]]
 
     norm_hist_0 = np.array(myhist_0[:, 0].values())
     norm_hist_1 = np.array(myhist_1[:, 0].values())
 
-    plot_config[f"hist_0"] = {
+    plot_config["hist_0"] = {
         "method": "draw_efficiency",
         "ratio_method": "draw_hist",
         "hist": myhist_0[:, eff_bin],
@@ -111,12 +109,12 @@ def plot_efficiencies(
         "ratio_kwargs": {
             "color": "#5790fc",
             # "linestyle": "none",
-            "norm": (myhist_1[:, eff_bin].values()*norm_hist_0)/norm_hist_1,
-            "histtype":"errorbar",
+            "norm": (myhist_1[:, eff_bin].values() * norm_hist_0) / norm_hist_1,
+            "histtype": "errorbar",
         },
     }
 
-    plot_config[f"hist_1"] = {
+    plot_config["hist_1"] = {
         "method": "draw_efficiency",
         "hist": myhist_1[:, eff_bin],
         "kwargs": {
@@ -145,7 +143,7 @@ def plot_efficiencies(
     default_style_config["legend_cfg"]["ncol"] = 2
     default_style_config["legend_cfg"]["title_fontsize"] = 17
     default_style_config["legend_cfg"]["fontsize"] = 15
-    default_style_config["rax_cfg"]["ylim"] = (0.61,1.39)
+    default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
     kwargs["skip_ratio"] = False
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)

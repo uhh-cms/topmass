@@ -189,6 +189,14 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"Jet 6 $p_{T}$",
     )
     cfg.add_variable(
+        name="jet6_pt_1",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=[30, 60, 1000],
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    cfg.add_variable(
         name="jet6_eta",
         expression="Jet.eta[:,5]",
         null_value=EMPTY_FLOAT,
@@ -205,7 +213,7 @@ def add_variables(cfg: od.Config) -> None:
     cfg.add_variable(
         name="ht",
         expression="ht",
-        binning=(60, 0, 2000.0),
+        binning=(20, 0, 2000.0),
         unit="GeV",
         x_title="$H_T$",
     )
@@ -309,7 +317,7 @@ def add_variables(cfg: od.Config) -> None:
         name="jets_btag",
         expression="Jet.btagDeepFlavB",
         null_value=EMPTY_FLOAT,
-        binning=(40,0,1),
+        binning=(40, 0, 1),
         x_title=r"btag scores",
     )
     cfg.add_variable(

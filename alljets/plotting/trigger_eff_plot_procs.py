@@ -6,18 +6,16 @@ Examples for custom plot functions.
 
 from __future__ import annotations
 
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 
 import law
 
 from columnflow.util import maybe_import
 from columnflow.plotting.plot_all import plot_all
 from columnflow.plotting.plot_util import (
-    prepare_plot_config,
     prepare_style_config,
     remove_residual_axis,
     apply_variable_settings,
-    apply_process_settings,
     apply_density_to_hists,
 )
 
@@ -30,13 +28,14 @@ od = maybe_import("order")
 
 logger = law.logger.get_logger(__name__)
 
-'''
+"""
 law run cf.PlotVariables1D --version v1
---processes tt --variables jet6_pt-trig_bits             
+--processes tt --variables jet6_pt-trig_bits
 --datasets tt_fh_powheg --selector trigger_sel
---producers example,trigger_prod           
---plot-function alljets.plotting.trigger_eff_plot.plot_efficiencies 
-'''
+--producers example,trigger_prod
+--plot-function alljets.plotting.trigger_eff_plot.plot_efficiencies
+"""
+
 
 def plot_efficiencies(
     hists: OrderedDict,
@@ -64,11 +63,12 @@ def plot_efficiencies(
     # for updating labels of individual selector steps
     for j in range(len(list(hists.keys()))):
         myhist = hists[list(hists.keys())[j]]
- 
+
         norm_hist = np.array(myhist[:, 0].values())
 
         for i in range(myhist.axes[1].size):
-            if i == 0: continue 
+            if i == 0:
+                continue
 
             plot_config[f"hist_{j,i}"] = {
                 "method": "draw_efficiency",

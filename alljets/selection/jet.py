@@ -15,7 +15,7 @@ ak = maybe_import("awkward")
 
 @selector(
     uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB", "Jet.jetId",
-          "Jet.puId", "Jet.phi", "Jet.mass", attach_coffea_behavior,
+          "Jet.puId", "Jet.phi", "Jet.mass", attach_coffea_behavior, "HLT.*",
           # "check_trigger",
           },
     produces={"MW1", "MW2", "Mt1", "Mt2", "chi2",
@@ -30,9 +30,10 @@ def jet_selection(
 ) -> tuple[ak.Array, SelectionResult]:
     # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
     EMPTY_FLOAT = -99999.0
+    ht1_sel = (ak.sum(events.Jet.pt, axis=1) >= 1)
     ht_sel = (ak.sum(events.Jet.pt, axis=1) >= 450)
-    jet_mask = ( (abs(events.Jet.eta) < 2.4))
-    jet_mask2 = (jet_mask & (events.Jet.pt >= 40.0))
+    jet_mask = ((abs(events.Jet.eta) < 2.6))
+    jet_mask2 = ((abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 40.0))
     jet_sel = ak.sum(jet_mask2, axis=1) >= 6
     veto_jet = ~jet_mask
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
@@ -43,9 +44,7 @@ def jet_selection(
     bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2) &
                 (ak.sum(jet_mask2[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1))
                 )
-    sixjets_sel = (bjet_sel &
-                (ak.sum(light_jet, axis=1) >= 4)
-                )
+    sixjets_sel = (bjet_sel & (ak.sum(light_jet, axis=1) >= 4))
     # Trigger selection step is skipped for QCD MC, which has no Trigger columns
     if not self.dataset_inst.name.startswith("qcd"):
         ones = ak.ones_like(jet_sel)
@@ -65,6 +64,7 @@ def jet_selection(
     ljets = ak.combinations((events.Jet[light_jet])[sixjets_sel], 4, axis=1)
     bjets = ak.combinations((events.Jet[bjet_mask])[sixjets_sel], 2, axis=1)
     # Building combination light jet mass functions
+
     def lpermutations(ljets):
         j1, j2, j3, j4 = ljets
         return ak.concatenate([ak.zip([j1, j2, j3, j4]), ak.zip([j1, j3, j2, j4]), ak.zip([j1, j4, j2, j3])], axis=1)
@@ -87,8 +87,6 @@ def jet_selection(
         chi2 = ak.sum([
             ((mw1 - mwref) ** 2) / mwsig ** 2,
             ((mw2 - mwref) ** 2) / mwsig ** 2,
-            # ((mt1 - mtref) ** 2) / mtsig,
-            # ((mt2 - mtref) ** 2) / mtsig],
             ((mt1 - mt2) ** 2) / mtsig ** 2],
             axis=0,
         )
@@ -118,9 +116,9 @@ def jet_selection(
     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
     return events, SelectionResult(
         steps={
+            "All": ht1_sel,
             "BaseTrigger": jet_base_trigger_sel,
             # "AltTrigger": alt_jet_trigger_sel,
-            # "VerifyAltTrigger": verify_jet_trigger,
             "Trigger": jet_trigger_sel,
             "HT": ht_sel,
             "jet": jet_sel,
@@ -174,7 +172,7 @@ def jet_selection_init(self: Selector) -> None:
         self.jet_base_trigger = {
             2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
             # or "HLT_PFHT450_SixJet40_BTagCSV_p056")
-            2017: "Mu50",
+            2017: "PFHT350",
             # Base Trigger: "PFHT370"
             2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
             # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
@@ -192,4 +190,3 @@ def jet_selection_init(self: Selector) -> None:
             # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
         }[year]
         self.uses.add(f"HLT.{self.alt_jet_trigger}")
-

@@ -248,11 +248,14 @@ def trigger_eff(
     results += jet_results
 
     # combined event selection after all steps
-    results.event = (results.steps.BaseTrigger &
-                    results.steps.SixJets &
-                    results.steps.jet &
-                    results.steps.BTag &
-                    results.steps.HT)
+    results.event = (
+        results.steps.All &
+        results.steps.BaseTrigger &
+        results.steps.BTag
+    )
+    # results.steps.SixJets &
+    # results.steps.jet &
+    # results.steps.HT
 
     # create process ids
     events = self[process_ids](events, **kwargs)
@@ -375,12 +378,11 @@ def trigger_eff2(
     results += jet_results
 
     # combined event selection after all steps
-    results.event = (results.steps.BaseTrigger &
-                    results.steps.Trigger &
-                    # results.steps.SixJets &
-                    # results.steps.jet
-                    results.steps.BTag &
-                    results.steps.HT)
+    results.event = (
+        # results.steps.SixJets &
+        # results.steps.jet
+        results.steps.BTag &
+        results.steps.HT)
 
     # create process ids
     events = self[process_ids](events, **kwargs)

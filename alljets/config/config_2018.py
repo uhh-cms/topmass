@@ -4,15 +4,15 @@
 Configuration of the topmass_alljets analysis.
 """
 
-import os
+import os # noqa
 import functools
 
-import law
-import order as od
+import law # noqa
+import order as od # noqa
 from scinum import Number
 
 from columnflow.util import DotDict, maybe_import
-from columnflow.config_util import (
+from columnflow.config_util import ( # noqa
     get_root_processes_from_campaign, add_shift_aliases, get_shifts_from_sources, add_category,
     verify_config_processes,
 )
@@ -38,7 +38,7 @@ campaign = campaign_run2_2018_nano_v9.copy()
 procs = get_root_processes_from_campaign(campaign)
 
 # create a config by passing the campaign, so id and name will be identical
-cfg = ana.add_config(campaign)
+cfg = ana.add_config(campaign) # noqa
 
 # gather campaign data
 year = campaign.x.year

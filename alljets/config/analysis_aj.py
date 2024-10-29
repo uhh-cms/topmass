@@ -126,9 +126,9 @@ for dataset_name in dataset_names:
     # add the dataset
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
-    # # for testing purposes, limit the number of files to 2
-    for info in dataset.info.values():
-       info.n_files = min(info.n_files, 2)
+    # for testing purposes, limit the number of files to 2
+    # for info in dataset.info.values():
+    #     info.n_files = min(info.n_files, 2)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -336,36 +336,36 @@ cfg.x.external_files = DotDict.wrap({
 })
 
 cfg.x.trigger = {
-    "tt_fh": ["PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2"]
+    "tt_fh": ["PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2"],
 }
-cfg.x.ref_trigger= {
-    "tt_fh": ["IsoMu24"]
-}
-# Mu50
-'''
-if year == 2017:
-    cfg.x.trigger = {
-        "tt_fh": ["PFHT380_SixPFJet32_DoublePFBTagCSV_2p2"]
-    }
-    cfg.x.ref_trigger= {
-        "tt_fh": ["PFHT370"]
-    }
-elif year == 2018:
-    cfg.x.trigger = {
-        "tt_fh": ["PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94"]
-    }
-    cfg.x.ref_trigger= {
-        "tt_fh": ["PFHT370"]
-    }
-elif year == 2016:
-    cfg.x.trigger = {
-        "tt_fh": ["PFHT400_SixJet30_DoubleBTagCSV_p056"]
-    }
-    cfg.x.ref_trigger= {
-        "tt_fh": ["PFHT370"]
-    }
-'''
 
+cfg.x.ref_trigger = {
+    "tt_fh": ["PFHT350"],
+}
+
+# IsoMu24,Mu50
+#
+# if year == 2017:
+#     cfg.x.trigger = {
+#         "tt_fh": ["PFHT380_SixPFJet32_DoublePFBTagCSV_2p2"]
+#     }
+#     cfg.x.ref_trigger= {
+#         "tt_fh": ["PFHT370"]
+#     }
+# elif year == 2018:
+#     cfg.x.trigger = {
+#         "tt_fh": ["PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94"]
+#     }
+#     cfg.x.ref_trigger= {
+#         "tt_fh": ["PFHT370"]
+#     }
+# elif year == 2016:
+#     cfg.x.trigger = {
+#         "tt_fh": ["PFHT400_SixJet30_DoubleBTagCSV_p056"]
+#     }
+#     cfg.x.ref_trigger= {
+#         "tt_fh": ["PFHT370"]
+#     }
 
 # target file size after MergeReducedEvents in MB
 cfg.x.reduced_file_size = 512.0
@@ -382,7 +382,8 @@ cfg.x.keep_columns = DotDict.wrap({
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
         "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
-        "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24",
+        "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350",
         # columns added during selection
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight*",
         "murmuf_weight*", "pu_weight*", "btag_weight*",

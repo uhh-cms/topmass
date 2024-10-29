@@ -101,9 +101,6 @@ def plot_efficiencies2d(
 
     eff_2d = h2d_trig / hh2d_all
 
-    import IPython
-    IPython.embed()
-
     if np.any(eff_2d > 1):
         logger.warning(
             "Some efficiencies are greater than 1",
@@ -112,7 +109,7 @@ def plot_efficiencies2d(
         logger.warning(
             "Some efficiencies are less than 0",
         )
-    eff_2d[(eff_2d>1)] = np.full_like(eff_2d[(eff_2d>1)], float("nan"))
+    eff_2d[(eff_2d > 1)] = np.full_like(eff_2d[(eff_2d > 1)], float("nan"))
 
     # either plot the efficiency directly or as a contour plot over a background distribution
     if kwargs.get("contour", False):
