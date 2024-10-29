@@ -34,3 +34,4 @@ data
 .law
 .setups
 topmass_alljets.code-workspace
+.__afs*
