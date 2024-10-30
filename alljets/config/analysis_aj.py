@@ -343,7 +343,7 @@ cfg.x.ref_trigger = {
     "tt_fh": ["PFHT350"],
 }
 
-# IsoMu24,Mu50
+# IsoMu24, Mu50, for MC with all events: Physics
 #
 # if year == 2017:
 #     cfg.x.trigger = {
@@ -383,7 +383,7 @@ cfg.x.keep_columns = DotDict.wrap({
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
         "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
         "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350",
+        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350", "HLT.Physics",
         # columns added during selection
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight*",
         "murmuf_weight*", "pu_weight*", "btag_weight*",
