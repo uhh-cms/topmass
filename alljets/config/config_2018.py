@@ -4,77 +4,41 @@
 Configuration of the topmass_alljets analysis.
 """
 
-import os
+import os # noqa
 import functools
 
-import law
-import order as od
+import law # noqa
+import order as od # noqa
 from scinum import Number
 
 from columnflow.util import DotDict, maybe_import
-from columnflow.config_util import (
-    get_root_processes_from_campaign, add_shift_aliases, get_shifts_from_sources,
+from columnflow.config_util import ( # noqa
+    get_root_processes_from_campaign, add_shift_aliases, get_shifts_from_sources, add_category,
     verify_config_processes,
 )
 
 ak = maybe_import("awkward")
 
-
-#
-# the main analysis object
-#
-
-analysis_aj = ana = od.Analysis(
-    name="analysis_aj",
-    id=1,
-)
-
-# analysis-global versions
-# (see cfg.x.versions below for more info)
-ana.x.versions = {}
-
-# files of bash sandboxes that might be required by remote tasks
-# (used in cf.HTCondorWorkflow)
-ana.x.bash_sandboxes = [
-    "$CF_BASE/sandboxes/cf.sh",
-    law.config.get("analysis", "default_columnar_sandbox"),
-]
-
-# files of cmssw sandboxes that might be required by remote tasks
-# (used in cf.HTCondorWorkflow)
-ana.x.cmssw_sandboxes = [
-    # "$CF_BASE/sandboxes/cmssw_default.sh",
-]
-
-# clear the list when cmssw bundling is disabled
-if not law.util.flag_to_bool(os.getenv("AJ_BUNDLE_CMSSW", "1")):
-    del ana.x.cmssw_sandboxes[:]
-
-# config groups for conveniently looping over certain configs
-# (used in wrapper_factory)
-ana.x.config_groups = {}
-
-
 #
 # setup configs
 #
 
-# an example config is setup below, based on cms NanoAOD v9 for Run2 2017, focussing on
+# an example config is setup below, based on cms NanoAOD v9 for Run2 2018, focussing on
 # ttbar and single top MCs, plus single muon data
 # update this config or add additional ones to accomodate the needs of your analysis
 
-from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
+from cmsdb.campaigns.run2_2018_nano_v9 import campaign_run2_2018_nano_v9
 
 
 # copy the campaign
 # (creates copies of all linked datasets, processes, etc. to allow for encapsulated customization)
-campaign = campaign_run2_2017_nano_v9.copy()
+campaign = campaign_run2_2018_nano_v9.copy()
 
 # get all root processes
 procs = get_root_processes_from_campaign(campaign)
 
 # create a config by passing the campaign, so id and name will be identical
-cfg = ana.add_config(campaign)
+cfg = ana.add_config(campaign) # noqa
 
 # gather campaign data
 year = campaign.x.year
@@ -97,58 +61,30 @@ for process_name in process_names:
 # add datasets we need to study
 dataset_names = [
     # data
-    # Trigger does not work for set B
-    # "data_jetht_b",
+    "data_jetht_a"
+    "data_jetht_b",
     "data_jetht_c",
     "data_jetht_d",
-    "data_jetht_e",
-    "data_jetht_f",
     # backgrounds
-    # "tt_sl_powheg",
-    # "tt_dl_powheg",
-    # "st_tchannel_t_powheg",
-    # "st_tchannel_tbar_powheg",
-    # "st_twchannel_t_powheg",
-    # "st_twchannel_tbar_powheg",
     # "qcd_ht50to100_madgraph",
     # "qcd_ht100to200_madgraph",
-    "qcd_ht200to300_madgraph",
+    # "qcd_ht200to300_madgraph",
     "qcd_ht300to500_madgraph",
     "qcd_ht500to700_madgraph",
     "qcd_ht700to1000_madgraph",
     "qcd_ht1000to1500_madgraph",
     "qcd_ht1500to2000_madgraph",
-<<<<<<< HEAD
-  #  "qcd_ht2000_madgraph",
-    # These are not in 2017 nano v9:
-    # "st_schannel_lep_amcatnlo",
-    # "st_schannel_had_amcatnlo",
-    # "dy_lep_pt50To100_amcatnlo",
-    # "dy_lep_pt100To250_amcatnlo",
-    # "dy_lep_pt250To400_amcatnlo",
-    # "dy_lep_pt400To650_amcatnlo",
-    # "dy_lep_pt650_amcatnlo",
-=======
     "qcd_ht2000_madgraph",
->>>>>>> refs/remotes/origin/master
     # signals
-    "tt_fh_powheg",
+    "tt_fh",
 ]
 for dataset_name in dataset_names:
     # add the dataset
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-<<<<<<< HEAD
     for info in dataset.info.values():
         info.n_files = min(info.n_files, 2)
-=======
-    # for info in dataset.info.values():
-    #     info.n_files = min(info.n_files, 2)
-    # # Add has_top tag to tt events
-    if dataset_name.startswith("tt_"):
-        dataset.add_tag("has_top")
->>>>>>> refs/remotes/origin/master
 
 # verify that the root process of all datasets is part of any of the registered processes
 verify_config_processes(cfg, warn=True)
@@ -198,28 +134,27 @@ cfg.x.get_dataset_lfns_sandbox = None
 cfg.x.validate_dataset_lfns = False
 
 # lumi values in inverse pb
-# https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2?rev=2#Combination_and_correlations: 41480
-# Luminosity by trigger: PFHT380_SixPFJet32_DoublePFBTagCSV_2p2: 36674
-# PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2: 27121
-cfg.x.luminosity = Number(27121, {
-    "lumi_13TeV_2017": 0.02j,
+# https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2?rev=2#Combination_and_correlations: 67860
+# PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94: 42145
+cfg.x.luminosity = Number(42145, {
+    "lumi_13TeV_2018": 0.02j,
     "lumi_13TeV_1718": 0.006j,
     "lumi_13TeV_correlated": 0.009j,
 })
 
 # b-tag working points
-# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
+# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18?rev=15
 cfg.x.btag_working_points = DotDict.wrap(
     {
         "deepjet": {
-            "loose": 0.0532,
-            "medium": 0.3040,
-            "tight": 0.7476,
+            "loose": 0.0490,
+            "medium": 0.2783,
+            "tight": 0.7100,
         },
         "deepcsv": {
-            "loose": 0.1355,
-            "medium": 0.4506,
-            "tight": 0.7738,
+            "loose": 0.1208,
+            "medium": 0.4168,
+            "tight": 0.7665,
         },
     },
 )
@@ -327,12 +262,12 @@ add_shift_aliases(
 
 # external files
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-849c6a6e"
-year = "2017"
+# year = "2018"
 corr_postfix = ""
 cfg.x.external_files = DotDict.wrap({
     # lumi files
     "lumi": {
-        "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
+        "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_294927-306462_13TeV_UL2018_Collisions18_GoldenJSON.txt", "v1"),  # noqa
         "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
     },
 
@@ -352,38 +287,6 @@ cfg.x.external_files = DotDict.wrap({
     "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
 })
 
-cfg.x.trigger = {
-    "tt_fh": ["PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2"],
-}
-
-cfg.x.ref_trigger = {
-    "tt_fh": ["PFHT350"],
-}
-
-# IsoMu24,Mu50
-#
-# if year == 2017:
-#     cfg.x.trigger = {
-#         "tt_fh": ["PFHT380_SixPFJet32_DoublePFBTagCSV_2p2"]
-#     }
-#     cfg.x.ref_trigger= {
-#         "tt_fh": ["PFHT370"]
-#     }
-# elif year == 2018:
-#     cfg.x.trigger = {
-#         "tt_fh": ["PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94"]
-#     }
-#     cfg.x.ref_trigger= {
-#         "tt_fh": ["PFHT370"]
-#     }
-# elif year == 2016:
-#     cfg.x.trigger = {
-#         "tt_fh": ["PFHT400_SixJet30_DoubleBTagCSV_p056"]
-#     }
-#     cfg.x.ref_trigger= {
-#         "tt_fh": ["PFHT370"]
-#     }
-
 # target file size after MergeReducedEvents in MB
 cfg.x.reduced_file_size = 512.0
 
@@ -393,19 +296,12 @@ cfg.x.keep_columns = DotDict.wrap({
         # general event info
         "run", "luminosityBlock", "event",
         # object info
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Bjet.*", "VetoJet.*", "LightJet.*", "JetsByBTag.*",
-        # "EventJet.*",
+        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Bjet.*", "VetoJet.*", "LightJet.*",
         "Jet.btagDeepFlavB", "Jet.hadronFlavour",
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
-<<<<<<< HEAD
-        "PV.npvs",
-        "FitJet.pt", "FitJet.eta", "FitJet.phi", "FitJet.mass", "fitChi2",
-=======
         "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
-        "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350",
->>>>>>> refs/remotes/origin/master
+        "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb",
         # columns added during selection
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight*",
         "murmuf_weight*", "pu_weight*", "btag_weight*",
@@ -435,14 +331,3 @@ cfg.x.versions = {
     # "cf.SelectEvents": (lambda cls, inst, params: "prod1" if params.get("selector") == "default" else "dev1"),
     # ...
 }
-
-# channels
-# (just one for now)
-cfg.add_channel(name="mutau", id=1)
-
-# add categories using the "add_category" tool which adds auto-generated ids
-from alljets.config.categories import add_categories
-add_categories(cfg)
-# add variables
-from alljets.config.variables import add_variables
-add_variables(cfg)
