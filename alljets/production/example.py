@@ -52,7 +52,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     }
     events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
     # events = set_ak_column(events, "ht", (ak.sum(events.Jet.pt, axis=1) + ak.sum(events.VetoJet.pt, axis=1)))
-    events = set_ak_column(events, "ht_old", (ak.sum(events.Jet.pt, axis=1)))
+    events = set_ak_column(events, "ht_old", (ak.sum(events.Jet[(abs(events.Jet.eta) < 2.4)].pt, axis=1)))
     events = set_ak_column(events, "ht", (ak.sum(events.Jet[(events.Jet.pt >= 30.0)].pt, axis=1)))
     events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32)
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
