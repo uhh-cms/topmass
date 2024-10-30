@@ -16,6 +16,7 @@ from columnflow.production.cms.scale import murmuf_weights
 from columnflow.production.cms.btag import btag_weights
 from columnflow.util import maybe_import
 from alljets.selection.jet import jet_selection
+from alljets.selection.jet import kinFit
 
 from alljets.production.example import cutflow_features
 

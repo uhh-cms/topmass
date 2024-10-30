@@ -138,7 +138,7 @@ dataset_names = [
     "qcd_ht700to1000_madgraph",
     "qcd_ht1000to1500_madgraph",
     "qcd_ht1500to2000_madgraph",
-    "qcd_ht2000_madgraph",
+  #  "qcd_ht2000_madgraph",
     # These are not in 2017 nano v9:
     # "st_schannel_lep_amcatnlo",
     # "st_schannel_had_amcatnlo",
@@ -155,8 +155,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-     for info in dataset.info.values():
-         info.n_files = min(info.n_files, 2)
+    for info in dataset.info.values():
+        info.n_files = min(info.n_files, 2)
 
 # verify that the root process of all datasets is part of any of the registered processes
 verify_config_processes(cfg, warn=True)
