@@ -278,7 +278,7 @@ def jet_selection_init(self: Selector) -> None:
             2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
             # or "HLT_PFHT450_SixJet40_BTagCSV_p056")
             2017: "PFHT350",
-            # Base Trigger: "PFHT370"
+            # Base Trigger: "PFHT370", "PFHT350", "IsoMu24", "Physics"
             2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
             # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
         }[year]

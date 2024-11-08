@@ -220,7 +220,7 @@ def add_variables(cfg: od.Config) -> None:
     cfg.add_variable(
         name="ht1",
         expression="ht",
-        binning=(3, 380, 1130.0),
+        binning=[380, 600, 1000, 9999],
         unit="GeV",
         x_title="$H_T$",
     )
@@ -299,7 +299,7 @@ def add_variables(cfg: od.Config) -> None:
     )
     cfg.add_variable(
         name="bjet1_pt",
-        expression="JetsByTag.pt[:,0]",
+        expression="Bjet.pt[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(15, 0.0, 300.0),
         unit="GeV",
@@ -307,11 +307,91 @@ def add_variables(cfg: od.Config) -> None:
     )
     cfg.add_variable(
         name="bjet2_pt",
+        expression="Bjet.pt[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 0.0, 300.0),
+        unit="GeV",
+        x_title=r"BJet 2 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="bjetbytag1_pt",
+        expression="JetsByBTag.pt[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 0.0, 300.0),
+        unit="GeV",
+        x_title=r"BJet 1 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="bjetbytag2_pt",
         expression="JetsByBTag.pt[:,1]",
         null_value=EMPTY_FLOAT,
         binning=(15, 0.0, 300.0),
         unit="GeV",
         x_title=r"BJet 2 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="bjet1_phi",
+        expression="Bjet.phi[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, -3.2, 3.2),
+        unit="GeV",
+        x_title=r"BJet 1 $\phi$",
+    )
+    cfg.add_variable(
+        name="bjet2_phi",
+        expression="Bjet.phi[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, -3.2, 3.2),
+        unit="GeV",
+        x_title=r"BJet 2 $\phi$",
+    )
+    cfg.add_variable(
+        name="bjetbytag1_phi",
+        expression="JetsByBTag.phi[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, -3.2, 3.2),
+        unit="GeV",
+        x_title=r"Highest B-Tag Jet $\phi$",
+    )
+    cfg.add_variable(
+        name="bjetbytag2_phi",
+        expression="JetsByBTag.phi[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, -3.2, 3.2),
+        unit="GeV",
+        x_title=r"Second highest B-Tag Jet $\phi$",
+    )
+    cfg.add_variable(
+        name="bjet1_eta",
+        expression="Bjet.eta[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        unit="GeV",
+        x_title=r"BJet 1 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="bjet2_eta",
+        expression="Bjet.eta[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        unit="GeV",
+        x_title=r"BJet 2 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="bjetbytag1_eta",
+        expression="JetsByBTag.eta[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        unit="GeV",
+        x_title=r"Highest B-Tag Jet $\eta$",
+    )
+    cfg.add_variable(
+        name="bjetbytag2_eta",
+        expression="JetsByBTag.eta[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        unit="GeV",
+        x_title=r"Second highest B-Tag Jet $\eta$",
     )
     cfg.add_variable(
         name="jets_btag",
