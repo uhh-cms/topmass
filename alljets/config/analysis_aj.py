@@ -118,7 +118,6 @@ dataset_names = [
     "qcd_ht700to1000_madgraph",
     "qcd_ht1000to1500_madgraph",
     "qcd_ht1500to2000_madgraph",
-<<<<<<< HEAD
   #  "qcd_ht2000_madgraph",
     # These are not in 2017 nano v9:
     # "st_schannel_lep_amcatnlo",
@@ -128,9 +127,6 @@ dataset_names = [
     # "dy_lep_pt250To400_amcatnlo",
     # "dy_lep_pt400To650_amcatnlo",
     # "dy_lep_pt650_amcatnlo",
-=======
-    "qcd_ht2000_madgraph",
->>>>>>> refs/remotes/origin/master
     # signals
     "tt_fh_powheg",
 ]
@@ -139,16 +135,13 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-<<<<<<< HEAD
     for info in dataset.info.values():
         info.n_files = min(info.n_files, 2)
-=======
     # for info in dataset.info.values():
     #     info.n_files = min(info.n_files, 2)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
->>>>>>> refs/remotes/origin/master
 
 # verify that the root process of all datasets is part of any of the registered processes
 verify_config_processes(cfg, warn=True)
@@ -398,14 +391,11 @@ cfg.x.keep_columns = DotDict.wrap({
         "Jet.btagDeepFlavB", "Jet.hadronFlavour",
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
-<<<<<<< HEAD
         "PV.npvs",
         "FitJet.pt", "FitJet.eta", "FitJet.phi", "FitJet.mass", "fitChi2",
-=======
         "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
         "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350",
->>>>>>> refs/remotes/origin/master
         # columns added during selection
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight*",
         "murmuf_weight*", "pu_weight*", "btag_weight*",
