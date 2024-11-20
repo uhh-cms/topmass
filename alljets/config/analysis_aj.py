@@ -118,7 +118,7 @@ dataset_names = [
     "qcd_ht700to1000_madgraph",
     "qcd_ht1000to1500_madgraph",
     "qcd_ht1500to2000_madgraph",
-    "qcd_ht2000_madgraph",
+    "qcd_ht2000toinf_madgraph",
     # signals
     "tt_fh_powheg",
 ]
@@ -127,8 +127,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-    # for info in dataset.info.values():
-    #     info.n_files = min(info.n_files, 2)
+    for info in dataset.info.values():
+        info.n_files = min(info.n_files, 1)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -343,7 +343,7 @@ cfg.x.ref_trigger = {
     "tt_fh": ["PFHT350"],
 }
 
-# IsoMu24, Mu50, for MC with all events: Physics
+# IsoMu24, Mu50, PFHT350 for MC with all events: Physics
 #
 # if year == 2017:
 #     cfg.x.trigger = {
@@ -384,9 +384,10 @@ cfg.x.keep_columns = DotDict.wrap({
         "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
         "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350", "HLT.Physics",
+        "HLT.PFHT1050", "HLT.PFHT890",
         # columns added during selection
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight*",
-        "murmuf_weight*", "pu_weight*", "btag_weight*",
+        "murmuf_weight*", "pu_weight*", "btag_weight*", "combination_type", "R2b4q", "trig_ht",
     },
     "cf.MergeSelectionMasks": {
         "normalization_weight", "process_id", "category_ids", "cutflow.*",

@@ -225,6 +225,13 @@ def add_variables(cfg: od.Config) -> None:
         x_title="$H_T$",
     )
     cfg.add_variable(
+        name="trig_ht",
+        expression="trig_ht",
+        binning=(20, 0, 2000.0),
+        unit="GeV",
+        x_title="$H_T$",
+    )
+    cfg.add_variable(
         name="nPV",
         expression="PV.npvs",
         null_value=EMPTY_FLOAT,
@@ -455,6 +462,20 @@ def add_variables(cfg: od.Config) -> None:
         null_value=EMPTY_FLOAT,
         binning=(40, 0, 1),
         x_title=r"Jet 6 bTag",
+    )
+    cfg.add_variable(
+        name="combination_type",
+        expression="combination_type",
+        null_value=EMPTY_FLOAT,
+        binning=(4, -1.5, 2.5),
+        x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
+    )
+    cfg.add_variable(
+        name="R2b4q",
+        expression="R2b4q",
+        null_value=EMPTY_FLOAT,
+        binning=(30, 0, 3),
+        x_title=r"$R_{2b4q}$",
     )
     # weights
     cfg.add_variable(

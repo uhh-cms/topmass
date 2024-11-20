@@ -14,12 +14,13 @@ ak = maybe_import("awkward")
 
 
 @selector(
-    uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB", "Jet.jetId",
-          "Jet.puId", "Jet.phi", "Jet.mass", attach_coffea_behavior, "HLT.*",
-          # "check_trigger",
+    uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB",
+          "Jet.phi", "Jet.mass", attach_coffea_behavior, "HLT.*",
+          "gen_top_decay", "GenPart.*",
           },
+    # "Jet.jetId", "Jet.puId", "Jet.genJetIdx", "GenJet.*",
     produces={"MW1", "MW2", "Mt1", "Mt2", "chi2",
-              "deltaRb",
+              "deltaRb", "combination_type", "R2b4q",
               },
     jet_pt=None, jet_trigger=None, jet_base_trigger=None, alt_jet_trigger=None,
 )
@@ -29,7 +30,7 @@ def jet_selection(
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
-    EMPTY_FLOAT = -99999.0
+    EF = -99999.0  # define EMPTY_FLOAT
     ht1_sel = (ak.sum(events.Jet.pt, axis=1) >= 1)
     ht_sel = (ak.sum(events.Jet.pt, axis=1) >= 450)
     jet_mask = ((abs(events.Jet.eta) < 2.6))
@@ -87,18 +88,18 @@ def jet_selection(
         chi2 = ak.sum([
             ((mw1 - mwref) ** 2) / mwsig ** 2,
             ((mw2 - mwref) ** 2) / mwsig ** 2,
-            ((mt1 - mt2) ** 2) / mtsig ** 2],
+            ((mt1 - mt2) ** 2) / (2 * (mtsig ** 2))],
             axis=0,
         )
         if len(chi2) > 0:
             bestc2 = ak.argmin(chi2, axis=1, keepdims=True)
-            return mt1[bestc2], mt2[bestc2], mw1[bestc2], mw2[bestc2], drbb[bestc2], chi2[bestc2]
+            return mt1[bestc2], mt2[bestc2], mw1[bestc2], mw2[bestc2], drbb[bestc2], chi2[bestc2], bestc2, sixjets
         else:
-            return [[EMPTY_FLOAT]], [[EMPTY_FLOAT]], [[EMPTY_FLOAT]], [[EMPTY_FLOAT]], [[EMPTY_FLOAT]], [[EMPTY_FLOAT]]
+            return [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]]
 
     mt_result = mt(sixjetcombinations(bpermutations(ak.unzip(bjets)), lpermutations(ak.unzip(ljets))))
-    chi2_cut = 16
-    mt_result_filled = np.full((6, ak.num(events, axis=0)), EMPTY_FLOAT)
+    chi2_cut = 8
+    mt_result_filled = np.full((6, ak.num(events, axis=0)), EF)
     for i in range(6):
         (mt_result_filled[i])[sixjets_sel] = ak.flatten(mt_result[i])
 
@@ -111,6 +112,75 @@ def jet_selection(
     events = set_ak_column(events, "MW2", mt_result_filled[3])
     events = set_ak_column(events, "deltaRb", mt_result_filled[4])
     events = set_ak_column(events, "chi2", mt_result_filled[5])
+
+    def combinationtype(bestcomb, correctcomb):
+        b1, b2 = ak.unzip(ak.unzip(bestcomb)[0])
+        j1, j2, j3, j4 = ak.unzip(ak.unzip(bestcomb)[1])
+
+        b1cor = correctcomb[:, 0, 1]
+        q1cor = correctcomb[:, 0, 3]
+        q2cor = correctcomb[:, 0, 4]
+        b2cor = correctcomb[:, 1, 1]
+        q3cor = correctcomb[:, 1, 3]
+        q4cor = correctcomb[:, 1, 4]
+        drmax = 0.4
+        drb11, drb22, drq11 = (dr(b1, b1cor) < drmax), (dr(b2, b2cor) < drmax), (dr(j1, q1cor) < drmax)
+        drq22, drq33, drq44 = (dr(j2, q2cor) < drmax), (dr(j3, q3cor) < drmax), (dr(j4, q4cor) < drmax)
+        drq21, drq12 = (dr(j2, q1cor) < drmax), (dr(j1, q2cor) < drmax)
+        drq43, drq34 = (dr(j4, q3cor) < drmax), (dr(j3, q4cor) < drmax)
+        drb21, drb12, drq31 = (dr(b2, b1cor) < drmax), (dr(b1, b2cor) < drmax), (dr(j3, q1cor) < drmax)
+        drq42, drq13, drq24 = (dr(j4, q2cor) < drmax), (dr(j1, q3cor) < drmax), (dr(j2, q4cor) < drmax)
+        drq41, drq32 = (dr(j4, q1cor) < drmax), (dr(j3, q2cor) < drmax)
+        drq23, drq14 = (dr(j2, q3cor) < drmax), (dr(j1, q4cor) < drmax)
+        # b1b2: 1234 2134 1243 2143, b2b1: 3412 4312 3421 4321
+        drlist = [(drb11 & drb22 & drq11 & drq22 & drq33 & drq44),
+                  (drb11 & drb22 & drq21 & drq12 & drq33 & drq44),
+                  (drb11 & drb22 & drq11 & drq22 & drq43 & drq34),
+                  (drb11 & drb22 & drq21 & drq12 & drq43 & drq34),
+                  (drb21 & drb12 & drq31 & drq42 & drq13 & drq24),
+                  (drb21 & drb12 & drq41 & drq32 & drq13 & drq24),
+                  (drb21 & drb12 & drq31 & drq42 & drq23 & drq14),
+                  (drb21 & drb12 & drq41 & drq32 & drq23 & drq14),
+                  ]
+        # test if all jets are matched
+        matched = ak.all([
+            ak.any([drb11, drb12], axis=0),
+            ak.any([drb22, drb21], axis=0),
+            ak.any([drq11, drq12, drq13, drq14], axis=0),
+            ak.any([drq21, drq22, drq23, drq24], axis=0),
+            ak.any([drq31, drq32, drq33, drq34], axis=0),
+            ak.any([drq41, drq42, drq43, drq44], axis=0)], axis=0)
+        type = ak.flatten(matched) * 1 + ak.flatten(ak.any(drlist, axis=0))
+        return type
+
+    if self.dataset_inst.has_tag("has_top"):
+        type = np.full((1, ak.num(events, axis=0)), -1)
+        type_unfilled = combinationtype((mt_result[7])[mt_result[6]], events.gen_top_decay[sixjets_sel])
+        type[0][sixjets_sel] = type_unfilled
+        type = ak.flatten(type)
+    else:
+        type = -1
+    events = set_ak_column(events, "combination_type", type)
+
+    if (len(ak.unzip(mt_result[6][:])) > 1):
+        if ((len(ak.unzip(ak.unzip(mt_result[6][:])[0])) > 1) & (len(ak.unzip(ak.unzip(mt_result[6][:])[1])) > 3)):
+            R2b4q = (
+                ak.unzip(ak.unzip(mt_result[6][:])[0])[0].pt + ak.unzip(ak.unzip(mt_result[6][:])[0])[1].pt
+            ) / (
+                ak.unzip(ak.unzip(mt_result[6][:])[1])[0].pt +
+                ak.unzip(ak.unzip(mt_result[6][:])[1])[1].pt +
+                ak.unzip(ak.unzip(mt_result[6][:])[1])[2].pt +
+                ak.unzip(ak.unzip(mt_result[6][:])[1])[3].pt
+            )
+            R2b4q_filled = np.full((1, ak.num(events, axis=0)), EF)
+            R2b4q_filled[0][sixjets_sel] = ak.flatten(R2b4q)
+
+            events = set_ak_column(events, "R2b4q", R2b4q_filled[0])
+        else:
+            events = set_ak_column(events, "R2b4q", EF)
+    else:
+        events = set_ak_column(events, "R2b4q", EF)
+
     # build and return selection results
     # "objects" maps source columns to new columns and selections to be applied on the old columns
     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
