@@ -74,21 +74,10 @@ def muon_selection(
         muon_selection,
         jet_selection,
         increment_stats,
-<<<<<<< HEAD
         kinFit,
-    },
-    produces={
-        # selectors / producers whose newly created columns should be kept
-        mc_weight, cutflow_features, process_ids, kinFit,
-=======
-        pdf_weights,
-        murmuf_weights,
-        pu_weight,
-        btag_weights,
         attach_coffea_behavior,
-        gen_top_decay_products,
     },
-    produces={
+      produces={
         # selectors / producers whose newly created columns should be kept
         mc_weight, cutflow_features, process_ids,
         jet_selection,
@@ -96,9 +85,8 @@ def muon_selection(
         murmuf_weights,
         pu_weight,
         btag_weights,
-        gen_top_decay_products,
+#        gen_top_decay_products,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
->>>>>>> refs/remotes/origin/master
     },
     exposed=True,
 )
@@ -140,8 +128,8 @@ def example(
     events = self[process_ids](events, **kwargs)
 
     # Produce gen_top_decay
-    if self.dataset_inst.name.startswith("tt_"):
-        events = self[gen_top_decay_products](events, **kwargs)
+#    if self.dataset_inst.name.startswith("tt_"):
+#        events = self[gen_top_decay_products](events, **kwargs)
     # add the mc weight
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
