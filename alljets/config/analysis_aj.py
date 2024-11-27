@@ -127,6 +127,7 @@ dataset_names = [
     # "dy_lep_pt250To400_amcatnlo",
     # "dy_lep_pt400To650_amcatnlo",
     # "dy_lep_pt650_amcatnlo",
+    "qcd_ht2000toinf_madgraph",
     # signals
     "tt_fh_powheg",
 ]
@@ -353,7 +354,7 @@ cfg.x.ref_trigger = {
     "tt_fh": ["PFHT350"],
 }
 
-# IsoMu24, Mu50, for MC with all events: Physics
+# IsoMu24, Mu50, PFHT350 for MC with all events: Physics
 #
 # if year == 2017:
 #     cfg.x.trigger = {
@@ -396,9 +397,10 @@ cfg.x.keep_columns = DotDict.wrap({
         "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
         "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350", "HLT.Physics",
+        "HLT.PFHT1050", "HLT.PFHT890",
         # columns added during selection
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight*",
-        "murmuf_weight*", "pu_weight*", "btag_weight*",
+        "murmuf_weight*", "pu_weight*", "btag_weight*", "combination_type", "R2b4q", "trig_ht",
     },
     "cf.MergeSelectionMasks": {
         "normalization_weight", "process_id", "category_ids", "cutflow.*",

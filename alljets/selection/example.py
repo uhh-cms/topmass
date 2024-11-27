@@ -102,6 +102,13 @@ def example(
     # prepare the selection results that are updated at every step
     results = SelectionResult()
 
+    # Produce gen_top_decay
+    if self.dataset_inst.has_tag("has_top"):
+        events = self[gen_top_decay_products](events, **kwargs)
+    else:
+        events = set_ak_column(events, "gen_top_decay", False)
+        events = set_ak_column(events, "GenPart.eta", False)
+
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
@@ -121,15 +128,12 @@ def example(
     results.event = (results.steps.muon & results.steps.jet &
                     results.steps.Trigger & results.steps.BTag &
                     results.steps.HT & results.steps.Chi2 &
-                    results.steps.SixJets &
-                    results.steps.BaseTrigger)
+                    results.steps.SixJets)
+    # results.steps.BaseTrigger
 
     # create process ids
     events = self[process_ids](events, **kwargs)
 
-    # Produce gen_top_decay
-#    if self.dataset_inst.name.startswith("tt_"):
-#        events = self[gen_top_decay_products](events, **kwargs)
     # add the mc weight
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
@@ -203,6 +207,7 @@ def example(
         btag_weights,
         attach_coffea_behavior,
         gen_top_decay_products,
+        "TrigObj*",
     },
     produces={
         # selectors / producers whose newly created columns should be kept
@@ -214,6 +219,7 @@ def example(
         btag_weights,
         gen_top_decay_products,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+        "trig_ht",
     },
     exposed=True,
 )
@@ -229,6 +235,17 @@ def trigger_eff(
     # prepare the selection results that are updated at every step
     results = SelectionResult()
 
+    # Produce gen_top_decay
+    if self.dataset_inst.has_tag("has_top"):
+        events = self[gen_top_decay_products](events, **kwargs)
+    else:
+        events = set_ak_column(events, "gen_top_decay", False)
+        events = set_ak_column(events, "GenPart.eta", False)
+
+    trig_ht = ak.sum(events.TrigObj.pt[(events.TrigObj.pt >= 32) &
+                                       (abs(events.TrigObj.eta) <= 2.6) &
+                                       (events.TrigObj.id == 1)], axis=1)
+    events = set_ak_column(events, "trig_ht", trig_ht)
     # ensure trigger column
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
@@ -333,6 +350,7 @@ def trigger_eff(
         btag_weights,
         attach_coffea_behavior,
         gen_top_decay_products,
+        "TrigObj*",
     },
     produces={
         # selectors / producers whose newly created columns should be kept
@@ -344,6 +362,7 @@ def trigger_eff(
         btag_weights,
         gen_top_decay_products,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+        "trig_ht",
     },
     exposed=True,
 )
@@ -359,6 +378,18 @@ def trigger_eff2(
     # prepare the selection results that are updated at every step
     results = SelectionResult()
 
+    # Produce gen_top_decay
+    if self.dataset_inst.has_tag("has_top"):
+        events = self[gen_top_decay_products](events, **kwargs)
+    else:
+        events = set_ak_column(events, "gen_top_decay", False)
+        events = set_ak_column(events, "GenPart.eta", False)
+
+    # Build HT from trigger objects (according to 2017 tt_fh triggers)
+    trig_ht = ak.sum(events.TrigObj.pt[(events.TrigObj.pt >= 32) &
+                                       (abs(events.TrigObj.eta) <= 2.6) &
+                                       (events.TrigObj.id == 1)], axis=1)
+    events = set_ak_column(events, "trig_ht", trig_ht)
     # ensure trigger column
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
@@ -376,10 +407,11 @@ def trigger_eff2(
 
     # combined event selection after all steps
     results.event = (
-        # results.steps.SixJets &
-        # results.steps.jet
-        results.steps.BTag &
-        results.steps.HT)
+        results.steps.BaseTrigger &
+        results.steps.SixJets &
+        results.steps.jet &
+        results.steps.BTag)
+    # results.steps.HT
 
     # create process ids
     events = self[process_ids](events, **kwargs)
