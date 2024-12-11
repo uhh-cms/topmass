@@ -335,7 +335,7 @@ cfg.x.external_files = DotDict.wrap({
     "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
 
     # prototype trigger weight corrections
-    "trig_sf": (f"/afs/desy.de/user/d/davidsto/public/mirrors/trigger_correction_HT350_CSV.json.gz", "v1")
+    "trig_sf": ("/afs/desy.de/user/d/davidsto/public/mirrors/trigger_correction_HT350_CSV.json.gz", "v1"),
 })
 
 cfg.x.trigger = {

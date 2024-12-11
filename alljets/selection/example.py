@@ -131,7 +131,7 @@ def example(
     # combined event selection after all steps
     results.event = (results.steps.muon & results.steps.jet &
                     results.steps.Trigger & results.steps.BTag &
-                    results.steps.HT & results.steps.Chi2 & results.steps.n25Chi2 & 
+                    results.steps.HT & results.steps.Chi2 & results.steps.n25Chi2 &
                     results.steps.n10Chi2 & results.steps.n5Chi2 & results.steps.SixJets)
     # results.steps.BaseTrigger
 
@@ -196,6 +196,7 @@ def example(
     )
 
     return events, results
+
 
 @selector(
     uses={
@@ -556,7 +557,6 @@ def trigger_eff(
     # results.steps.SixJets &
     # results.steps.jet &
     # results.steps.HT
-    
 
     # create process ids
     events = self[process_ids](events, **kwargs)
@@ -866,7 +866,6 @@ def trigger_eff_pt(
         results.steps.HT
     )
     # results.steps.SixJets &
-    
 
     # create process ids
     events = self[process_ids](events, **kwargs)
@@ -1019,7 +1018,6 @@ def trigger_eff2(
         results.steps.jet &
         results.steps.HT)
     # results.steps.BTag)
-    # 
 
     # create process ids
     events = self[process_ids](events, **kwargs)

@@ -57,8 +57,8 @@ def jet_selection(
         jet_trigger_sel = True
         jet_base_trigger_sel = True
     mwref = 80.4
-    mwsig = 11.01 # 12
-    mtsig = 27.07 # 15
+    mwsig = 11.01  # 12
+    mtsig = 27.07  # 15
     mu_tt = 2.07
     mu_w = 0.88
     m = lambda j1, j2: (j1.add(j2)).mass
