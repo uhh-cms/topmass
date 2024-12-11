@@ -1,4 +1,4 @@
-
+# coding: utf-8
 """
 Jet selection methods.
 """
@@ -57,8 +57,10 @@ def jet_selection(
         jet_trigger_sel = True
         jet_base_trigger_sel = True
     mwref = 80.4
-    mwsig = 12
-    mtsig = 15
+    mwsig = 11.01 # 12
+    mtsig = 27.07 # 15
+    mu_tt = 2.07
+    mu_w = 0.88
     m = lambda j1, j2: (j1.add(j2)).mass
     m3 = lambda j1, j2, j3: (j1.add(j2.add(j3))).mass
     dr = lambda j1, j2: j1.delta_r(j2)
@@ -77,18 +79,38 @@ def jet_selection(
     def sixjetcombinations(bjets, ljets):
         return ak.cartesian([bjets, ljets], axis=1)
 
+    # def mt(sixjets):
+    #     b1, b2 = ak.unzip(ak.unzip(sixjets)[0])
+    #     j1, j2, j3, j4 = ak.unzip(ak.unzip(sixjets)[1])
+    #     mt1 = m3(b1, j1, j2)
+    #     mt2 = m3(b2, j3, j4)
+    #     mw1 = m(j1, j2)
+    #     mw2 = m(j3, j4)
+    #     drbb = dr(b1, b2)
+    #     chi2 = ak.sum([
+    #         ((mw1 - mwref) ** 2) / mwsig ** 2,
+    #         ((mw2 - mwref) ** 2) / mwsig ** 2,
+    #         ((mt1 - mt2) ** 2) / (2 * (mtsig ** 2))],
+    #         axis=0,
+    #     )
+    #     if len(chi2) > 0:
+    #         bestc2 = ak.argmin(chi2, axis=1, keepdims=True)
+    #         return mt1[bestc2], mt2[bestc2], mw1[bestc2], mw2[bestc2], drbb[bestc2], chi2[bestc2], bestc2, sixjets
+    #     else:
+    #         return [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]]
+
     def mt(sixjets):
         b1, b2 = ak.unzip(ak.unzip(sixjets)[0])
         j1, j2, j3, j4 = ak.unzip(ak.unzip(sixjets)[1])
-        mt1 = m3(b1, j1, j2)
-        mt2 = m3(b2, j3, j4)
-        mw1 = m(j1, j2)
-        mw2 = m(j3, j4)
+        mt1 = ak.where((b1.pt > b2.pt), m3(b1, j1, j2), m3(b2, j3, j4))
+        mt2 = ak.where((b1.pt > b2.pt), m3(b2, j3, j4), m3(b1, j1, j2))
+        mw1 = ak.where((b1.pt > b2.pt), m(j1, j2), m(j3, j4))
+        mw2 = ak.where((b1.pt > b2.pt), m(j3, j4), m(j1, j2))
         drbb = dr(b1, b2)
         chi2 = ak.sum([
-            ((mw1 - mwref) ** 2) / mwsig ** 2,
-            ((mw2 - mwref) ** 2) / mwsig ** 2,
-            ((mt1 - mt2) ** 2) / (2 * (mtsig ** 2))],
+            ((mw1 - mwref - mu_w) ** 2) / (mwsig ** 2),
+            ((mw2 - mwref - mu_w) ** 2) / (mwsig ** 2),
+            ((mt1 - mt2 - mu_tt) ** 2) / (mtsig ** 2)],
             axis=0,
         )
         if len(chi2) > 0:
@@ -98,12 +120,15 @@ def jet_selection(
             return [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]]
 
     mt_result = mt(sixjetcombinations(bpermutations(ak.unzip(bjets)), lpermutations(ak.unzip(ljets))))
-    chi2_cut = 8
+    chi2_cut = 50
     mt_result_filled = np.full((6, ak.num(events, axis=0)), EF)
     for i in range(6):
         (mt_result_filled[i])[sixjets_sel] = ak.flatten(mt_result[i])
 
     chi2_sel = ak.Array((mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
+    chi2_sel1 = ak.Array((mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
+    chi2_sel2 = ak.Array((mt_result_filled[5] < 10) & (mt_result_filled[5] > -1))
+    chi2_sel3 = ak.Array((mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
     # verify_jet_trigger = (check_trigger == True)
 
     events = set_ak_column(events, "Mt1", mt_result_filled[0])
@@ -195,6 +220,9 @@ def jet_selection(
             "BTag": bjet_sel,
             "SixJets": sixjets_sel,
             "Chi2": chi2_sel,
+            "n25Chi2": chi2_sel1,
+            "n10Chi2": chi2_sel2,
+            "n5Chi2": chi2_sel3,
         },
         objects={
             "Jet": {

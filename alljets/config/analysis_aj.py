@@ -112,7 +112,7 @@ dataset_names = [
     # "st_twchannel_tbar_powheg",
     # "qcd_ht50to100_madgraph",
     # "qcd_ht100to200_madgraph",
-    "qcd_ht200to300_madgraph",
+    # "qcd_ht200to300_madgraph",
     "qcd_ht300to500_madgraph",
     "qcd_ht500to700_madgraph",
     "qcd_ht700to1000_madgraph",
@@ -128,7 +128,7 @@ for dataset_name in dataset_names:
 
     # for testing purposes, limit the number of files to 2
     for info in dataset.info.values():
-        info.n_files = min(info.n_files, 1)
+        info.n_files = min(info.n_files, 66)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -333,6 +333,9 @@ cfg.x.external_files = DotDict.wrap({
 
     # electron scale factors
     "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
+
+    # prototype trigger weight corrections
+    "trig_sf": (f"/afs/desy.de/user/d/davidsto/public/mirrors/trigger_correction_HT350_CSV.json.gz", "v1")
 })
 
 cfg.x.trigger = {
@@ -340,7 +343,7 @@ cfg.x.trigger = {
 }
 
 cfg.x.ref_trigger = {
-    "tt_fh": ["PFHT350"],
+    "tt_fh": ["Physics"],
 }
 
 # IsoMu24, Mu50, PFHT350 for MC with all events: Physics
@@ -386,14 +389,14 @@ cfg.x.keep_columns = DotDict.wrap({
         "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350", "HLT.Physics",
         "HLT.PFHT1050", "HLT.PFHT890",
         # columns added during selection
-        "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight*",
-        "murmuf_weight*", "pu_weight*", "btag_weight*", "combination_type", "R2b4q", "trig_ht",
+        "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight", "trig_weight",
+        "murmuf_weight", "pu_weight", "btag_weight", "combination_type", "R2b4q", "trig_ht",
     },
     "cf.MergeSelectionMasks": {
         "normalization_weight", "process_id", "category_ids", "cutflow.*",
     },
     "cf.UniteColumns": {
-        "*",
+        "*_weight", "Jet.*", "combination_type", "ht", "Mt*", "MW*", "trig_bits",
     },
 })
 
@@ -402,7 +405,9 @@ cfg.x.keep_columns = DotDict.wrap({
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict({
     "normalization_weight": [],
-    "muon_weight": get_shifts("mu"),
+    # "btag_weight": [],
+    "trig_weight": [],
+    # "muon_weight": get_shifts("mu"),
     # "pdf_weight": get_shifts("pdf"),
     # "murmuf_weight": get_shifts("murmuf"),
 })

@@ -192,7 +192,39 @@ def add_variables(cfg: od.Config) -> None:
         name="jet6_pt_1",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=[30, 60, 1000],
+        binning=[32, 60, 1000],
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="jet6_pt_2",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=[0, 10, 15, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 60, 80, 100],
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="jet6_pt_3",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=[0, 15, 20, 25, 28, 31, 34, 37, 40, 43, 47, 50, 60, 80, 100],
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="jet6_pt_4",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=[0, 10, 20, 26, 32, 38, 44, 50, 60, 80, 100],
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="jet6_pt_5",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=[0, 10, 20, 26, 32, 38, 44, 50, 60, 100],
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )
@@ -225,6 +257,13 @@ def add_variables(cfg: od.Config) -> None:
         x_title="$H_T$",
     )
     cfg.add_variable(
+        name="ht2",
+        expression="ht",
+        binning=[380, 600, 9999],
+        unit="GeV",
+        x_title="$H_T$",
+    )
+    cfg.add_variable(
         name="trig_ht",
         expression="trig_ht",
         binning=(20, 0, 2000.0),
@@ -242,7 +281,7 @@ def add_variables(cfg: od.Config) -> None:
         name="MW1",
         expression="MW1",
         null_value=EMPTY_FLOAT,
-        binning=(100, 0, 500),
+        binning=(100, 40, 140),
         unit="GeV",
         x_title=r"$M_{W1}$",
     )
@@ -250,7 +289,7 @@ def add_variables(cfg: od.Config) -> None:
         name="MW2",
         expression="MW2",
         null_value=EMPTY_FLOAT,
-        binning=(100, 0, 500),
+        binning=(100, 40, 140),
         unit="GeV",
         x_title=r"$M_{W2}$",
     )
@@ -512,6 +551,13 @@ def add_variables(cfg: od.Config) -> None:
         binning=(40, 0, 2),
         x_title="pdf weight",
     )
+    cfg.add_variable(
+        name="trig_weight",
+        expression="trig_weight",
+        null_value=EMPTY_FLOAT,
+        binning=(20, 0.7, 1.1),
+        x_title="trigger weight",
+    )
     # cutflow variables
     cfg.add_variable(
         name="cf_jet1_pt",
@@ -553,6 +599,13 @@ def add_variables(cfg: od.Config) -> None:
         expression="cutflow.turnon",
         binning=(2, -0.5, 1.5),
         x_title=r"0: only in base trigger, 1: In both",
+    )
+    cfg.add_variable(
+        name="cf_combination_type",
+        expression="cutflow.combination_type",
+        null_value=EMPTY_FLOAT,
+        binning=(4, -1.5, 2.5),
+        x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
     )
     cfg.add_variable(
         name="trig_bits",
