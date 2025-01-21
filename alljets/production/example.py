@@ -148,6 +148,37 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
 
 @producer(
+    uses={
+        normalization_weights, features, category_ids, muon_weights, deterministic_seeds,
+    },
+    produces={
+        normalization_weights, features, category_ids, muon_weights, deterministic_seeds,
+    },
+)
+def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    # features
+
+    events = self[features](events, **kwargs)
+
+    # category ids
+    events = self[category_ids](events, **kwargs)
+
+    # deterministic seeds
+    events = self[deterministic_seeds](events, **kwargs)
+
+    # mc-only weights
+    if self.dataset_inst.is_mc:
+        # normalization weights
+        events = self[normalization_weights](events, **kwargs)
+        events = set_ak_column(events, "normalization_weight", np.ones(len(events)), value_type=np.float32)
+        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+        # muon weights
+        events = self[muon_weights](events, **kwargs)
+
+    return events
+
+
+@producer(
     produces={"trig_bits", "trig_bits_orth"},
     channel=["tt_fh"],
 )

@@ -264,6 +264,13 @@ def add_variables(cfg: od.Config) -> None:
         x_title="$H_T$",
     )
     cfg.add_variable(
+        name="ht5",
+        expression="ht",
+        binning=[0, 200, 300, 340, 380, 420, 500, 700, 1000, 1500],
+        unit="GeV",
+        x_title="$H_T$",
+    )
+    cfg.add_variable(
         name="trig_ht",
         expression="trig_ht",
         binning=(20, 0, 2000.0),

@@ -65,61 +65,64 @@ def plot_hist_matching(
 
     # for updating labels of individual selector steps
     myhist_0 = hists[list(hists.keys())[0]]
-    myhist_1 = hists[list(hists.keys())[1]]
-    myhist_2 = hists[list(hists.keys())[2]]
-    norm = (np.full((1, len(myhist_2[:, 1].values())), 1))[0]
+    # myhist_1 = hists[list(hists.keys())[1]]
+    # myhist_2 = hists[list(hists.keys())[2]]
+    norm = (np.full((1, len(myhist_0[:, 1].values())), 1))[0]
 
     plot_config["hist_correct"] = {
         "method": "draw_hist",
-        "hist": myhist_2[:, 3],
+        "hist": myhist_0[:, 3],
         "kwargs": {
+            "stack": True,
             "norm": norm,
-            "label": f"{list(hists.keys())[2].name}, correct",
+            "label": f"{list(hists.keys())[0].name}, correct",
         },
     }
 
     plot_config["hist_wrong"] = {
         "method": "draw_hist",
-        "hist": myhist_2[:, 2],
+        "hist": myhist_0[:, 2],
         "kwargs": {
-            "norm": float(1),
-            "label": f"{list(hists.keys())[2].name}, wrong",
+            "stack": True,
+            "norm": norm,
+            "label": f"{list(hists.keys())[0].name}, wrong",
         },
     }
 
     plot_config["hist_unmatched"] = {
         "method": "draw_hist",
-        "hist": myhist_2[:, 1],
+        "hist": myhist_0[:, 1],
         "kwargs": {
+            "stack": True,
             "norm": norm,
-            "label": f"{list(hists.keys())[2].name}, unmatched",
+            "label": f"{list(hists.keys())[0].name}, unmatched",
         },
     }
 
-    plot_config["hist_data"] = {
-        "method": "draw_hist",
-        # "ratio_method": "draw_hist",
-        "hist": myhist_0[:, 0],
-        "kwargs": {
-            "norm": norm,
-            "label": f"{list(hists.keys())[0].name}",
-        },
-        # "ratio_kwargs": {
-        #     "color": "#5790fc",
-        #     # "linestyle": "none",
-        #     "norm": (myhist_2[:, 0] + myhist_2[:, 1] + myhist_2[:, 2] + myhist_1[:, 0]),
-        #     "histtype": "errorbar",
-        # },
-    }
+    # plot_config["hist_data"] = {
+    #     "method": "draw_hist",
+    #     # "ratio_method": "draw_hist",
+    #     "hist": myhist_0[:, 0],
+    #     "kwargs": {
+    #         "norm": norm,
+    #         "label": f"{list(hists.keys())[0].name}",
+    #     },
+    #     # "ratio_kwargs": {
+    #     #     "color": "#5790fc",
+    #     #     # "linestyle": "none",
+    #     #     "norm": (myhist_2[:, 0] + myhist_2[:, 1] + myhist_2[:, 2] + myhist_1[:, 0]),
+    #     #     "histtype": "errorbar",
+    #     # },
+    # }
 
-    plot_config["hist_qcd"] = {
-        "method": "draw_hist",
-        "hist": myhist_1[:, 0],
-        "kwargs": {
-            "norm": norm,
-            "label": f"{list(hists.keys())[1].name}",
-        },
-    }
+    # plot_config["hist_qcd"] = {
+    #     "method": "draw_hist",
+    #     "hist": myhist_1[:, 0],
+    #     "kwargs": {
+    #         "norm": norm,
+    #         "label": f"{list(hists.keys())[1].name}",
+    #     },
+    # }
 
     # setup style config
     default_style_config = prepare_style_config(

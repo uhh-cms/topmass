@@ -184,7 +184,7 @@ cfg.x.validate_dataset_lfns = False
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2?rev=2#Combination_and_correlations: 41480
 # Luminosity by trigger: PFHT380_SixPFJet32_DoublePFBTagCSV_2p2: 36674
 # PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2: 27121
-cfg.x.luminosity = Number(27121, {
+cfg.x.luminosity = Number(36674, {
     "lumi_13TeV_2017": 0.02j,
     "lumi_13TeV_1718": 0.006j,
     "lumi_13TeV_correlated": 0.009j,
@@ -404,7 +404,7 @@ cfg.x.keep_columns = DotDict.wrap({
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict({
-    "normalization_weight": [],
+    # "normalization_weight": [],
     # "btag_weight": [],
     "trig_weight": [],
     # "muon_weight": get_shifts("mu"),
