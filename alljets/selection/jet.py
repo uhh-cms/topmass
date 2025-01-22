@@ -8,6 +8,7 @@ from columnflow.selection.util import sorted_indices_from_mask
 from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.columnar_util import set_ak_column
+import pyKinFitTest as pyKinFit
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -97,9 +98,8 @@ def jet_selection_init(self: Selector) -> None:
 )
 
 def kinFit(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
-    import pyKinFitTest as pyKinFit
 
-    fitData = pyKinFit.setBestCombi(events.Jet.pt, events.Jet.eta, events.Jet.phi, events.Jet.mass)
+    fitData = pyKinFit.setBestCombi(ak.to_list(events.Jet.pt), ak.to_list(events.Jet.eta), ak.to_list(events.Jet.phi), ak.to_list(events.Jet.mass))
     events = set_ak_column(events, "FitJet.pt", fitData[0])
     events = set_ak_column(events, "FitJet.eta", fitData[1])
     events = set_ak_column(events, "FitJet.phi", fitData[2])

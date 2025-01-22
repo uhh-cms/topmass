@@ -76,6 +76,10 @@ def muon_selection(
         increment_stats,
         kinFit,
         attach_coffea_behavior,
+        pdf_weights,
+        murmuf_weights,
+        pu_weight,
+        btag_weights,
     },
       produces={
         # selectors / producers whose newly created columns should be kept
@@ -85,7 +89,7 @@ def muon_selection(
         murmuf_weights,
         pu_weight,
         btag_weights,
-#        gen_top_decay_products,
+        gen_top_decay_products,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
     },
     exposed=True,
@@ -123,6 +127,10 @@ def example(
     # jet selection
     events, jet_results = self[jet_selection](events, **kwargs)
     results += jet_results
+
+    #kinFit selection
+    events, kin_results =self[kinFit](events, **kwargs)
+    results += kin_results
 
     # combined event selection after all steps
     results.event = (results.steps.muon & results.steps.jet &
