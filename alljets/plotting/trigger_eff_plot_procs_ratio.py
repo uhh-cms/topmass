@@ -102,13 +102,16 @@ def plot_efficiencies(
         "ratio_method": "draw_hist",
         "hist": myhist_0[:, eff_bin],
         "kwargs": {
-            "color": "dodgerblue",
+            "color": "b",
             "norm": norm_hist_0,
             "label": f"{list(hists.keys())[0].name}",
+            "histtype": "errorbar",
+            "capsize": 3,
         },
         "ratio_kwargs": {
-            "color": "#5790fc",
-            # "linestyle": "none",
+            "color": "b",
+            "capsize": 3,
+            "linestyle": "none",
             "norm": (myhist_1[:, eff_bin].values() * norm_hist_0) / norm_hist_1,
             "histtype": "errorbar",
         },
@@ -120,6 +123,8 @@ def plot_efficiencies(
         "kwargs": {
             "norm": norm_hist_1,
             "label": f"{list(hists.keys())[1].name}",
+            "histtype": "errorbar",
+            "capsize": 3,
         },
         # "ratio_kwargs": {
         #     "color": "orange",

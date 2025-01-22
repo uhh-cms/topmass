@@ -208,7 +208,7 @@ def add_variables(cfg: od.Config) -> None:
         name="jet6_pt_3",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=[0, 15, 20, 25, 28, 31, 34, 37, 40, 43, 47, 50, 60, 80, 100],
+        binning=[32, 40, 60, 1000],
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )

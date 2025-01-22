@@ -127,8 +127,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-    for info in dataset.info.values():
-        info.n_files = min(info.n_files, 66)
+    # for info in dataset.info.values():
+    #     info.n_files = min(info.n_files, 66)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -170,6 +170,10 @@ cfg.x.shift_groups = {}
 # (used in cutflow tasks)
 cfg.x.selector_step_groups = {
     "default": ["muon", "jet"],
+    "trig_eff_ht": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
+    "trig_eff_pt": ["All", "BaseTrigger", "BTag", "HT"],
+    "trig_eff_bjet": ["All", "BaseTrigger", "jet", "HT"],
+    "trig_eff_ht_pt": ["All", "BaseTrigger", "BTag"],
 }
 
 # custom method and sandbox for determining dataset lfns

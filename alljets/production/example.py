@@ -173,7 +173,7 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = set_ak_column(events, "normalization_weight", np.ones(len(events)), value_type=np.float32)
         events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
         # muon weights
-        events = self[muon_weights](events, **kwargs)
+        # events = self[muon_weights](events, **kwargs)
 
     return events
 
