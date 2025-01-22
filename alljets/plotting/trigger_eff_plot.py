@@ -66,18 +66,25 @@ def plot_efficiencies(
 
     norm_hist = np.array(myhist[:, 0].values())
 
-    plot_config["hist_0"] = {
-        "method": "draw_hist_twin",
-        "hist": myhist[:, 0],
-        "kwargs": {
-            "norm": 1,
-            "label": None,
-            "color": "grey",
-            "histtype": "fill",
-            "alpha": 0.3,
-        },
-    }
-
+    # plot_config["hist_0"] = {
+    #     "method": "draw_hist_twin",
+    #     "hist": myhist[:, 0],
+    #     "kwargs": {
+    #         "norm": 1,
+    #         "label": None,
+    #         "color": "grey",
+    #         "histtype": "fill",
+    #         "alpha": 0.3,
+    #     },
+    # }
+    trigger_names = np.array(config_inst.x.trigger["tt_fh"])
+    for i in range(len(trigger_names)):
+        trigger_names[i] = trigger_names[i].replace("PFHT380_", "")
+        trigger_names[i] = trigger_names[i].replace("SixPFJet32_", "")
+        trigger_names[i] = trigger_names[i].replace("Double", "")
+        trigger_names[i] = trigger_names[i].replace("_2p2", "")
+        trigger_names[i] = trigger_names[i].replace("_2p94", "")
+        trigger_names[i] = trigger_names[i].replace("_p056", "")
     for i in range(myhist.axes[1].size):
         if i == 0:
             continue
@@ -87,7 +94,7 @@ def plot_efficiencies(
             "hist": myhist[:, i],
             "kwargs": {
                 "norm": norm_hist,
-                "label": f"Trigger Nr. {i}",
+                "label": f"{trigger_names[i-1]}",
             },
         }
 
