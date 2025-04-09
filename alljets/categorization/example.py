@@ -39,7 +39,7 @@ def cat_2btj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, a
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     return events, (ak.sum(
         (events.Jet.pt >= 40.0) &
-        abs(events.Jet.eta < 2.4) &
+        (abs(events.Jet.eta) < 2.4) &
         (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
     )
 

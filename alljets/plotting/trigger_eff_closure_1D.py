@@ -144,14 +144,15 @@ def plot_efficiencies_no_weight(
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2
-    default_style_config["legend_cfg"]["title_fontsize"] = 17
-    default_style_config["legend_cfg"]["fontsize"] = 15
+    default_style_config["legend_cfg"]["title_fontsize"] = 19
+    default_style_config["legend_cfg"]["fontsize"] = 25
     default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
     kwargs["skip_ratio"] = False
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
     return plot_all(plot_config, style_config, **kwargs)
+
 
 def plot_efficiencies(
     hists: OrderedDict,
@@ -260,8 +261,8 @@ def plot_efficiencies(
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2
-    default_style_config["legend_cfg"]["title_fontsize"] = 17
-    default_style_config["legend_cfg"]["fontsize"] = 15
+    default_style_config["legend_cfg"]["title_fontsize"] = 19
+    default_style_config["legend_cfg"]["fontsize"] = 25
     default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
     kwargs["skip_ratio"] = False
 

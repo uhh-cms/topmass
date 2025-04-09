@@ -16,7 +16,6 @@ def add_variables(cfg: od.Config) -> None:
         expression="event",
         binning=(1, 0.0, 1.0e9),
         x_title="Event number",
-        discrete_x=True,
     )
     cfg.add_variable(
         name="run",
@@ -30,13 +29,6 @@ def add_variables(cfg: od.Config) -> None:
         expression="luminosityBlock",
         binning=(1, 0.0, 5000.0),
         x_title="Luminosity block",
-        discrete_x=True,
-    )
-    cfg.add_variable(
-        name="turnon",
-        expression="turnon",
-        binning=(2, -0.5, 1.5),
-        x_title="Trigger turn on",
         discrete_x=True,
     )
     cfg.add_variable(
@@ -200,7 +192,7 @@ def add_variables(cfg: od.Config) -> None:
         name="jet6_pt_2",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=[0, 10, 15, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 60, 80, 100],
+        binning=[32, 40, 60, float("inf")],
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )
@@ -224,7 +216,15 @@ def add_variables(cfg: od.Config) -> None:
         name="jet6_pt_5",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=[0, 10, 20, 26, 32, 38, 44, 50, 60, 100],
+        binning=[0, 10, 20, 26, 32, 40, 44, 50, 60, 100],
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="jet6_ptdummy",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=[0, 9999],
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )
@@ -250,9 +250,9 @@ def add_variables(cfg: od.Config) -> None:
         x_title="$H_T$",
     )
     cfg.add_variable(
-        name="ht1",
+        name="ht3",
         expression="ht",
-        binning=[380, 600, 1000, 9999],
+        binning=[380, 600, 1000, float("inf")],
         unit="GeV",
         x_title="$H_T$",
     )
@@ -264,9 +264,23 @@ def add_variables(cfg: od.Config) -> None:
         x_title="$H_T$",
     )
     cfg.add_variable(
-        name="ht5",
+        name="ht7",
+        expression="ht",
+        binning=[0, 200, 300, 340, 380, 415, 450, 500, 700, 1000, 1500],
+        unit="GeV",
+        x_title="$H_T$",
+    )
+    cfg.add_variable(
+        name="ht6",
         expression="ht",
         binning=[0, 200, 300, 340, 380, 420, 500, 700, 1000, 1500],
+        unit="GeV",
+        x_title="$H_T$",
+    )
+    cfg.add_variable(
+        name="ht_dummy",
+        expression="ht",
+        binning=[380, 99999],
         unit="GeV",
         x_title="$H_T$",
     )
@@ -309,6 +323,14 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$M_{t1}$",
     )
     cfg.add_variable(
+        name="Mt1_1",
+        expression="Mt1",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 100, 500),
+        unit="GeV",
+        x_title=r"$M_{t1}$",
+    )
+    cfg.add_variable(
         name="Mt2",
         expression="Mt2",
         null_value=EMPTY_FLOAT,
@@ -321,6 +343,13 @@ def add_variables(cfg: od.Config) -> None:
         expression="chi2",
         null_value=EMPTY_FLOAT,
         binning=(100, 0, 200),
+        x_title=r"$\chi^2$",
+    )
+    cfg.add_variable(
+        name="chi2_0",
+        expression="chi2",
+        null_value=EMPTY_FLOAT,
+        binning=(100, 0, 10),
         x_title=r"$\chi^2$",
     )
     cfg.add_variable(

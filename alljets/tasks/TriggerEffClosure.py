@@ -90,8 +90,9 @@ class CreateTriggerHistograms(
         import numpy as np
         import awkward as ak
         from columnflow.columnar_util import (
-            Route, update_ak_array, add_ak_aliases, has_ak_column, fill_hist,
+            Route, update_ak_array, add_ak_aliases, has_ak_column,
         )
+        from columnflow.hist_util import fill_hist
 
         # prepare inputs
         inputs = self.input()
