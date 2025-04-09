@@ -351,40 +351,40 @@ cfg.x.external_files = DotDict.wrap({
     # electron scale factors
     "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
 
-    # prototype trigger weight corrections
-    "trig_sf": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
-        "v1",
-    ),
+    # # prototype trigger weight corrections
+    # "trig_sf": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
+    #     "v1",
+    # ),
 
-    # prototype trigger weight corrections 1D pt
-    "trig_sf_pt": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-        "v1",
-    ),
+    # # prototype trigger weight corrections 1D pt
+    # "trig_sf_pt": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+    #     "v1",
+    # ),
 
-    # prototype trigger weight corrections 1D ht
-    "trig_sf_ht": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-        "v1",
-    ),
+    # # prototype trigger weight corrections 1D ht
+    # "trig_sf_ht": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+    #     "v1",
+    # ),
 
-    # prototype trigger weight corrections 2x 1D first ht second pt
-    "trig_sf_pt_after_ht": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-        "v1",
-    ),
+    # # prototype trigger weight corrections 2x 1D first ht second pt
+    # "trig_sf_pt_after_ht": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+    #     "v1",
+    # ),
 
-    # prototype trigger weight corrections 2x 1D first pt second ht
-    "trig_sf_ht_after_pt": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-        "v1",
-    ),
+    # # prototype trigger weight corrections 2x 1D first pt second ht
+    # "trig_sf_ht_after_pt": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+    #     "v1",
+    # ),
 })
 
 cfg.x.trigger = {
