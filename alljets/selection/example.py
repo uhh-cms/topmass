@@ -91,6 +91,7 @@ def muon_selection(
         pu_weight,
         btag_weights,
         gen_top_decay_products,
+        kinFit,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
     },
     exposed=True,
@@ -132,12 +133,13 @@ def example(
     #kinFit selection
     events, kin_results =self[kinFit](events, **kwargs)
     results += kin_results
+    
+    results += SelectionResult(steps={"kinfit_convergence": (events.FitChi2 < 10000)})
 
     # combined event selection after all steps
-    results.event = (results.steps.muon & results.steps.jet &
+    results.event = (results.steps.jet &
                     results.steps.Trigger & results.steps.BTag &
-                    results.steps.HT & results.steps.Chi2 & results.steps.n25Chi2 &
-                    results.steps.n10Chi2 & results.steps.n5Chi2 & results.steps.SixJets)
+                    results.steps.HT & results.steps.Chi2 & results.steps.SixJets)
     # results.steps.BaseTrigger
 
     # create process ids

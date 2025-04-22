@@ -137,7 +137,7 @@ for dataset_name in dataset_names:
 
     # for testing purposes, limit the number of files to 2
     for info in dataset.info.values():
-        info.n_files = min(info.n_files, 2)
+        info.n_files = min(info.n_files, 1)
     # for info in dataset.info.values():
     #     info.n_files = min(info.n_files, 2)
     # # Add has_top tag to tt events
@@ -320,7 +320,7 @@ add_shift_aliases(
 )
 
 # external files
-json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-849c6a6e"
+json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = "2017"
 corr_postfix = ""
 cfg.x.external_files = DotDict.wrap({
@@ -396,7 +396,7 @@ cfg.x.keep_columns = DotDict.wrap({
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
         "PV.npvs",
-        "FitJet.pt", "FitJet.eta", "FitJet.phi", "FitJet.mass", "fitChi2",
+        "FitJet.*",  "FitChi2",
         "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
         "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350", "HLT.Physics",
@@ -417,9 +417,9 @@ cfg.x.keep_columns = DotDict.wrap({
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict({
-    # "normalization_weight": [],
+     "normalization_weight": [],
     # "btag_weight": [],
-    "trig_weight": [],
+    # "trig_weight": [],
     # "muon_weight": get_shifts("mu"),
     # "pdf_weight": get_shifts("pdf"),
     # "murmuf_weight": get_shifts("murmuf"),
