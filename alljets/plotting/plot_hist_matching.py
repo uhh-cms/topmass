@@ -64,65 +64,55 @@ def plot_hist_matching(
     plot_config = OrderedDict()
 
     # for updating labels of individual selector steps
-    myhist_0 = hists[list(hists.keys())[0]]
-    # myhist_1 = hists[list(hists.keys())[1]]
-    # myhist_2 = hists[list(hists.keys())[2]]
-    norm = (np.full((1, len(myhist_0[:, 1].values())), 1))[0]
+    norm = (np.full((1, len(hists[list(hists.keys())[0]][:, 1].values())), 1))[0]
 
-    plot_config["hist_correct"] = {
-        "method": "draw_hist",
-        "hist": myhist_0[:, 3],
-        "kwargs": {
-            "stack": True,
-            "norm": norm,
-            "label": f"{list(hists.keys())[0].name}, correct",
-        },
-    }
+    for i in range(len(list(hists.keys()))):
+        if list(hists.keys())[i] == "tt":
+            plot_config["hist_correct"] = {
+                "method": "draw_hist",
+                "hist": hists[list(hists.keys())[i]][:, 3],
+                "kwargs": {
+                    "stack": True,
+                    "norm": norm,
+                    "label": f"{list(hists.keys())[i].name}, correct",
+                },
+            }
 
-    plot_config["hist_wrong"] = {
-        "method": "draw_hist",
-        "hist": myhist_0[:, 2],
-        "kwargs": {
-            "stack": True,
-            "norm": norm,
-            "label": f"{list(hists.keys())[0].name}, wrong",
-        },
-    }
+            plot_config["hist_wrong"] = {
+                "method": "draw_hist",
+                "hist": hists[list(hists.keys())[i]][:, 2],
+                "kwargs": {
+                    "stack": True,
+                    "norm": norm,
+                    "label": f"{list(hists.keys())[i].name}, wrong",
+                },
+            }
 
-    plot_config["hist_unmatched"] = {
-        "method": "draw_hist",
-        "hist": myhist_0[:, 1],
-        "kwargs": {
-            "stack": True,
-            "norm": norm,
-            "label": f"{list(hists.keys())[0].name}, unmatched",
-        },
-    }
-
-    # plot_config["hist_data"] = {
-    #     "method": "draw_hist",
-    #     # "ratio_method": "draw_hist",
-    #     "hist": myhist_0[:, 0],
-    #     "kwargs": {
-    #         "norm": norm,
-    #         "label": f"{list(hists.keys())[0].name}",
-    #     },
-    #     # "ratio_kwargs": {
-    #     #     "color": "#5790fc",
-    #     #     # "linestyle": "none",
-    #     #     "norm": (myhist_2[:, 0] + myhist_2[:, 1] + myhist_2[:, 2] + myhist_1[:, 0]),
-    #     #     "histtype": "errorbar",
-    #     # },
-    # }
-
-    # plot_config["hist_qcd"] = {
-    #     "method": "draw_hist",
-    #     "hist": myhist_1[:, 0],
-    #     "kwargs": {
-    #         "norm": norm,
-    #         "label": f"{list(hists.keys())[1].name}",
-    #     },
-    # }
+            plot_config["hist_unmatched"] = {
+                "method": "draw_hist",
+                "hist": hists[list(hists.keys())[i]][:, 1],
+                "kwargs": {
+                    "stack": True,
+                    "norm": norm,
+                    "label": f"{list(hists.keys())[i].name}, unmatched",
+                },
+            }
+        else:
+            plot_config[f"hist_{i}"] = {
+                "method": "draw_hist",
+                # "ratio_method": "draw_hist",
+                "hist": hists[list(hists.keys())[i]][:, 0],
+                "kwargs": {
+                    "norm": norm,
+                    "label": f"{list(hists.keys())[i].name}",
+                },
+                # "ratio_kwargs": {
+                #     "color": "#5790fc",
+                #     # "linestyle": "none",
+                #     "norm": (myhist_2[:, 0] + myhist_2[:, 1] + myhist_2[:, 2] + myhist_1[:, 0]),
+                #     "histtype": "errorbar",
+                # },
+            }
 
     # setup style config
     default_style_config = prepare_style_config(

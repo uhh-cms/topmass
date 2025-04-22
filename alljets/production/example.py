@@ -73,7 +73,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         uses={
         mc_weight, category_ids,
         # nano columns
-        "Jet.pt",
+        "Jet.pt", "Jet.eta", "Jet.phi",
         "Jet.btagDeepFlavB",
     },
     produces={
@@ -141,7 +141,7 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[normalization_weights](events, **kwargs)
 
         # muon weights
-        events = self[muon_weights](events, **kwargs)
+        # events = self[muon_weights](events, **kwargs)
 
     return events
 
@@ -172,7 +172,7 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = set_ak_column(events, "normalization_weight", np.ones(len(events)), value_type=np.float32)
         events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
         # muon weights
-        events = self[muon_weights](events, **kwargs)
+        # events = self[muon_weights](events, **kwargs)
 
     return events
 

@@ -136,10 +136,15 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
+<<<<<<< HEAD
     for info in dataset.info.values():
         info.n_files = min(info.n_files, 1)
     # for info in dataset.info.values():
     #     info.n_files = min(info.n_files, 2)
+=======
+    # for info in dataset.info.values():
+    #     info.n_files = min(info.n_files, 1)
+>>>>>>> 8a7a79cb47c509a5d1ecb9002dbc3ba87b21d0ea
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -181,6 +186,11 @@ cfg.x.shift_groups = {}
 # (used in cutflow tasks)
 cfg.x.selector_step_groups = {
     "default": ["muon", "jet"],
+    "trig_eff_ht": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
+    "trig_eff_ht2": ["All", "BaseTrigger", "BTag", "jet"],
+    "trig_eff_pt": ["All", "BaseTrigger", "BTag", "HT"],
+    "trig_eff_bjet": ["All", "BaseTrigger", "jet", "HT"],
+    "trig_eff_ht_pt": ["All", "BaseTrigger", "BTag"],
 }
 
 # custom method and sandbox for determining dataset lfns
@@ -319,7 +329,22 @@ add_shift_aliases(
     },
 )
 
+# Trigger shifts
+cfg.add_shift(name="trig_up", id=120, type="shape")
+cfg.add_shift(name="trig_down", id=121, type="shape")
+add_shift_aliases(
+    cfg,
+    "trig",
+    {
+        "trig_weight": "trig_weight_{direction}",
+    },
+)
+
 # external files
+<<<<<<< HEAD
+=======
+# json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-849c6a6e" copied usage in hbt
+>>>>>>> 8a7a79cb47c509a5d1ecb9002dbc3ba87b21d0ea
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = "2017"
 corr_postfix = ""
@@ -345,8 +370,40 @@ cfg.x.external_files = DotDict.wrap({
     # electron scale factors
     "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
 
-    # prototype trigger weight corrections
-    "trig_sf": ("/afs/desy.de/user/d/davidsto/public/mirrors/trigger_correction_HT350_CSV.json.gz", "v1"),
+    # # prototype trigger weight corrections
+    # "trig_sf": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
+    #     "v1",
+    # ),
+
+    # # prototype trigger weight corrections 1D pt
+    # "trig_sf_pt": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+    #     "v1",
+    # ),
+
+    # # prototype trigger weight corrections 1D ht
+    # "trig_sf_ht": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+    #     "v1",
+    # ),
+
+    # # prototype trigger weight corrections 2x 1D first ht second pt
+    # "trig_sf_pt_after_ht": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+    #     "v1",
+    # ),
+
+    # # prototype trigger weight corrections 2x 1D first pt second ht
+    # "trig_sf_ht_after_pt": (
+    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+    #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+    #     "v1",
+    # ),
 })
 
 cfg.x.trigger = {
@@ -354,7 +411,7 @@ cfg.x.trigger = {
 }
 
 cfg.x.ref_trigger = {
-    "tt_fh": ["Physics"],
+    "tt_fh": ["PFHT350"],
 }
 
 # IsoMu24, Mu50, PFHT350 for MC with all events: Physics
@@ -402,8 +459,8 @@ cfg.x.keep_columns = DotDict.wrap({
         "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350", "HLT.Physics",
         "HLT.PFHT1050", "HLT.PFHT890",
         # columns added during selection
-        "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight", "trig_weight",
-        "murmuf_weight", "pu_weight", "btag_weight", "combination_type", "R2b4q", "trig_ht",
+        "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight", "trig_weight", "trig_weight_up",
+        "trig_weight_down", "murmuf_weight", "pu_weight", "btag_weight", "combination_type", "R2b4q", "trig_ht",
     },
     "cf.MergeSelectionMasks": {
         "normalization_weight", "process_id", "category_ids", "cutflow.*",
@@ -417,12 +474,19 @@ cfg.x.keep_columns = DotDict.wrap({
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict({
+<<<<<<< HEAD
      "normalization_weight": [],
     # "btag_weight": [],
     # "trig_weight": [],
+=======
+    "normalization_weight": [],
+    "btag_weight": [],
+    # "trig_weight": [],
+    # "trig_weight": get_shifts("trig"),
+>>>>>>> 8a7a79cb47c509a5d1ecb9002dbc3ba87b21d0ea
     # "muon_weight": get_shifts("mu"),
-    # "pdf_weight": get_shifts("pdf"),
-    # "murmuf_weight": get_shifts("murmuf"),
+    "pdf_weight": get_shifts("pdf"),
+    "murmuf_weight": get_shifts("murmuf"),
 })
 
 # versions per task family, either referring to strings or to callables receving the invoking

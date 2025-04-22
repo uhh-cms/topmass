@@ -4,11 +4,14 @@ Jet selection methods.
 """
 
 from columnflow.selection import Selector, SelectionResult, selector
-from columnflow.selection.util import sorted_indices_from_mask
 from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
+<<<<<<< HEAD
 from columnflow.columnar_util import set_ak_column, flat_np_view, mask_from_indices
 import pyKinFitTest as pyKinFit
+=======
+from columnflow.columnar_util import set_ak_column, sorted_indices_from_mask
+>>>>>>> 8a7a79cb47c509a5d1ecb9002dbc3ba87b21d0ea
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -292,26 +295,6 @@ def jet_selection(
 
     def sixjetcombinations(bjets, ljets):
         return ak.cartesian([bjets, ljets], axis=1)
-
-    # def mt(sixjets):
-    #     b1, b2 = ak.unzip(ak.unzip(sixjets)[0])
-    #     j1, j2, j3, j4 = ak.unzip(ak.unzip(sixjets)[1])
-    #     mt1 = m3(b1, j1, j2)
-    #     mt2 = m3(b2, j3, j4)
-    #     mw1 = m(j1, j2)
-    #     mw2 = m(j3, j4)
-    #     drbb = dr(b1, b2)
-    #     chi2 = ak.sum([
-    #         ((mw1 - mwref) ** 2) / mwsig ** 2,
-    #         ((mw2 - mwref) ** 2) / mwsig ** 2,
-    #         ((mt1 - mt2) ** 2) / (2 * (mtsig ** 2))],
-    #         axis=0,
-    #     )
-    #     if len(chi2) > 0:
-    #         bestc2 = ak.argmin(chi2, axis=1, keepdims=True)
-    #         return mt1[bestc2], mt2[bestc2], mw1[bestc2], mw2[bestc2], drbb[bestc2], chi2[bestc2], bestc2, sixjets
-    #     else:
-    #         return [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]]
 
     def mt(sixjets):
         b1, b2 = ak.unzip(ak.unzip(sixjets)[0])

@@ -17,7 +17,7 @@ ak = maybe_import("awkward")
 @calibrator(
     uses={
         deterministic_seeds,
-        "Jet.pt", "Jet.mass",
+        "Jet.pt", "Jet.mass", "Jet.eta", "Jet.phi",
     },
     produces={
         deterministic_seeds,
