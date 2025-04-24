@@ -136,15 +136,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-<<<<<<< HEAD
     for info in dataset.info.values():
         info.n_files = min(info.n_files, 1)
-    # for info in dataset.info.values():
-    #     info.n_files = min(info.n_files, 2)
-=======
-    # for info in dataset.info.values():
-    #     info.n_files = min(info.n_files, 1)
->>>>>>> 8a7a79cb47c509a5d1ecb9002dbc3ba87b21d0ea
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -341,10 +334,6 @@ add_shift_aliases(
 )
 
 # external files
-<<<<<<< HEAD
-=======
-# json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-849c6a6e" copied usage in hbt
->>>>>>> 8a7a79cb47c509a5d1ecb9002dbc3ba87b21d0ea
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = "2017"
 corr_postfix = ""
@@ -474,16 +463,10 @@ cfg.x.keep_columns = DotDict.wrap({
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict({
-<<<<<<< HEAD
-     "normalization_weight": [],
-    # "btag_weight": [],
-    # "trig_weight": [],
-=======
     "normalization_weight": [],
     "btag_weight": [],
     # "trig_weight": [],
     # "trig_weight": get_shifts("trig"),
->>>>>>> 8a7a79cb47c509a5d1ecb9002dbc3ba87b21d0ea
     # "muon_weight": get_shifts("mu"),
     "pdf_weight": get_shifts("pdf"),
     "murmuf_weight": get_shifts("murmuf"),
