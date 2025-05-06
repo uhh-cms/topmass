@@ -3,7 +3,6 @@
 Jet selection methods.
 """
 
-import pyKinFitTest as pyKinFit
 from columnflow.columnar_util import (
     flat_np_view,
     mask_from_indices,
@@ -13,6 +12,8 @@ from columnflow.columnar_util import (
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.util import maybe_import
+
+import pyKinFitTest as pyKinFit
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -116,8 +117,17 @@ def jet_selection_init(self: Selector) -> None:
 
 @selector(
     uses={"Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB"},
-    produces={"FitJet.pt", "FitJet.eta",
-              "FitJet.phi", "FitJet.mass", "FitChi2"},
+    produces={
+        "FitJet.pt",
+        "FitJet.eta",
+        "FitJet.phi",
+        "FitJet.mass",
+        "FitChi2",
+        "FitW1.*",
+        "FitW2.*",
+        "FitTop1.*",
+        "FitTop2.*",
+    },
     jet_pt=None,
     jet_trigger=None,
     sandbox="bash::$CF_REPO_BASE/sandboxes/cmsswtest.sh",
@@ -175,45 +185,59 @@ def kinFit(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
 
         return initial_array
 
-    # Convert data to arrays with explicit record structure
-    indexmask = appendindices(indexlist, ak.num(
-        sorted_jets.pt[sel_jet_mask], axis=1))
+    def insert_at_index(to_insert, where, indices_to_replace):
+        full_true = ak.full_like(where, True, dtype=bool)
+        mask = full_true & indices_to_replace
+        flat = flat_np_view(where[mask])
+        flat = flat_np_view(to_insert)
+        cut_orig = ak.num(where[mask])
+        cut_replaced = ak.unflatten(flat, cut_orig)
+        original = where[~mask]
+        combined = ak.concatenate((original, cut_replaced), axis=1)
+        return combined
+
     lok_ind = ak.local_index(events.Jet)
-    indexpad = ak.pad_none(indexmask, ak.num(lok_ind, axis=0), axis=0)
-    full_ind = ak.where(eventmask, indexpad, lok_ind)
+    # Convert data to arrays with explicit record structure
+    indexmask = appendindices(indexlist, ak.num(lok_ind[eventmask], axis=1))
+
+    full_true = ak.full_like(events.Jet.pt, True, dtype=bool)
+    fitjet_mask = full_true & eventmask
+    flat_indices = flat_np_view(lok_ind[fitjet_mask])
+    flat_indices = flat_np_view(indexmask)
+    cut_original = ak.num(lok_ind[fitjet_mask])
+    cut_replaced = ak.unflatten(flat_indices, cut_original)
+    original = lok_ind[~fitjet_mask]
+    combined = ak.concatenate((original, cut_replaced), axis=1)
+    combined_indices = insert_at_index(indexmask, lok_ind, eventmask)
+
     # mask_from_indices
     # First, get the original jets that pass selection and sort them by indexmask
     # IPython.embed()
-    sorted_jet = events.Jet[full_ind]
+    sorted_jet = events.Jet[combined_indices]
 
     # Take only the first 6 jets per event
     sorted_jets_top6 = sorted_jet[:, :6]
-
     # Convert your Python lists to awkward arrays
     fitPt_ak = ak.Array(fitPt)
-    fitPt_ak = ak.pad_none(fitPt_ak, ak.num(
-        sorted_jets_top6, axis=0), axis=0)
+    fitPt_full = insert_at_index(
+        fitPt_ak[:, :6], sorted_jets_top6.pt, eventmask)
     fitEta_ak = ak.Array(fitEta)
-    fitEta_ak = ak.pad_none(fitEta_ak, ak.num(
-        sorted_jets_top6, axis=0), axis=0)
+    fitEta_full = insert_at_index(
+        fitEta_ak[:, :6], sorted_jets_top6.eta, eventmask)
     fitPhi_ak = ak.Array(fitPhi)
-    fitPhi_ak = ak.pad_none(fitPhi_ak, ak.num(
-        sorted_jets_top6, axis=0), axis=0)
+    fitPhi_full = insert_at_index(
+        fitPhi_ak[:, :6], sorted_jets_top6.phi, eventmask)
     fitMass_ak = ak.Array(fitMass)
-    fitMass_ak = ak.pad_none(fitMass_ak, ak.num(
-        sorted_jets_top6, axis=0), axis=0)
+    fitMass_full = insert_at_index(
+        fitMass_ak[:, :6], sorted_jets_top6.mass, eventmask)
     # Create FitJet collection for the selected events with fit values
-    selected_fitJet = sorted_jets_top6  # Start with the sorted structure
-    selected_fitJet_record = ak.Array({"reco": selected_fitJet})
-    selected_fitJet_record = ak.with_field(
-        selected_fitJet_record, fitPt_ak[:, :6], "pt")
-    selected_fitJet_record = ak.with_field(
-        selected_fitJet_record, fitEta_ak[:, :6], "eta")
-    selected_fitJet_record = ak.with_field(
-        selected_fitJet_record, fitPhi_ak[:, :6], "phi")
-    selected_fitJet_record = ak.with_field(
-        selected_fitJet_record, fitMass_ak[:, :6], "mass")
-    events = set_ak_column(events, "FitJet", selected_fitJet_record)
+    fitJet_record = ak.Array({"reco": sorted_jets_top6})
+    fitJet_record = ak.with_field(fitJet_record, fitPt_full[:, :6], "pt")
+    fitJet_record = ak.with_field(fitJet_record, fitEta_full[:, :6], "eta")
+    fitJet_record = ak.with_field(fitJet_record, fitPhi_full[:, :6], "phi")
+    fitJet_record = ak.with_field(fitJet_record, fitMass_full[:, :6], "mass")
+    events = set_ak_column(events, "FitJet", fitJet_record)
+    # IPython.embed()
     total_chi2 = np.full(len(events), EMPTY_FLOAT)
     total_chi2[eventmask] = ak.Array(fitChi2)
     events = set_ak_column(events, "FitChi2", total_chi2)
@@ -247,8 +271,6 @@ def kinFit(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
     jet_trigger=None,
     jet_base_trigger=None,
     alt_jet_trigger=None,
-
-
 )
 def jet_selection(
     self: Selector,
