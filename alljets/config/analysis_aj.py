@@ -4,18 +4,19 @@
 Configuration of the topmass_alljets analysis.
 """
 
-import os
 import functools
+import os
 
 import law
 import order as od
-from scinum import Number
-
-from columnflow.util import DotDict, maybe_import
 from columnflow.config_util import (
-    get_root_processes_from_campaign, add_shift_aliases, get_shifts_from_sources,
+    add_shift_aliases,
+    get_root_processes_from_campaign,
+    get_shifts_from_sources,
     verify_config_processes,
 )
+from columnflow.util import DotDict, maybe_import
+from scinum import Number
 
 ak = maybe_import("awkward")
 
@@ -64,7 +65,6 @@ ana.x.config_groups = {}
 # update this config or add additional ones to accomodate the needs of your analysis
 
 from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
-
 
 # copy the campaign
 # (creates copies of all linked datasets, processes, etc. to allow for encapsulated customization)
@@ -118,7 +118,7 @@ dataset_names = [
     "qcd_ht700to1000_madgraph",
     "qcd_ht1000to1500_madgraph",
     "qcd_ht1500to2000_madgraph",
-  #  "qcd_ht2000_madgraph",
+    #  "qcd_ht2000_madgraph",
     # These are not in 2017 nano v9:
     # "st_schannel_lep_amcatnlo",
     # "st_schannel_had_amcatnlo",
@@ -198,11 +198,14 @@ cfg.x.validate_dataset_lfns = False
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2?rev=2#Combination_and_correlations: 41480
 # Luminosity by trigger: PFHT380_SixPFJet32_DoublePFBTagCSV_2p2: 36674
 # PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2: 27121
-cfg.x.luminosity = Number(36674, {
-    "lumi_13TeV_2017": 0.02j,
-    "lumi_13TeV_1718": 0.006j,
-    "lumi_13TeV_correlated": 0.009j,
-})
+cfg.x.luminosity = Number(
+    36674,
+    {
+        "lumi_13TeV_2017": 0.02j,
+        "lumi_13TeV_1718": 0.006j,
+        "lumi_13TeV_correlated": 0.009j,
+    },
+)
 
 # b-tag working points
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
@@ -337,66 +340,79 @@ add_shift_aliases(
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = "2017"
 corr_postfix = ""
-cfg.x.external_files = DotDict.wrap({
-    # lumi files
-    "lumi": {
-        "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
-        "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
-    },
-
-    # muon scale factors
-    "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
-
-    # btag scale factor
-    "btag_sf_corr": (f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz", "v1"),
-
-    # pileup weight corrections
-    "pu_sf": (f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz", "v1"),
-
-    # jet energy correction
-    "jet_jerc": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
-
-    # electron scale factors
-    "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
-
-    # # prototype trigger weight corrections
-    # "trig_sf": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
-    #     "v1",
-    # ),
-
-    # # prototype trigger weight corrections 1D pt
-    # "trig_sf_pt": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-    #     "v1",
-    # ),
-
-    # # prototype trigger weight corrections 1D ht
-    # "trig_sf_ht": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-    #     "v1",
-    # ),
-
-    # # prototype trigger weight corrections 2x 1D first ht second pt
-    # "trig_sf_pt_after_ht": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-    #     "v1",
-    # ),
-
-    # # prototype trigger weight corrections 2x 1D first pt second ht
-    # "trig_sf_ht_after_pt": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-    #     "v1",
-    # ),
-})
+cfg.x.external_files = DotDict.wrap(
+    {
+        # lumi files
+        "lumi": {
+            "golden": (
+                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
+                "v1",
+            ),  # noqa
+            "normtag": (
+                "/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json",
+                "v1",
+            ),
+        },
+        # muon scale factors
+        "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
+        # btag scale factor
+        "btag_sf_corr": (
+            f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz",
+            "v1",
+        ),
+        # pileup weight corrections
+        "pu_sf": (
+            f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz",
+            "v1",
+        ),
+        # jet energy correction
+        "jet_jerc": (
+            f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz",
+            "v1",
+        ),
+        # electron scale factors
+        "electron_sf": (
+            f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz",
+            "v1",
+        ),
+        # # prototype trigger weight corrections
+        # "trig_sf": (
+        #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
+        #     "v1",
+        # ),
+        # # prototype trigger weight corrections 1D pt
+        # "trig_sf_pt": (
+        #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+        #     "v1",
+        # ),
+        # # prototype trigger weight corrections 1D ht
+        # "trig_sf_ht": (
+        #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+        #     "v1",
+        # ),
+        # # prototype trigger weight corrections 2x 1D first ht second pt
+        # "trig_sf_pt_after_ht": (
+        #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+        #     "v1",
+        # ),
+        # # prototype trigger weight corrections 2x 1D first pt second ht
+        # "trig_sf_ht_after_pt": (
+        #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+        #     "v1",
+        # ),
+    }
+)
 
 cfg.x.trigger = {
-    "tt_fh": ["PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2"],
+    "tt_fh": [
+        "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
+        "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+    ],
 }
 
 cfg.x.ref_trigger = {
@@ -431,46 +447,110 @@ cfg.x.ref_trigger = {
 cfg.x.reduced_file_size = 512.0
 
 # columns to keep after certain steps
-cfg.x.keep_columns = DotDict.wrap({
-    "cf.ReduceEvents": {
-        # general event info
-        "run", "luminosityBlock", "event",
-        # object info
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Bjet.*", "VetoJet.*", "LightJet.*", "JetsByBTag.*",
-        # "EventJet.*",
-        "Jet.btagDeepFlavB", "Jet.hadronFlavour",
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
-        "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
-        "PV.npvs",
-        "FitJet.*",  "FitChi2",
-        "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
-        "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350", "HLT.Physics",
-        "HLT.PFHT1050", "HLT.PFHT890",
-        # columns added during selection
-        "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight", "trig_weight", "trig_weight_up",
-        "trig_weight_down", "murmuf_weight", "pu_weight", "btag_weight", "combination_type", "R2b4q", "trig_ht",
-    },
-    "cf.MergeSelectionMasks": {
-        "normalization_weight", "process_id", "category_ids", "cutflow.*",
-    },
-    "cf.UniteColumns": {
-        "*_weight", "Jet.*", "combination_type", "ht", "Mt*", "MW*", "trig_bits",
-    },
-})
+cfg.x.keep_columns = DotDict.wrap(
+    {
+        "cf.ReduceEvents": {
+            # general event info
+            "run",
+            "luminosityBlock",
+            "event",
+            # object info
+            "Jet.pt",
+            "Jet.eta",
+            "Jet.phi",
+            "Jet.mass",
+            "Bjet.*",
+            "VetoJet.*",
+            "LightJet.*",
+            "JetsByBTag.*",
+            # "EventJet.*",
+            "Jet.btagDeepFlavB",
+            "Jet.hadronFlavour",
+            "Muon.pt",
+            "Muon.eta",
+            "Muon.phi",
+            "Muon.mass",
+            "Muon.pfRelIso04_all",
+            "MET.pt",
+            "MET.phi",
+            "MET.significance",
+            "MET.covXX",
+            "MET.covXY",
+            "MET.covYY",
+            "PV.npvs",
+            "FitJet.*",
+            "FitChi2",
+            "FitW1.*",
+            "FitW2.*",
+            "FitTop1.*",
+            "FitTop2.*",
+            "PV.npvs",
+            "PV.npvsGood",
+            "DeltaR",
+            "GenPart.*",
+            "MW1",
+            "MW2",
+            "Mt1",
+            "Mt2",
+            "chi2",
+            "deltaRb",
+            "HLT.Mu50",
+            "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+            "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
+            "HLT.IsoMu24",
+            "HLT.PFHT370",
+            "HLT.PFHT350",
+            "HLT.Physics",
+            "HLT.PFHT1050",
+            "HLT.PFHT890",
+            # columns added during selection
+            "deterministic_seed",
+            "process_id",
+            "mc_weight",
+            "cutflow.*",
+            "pdf_weight",
+            "trig_weight",
+            "trig_weight_up",
+            "trig_weight_down",
+            "murmuf_weight",
+            "pu_weight",
+            "btag_weight",
+            "combination_type",
+            "R2b4q",
+            "trig_ht",
+        },
+        "cf.MergeSelectionMasks": {
+            "normalization_weight",
+            "process_id",
+            "category_ids",
+            "cutflow.*",
+        },
+        "cf.UniteColumns": {
+            "*_weight",
+            "Jet.*",
+            "combination_type",
+            "ht",
+            "Mt*",
+            "MW*",
+            "trig_bits",
+        },
+    }
+)
 
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
-cfg.x.event_weights = DotDict({
-    "normalization_weight": [],
-    "btag_weight": [],
-    # "trig_weight": [],
-    # "trig_weight": get_shifts("trig"),
-    # "muon_weight": get_shifts("mu"),
-    "pdf_weight": get_shifts("pdf"),
-    "murmuf_weight": get_shifts("murmuf"),
-})
+cfg.x.event_weights = DotDict(
+    {
+        "normalization_weight": [],
+        "btag_weight": [],
+        # "trig_weight": [],
+        # "trig_weight": get_shifts("trig"),
+        # "muon_weight": get_shifts("mu"),
+        "pdf_weight": get_shifts("pdf"),
+        "murmuf_weight": get_shifts("murmuf"),
+    }
+)
 
 # versions per task family, either referring to strings or to callables receving the invoking
 # task instance and parameters to be passed to the task family
@@ -486,7 +566,9 @@ cfg.add_channel(name="mutau", id=1)
 
 # add categories using the "add_category" tool which adds auto-generated ids
 from alljets.config.categories import add_categories
+
 add_categories(cfg)
 # add variables
 from alljets.config.variables import add_variables
+
 add_variables(cfg)
