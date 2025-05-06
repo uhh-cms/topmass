@@ -5,7 +5,6 @@ Definition of variables.
 """
 
 import order as od
-
 from columnflow.columnar_util import EMPTY_FLOAT
 
 
@@ -650,13 +649,6 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"trig bits",
     )
     cfg.add_variable(
-        name="fit_top1_pt",
-        expression="FitJet.Top1[0]",
-        binning=(10, 60, 500),
-        unit="GeV",
-        x_title=r"fitted top mass",
-    )
-    cfg.add_variable(
         name="fit_jets_pt",
         expression="FitJet.pt[0:5]",
         binning=(10, 60, 500),
@@ -664,87 +656,44 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"fitted top mass",
     )
     cfg.add_variable(
-        name="fit_top1_mass",
-        expression="FitJet.Top1[:,3]",
-        binning=(100, 0, 500),
-        unit="GeV",
-        x_title=r"fitted top mass",
-    )
-    cfg.add_variable(
-        name="fit_W1_mass",
-        expression="FitJet.W1[:,3]",
-        binning=(100, 0, 100),
+        name="fit_W1_pt",
+        expression="FitW1.pt",
+        binning=(100, 0, 200),
         unit="GeV",
         x_title=r"fitted W1 mass",
     )
     cfg.add_variable(
-        name="fit_W1_Pt",
-        expression="FitJet.W1[:,0]",
-        binning=(100, 0, 100),
+        name="fit_W1_mass",
+        expression="FitW1.mass",
+        binning=(100, 0, 200),
         unit="GeV",
-        x_title=r"fitted W1 Pt",
-    )
-    cfg.add_variable(
-        name="fit_W1Prod1_mass",
-        expression="FitJet.W1Prod1[:,3]",
-        binning=(100, 0, 100),
-        unit="GeV",
-        x_title=r"fitted W1Prod1 mass",
-    )
-    cfg.add_variable(
-        name="fit_W1Prod1_Pt",
-        expression="FitJet.W1Prod1[:,0]",
-        binning=(100, 0, 100),
-        unit="GeV",
-        x_title=r"fitted W1Prod1 Pt",
-    )
-    cfg.add_variable(
-        name="fit_W1_Phi",
-        expression="FitJet.W1[:,2]",
-        binning=(100, -4, 8),
-        unit="GeV",
-        x_title=r"fitted W1 Phi",
-    )
-    cfg.add_variable(
-        name="fit_W1_eta",
-        expression="FitJet.W1[:,1]",
-        binning=(100, -3, 3),
-        unit="GeV",
-        x_title=r"fitted W1 Eta",
+        x_title=r"fitted W1 mass",
     )
     cfg.add_variable(
         name="fit_W2_mass",
-        expression="FitJet.W2[:,3]",
-        binning=(100, 0, 100),
+        expression="FitW2.mass",
+        binning=(100, 0, 200),
         unit="GeV",
-        x_title=r"fitted W2 mass",
+        x_title=r"fitted W1 mass",
     )
     cfg.add_variable(
-        name="fit_W2_Pt",
-        expression="FitJet.W2[:,0]",
-        binning=(100, 0, 100),
+        name="fit_Top1_mass",
+        expression="FitTop1.mass",
+        binning=(100, 0, 500),
         unit="GeV",
-        x_title=r"fitted W2 Pt",
+        x_title=r"fitted Top mass",
     )
     cfg.add_variable(
-        name="fit_W2_Phi",
-        expression="FitJet.W2[:,2]",
-        binning=(100, -4, 8),
+        name="fit_Top2_mass",
+        expression="FitTop2.mass",
+        binning=(100, 0, 500),
         unit="GeV",
-        x_title=r"fitted W2 Phi",
+        x_title=r"fitted Top mass",
     )
-    cfg.add_variable(
-        name="fit_W2_eta",
-        expression="FitJet.W2[:,1]",
-        binning=(100, -3, 3),
-        unit="GeV",
-        x_title=r"fitted W2 Eta",
-    )
-
     cfg.add_variable(
         name="fitchi2",
         expression="FitChi2",
-        binning=(100, 0, 40),
+        binning=(100, 0, 200),
         unit="",
         x_title=r"chi2 from kinfit",
     )
