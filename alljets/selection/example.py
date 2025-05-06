@@ -82,7 +82,7 @@ def muon_selection(
         pu_weight,
         btag_weights,
     },
-      produces={
+    produces={
         # selectors / producers whose newly created columns should be kept
         mc_weight, cutflow_features, process_ids,
         jet_selection,
@@ -117,7 +117,8 @@ def example(
 
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
+        events = set_ak_column(
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
     #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
@@ -130,16 +131,18 @@ def example(
     events, jet_results = self[jet_selection](events, **kwargs)
     results += jet_results
 
-    #kinFit selection
-    events, kin_results =self[kinFit](events, **kwargs)
+    # kinFit selection
+    events, kin_results = self[kinFit](events, **kwargs)
     results += kin_results
-    
-    results += SelectionResult(steps={"kinfit_convergence": (events.FitChi2 < 10000)})
+
+    results += SelectionResult(
+        steps={"kinfit_convergence": (events.FitChi2 < 10000)})
 
     # combined event selection after all steps
     results.event = (results.steps.jet &
-                    results.steps.Trigger & results.steps.BTag &
-                    results.steps.HT & results.steps.Chi2 & results.steps.SixJets)
+                     results.steps.Trigger & results.steps.BTag &
+                     results.steps.HT &  # results.steps.Chi2 &
+                     results.steps.SixJets)
     # results.steps.BaseTrigger
 
     # create process ids
@@ -255,7 +258,8 @@ def example_trig_weight(
 
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
+        events = set_ak_column(
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
     #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
@@ -270,8 +274,8 @@ def example_trig_weight(
 
     # combined event selection after all steps
     results.event = (results.steps.muon & results.steps.jet &
-                    results.steps.Trigger & results.steps.BTag &
-                    results.steps.HT & results.steps.n10Chi2 & results.steps.SixJets)
+                     results.steps.Trigger & results.steps.BTag &
+                     results.steps.HT & results.steps.n10Chi2 & results.steps.SixJets)
     # results.steps.BaseTrigger
 
     # create process ids
@@ -406,7 +410,8 @@ def trigger_eff(
 
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
+        events = set_ak_column(
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
     #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
@@ -431,7 +436,8 @@ def trigger_eff(
     # add the mc weight
     if self.dataset_inst.is_mc:
         # events = self[mc_weight](events, **kwargs)
-        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+        events = set_ak_column(events, "mc_weight", np.ones(
+            len(events)), value_type=np.float32)
         events = self[trig_weights](events, **kwargs)
 
         if self.dataset_inst.has_tag("has_top"):
@@ -535,7 +541,8 @@ def trigger_eff_pt(
 
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
+        events = set_ak_column(
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
     #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
@@ -560,7 +567,8 @@ def trigger_eff_pt(
     # add the mc weight
     if self.dataset_inst.is_mc:
         # events = self[mc_weight](events, **kwargs)
-        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+        events = set_ak_column(events, "mc_weight", np.ones(
+            len(events)), value_type=np.float32)
         events = self[trig_weights_pt](events, **kwargs)
 
         if self.dataset_inst.has_tag("has_top"):
@@ -664,7 +672,8 @@ def trigger_eff_ht(
 
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
+        events = set_ak_column(
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
     #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
@@ -689,7 +698,8 @@ def trigger_eff_ht(
     # add the mc weight
     if self.dataset_inst.is_mc:
         # events = self[mc_weight](events, **kwargs)
-        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+        events = set_ak_column(events, "mc_weight", np.ones(
+            len(events)), value_type=np.float32)
         events = self[trig_weights_ht](events, **kwargs)
 
         if self.dataset_inst.has_tag("has_top"):
@@ -795,7 +805,8 @@ def trigger_eff_pt_after_ht(
 
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
+        events = set_ak_column(
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
     #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
@@ -820,7 +831,8 @@ def trigger_eff_pt_after_ht(
     # add the mc weight
     if self.dataset_inst.is_mc:
         # events = self[mc_weight](events, **kwargs)
-        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+        events = set_ak_column(events, "mc_weight", np.ones(
+            len(events)), value_type=np.float32)
         events = self[trig_weights_ht](events, **kwargs)
         events = self[trig_weights_pt_after_ht](events, **kwargs)
         events = set_ak_column(
@@ -932,7 +944,8 @@ def trigger_eff_ht_after_pt(
 
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
+        events = set_ak_column(
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
     #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
@@ -957,7 +970,8 @@ def trigger_eff_ht_after_pt(
     # add the mc weight
     if self.dataset_inst.is_mc:
         # events = self[mc_weight](events, **kwargs)
-        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+        events = set_ak_column(events, "mc_weight", np.ones(
+            len(events)), value_type=np.float32)
         events = self[trig_weights_pt](events, **kwargs)
         events = self[trig_weights_ht_after_pt](events, **kwargs)
         events = set_ak_column(
