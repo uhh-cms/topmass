@@ -132,16 +132,12 @@ def example(
     results += jet_results
 
     # kinFit selection
-    events, kin_results = self[kinFit](events, **kwargs)
-    results += kin_results
 
-    results += SelectionResult(
-        steps={"kinfit_convergence": (events.FitChi2 < 10000)})
 
     # combined event selection after all steps
     results.event = (results.steps.jet &
                      results.steps.Trigger & results.steps.BTag &
-                     results.steps.HT &  # results.steps.Chi2 &
+                     results.steps.HT &  #results.steps.FitChi2 & results.steps.Chi2 &
                      results.steps.SixJets)
     # results.steps.BaseTrigger
 
