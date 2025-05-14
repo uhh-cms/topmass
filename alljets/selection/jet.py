@@ -13,7 +13,7 @@ from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.util import maybe_import
 
-import pyKinFitTest as pyKinFit
+from alljets.production.KinFit import kinFit
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -116,135 +116,6 @@ def jet_selection_init(self: Selector) -> None:
 
 
 @selector(
-    uses={"Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB"},
-    produces={
-        "FitJet.pt",
-        "FitJet.eta",
-        "FitJet.phi",
-        "FitJet.mass",
-        "FitChi2",
-        "FitW1.*",
-        "FitW2.*",
-        "FitTop1.*",
-        "FitTop2.*",
-    },
-    jet_pt=None,
-    jet_trigger=None,
-    sandbox="bash::$CF_REPO_BASE/sandboxes/cmsswtest.sh",
-)
-def kinFit(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
-    EMPTY_FLOAT = -99999.0
-    import IPython
-
-    # PRELIMINARY SELECTIONS
-    ht_sel = ak.sum(events.Jet.pt, axis=1) >= 450
-    jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
-    jet_sel = ak.sum(jet_mask, axis=1) >= 6
-    # b-tagged jets (tight wp)
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
-    # bjet_indices = indices[bjet_mask][:, :2]
-    bjet_sel = (ak.sum(bjet_mask, axis=1) >= 2) & (
-        ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1)
-    )
-    eventmask = ht_sel & jet_sel & bjet_sel
-    sel_events = events[eventmask]
-    sorted_indices = ak.argsort(sel_events.Jet.btagDeepFlavB, ascending=False)
-    sorted_jets = sel_events.Jet[sorted_indices]
-    sel_jet_mask = (sorted_jets.pt >= 40.0) & (abs(sorted_jets.eta) < 2.4)
-    fitPt, fitEta, fitPhi, fitMass, indexlist, fitChi2 = pyKinFit.setBestCombi(
-        ak.to_list(sorted_jets.pt[sel_jet_mask]),
-        ak.to_list(sorted_jets.eta[sel_jet_mask]),
-        ak.to_list(sorted_jets.phi[sel_jet_mask]),
-        ak.to_list(sorted_jets.mass[sel_jet_mask]),
-    )
-
-    def appendindices(initial_array, target_lengths):
-        # Check that initial_array and target_lengths have the same number of outer entries
-        if len(initial_array) != len(target_lengths):
-            raise ValueError(
-                "initial_array and target_lengths must have the same number of outer entries."
-            )
-
-        # Process each pair of inner lists
-        for i in range(len(initial_array)):
-            inner_list = initial_array[i]
-            # this should be a list of integers
-            target_length = target_lengths[i]
-            # Create a list of all integers in the range from 0 to target_length - 1
-            available_numbers = list(range(target_length))
-
-            # Iterate through the available numbers and fill the inner list
-            for num in available_numbers:
-                # Only add the number if it's not already in the inner list
-                if num not in inner_list:
-                    inner_list.append(num)
-                # Stop if we reach the target length
-                if len(inner_list) >= target_length:
-                    break
-
-        return initial_array
-
-    def insert_at_index(to_insert, where, indices_to_replace):
-        full_true = ak.full_like(where, True, dtype=bool)
-        mask = full_true & indices_to_replace
-        flat = flat_np_view(where[mask])
-        flat = flat_np_view(to_insert)
-        cut_orig = ak.num(where[mask])
-        cut_replaced = ak.unflatten(flat, cut_orig)
-        original = where[~mask]
-        combined = ak.concatenate((original, cut_replaced), axis=1)
-        return combined
-
-    lok_ind = ak.local_index(events.Jet)
-    # Convert data to arrays with explicit record structure
-    indexmask = appendindices(indexlist, ak.num(lok_ind[eventmask], axis=1))
-
-    full_true = ak.full_like(events.Jet.pt, True, dtype=bool)
-    fitjet_mask = full_true & eventmask
-    flat_indices = flat_np_view(lok_ind[fitjet_mask])
-    flat_indices = flat_np_view(indexmask)
-    cut_original = ak.num(lok_ind[fitjet_mask])
-    cut_replaced = ak.unflatten(flat_indices, cut_original)
-    original = lok_ind[~fitjet_mask]
-    combined = ak.concatenate((original, cut_replaced), axis=1)
-    combined_indices = insert_at_index(indexmask, lok_ind, eventmask)
-
-    # mask_from_indices
-    # First, get the original jets that pass selection and sort them by indexmask
-    # IPython.embed()
-    sorted_jet = events.Jet[combined_indices]
-
-    # Take only the first 6 jets per event
-    sorted_jets_top6 = sorted_jet[:, :6]
-    # Convert your Python lists to awkward arrays
-    fitPt_ak = ak.Array(fitPt)
-    fitPt_full = insert_at_index(
-        fitPt_ak[:, :6], sorted_jets_top6.pt, eventmask)
-    fitEta_ak = ak.Array(fitEta)
-    fitEta_full = insert_at_index(
-        fitEta_ak[:, :6], sorted_jets_top6.eta, eventmask)
-    fitPhi_ak = ak.Array(fitPhi)
-    fitPhi_full = insert_at_index(
-        fitPhi_ak[:, :6], sorted_jets_top6.phi, eventmask)
-    fitMass_ak = ak.Array(fitMass)
-    fitMass_full = insert_at_index(
-        fitMass_ak[:, :6], sorted_jets_top6.mass, eventmask)
-    # Create FitJet collection for the selected events with fit values
-    fitJet_record = ak.Array({"reco": sorted_jets_top6})
-    fitJet_record = ak.with_field(fitJet_record, fitPt_full[:, :6], "pt")
-    fitJet_record = ak.with_field(fitJet_record, fitEta_full[:, :6], "eta")
-    fitJet_record = ak.with_field(fitJet_record, fitPhi_full[:, :6], "phi")
-    fitJet_record = ak.with_field(fitJet_record, fitMass_full[:, :6], "mass")
-    events = set_ak_column(events, "FitJet", fitJet_record)
-    # IPython.embed()
-    total_chi2 = np.full(len(events), EMPTY_FLOAT)
-    total_chi2[eventmask] = ak.Array(fitChi2)
-    events = set_ak_column(events, "FitChi2", total_chi2)
-    return events, SelectionResult()
-
-
-@selector(
     uses={
         "Jet.pt",
         "Jet.eta",
@@ -255,6 +126,7 @@ def kinFit(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
         "HLT.*",
         "gen_top_decay",
         "GenPart.*",
+        kinFit,
     },
     # "Jet.jetId", "Jet.puId", "Jet.genJetIdx", "GenJet.*",
     produces={
@@ -266,6 +138,8 @@ def kinFit(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
         "deltaRb",
         "combination_type",
         "R2b4q",
+        "FitJet.*",
+        "FitChi2",
     },
     jet_pt=None,
     jet_trigger=None,
@@ -383,14 +257,10 @@ def jet_selection(
     for i in range(6):
         (mt_result_filled[i])[sixjets_sel] = ak.flatten(mt_result[i])
 
-    chi2_sel = ak.Array(
-        (mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
-    chi2_sel1 = ak.Array(
-        (mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
-    chi2_sel2 = ak.Array(
-        (mt_result_filled[5] < 10) & (mt_result_filled[5] > -1))
-    chi2_sel3 = ak.Array(
-        (mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
+    chi2_sel = ak.Array((mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
+    chi2_sel1 = ak.Array((mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
+    chi2_sel2 = ak.Array((mt_result_filled[5] < 10) & (mt_result_filled[5] > -1))
+    chi2_sel3 = ak.Array((mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
     # verify_jet_trigger = (check_trigger == True)
 
     events = set_ak_column(events, "Mt1", mt_result_filled[0])
@@ -399,6 +269,21 @@ def jet_selection(
     events = set_ak_column(events, "MW2", mt_result_filled[3])
     events = set_ak_column(events, "deltaRb", mt_result_filled[4])
     events = set_ak_column(events, "chi2", mt_result_filled[5])
+
+    ht_sel_kin = ak.sum(events.Jet.pt, axis=1) >= 450
+
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
+    # bjet_indices = indices[bjet_mask][:, :2]
+    bjet_sel_kin = (ak.sum(bjet_mask, axis=1) >= 2) & (
+        ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1)
+    )
+    jet_mask_kin = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+    jet_sel_kin = ak.sum(jet_mask_kin, axis=1) >= 6
+    kinFit_eventmask = ht_sel_kin & jet_sel_kin & bjet_sel_kin
+    kinFit_jetmask = (events[kinFit_eventmask].Jet.pt >= 40.0) & (abs(events[kinFit_eventmask].Jet.eta) < 2.4)
+    events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
+    fitchi2_sel = events.FitChi2 < 10000
 
     def combinationtype(bestcomb, correctcomb):
         b1, b2 = ak.unzip(ak.unzip(bestcomb)[0])
@@ -511,6 +396,7 @@ def jet_selection(
             "n25Chi2": chi2_sel1,
             "n10Chi2": chi2_sel2,
             "n5Chi2": chi2_sel3,
+            "kinfit_convergence": (fitchi2_sel),
         },
         objects={
             "Jet": {
