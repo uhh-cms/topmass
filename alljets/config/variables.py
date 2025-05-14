@@ -3,9 +3,10 @@
 """
 Definition of variables.
 """
-
+from functools import partial
 import order as od
-from columnflow.columnar_util import EMPTY_FLOAT
+from columnflow.columnar_util import EMPTY_FLOAT, attach_coffea_behavior, default_coffea_collections
+
 
 
 def add_variables(cfg: od.Config) -> None:
@@ -649,46 +650,11 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"trig bits",
     )
     cfg.add_variable(
-        name="fit_jets_pt",
-        expression="FitJet.pt[0:5]",
+        name="fit_B1_pt",
+        expression="FitJet.pt[:,0]",
         binning=(10, 60, 500),
         unit="GeV",
         x_title=r"fitted top mass",
-    )
-    cfg.add_variable(
-        name="fit_W1_pt",
-        expression="FitW1.pt",
-        binning=(100, 0, 200),
-        unit="GeV",
-        x_title=r"fitted W1 mass",
-    )
-    cfg.add_variable(
-        name="fit_W1_mass",
-        expression="FitW1.mass",
-        binning=(100, 0, 200),
-        unit="GeV",
-        x_title=r"fitted W1 mass",
-    )
-    cfg.add_variable(
-        name="fit_W2_mass",
-        expression="FitW2.mass",
-        binning=(100, 0, 200),
-        unit="GeV",
-        x_title=r"fitted W1 mass",
-    )
-    cfg.add_variable(
-        name="fit_Top1_mass",
-        expression="FitTop1.mass",
-        binning=(100, 0, 500),
-        unit="GeV",
-        x_title=r"fitted Top mass",
-    )
-    cfg.add_variable(
-        name="fit_Top2_mass",
-        expression="FitTop2.mass",
-        binning=(100, 0, 500),
-        unit="GeV",
-        x_title=r"fitted Top mass",
     )
     cfg.add_variable(
         name="fitchi2",
@@ -696,4 +662,62 @@ def add_variables(cfg: od.Config) -> None:
         binning=(100, 0, 200),
         unit="",
         x_title=r"chi2 from kinfit",
+    )
+    def build_w1jet(events, which=None):
+        events = attach_coffea_behavior(events, {"FitW1": default_coffea_collections["Jet"]})
+        W1jets = events.FitW1
+        if which is None:
+            return W1jets * 1
+        if which == "mass":
+            return W1jets.mass
+        if which == "pt":
+            return W1jets.pt
+        if which == "eta":
+            return W1jets.eta
+        if which == "abs_eta":
+            return abs(W1jets.eta)
+        if which == "phi":
+            return W1jets.phi
+        if which == "energy":
+            return W1jets.energy
+        raise ValueError(f"Unknown which: {which}")
+        
+    build_w1jet.inputs = ["FitW1.{x,t,y,z}"]
+
+    cfg.add_variable(
+        name="fit_W1_mass",
+        expression=partial(build_w1jet, which="mass"),
+        aux={"inputs": build_w1jet.inputs},
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"fitted W mass",
+    )
+    def build_top1jet(events, which=None):
+        events = attach_coffea_behavior(events, {"FitTop1": default_coffea_collections["Jet"]})
+        Top1jets = events.FitTop1
+        if which is None:
+            return Top1jets * 1
+        if which == "mass":
+            return Top1jets.mass
+        if which == "pt":
+            return Top1jets.pt
+        if which == "eta":
+            return Top1jets.eta
+        if which == "abs_eta":
+            return abs(Top1jets.eta)
+        if which == "phi":
+            return Top1jets.phi
+        if which == "energy":
+            return Top1jets.energy
+        raise ValueError(f"Unknown which: {which}")
+        
+    build_top1jet.inputs = ["FitTop1.{x,y,z,t}"]
+
+    cfg.add_variable(
+        name="fit_Top1_mass",
+        expression=partial(build_top1jet, which="mass"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"fitted Top mass",
     )
