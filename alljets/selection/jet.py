@@ -3,6 +3,7 @@
 Jet selection methods.
 """
 
+from alljets.production.KinFit import kinFit
 from columnflow.columnar_util import (
     flat_np_view,
     mask_from_indices,
@@ -12,8 +13,6 @@ from columnflow.columnar_util import (
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.util import maybe_import
-
-from alljets.production.KinFit import kinFit
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -281,7 +280,9 @@ def jet_selection(
     jet_mask_kin = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
     jet_sel_kin = ak.sum(jet_mask_kin, axis=1) >= 6
     kinFit_eventmask = ht_sel_kin & jet_sel_kin & bjet_sel_kin
-    kinFit_jetmask = (events[kinFit_eventmask].Jet.pt >= 40.0) & (abs(events[kinFit_eventmask].Jet.eta) < 2.4)
+    kinFit_jetmask = (events[kinFit_eventmask].Jet.pt >= 40.0) & (
+        abs(events[kinFit_eventmask].Jet.eta) < 2.4
+    )
     events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
     fitchi2_sel = events.FitChi2 < 10000
 
