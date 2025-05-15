@@ -721,3 +721,11 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"fitted Top mass",
     )
+    cfg.add_variable(
+        name="fit_Top1_mass_1",
+        expression=partial(build_top1jet, which="mass"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=(40, 100, 500),
+        unit="GeV",
+        x_title=r"fitted Top mass",
+    )
