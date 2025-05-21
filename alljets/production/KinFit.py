@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import pyKinFit as pyKinFit
+import pyKinFit
 from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column, flat_np_view
 from columnflow.production import Producer, producer
 
@@ -59,7 +59,6 @@ def kinFit(
     def insert_at_index(to_insert, where, indices_to_replace):
         full_true = ak.full_like(where, True, dtype=bool)
         mask = full_true & indices_to_replace
-        flat = flat_np_view(where[mask])
         flat = flat_np_view(to_insert)
         cut_orig = ak.num(where[mask])
         cut_replaced = ak.unflatten(flat, cut_orig)
