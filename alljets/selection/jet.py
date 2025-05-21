@@ -184,7 +184,6 @@ def jet_selection(
             events = set_ak_column(events, "R2b4q", EF)
     else:
         events = set_ak_column(events, "R2b4q", EF)
-
     # build and return selection results
     # "objects" maps source columns to new columns and selections to be applied on the old columns
     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}

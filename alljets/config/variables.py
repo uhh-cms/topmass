@@ -204,7 +204,7 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )
-    cfg.add_variable(
+    var_jet6 = cfg.add_variable(
         name="jet6_pt_4",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
@@ -212,11 +212,28 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )
+    var_jet6.x.overflow = True
     cfg.add_variable(
         name="jet6_pt_5",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
         binning=[0, 10, 20, 26, 32, 40, 44, 50, 60, 100],
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="jet6_pt_6",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=[0, 10, 20, 23, 26, 29, 32, 36, 40, 44, 50, 60, 100],
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    cfg.add_variable(
+        name="jet6_pt_7",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=[0, 10, 20, 23, 26, 29, 32, 36, 40, 44, 50, 60, 150],
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )

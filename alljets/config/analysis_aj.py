@@ -128,7 +128,7 @@ for dataset_name in dataset_names:
 
     # for testing purposes, limit the number of files to 2
     # for info in dataset.info.values():
-    #     info.n_files = min(info.n_files, 1)
+    #     info.n_files = min(info.n_files, 2)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -139,12 +139,13 @@ verify_config_processes(cfg, warn=True)
 # default objects, such as calibrator, selector, producer, ml model, inference model, etc
 cfg.x.default_calibrator = "example"
 cfg.x.default_selector = "example"
+cfg.x.default_reducer = "cf_default"
 cfg.x.default_producer = "example"
 cfg.x.default_ml_model = None
 cfg.x.default_inference_model = "example"
 cfg.x.default_categories = ("incl",)
 cfg.x.default_variables = ("n_jet", "jet1_pt")
-cfg.x.default_weight_producer = "all_weights"
+cfg.x.default_hist_producer = "all_weights"
 
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)
@@ -351,40 +352,47 @@ cfg.x.external_files = DotDict.wrap({
     # electron scale factors
     "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
 
-    # # prototype trigger weight corrections
-    # "trig_sf": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
-    #     "v1",
-    # ),
+    # prototype trigger weight corrections
+    "trig_sf": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
+        "v1",
+    ),
 
-    # # prototype trigger weight corrections 1D pt
-    # "trig_sf_pt": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-    #     "v1",
-    # ),
+    # prototype trigger weight corrections 1D pt
+    "trig_sf_pt": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+        "v1",
+    ),
 
-    # # prototype trigger weight corrections 1D ht
-    # "trig_sf_ht": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-    #     "v1",
-    # ),
+    # prototype trigger weight corrections 1D ht
+    "trig_sf_ht": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+        "v1",
+    ),
 
-    # # prototype trigger weight corrections 2x 1D first ht second pt
-    # "trig_sf_pt_after_ht": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-    #     "v1",
-    # ),
+    # prototype trigger weight corrections 2x 1D first ht second pt
+    "trig_sf_pt_after_ht": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+        "v1",
+    ),
 
-    # # prototype trigger weight corrections 2x 1D first pt second ht
-    # "trig_sf_ht_after_pt": (
-    #     "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-    #     "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-    #     "v1",
-    # ),
+    # prototype trigger weight corrections 2x 1D first pt second ht
+    "trig_sf_ht_after_pt": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+        "v1",
+    ),
+
+    # prototype trigger weight corrections 3x 1D first ht second pt third ht
+    "trig_sf_ht_after_pt_after_ht": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "third_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+        "v1",
+    ),
 })
 
 cfg.x.trigger = {
@@ -454,12 +462,12 @@ cfg.x.keep_columns = DotDict.wrap({
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict({
     "normalization_weight": [],
-    "btag_weight": [],
+    # "btag_weight": [],
     # "trig_weight": [],
     # "trig_weight": get_shifts("trig"),
     # "muon_weight": get_shifts("mu"),
-    "pdf_weight": get_shifts("pdf"),
-    "murmuf_weight": get_shifts("murmuf"),
+    # "pdf_weight": get_shifts("pdf"),
+    # "murmuf_weight": get_shifts("murmuf"),
 })
 
 # versions per task family, either referring to strings or to callables receving the invoking

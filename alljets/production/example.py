@@ -29,7 +29,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "Jet.pt", "Bjet.pt", "LightJet*.pt", "Jet.phi", "Bjet.phi",
         "LightJet.phi", "Jet.eta", "Bjet.eta", "LightJet.eta",
         "Jet.mass", "VetoJet.pt", "Bjet.mass", "LightJet.mass",
-        "event", attach_coffea_behavior, "HLT.*",
+        "event", attach_coffea_behavior, "HLT.*", "Jet.btagDeepFlavB",
     },
     produces={
         # new columns
