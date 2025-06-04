@@ -536,19 +536,6 @@ cfg.x.keep_columns = DotDict.wrap(
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
-<<<<<<< HEAD
-cfg.x.event_weights = DotDict(
-    {
-        "normalization_weight": [],
-        "btag_weight": [],
-        # "trig_weight": [],
-        # "trig_weight": get_shifts("trig"),
-        # "muon_weight": get_shifts("mu"),
-        "pdf_weight": get_shifts("pdf"),
-        "murmuf_weight": get_shifts("murmuf"),
-    }
-)
-=======
 cfg.x.event_weights = DotDict({
     "normalization_weight": [],
     # "btag_weight": [],
@@ -558,7 +545,6 @@ cfg.x.event_weights = DotDict({
     # "pdf_weight": get_shifts("pdf"),
     # "murmuf_weight": get_shifts("murmuf"),
 })
->>>>>>> e249db226dd1b0ca7b1085f11817f7ec2c48614b
 
 # versions per task family, either referring to strings or to callables receving the invoking
 # task instance and parameters to be passed to the task family
