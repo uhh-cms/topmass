@@ -480,6 +480,8 @@ cfg.x.keep_columns = DotDict.wrap(
             "PV.npvs",
             "FitJet.*",
             "FitChi2",
+            "fitCombinationType",
+            "reco_combination_type",
             "PV.npvs",
             "PV.npvsGood",
             "DeltaR",

@@ -33,13 +33,14 @@ def kinFit(
     import IPython
 
     sel_events = events[eventmask]
-    sorted_indices = ak.argsort(sel_events.Jet.btagDeepFlavB, ascending=False)
-    sorted_jets = sel_events.Jet[sorted_indices]
+    sel_Jets = sel_events.Jet[sel_jet_mask]
+    sorted_indices = ak.argsort(sel_Jets.btagDeepFlavB, ascending=False)
+    sorted_jets = sel_Jets[sorted_indices]
     fitPt, fitEta, fitPhi, fitMass, indexlist, fitChi2 = pyKinFit.setBestCombi(
-        ak.to_list(sorted_jets.pt[sel_jet_mask]),
-        ak.to_list(sorted_jets.eta[sel_jet_mask]),
-        ak.to_list(sorted_jets.phi[sel_jet_mask]),
-        ak.to_list(sorted_jets.mass[sel_jet_mask]),
+        ak.to_list(sorted_jets.pt),
+        ak.to_list(sorted_jets.eta),
+        ak.to_list(sorted_jets.phi),
+        ak.to_list(sorted_jets.mass),
     )
 
     # function to insert append indices not found in a list yet to a target length
@@ -69,8 +70,9 @@ def kinFit(
     lok_ind = ak.local_index(events.Jet)
     indexmask = appendindices(indexlist, ak.num(lok_ind[eventmask], axis=1))
     combined_indices = insert_at_index(indexmask, lok_ind, eventmask)
-
-    sorted_jet = events.Jet[combined_indices]
+    sorted_reco_indices = ak.argsort(events.Jet.btagDeepFlavB, ascending=False)
+    sorted_reco = events.Jet[sorted_reco_indices]
+    sorted_jet = sorted_reco[combined_indices]
 
     # Take only the first 6 jets per event
     sorted_jets_top6 = sorted_jet[:, :6]

@@ -539,8 +539,8 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"Jet 6 bTag",
     )
     cfg.add_variable(
-        name="combination_type",
-        expression="combination_type",
+        name="reco_combination_type",
+        expression="reco_combination_type",
         null_value=EMPTY_FLOAT,
         binning=(4, -1.5, 2.5),
         x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
@@ -728,4 +728,11 @@ def add_variables(cfg: od.Config) -> None:
         binning=(40, 100, 500),
         unit="GeV",
         x_title=r"fitted Top mass",
+    )
+    cfg.add_variable(
+        name="fit_combination_type",
+        expression="fitCombinationType",
+        null_value=EMPTY_FLOAT,
+        binning=(4, -1.5, 2.5),
+        x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
     )

@@ -135,10 +135,11 @@ def jet_selection_init(self: Selector) -> None:
         "Mt2",
         "chi2",
         "deltaRb",
-        "combination_type",
+        "reco_combination_type",
         "R2b4q",
         "FitJet.*",
         "FitChi2",
+        "fitCombinationType",
     },
     jet_pt=None,
     jet_trigger=None,
@@ -256,10 +257,14 @@ def jet_selection(
     for i in range(6):
         (mt_result_filled[i])[sixjets_sel] = ak.flatten(mt_result[i])
 
-    chi2_sel = ak.Array((mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
-    chi2_sel1 = ak.Array((mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
-    chi2_sel2 = ak.Array((mt_result_filled[5] < 10) & (mt_result_filled[5] > -1))
-    chi2_sel3 = ak.Array((mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
+    chi2_sel = ak.Array(
+        (mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
+    chi2_sel1 = ak.Array(
+        (mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
+    chi2_sel2 = ak.Array(
+        (mt_result_filled[5] < 10) & (mt_result_filled[5] > -1))
+    chi2_sel3 = ak.Array(
+        (mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
     # verify_jet_trigger = (check_trigger == True)
 
     events = set_ak_column(events, "Mt1", mt_result_filled[0])
@@ -286,9 +291,7 @@ def jet_selection(
     events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
     fitchi2_sel = events.FitChi2 < 10000
 
-    def combinationtype(bestcomb, correctcomb):
-        b1, b2 = ak.unzip(ak.unzip(bestcomb)[0])
-        j1, j2, j3, j4 = ak.unzip(ak.unzip(bestcomb)[1])
+    def combinationtype(b1, b2, j1, j2, j3, j4, correctcomb):
 
         b1cor = correctcomb[:, 0, 1]
         q1cor = correctcomb[:, 0, 3]
@@ -344,19 +347,59 @@ def jet_selection(
             ],
             axis=0,
         )
-        type = ak.flatten(matched) * 1 + ak.flatten(ak.any(drlist, axis=0))
+        import IPython
+        type = matched * 1 + ak.any(drlist, axis=0)
         return type
 
     if self.dataset_inst.has_tag("has_top"):
         type = np.full((1, ak.num(events, axis=0)), -1)
+
+        b1, b2 = ak.unzip(ak.unzip((mt_result[7])[mt_result[6]])[0])
+        b1 = ak.flatten(b1)
+        b2 = ak.flatten(b2)
+        j1, j2, j3, j4 = (ak.unzip(ak.unzip((mt_result[7])[mt_result[6]])[1]))
+        j1 = ak.flatten(j1)
+        j2 = ak.flatten(j2)
+        j3 = ak.flatten(j3)
+        j4 = ak.flatten(j4)
         type_unfilled = combinationtype(
-            (mt_result[7])[mt_result[6]], events.gen_top_decay[sixjets_sel]
+            b1, b2, j1, j2, j3, j4, events.gen_top_decay[sixjets_sel]
         )
         type[0][sixjets_sel] = type_unfilled
         type = ak.flatten(type)
     else:
         type = -1
-    events = set_ak_column(events, "combination_type", type)
+    events = set_ak_column(events, "reco_combination_type", type)
+
+    # function to insert values of one awkward array into another at a list of given indices
+    def insert_at_index(to_insert, where, indices_to_replace):
+        full_true = ak.full_like(where, True, dtype=bool)
+        mask = full_true & indices_to_replace
+        flat = flat_np_view(to_insert)
+        cut_orig = ak.num(where[mask])
+        cut_replaced = ak.unflatten(flat, cut_orig)
+        original = where[~mask]
+        combined = ak.concatenate((original, cut_replaced), axis=1)
+        return combined
+
+    jetcollections = {
+        "FitJet": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "",
+        },
+        "FitJet.reco": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "",
+        },
+    }
+    events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
+    fitcomb = combinationtype(
+        events.FitJet.reco[kinFit_eventmask][:, 0], events.FitJet.reco[kinFit_eventmask][:, 1], events.FitJet.reco[kinFit_eventmask][:, 2], events.FitJet.reco[kinFit_eventmask][:, 3], events.FitJet.reco[kinFit_eventmask][:, 4], events.FitJet.reco[kinFit_eventmask][:, 5], events.gen_top_decay[kinFit_eventmask])
+    full_fitcomb = np.full(len(events), EF)
+    full_fitcomb[kinFit_eventmask] = fitcomb
+    events = set_ak_column(events, "fitCombinationType", full_fitcomb)
 
     if len(ak.unzip(mt_result[6][:])) > 1:
         if (len(ak.unzip(ak.unzip(mt_result[6][:])[0])) > 1) & (
