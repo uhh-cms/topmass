@@ -43,6 +43,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         attach_coffea_behavior,
         "HLT.*",
         "FitJet.*",
+        "Jet.btagDeepFlavB",
     },
     produces={
         # new columns

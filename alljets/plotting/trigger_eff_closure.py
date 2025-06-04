@@ -11,12 +11,12 @@ from collections import OrderedDict
 import law
 
 from columnflow.util import maybe_import
-from columnflow.plotting.plot_all import plot_all
+from alljets.plotting.aj_plot_all import aj_plot_all, convert_weightedmean_to_weight
 from columnflow.plotting.plot_util import (
     prepare_style_config,
     remove_residual_axis,
     apply_variable_settings,
-    apply_density_to_hists,
+    apply_density,
 )
 
 hist = maybe_import("hist")
@@ -33,7 +33,7 @@ law run cf.PlotVariables1D --version v1
 --processes tt --variables jet6_pt-trig_bits
 --datasets tt_fh_powheg --selector trigger_sel
 --producers example,trigger_prod
---plot-function alljets.plotting.trigger_eff_plot.plot_efficiencies
+--plot-function alljets.plotting.trigger_eff_closure.plot_efficiencies
 """
 
 
@@ -52,11 +52,18 @@ def plot_efficiencies(
     """
     TODO.
     """
+    hist_list = list(hists.values())
+    if isinstance(hist_list[0]._storage_type(), hist.storage.WeightedMean):
+        # hist_list_mean = hist_list.copy()
+        for i in range(len(hist_list)):
+            hist_list[i] = convert_weightedmean_to_weight(hist_list[i])
+    import IPython
+    IPython.embed()
     remove_residual_axis(hists, "shift")
 
     variable_inst = variable_insts[0]
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
-    hists = apply_density_to_hists(hists, density)
+    hists = apply_density(hists, density)
 
     plot_config = OrderedDict()
 
@@ -68,7 +75,7 @@ def plot_efficiencies(
             "No bin selected, bin zero is used for efficiency calculation",
         )
 
-    if (len(list(hists.keys())) > 2):
+    if (len(list(hists[0].keys())) > 2):
         logger.warning(
             "More than two input processes, only two are considered",
         )
@@ -82,20 +89,20 @@ def plot_efficiencies(
     if not trig_alias == "None":
         trigger_names[eff_bin] = trig_alias
 
-    num_bins = int(len((list(hists.values())[0])[1, 0, :, 0].values()))
+    num_bins = int(len((hist_list[0])[1, 0, :, 0].values()))
 
     for i in range(num_bins):
-        myhist_0 = hists[list(hists.keys())[0]]
-        myhist_1 = hists[list(hists.keys())[1]]
+        myhist_0 = hist_list[0]
+        myhist_1 = hist_list[1]
         if (float("inf") == myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1]):
             text = (
-                f"{list(hists.keys())[0].name}, "
+                f"{list(hists[0].keys())[0].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to inf"
             )
         else:
             text = (
-                f"{list(hists.keys())[0].name}, "
+                f"{list(hists[0].keys())[0].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to "
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1])}"
@@ -122,16 +129,16 @@ def plot_efficiencies(
         }
 
     for i in range(num_bins):
-        myhist_1 = hists[list(hists.keys())[1]]
+        myhist_1 = hist_list[1]
         if (float("inf") == myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1]):
             text = (
-                f"{list(hists.keys())[1].name}, "
+                f"{list(hists[0].keys())[1].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to inf"
             )
         else:
             text = (
-                f"{list(hists.keys())[1].name}, "
+                f"{list(hists[0].keys())[1].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to "
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1])}"
@@ -161,8 +168,7 @@ def plot_efficiencies(
     kwargs["skip_ratio"] = False
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
-
-    return plot_all(plot_config, style_config, **kwargs)
+    return aj_plot_all(plot_config, style_config, **kwargs)
 
 
 def plot_efficiencies_no_weight(
@@ -180,11 +186,16 @@ def plot_efficiencies_no_weight(
     """
     TODO.
     """
+    hist_list = list(hists.values())
+    if isinstance(hist_list[0]._storage_type(), hist.storage.WeightedMean):
+        # hist_list_mean = hist_list.copy()
+        for i in range(len(hist_list)):
+            hist_list[i] = convert_weightedmean_to_weight(hist_list[i])
     remove_residual_axis(hists, "shift")
 
     variable_inst = variable_insts[0]
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
-    hists = apply_density_to_hists(hists, density)
+    hists = apply_density(hists, density)
 
     plot_config = OrderedDict()
 
@@ -196,10 +207,11 @@ def plot_efficiencies_no_weight(
             "No bin selected, bin zero is used for efficiency calculation",
         )
 
-    if (len(list(hists.keys())) > 2):
+    if (len(list(hists[0].keys())) > 2):
         logger.warning(
             "More than two input processes, only two are considered",
         )
+
     color_list = ["b", "g", "r", "c", "m", "y"]
     trigger_ref = np.array(config_inst.x.ref_trigger["tt_fh"])
     triggers = np.array(config_inst.x.trigger["tt_fh"])
@@ -210,20 +222,20 @@ def plot_efficiencies_no_weight(
     if not trig_alias == "None":
         trigger_names[eff_bin] = trig_alias
 
-    num_bins = int(len((list(hists.values())[0])[1, 0, :, 0].values()))
+    num_bins = int(len((hist_list[0])[1, 0, :, 0].values()))
 
     for i in range(num_bins):
-        myhist_0 = hists[list(hists.keys())[0]]
-        myhist_1 = hists[list(hists.keys())[1]]
+        myhist_0 = hist_list[0]
+        myhist_1 = hist_list[1]
         if (float("inf") == myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1]):
             text = (
-                f"{list(hists.keys())[0].name}, "
+                f"{list(hists[0].keys())[0].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to inf"
             )
         else:
             text = (
-                f"{list(hists.keys())[0].name}, "
+                f"{list(hists[0].keys())[0].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to "
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1])}"
@@ -250,16 +262,16 @@ def plot_efficiencies_no_weight(
         }
 
     for i in range(num_bins):
-        myhist_1 = hists[list(hists.keys())[1]]
+        myhist_1 = hist_list[1]
         if (float("inf") == myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1]):
             text = (
-                f"{list(hists.keys())[1].name}, "
+                f"{list(hists[0].keys())[1].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to inf"
             )
         else:
             text = (
-                f"{list(hists.keys())[1].name}, "
+                f"{list(hists[0].keys())[1].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to "
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1])}"
@@ -290,7 +302,7 @@ def plot_efficiencies_no_weight(
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
-    return plot_all(plot_config, style_config, **kwargs)
+    return aj_plot_all(plot_config, style_config, **kwargs)
 
 
 def produce_weight(
@@ -308,11 +320,17 @@ def produce_weight(
     """
     TODO.
     """
+    hists = apply_density(hists, density)
+    hist_list = list(hists.values())
+    if isinstance(hist_list[0]._storage_type(), hist.storage.WeightedMean):
+        # hist_list_mean = hist_list.copy()
+        for i in range(len(hist_list)):
+            hist_list[i] = convert_weightedmean_to_weight(hist_list[i])
+
     remove_residual_axis(hists, "shift")
 
     variable_inst = variable_insts[0]
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
-    hists = apply_density_to_hists(hists, density)
 
     plot_config = OrderedDict()
 
@@ -324,10 +342,11 @@ def produce_weight(
             "No bin selected, bin zero is used for efficiency calculation",
         )
 
-    if (len(list(hists.keys())) > 2):
+    if (len(list(hists[0].keys())) > 2):
         logger.warning(
             "More than two input processes, only two are considered",
         )
+
     color_list = ["b", "g", "r", "c", "m", "y"]
     trigger_ref = np.array(config_inst.x.ref_trigger["tt_fh"])
     triggers = np.array(config_inst.x.trigger["tt_fh"])
@@ -338,24 +357,24 @@ def produce_weight(
     if not trig_alias == "None":
         trigger_names[eff_bin] = trig_alias
 
-    num_bins = int(len((list(hists.values())[0])[1, 0, :, 0].values()))
-    num_0 = np.ones_like((list(hists.values())[0])[1, :, :, 0].values())
-    num_1 = np.ones_like((list(hists.values())[0])[1, :, :, 0].values())
-    den_0 = np.ones_like((list(hists.values())[0])[1, :, :, 0].values())
-    den_1 = np.ones_like((list(hists.values())[0])[1, :, :, 0].values())
+    num_bins = int(len((hist_list[0])[1, 0, :, 0].values()))
+    num_0 = np.ones_like((hist_list[0])[1, :, :, 0].values())
+    num_1 = np.ones_like((hist_list[0])[1, :, :, 0].values())
+    den_0 = np.ones_like((hist_list[0])[1, :, :, 0].values())
+    den_1 = np.ones_like((hist_list[0])[1, :, :, 0].values())
 
     for i in range(num_bins):
-        myhist_0 = hists[list(hists.keys())[0]]
-        myhist_1 = hists[list(hists.keys())[1]]
+        myhist_0 = hist_list[0]
+        myhist_1 = hist_list[1]
         if (float("inf") == myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1]):
             text = (
-                f"{list(hists.keys())[0].name}, "
+                f"{list(hists[0].keys())[0].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to inf"
             )
         else:
             text = (
-                f"{list(hists.keys())[0].name}, "
+                f"{list(hists[0].keys())[0].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to "
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1])}"
@@ -387,16 +406,16 @@ def produce_weight(
         den_1[:, i] = myhist_1[1, :, i, 0].values()
 
     for i in range(num_bins):
-        myhist_1 = hists[list(hists.keys())[1]]
+        myhist_1 = hist_list[1]
         if (float("inf") == myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1]):
             text = (
-                f"{list(hists.keys())[1].name}, "
+                f"{list(hists[0].keys())[1].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to inf"
             )
         else:
             text = (
-                f"{list(hists.keys())[1].name}, "
+                f"{list(hists[0].keys())[1].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to "
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1])}"
@@ -430,9 +449,9 @@ def produce_weight(
     high_1 = np.where(np.isnan(high_1), 1, high_1)
     weight_down = low_0 / high_1
     weight_up = np.nan_to_num(high_0 / low_1, posinf=99999)
-    weight_hist = hist.Hist(*(list(hists.values())[0])[1, :, :, 0].axes, data=weight)
-    weight_up_hist = hist.Hist(*(list(hists.values())[0])[1, :, :, 0].axes, data=weight_up)
-    weight_down_hist = hist.Hist(*(list(hists.values())[0])[1, :, :, 0].axes, data=weight_down)
+    weight_hist = hist.Hist(*(hist_list[0])[1, :, :, 0].axes, data=weight)
+    weight_up_hist = hist.Hist(*(hist_list[0])[1, :, :, 0].axes, data=weight_up)
+    weight_down_hist = hist.Hist(*(hist_list[0])[1, :, :, 0].axes, data=weight_down)
     weight_name = kwargs.get("name", "trig_cor")
     weight_hist.name = weight_name
     weight_up_hist.name = weight_name + "_up"
@@ -467,7 +486,7 @@ def produce_weight(
             trig_cor_down,
         ],
     )
-    axes = (list(hists.values())[0])[1, :, :, 0].axes.name
+    axes = (hist_list[0])[1, :, :, 0].axes.name
     file_name = f"{weight_name}_{trigger_names[eff_bin]}_{trigger_names[0]}_{axes[0]}_{axes[1]}.json"
     with open(file_name, "w") as fout:
         fout.write(cset.json(exclude_unset=True))
@@ -490,7 +509,7 @@ def produce_weight(
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
-    return plot_all(plot_config, style_config, **kwargs)
+    return aj_plot_all(plot_config, style_config, **kwargs)
 
 
 def produce_sec_weight(
@@ -508,11 +527,16 @@ def produce_sec_weight(
     """
     TODO.
     """
+    hist_list = list(hists.values())
+    if isinstance(hist_list[0]._storage_type(), hist.storage.WeightedMean):
+        # hist_list_mean = hist_list.copy()
+        for i in range(len(hist_list)):
+            hist_list[i] = convert_weightedmean_to_weight(hist_list[i])
     remove_residual_axis(hists, "shift")
 
     variable_inst = variable_insts[0]
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
-    hists = apply_density_to_hists(hists, density)
+    hists = apply_density(hists, density)
 
     plot_config = OrderedDict()
 
@@ -524,7 +548,7 @@ def produce_sec_weight(
             "No bin selected, bin zero is used for efficiency calculation",
         )
 
-    if (len(list(hists.keys())) > 2):
+    if (len(list(hists[0].keys())) > 2):
         logger.warning(
             "More than two input processes, only two are considered",
         )
@@ -538,24 +562,24 @@ def produce_sec_weight(
     if not trig_alias == "None":
         trigger_names[eff_bin] = trig_alias
 
-    num_bins = int(len((list(hists.values())[0])[0, 0, :, 0].values()))
-    num_0 = np.ones_like((list(hists.values())[0])[0, :, :, 0].values())
-    num_1 = np.ones_like((list(hists.values())[0])[0, :, :, 0].values())
-    den_0 = np.ones_like((list(hists.values())[0])[0, :, :, 0].values())
-    den_1 = np.ones_like((list(hists.values())[0])[0, :, :, 0].values())
+    num_bins = int(len((hist_list[0])[0, 0, :, 0].values()))
+    num_0 = np.ones_like((hist_list[0])[0, :, :, 0].values())
+    num_1 = np.ones_like((hist_list[0])[0, :, :, 0].values())
+    den_0 = np.ones_like((hist_list[0])[0, :, :, 0].values())
+    den_1 = np.ones_like((hist_list[0])[0, :, :, 0].values())
 
     for i in range(num_bins):
-        myhist_0 = hists[list(hists.keys())[0]]
-        myhist_1 = hists[list(hists.keys())[1]]
+        myhist_0 = hist_list[0]
+        myhist_1 = hist_list[1]
         if (float("inf") == myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1]):
             text = (
-                f"{list(hists.keys())[0].name}, "
+                f"{list(hists[0].keys())[0].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to inf"
             )
         else:
             text = (
-                f"{list(hists.keys())[0].name}, "
+                f"{list(hists[0].keys())[0].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to "
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1])}"
@@ -586,16 +610,16 @@ def produce_sec_weight(
         den_1[:, i] = myhist_1[1, :, i, 0].values()
 
     for i in range(num_bins):
-        myhist_1 = hists[list(hists.keys())[1]]
+        myhist_1 = hist_list[1]
         if (float("inf") == myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1]):
             text = (
-                f"{list(hists.keys())[1].name}, "
+                f"{list(hists[0].keys())[1].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to inf"
             )
         else:
             text = (
-                f"{list(hists.keys())[1].name}, "
+                f"{list(hists[0].keys())[1].name}, "
                 f"{myhist_0[0, 0, :, eff_bin].axes[0].label}:"
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i])} to "
                 f"{int(myhist_0[0, 0, :, eff_bin].axes.edges[0][i + 1])}"
@@ -629,9 +653,9 @@ def produce_sec_weight(
     high_1 = np.where(np.isnan(high_1), 1, high_1)
     weight_down = low_0 / high_1
     weight_up = np.nan_to_num(high_0 / low_1, posinf=99999)
-    weight_hist = hist.Hist(*(list(hists.values())[0])[1, :, :, 0].axes, data=weight)
-    weight_up_hist = hist.Hist(*(list(hists.values())[0])[1, :, :, 0].axes, data=weight_up)
-    weight_down_hist = hist.Hist(*(list(hists.values())[0])[1, :, :, 0].axes, data=weight_down)
+    weight_hist = hist.Hist(*(hist_list[0])[1, :, :, 0].axes, data=weight)
+    weight_up_hist = hist.Hist(*(hist_list[0])[1, :, :, 0].axes, data=weight_up)
+    weight_down_hist = hist.Hist(*(hist_list[0])[1, :, :, 0].axes, data=weight_down)
     weight_name = kwargs.get("name", "second_trig_cor")
     weight_hist.name = weight_name
     weight_up_hist.name = weight_name + "_up"
@@ -666,7 +690,7 @@ def produce_sec_weight(
             trig_cor_down,
         ],
     )
-    axes = (list(hists.values())[0])[1, :, :, 0].axes.name
+    axes = (hist_list[0])[1, :, :, 0].axes.name
     file_name = f"{weight_name}_{trigger_names[eff_bin]}_{trigger_names[0]}_{axes[0]}_{axes[1]}.json"
     with open(file_name, "w") as fout:
         fout.write(cset.json(exclude_unset=True))
@@ -689,4 +713,4 @@ def produce_sec_weight(
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
-    return plot_all(plot_config, style_config, **kwargs)
+    return aj_plot_all(plot_config, style_config, **kwargs)

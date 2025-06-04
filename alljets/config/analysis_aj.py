@@ -148,12 +148,13 @@ verify_config_processes(cfg, warn=True)
 # default objects, such as calibrator, selector, producer, ml model, inference model, etc
 cfg.x.default_calibrator = "example"
 cfg.x.default_selector = "example"
+cfg.x.default_reducer = "cf_default"
 cfg.x.default_producer = "example"
 cfg.x.default_ml_model = None
 cfg.x.default_inference_model = "example"
 cfg.x.default_categories = ("incl",)
 cfg.x.default_variables = ("n_jet", "jet1_pt")
-cfg.x.default_weight_producer = "all_weights"
+cfg.x.default_hist_producer = "all_weights"
 
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)
@@ -340,6 +341,7 @@ add_shift_aliases(
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = "2017"
 corr_postfix = ""
+<<<<<<< HEAD
 cfg.x.external_files = DotDict.wrap(
     {
         # lumi files
@@ -407,6 +409,72 @@ cfg.x.external_files = DotDict.wrap(
         # ),
     }
 )
+=======
+cfg.x.external_files = DotDict.wrap({
+    # lumi files
+    "lumi": {
+        "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
+        "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
+    },
+
+    # muon scale factors
+    "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
+
+    # btag scale factor
+    "btag_sf_corr": (f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz", "v1"),
+
+    # pileup weight corrections
+    "pu_sf": (f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz", "v1"),
+
+    # jet energy correction
+    "jet_jerc": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
+
+    # electron scale factors
+    "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
+
+    # prototype trigger weight corrections
+    "trig_sf": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
+        "v1",
+    ),
+
+    # prototype trigger weight corrections 1D pt
+    "trig_sf_pt": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+        "v1",
+    ),
+
+    # prototype trigger weight corrections 1D ht
+    "trig_sf_ht": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+        "v1",
+    ),
+
+    # prototype trigger weight corrections 2x 1D first ht second pt
+    "trig_sf_pt_after_ht": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+        "v1",
+    ),
+
+    # prototype trigger weight corrections 2x 1D first pt second ht
+    "trig_sf_ht_after_pt": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+        "v1",
+    ),
+
+    # prototype trigger weight corrections 3x 1D first ht second pt third ht
+    "trig_sf_ht_after_pt_after_ht": (
+        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
+        "third_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+        "v1",
+    ),
+})
+>>>>>>> e249db226dd1b0ca7b1085f11817f7ec2c48614b
 
 cfg.x.trigger = {
     "tt_fh": [
@@ -538,6 +606,7 @@ cfg.x.keep_columns = DotDict.wrap(
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
+<<<<<<< HEAD
 cfg.x.event_weights = DotDict(
     {
         "normalization_weight": [],
@@ -549,6 +618,17 @@ cfg.x.event_weights = DotDict(
         "murmuf_weight": get_shifts("murmuf"),
     }
 )
+=======
+cfg.x.event_weights = DotDict({
+    "normalization_weight": [],
+    # "btag_weight": [],
+    # "trig_weight": [],
+    # "trig_weight": get_shifts("trig"),
+    # "muon_weight": get_shifts("mu"),
+    # "pdf_weight": get_shifts("pdf"),
+    # "murmuf_weight": get_shifts("murmuf"),
+})
+>>>>>>> e249db226dd1b0ca7b1085f11817f7ec2c48614b
 
 # versions per task family, either referring to strings or to callables receving the invoking
 # task instance and parameters to be passed to the task family
