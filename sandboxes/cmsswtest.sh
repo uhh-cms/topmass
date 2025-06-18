@@ -21,15 +21,18 @@ action() {
     # define custom install and setup functions
     cf_cmssw_custom_install() {
         # install a venv into ${CMSSW_BASE}/venvs, which is included by BundleCMSSWSandbox
-        CF_VENV_BASE="${CMSSW_BASE}/venvs" cf_create_venv columnar &&
-        source "${CMSSW_BASE}/venvs/columnar/bin/activate" "" &&
-        pip install -r "${CF_BASE}/sandboxes/columnar.txt" &&
-        CF_VENV_BASE="${CMSSW_BASE}/venvs" cf_make_venv_relocatable columnar
+        CF_VENV_BASE="${CMSSW_BASE}/venvs" cf_create_venv cmsswtest &&
+        source "${CMSSW_BASE}/venvs/cmsswtest/bin/activate" "" &&
+        pip install -r  "${CF_REPO_BASE}/sandboxes/cmsswtest.txt" --force-reinstall &&
+        CF_VENV_BASE="${CMSSW_BASE}/venvs" cf_make_venv_relocatable cmsswtest
     }
     cf_cmssw_custom_setup() {
-        source "${CMSSW_BASE}/venvs/columnar/bin/activate" "" &&
+        source "${CMSSW_BASE}/venvs/cmsswtest/bin/activate" "" &&
         export PYTHONPATH="${PYTHONPATH}:/afs/desy.de/user/s/schaller/HiWi/topmass-alljets-kinfit/standaloneKinFitter/:$( python -c "import os; print(os.path.normpath('$( root-config --libdir )'))" )"
+  export LD_LIBRARY_PATH=/afs/desy.de/user/s/schaller/HiWi/topmass-alljets-kinfit/standaloneKinFitter/lib/el9_amd64_gcc12/6.26.11/:/cvmfs/cms.cern.ch/el9_amd64_gcc12/cms/cmssw/CMSSW_13_3_0/external/el9_amd64_gcc12/lib/:$LD_LIBRARY_PATH
+        export LD_PRELOAD=/cvmfs/cms.cern.ch/el9_amd64_gcc12/external/gcc/12.3.1-40d504be6370b5a30e3947a6e575ca28/lib64/libstdc++.so.6
     }
+
 
     source "${CF_BASE}/sandboxes/_setup_cmssw.sh" "$@"
 }

@@ -81,8 +81,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
     # events = set_ak_column(events, "ht", (ak.sum(events.Jet.pt, axis=1) + ak.sum(events.VetoJet.pt, axis=1)))
     events = set_ak_column(
-        events, "ht_old", (ak.sum(
-            events.Jet[(abs(events.Jet.eta) < 2.4)].pt, axis=1))
+        events, "ht_old", (ak.sum(events.Jet[(abs(events.Jet.eta) < 2.4)].pt, axis=1))
     )
     events = set_ak_column(
         events, "ht", (ak.sum(events.Jet[(events.Jet.pt >= 30.0)].pt, axis=1))
@@ -104,8 +103,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     secmax = ak.sort(events.Jet.btagDeepFlavB, axis=1, ascending=False)
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
     events = set_ak_column(
-        events, "secmaxbtag", (ak.concatenate(
-            [secmax, empty, empty], axis=1)[:, 1])
+        events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1])
     )
     W1 = events.FitJet[:, 2].add(events.FitJet[:, 3])
     W2 = events.FitJet[:, 4].add(events.FitJet[:, 5])
@@ -119,7 +117,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     return events
 
 
-@ producer(
+@producer(
     uses={
         mc_weight,
         category_ids,
@@ -139,8 +137,6 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "cutflow.n_jet",
         "cutflow.n_bjet",
     },
-
-
 )
 def cutflow_features(
     self: Producer,
@@ -164,20 +160,16 @@ def cutflow_features(
 
     # add cutflow columns
     events = set_ak_column(
-        events, "cutflow.jet6_pt", Route(
-            "Jet.pt[:,5]").apply(events, EMPTY_FLOAT)
+        events, "cutflow.jet6_pt", Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT)
     )
     events = set_ak_column(events, "cutflow.ht", ak.sum(events.Jet.pt, axis=1))
     events = set_ak_column(
-        events, "cutflow.jet1_pt", Route(
-            "Jet.pt[:,0]").apply(events, EMPTY_FLOAT)
+        events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT)
     )
-    events = set_ak_column(events, "cutflow.n_jet",
-                           ak.num(events.Jet.pt, axis=1))
+    events = set_ak_column(events, "cutflow.n_jet", ak.num(events.Jet.pt, axis=1))
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     events = set_ak_column(
-        events, "cutflow.n_bjet", ak.sum(
-            (events.Jet.btagDeepFlavB >= wp_tight), axis=1)
+        events, "cutflow.n_bjet", ak.sum((events.Jet.btagDeepFlavB >= wp_tight), axis=1)
     )
     return events
 
@@ -283,8 +275,7 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             trig_passed = ak.singletons(
                 ak.flatten(
                     ak.nan_to_none(
-                        ak.unzip(
-                            ak.where(events.HLT[trigger], id, np.float64(np.nan))),
+                        ak.unzip(ak.where(events.HLT[trigger], id, np.float64(np.nan))),
                     )
                 )
             )
@@ -292,8 +283,7 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                 ak.singletons(
                     ak.nan_to_none(
                         ak.where(
-                            ak.singletons(ak.flatten(
-                                ak.unzip(events.HLT[ref_trig])))
+                            ak.singletons(ak.flatten(ak.unzip(events.HLT[ref_trig])))
                             & ak.singletons(ak.flatten(ak.unzip(events.HLT[trigger]))),
                             id,
                             np.float64(np.nan),

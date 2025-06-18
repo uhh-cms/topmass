@@ -1,7 +1,6 @@
 # coding: utf-8
 
-import pyKinFit
-from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column, flat_np_view
+from columnflow.columnar_util import EMPTY_FLOAT, Route, flat_np_view, set_ak_column
 from columnflow.production import Producer, producer
 
 # from columnflow.selection.util import create_collections_from_masks
@@ -27,10 +26,13 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
     sandbox="bash::$CF_REPO_BASE/sandboxes/cmsswtest.sh",
 )
 def kinFit(
-    self: Producer, events: ak.Array, sel_jet_mask: ak.Array, eventmask: ak.Array,
+    self: Producer,
+    events: ak.Array,
+    sel_jet_mask: ak.Array,
+    eventmask: ak.Array,
     **kwargs
 ) -> ak.Array:
-    import IPython
+    import pyKinFit
 
     sel_events = events[eventmask]
     sel_Jets = sel_events.Jet[sel_jet_mask]
@@ -78,17 +80,13 @@ def kinFit(
     sorted_jets_top6 = sorted_jet[:, :6]
     # Convert your Python lists to awkward arrays
     fitPt_ak = ak.Array(fitPt)
-    fitPt_full = insert_at_index(
-        fitPt_ak[:, :6], sorted_jets_top6.pt, eventmask)
+    fitPt_full = insert_at_index(fitPt_ak[:, :6], sorted_jets_top6.pt, eventmask)
     fitEta_ak = ak.Array(fitEta)
-    fitEta_full = insert_at_index(
-        fitEta_ak[:, :6], sorted_jets_top6.eta, eventmask)
+    fitEta_full = insert_at_index(fitEta_ak[:, :6], sorted_jets_top6.eta, eventmask)
     fitPhi_ak = ak.Array(fitPhi)
-    fitPhi_full = insert_at_index(
-        fitPhi_ak[:, :6], sorted_jets_top6.phi, eventmask)
+    fitPhi_full = insert_at_index(fitPhi_ak[:, :6], sorted_jets_top6.phi, eventmask)
     fitMass_ak = ak.Array(fitMass)
-    fitMass_full = insert_at_index(
-        fitMass_ak[:, :6], sorted_jets_top6.mass, eventmask)
+    fitMass_full = insert_at_index(fitMass_ak[:, :6], sorted_jets_top6.mass, eventmask)
     # Create FitJet collection for the selected events with fit values
     fitJet_record = ak.Array({"reco": sorted_jets_top6})
     fitJet_record = ak.with_field(fitJet_record, fitPt_full[:, :6], "pt")

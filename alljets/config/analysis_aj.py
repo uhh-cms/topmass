@@ -39,12 +39,13 @@ ana.x.versions = {}
 ana.x.bash_sandboxes = [
     "$CF_BASE/sandboxes/cf.sh",
     law.config.get("analysis", "default_columnar_sandbox"),
+    # "$AJ_BASE/sandboxes/example.sh"
 ]
 
 # files of cmssw sandboxes that might be required by remote tasks
 # (used in cf.HTCondorWorkflow)
 ana.x.cmssw_sandboxes = [
-    # "$CF_BASE/sandboxes/cmssw_default.sh",
+    "$AJ_BASE/sandboxes/cmsswtest.sh",
 ]
 
 # clear the list when cmssw bundling is disabled
@@ -130,6 +131,12 @@ dataset_names = [
     "qcd_ht2000toinf_madgraph",
     # signals
     "tt_fh_powheg",
+    "tt_fh_mt166p5_powheg",
+    "tt_fh_mt169p5_powheg",
+    "tt_fh_mt171p5_powheg",
+    "tt_fh_mt173p5_powheg",
+    "tt_fh_mt175p5_powheg",
+    "tt_fh_mt178p5_powheg",
 ]
 for dataset_name in dataset_names:
     # add the dataset
@@ -341,70 +348,79 @@ add_shift_aliases(
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = "2017"
 corr_postfix = ""
-cfg.x.external_files = DotDict.wrap({
-    # lumi files
-    "lumi": {
-        "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
-        "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
-    },
-
-    # muon scale factors
-    "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
-
-    # btag scale factor
-    "btag_sf_corr": (f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz", "v1"),
-
-    # pileup weight corrections
-    "pu_sf": (f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz", "v1"),
-
-    # jet energy correction
-    "jet_jerc": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
-
-    # electron scale factors
-    "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
-
-    # prototype trigger weight corrections
-    "trig_sf": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 1D pt
-    "trig_sf_pt": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 1D ht
-    "trig_sf_ht": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 2x 1D first ht second pt
-    "trig_sf_pt_after_ht": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 2x 1D first pt second ht
-    "trig_sf_ht_after_pt": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 3x 1D first ht second pt third ht
-    "trig_sf_ht_after_pt_after_ht": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "third_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-        "v1",
-    ),
-})
+cfg.x.external_files = DotDict.wrap(
+    {
+        # lumi files
+        "lumi": {
+            "golden": (
+                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
+                "v1",
+            ),  # noqa
+            "normtag": (
+                "/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json",
+                "v1",
+            ),
+        },
+        # muon scale factors
+        "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
+        # btag scale factor
+        "btag_sf_corr": (
+            f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz",
+            "v1",
+        ),
+        # pileup weight corrections
+        "pu_sf": (
+            f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz",
+            "v1",
+        ),
+        # jet energy correction
+        "jet_jerc": (
+            f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz",
+            "v1",
+        ),
+        # electron scale factors
+        "electron_sf": (
+            f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz",
+            "v1",
+        ),
+        # prototype trigger weight corrections
+        "trig_sf": (
+            "/afs/desy.de/user/d/davidsto/public/mirrors/"
+            + "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
+            "v1",
+        ),
+        # prototype trigger weight corrections 1D pt
+        "trig_sf_pt": (
+            "/afs/desy.de/user/d/davidsto/public/mirrors/"
+            + "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+            "v1",
+        ),
+        # prototype trigger weight corrections 1D ht
+        "trig_sf_ht": (
+            "/afs/desy.de/user/d/davidsto/public/mirrors/"
+            + "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+            "v1",
+        ),
+        # prototype trigger weight corrections 2x 1D first ht second pt
+        "trig_sf_pt_after_ht": (
+            "/afs/desy.de/user/d/davidsto/public/mirrors/"
+            + "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
+            "v1",
+        ),
+        # prototype trigger weight corrections 2x 1D first pt second ht
+        "trig_sf_ht_after_pt": (
+            "/afs/desy.de/user/d/davidsto/public/mirrors/"
+            + "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+            "v1",
+        ),
+        # prototype trigger weight corrections 3x 1D first ht second pt third ht
+        "trig_sf_ht_after_pt_after_ht": (
+            "/afs/desy.de/user/d/davidsto/public/mirrors/"
+            + "third_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
+            "v1",
+        ),
+    }
+)
 
 cfg.x.trigger = {
     "tt_fh": [
@@ -536,15 +552,17 @@ cfg.x.keep_columns = DotDict.wrap(
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
-cfg.x.event_weights = DotDict({
-    "normalization_weight": [],
-    # "btag_weight": [],
-    # "trig_weight": [],
-    # "trig_weight": get_shifts("trig"),
-    # "muon_weight": get_shifts("mu"),
-    # "pdf_weight": get_shifts("pdf"),
-    # "murmuf_weight": get_shifts("murmuf"),
-})
+cfg.x.event_weights = DotDict(
+    {
+        "normalization_weight": [],
+        # "btag_weight": [],
+        # "trig_weight": [],
+        # "trig_weight": get_shifts("trig"),
+        # "muon_weight": get_shifts("mu"),
+        # "pdf_weight": get_shifts("pdf"),
+        # "murmuf_weight": get_shifts("murmuf"),
+    }
+)
 
 # versions per task family, either referring to strings or to callables receving the invoking
 # task instance and parameters to be passed to the task family

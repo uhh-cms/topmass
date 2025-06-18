@@ -3,16 +3,16 @@
 Jet selection methods.
 """
 
-from alljets.production.KinFit import kinFit
 from columnflow.columnar_util import (
     flat_np_view,
-    mask_from_indices,
     set_ak_column,
     sorted_indices_from_mask,
 )
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.util import maybe_import
+
+from alljets.production.KinFit import kinFit
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -145,6 +145,7 @@ def jet_selection_init(self: Selector) -> None:
     jet_trigger=None,
     jet_base_trigger=None,
     alt_jet_trigger=None,
+    sandbox="bash::$CF_REPO_BASE/sandboxes/cmsswtest.sh",
 )
 def jet_selection(
     self: Selector,
@@ -153,6 +154,8 @@ def jet_selection(
 ) -> tuple[ak.Array, SelectionResult]:
     # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
     EF = -99999.0  # define EMPTY_FLOAT
+    from alljets.production.KinFit import kinFit
+
     ht1_sel = ak.sum(events.Jet.pt, axis=1) >= 1
     ht_sel = ak.sum(events.Jet.pt, axis=1) >= 450
     jet_mask = abs(events.Jet.eta) < 2.6
@@ -348,6 +351,7 @@ def jet_selection(
             axis=0,
         )
         import IPython
+
         type = matched * 1 + ak.any(drlist, axis=0)
         return type
 
@@ -357,7 +361,7 @@ def jet_selection(
         b1, b2 = ak.unzip(ak.unzip((mt_result[7])[mt_result[6]])[0])
         b1 = ak.flatten(b1)
         b2 = ak.flatten(b2)
-        j1, j2, j3, j4 = (ak.unzip(ak.unzip((mt_result[7])[mt_result[6]])[1]))
+        j1, j2, j3, j4 = ak.unzip(ak.unzip((mt_result[7])[mt_result[6]])[1])
         j1 = ak.flatten(j1)
         j2 = ak.flatten(j2)
         j3 = ak.flatten(j3)
@@ -396,7 +400,14 @@ def jet_selection(
     }
     events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
     fitcomb = combinationtype(
-        events.FitJet.reco[kinFit_eventmask][:, 0], events.FitJet.reco[kinFit_eventmask][:, 1], events.FitJet.reco[kinFit_eventmask][:, 2], events.FitJet.reco[kinFit_eventmask][:, 3], events.FitJet.reco[kinFit_eventmask][:, 4], events.FitJet.reco[kinFit_eventmask][:, 5], events.gen_top_decay[kinFit_eventmask])
+        events.FitJet.reco[kinFit_eventmask][:, 0],
+        events.FitJet.reco[kinFit_eventmask][:, 1],
+        events.FitJet.reco[kinFit_eventmask][:, 2],
+        events.FitJet.reco[kinFit_eventmask][:, 3],
+        events.FitJet.reco[kinFit_eventmask][:, 4],
+        events.FitJet.reco[kinFit_eventmask][:, 5],
+        events.gen_top_decay[kinFit_eventmask],
+    )
     full_fitcomb = np.full(len(events), EF)
     full_fitcomb[kinFit_eventmask] = fitcomb
     events = set_ak_column(events, "fitCombinationType", full_fitcomb)
