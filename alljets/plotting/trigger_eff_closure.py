@@ -57,8 +57,7 @@ def plot_efficiencies(
         # hist_list_mean = hist_list.copy()
         for i in range(len(hist_list)):
             hist_list[i] = convert_weightedmean_to_weight(hist_list[i])
-    import IPython
-    IPython.embed()
+
     remove_residual_axis(hists, "shift")
 
     variable_inst = variable_insts[0]

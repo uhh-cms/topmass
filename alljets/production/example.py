@@ -13,7 +13,6 @@ from columnflow.production.cms.muon import muon_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.normalization import normalization_weights
 from columnflow.production.util import attach_coffea_behavior
-
 # from columnflow.selection.util import create_collections_from_masks
 from columnflow.util import maybe_import
 
@@ -55,7 +54,12 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "n_bjet",
         "maxbtag",
         "secmaxbtag",
-        # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
+        "deltaMt",
+        "Jet.pt", "Bjet.pt", "LightJet*.pt", "Jet.phi", "Bjet.phi",
+        "LightJet.phi", "Jet.eta", "Bjet.eta", "LightJet.eta",
+        "Jet.mass", "VetoJet.pt", "Bjet.mass", "LightJet.mass",
+        "event", attach_coffea_behavior, "HLT.*", "Jet.btagDeepFlavB",
+        "Mt1", "Mt2",
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -95,9 +99,8 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Insert dummy value for one jet events
     secmax = ak.sort(events.Jet.btagDeepFlavB, axis=1, ascending=False)
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
-    events = set_ak_column(
-        events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1])
-    )
+    events = set_ak_column(events, "deltaMt", (events.Mt1 - events.Mt2))
+    events = set_ak_column(events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1]))
     return events
 
 
@@ -420,3 +423,65 @@ tt_fh_trigger_prod = trigger_prod.derive(
 # def trig_cats_init(self: Producer) -> None:
 
 #     add_trigger_categories(self.config_inst)
+
+
+@producer(
+    uses={
+        features, category_ids, normalization_weights, muon_weights, deterministic_seeds,
+    },
+    produces={
+        features, category_ids, normalization_weights, muon_weights, deterministic_seeds,
+    },
+)
+def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    # features
+
+    events = self[features](events, **kwargs)
+
+    # category ids
+    events = self[category_ids](events, **kwargs)
+
+    # deterministic seeds
+    events = self[deterministic_seeds](events, **kwargs)
+
+    # mc-only weights
+    if self.dataset_inst.is_mc:
+        # normalization weights
+        events = self[normalization_weights](events, **kwargs)
+
+        # muon weights
+        # events = self[muon_weights](events, **kwargs)
+
+    return events
+
+
+@producer(
+    uses={
+        normalization_weights, features, category_ids, muon_weights, deterministic_seeds,
+    },
+    produces={
+        normalization_weights, features, category_ids, muon_weights, deterministic_seeds, "trig_weight",
+    },
+)
+def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    # features
+
+    events = self[features](events, **kwargs)
+
+    # category ids
+    events = self[category_ids](events, **kwargs)
+
+    # deterministic seeds
+    events = self[deterministic_seeds](events, **kwargs)
+    events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
+    # mc-only weights
+    if self.dataset_inst.is_mc:
+        # normalization weights
+        events = self[normalization_weights](events, **kwargs)
+        events = set_ak_column(events, "normalization_weight", np.ones(len(events)), value_type=np.float32)
+        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+
+        # muon weights
+        # events = self[muon_weights](events, **kwargs)
+
+    return events

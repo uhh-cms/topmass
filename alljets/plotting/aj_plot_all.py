@@ -126,11 +126,13 @@ def draw_efficiency_with_fit(
     # calculate x error
     xerror_low = h.axes[0].edges
     xerror_low = xerror_low[:(len(xerror_low) - 1)]
-    xerror_low = defaults["x"] - xerror_low
-    xerror_high = h.axes[0].edges[1:] - defaults["x"]
+    x_filled = np.where(defaults["x"] == 0, h.axes[0].centers, defaults["x"])
+    xerror_low = x_filled - xerror_low
+    xerror_high = h.axes[0].edges[1:] - x_filled
     xerrors = np.concatenate((xerror_low.reshape(xerror_low.shape[0], 1),
                              xerror_high.reshape(xerror_high.shape[0], 1)), axis=1)
     xerrors = xerrors.T
+
     defaults.update({"xerr": xerrors})
 
     ax.errorbar(**defaults)

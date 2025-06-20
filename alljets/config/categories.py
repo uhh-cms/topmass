@@ -5,7 +5,6 @@ Definition of categories.
 """
 
 import order as od
-
 from columnflow.config_util import add_category
 
 
@@ -65,4 +64,18 @@ def add_categories(cfg: od.Config) -> None:
         name="fit_conv_big",
         selection="cat_fit_conv_big",
         label="kinfit converged and above chi2 cut",
+    )
+    add_category(
+        cfg,
+        name="0btj_bkg",
+        selection="cat_0btj_bkg",
+        label="QCD estimation",
+        tags={"0btj"},
+    )
+    add_category(
+        cfg,
+        name="2btj_sig",
+        selection="cat_2btj_sig",
+        label=">2 b-tagged jets & signal trigger",
+        tags={"2btj"},
     )

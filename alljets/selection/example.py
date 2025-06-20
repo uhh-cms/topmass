@@ -20,15 +20,8 @@ from columnflow.selection.stats import increment_stats
 from columnflow.util import maybe_import
 
 from alljets.production.example import cutflow_features
-from alljets.production.trig_cor_weight import (
-    trig_weights,
-    trig_weights_ht,
-    trig_weights_ht_after_pt,
-    trig_weights_ht_after_pt_after_ht,
-    trig_weights_pt,
-    trig_weights_pt_after_ht,
-)
 from alljets.selection.jet import jet_selection
+from alljets.production.trig_cor_weight import trig_weights
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
