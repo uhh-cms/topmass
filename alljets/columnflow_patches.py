@@ -35,5 +35,13 @@ def patch_bundle_repo_exclude_files():
 
 
 @memoize
+def patch_selector_steps_names():
+    from columnflow.tasks.framework.mixins import SelectorClassMixin
+
+    SelectorClassMixin.selector_steps_order_sensitive = True
+
+
+@memoize
 def patch_all():
     patch_bundle_repo_exclude_files()
+    patch_selector_steps_names()

@@ -17,7 +17,7 @@ from columnflow.plotting.plot_util import (
     remove_residual_axis,
     apply_process_settings,
     apply_variable_settings,
-    apply_density_to_hists,
+    apply_density,
 )
 
 hist = maybe_import("hist")
@@ -54,12 +54,14 @@ def plot_hist_matching(
     """
     TODO.
     """
+    import IPython
+    IPython.embed()
     remove_residual_axis(hists, "shift")
 
     variable_inst = variable_insts[0]
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
     hists = apply_process_settings(hists, process_settings)
-    hists = apply_density_to_hists(hists, density)
+    hists = apply_density(hists, density)
 
     plot_config = OrderedDict()
 

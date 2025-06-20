@@ -48,3 +48,17 @@ def add_categories(cfg: od.Config) -> None:
         selection="cat_0btj",
         label="0 b-tagged jets",
     )
+    add_category(
+        cfg,
+        name="0btj_bkg",
+        selection="cat_0btj_bkg",
+        label="QCD estimation",
+        tags={"0btj"},
+    )
+    add_category(
+        cfg,
+        name="2btj_sig",
+        selection="cat_2btj_sig",
+        label=">2 b-tagged jets & signal trigger",
+        tags={"2btj"},
+    )

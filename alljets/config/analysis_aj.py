@@ -17,6 +17,7 @@ from columnflow.config_util import (
     verify_config_processes,
 )
 
+
 ak = maybe_import("awkward")
 
 
@@ -28,6 +29,12 @@ analysis_aj = ana = od.Analysis(
     name="analysis_aj",
     id=1,
 )
+
+# Add hist hooks
+analysis_aj.x.hist_hooks = DotDict()
+# QCD hist hooks
+from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
+add_qcd_hooks(analysis_aj)
 
 # analysis-global versions
 # (see cfg.x.versions below for more info)
@@ -85,14 +92,23 @@ process_names = [
     "qcd",
     "tt",
     "st",
+    "qcd_est",
 ]
 for process_name in process_names:
     # add the process
-    proc = cfg.add_process(procs.get(process_name))
+    if process_name == "qcd_est":
+        proc = cfg.add_process(name="qcd_est", id=30002)
+    else:
+        proc = cfg.add_process(procs.get(process_name))
 
     # configuration of colors, labels, etc. can happen here
     if proc.is_mc:
-        proc.color1 = (244, 182, 66) if proc.name == "tt" else (244, 93, 66)
+        if proc.name == "qcd_est":
+            proc.color1 = (244, 93, 244)
+        elif proc.name == "tt":
+            proc.color1 = (244, 182, 66)
+        else:
+            (244, 93, 66)
 
 # add datasets we need to study
 dataset_names = [
@@ -128,7 +144,7 @@ for dataset_name in dataset_names:
 
     # for testing purposes, limit the number of files to 2
     # for info in dataset.info.values():
-    #     info.n_files = min(info.n_files, 2)
+    #     info.n_files = min(info.n_files, 1)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -171,9 +187,18 @@ cfg.x.shift_groups = {}
 # (used in cutflow tasks)
 cfg.x.selector_step_groups = {
     "default": ["muon", "jet"],
+    "default_Mt": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT", "Rbb", "LeadingSix", "n5Chi2", "Mt"],
+    "default_Rbb": ["Rbb", "n5Chi2", "All", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
+    "default_LS": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT", "Rbb", "LeadingSix", "n5Chi2"],
+    "default_bkg_n5Chi2": ["All", "n5Chi2", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
+    "default_bkg_n10Chi2": ["All", "n10Chi2", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
+    "default_bkg_chi2": ["All", "Chi2", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
+    "default_bkg": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
     "trig_eff_ht": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
+    "ht7": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
     "trig_eff_ht2": ["All", "BaseTrigger", "BTag", "jet"],
     "trig_eff_pt": ["All", "BaseTrigger", "BTag", "HT"],
+    "jet6_pt_5": ["All", "BaseTrigger", "BTag", "HT"],
     "trig_eff_bjet": ["All", "BaseTrigger", "jet", "HT"],
     "trig_eff_ht_pt": ["All", "BaseTrigger", "BTag"],
 }
@@ -261,6 +286,9 @@ cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
 # names of muon correction sets and working points
 # (used in the muon producer)
 cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", f"{year}_UL")
+
+# choice of variable for calculating trigger weights
+cfg.x.trigger_sf_variable = "jet6_pt_5"
 
 # register shifts
 cfg.add_shift(name="nominal", id=0)
@@ -351,48 +379,6 @@ cfg.x.external_files = DotDict.wrap({
 
     # electron scale factors
     "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
-
-    # prototype trigger weight corrections
-    "trig_sf": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 1D pt
-    "trig_sf_pt": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 1D ht
-    "trig_sf_ht": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 2x 1D first ht second pt
-    "trig_sf_pt_after_ht": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 2x 1D first pt second ht
-    "trig_sf_ht_after_pt": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-        "v1",
-    ),
-
-    # prototype trigger weight corrections 3x 1D first ht second pt third ht
-    "trig_sf_ht_after_pt_after_ht": (
-        "/afs/desy.de/user/d/davidsto/public/mirrors/" +
-        "third_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-        "v1",
-    ),
 })
 
 cfg.x.trigger = {
@@ -401,6 +387,10 @@ cfg.x.trigger = {
 
 cfg.x.ref_trigger = {
     "tt_fh": ["PFHT350"],
+}
+
+cfg.x.bkg_trigger = {
+    "tt_fh": ["PFHT380_SixPFJet32"],
 }
 
 # IsoMu24, Mu50, PFHT350 for MC with all events: Physics
@@ -443,8 +433,8 @@ cfg.x.keep_columns = DotDict.wrap({
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
         "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
         "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350", "HLT.Physics",
-        "HLT.PFHT1050", "HLT.PFHT890",
+        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350",
+        "HLT.PFHT380_SixPFJet32", "HLT.Physics", "HLT.PFHT1050", "HLT.PFHT890",
         # columns added during selection
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight", "trig_weight", "trig_weight_up",
         "trig_weight_down", "murmuf_weight", "pu_weight", "btag_weight", "combination_type", "R2b4q", "trig_ht",
@@ -463,7 +453,7 @@ get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict({
     "normalization_weight": [],
     # "btag_weight": [],
-    # "trig_weight": [],
+    "trig_weight": [],
     # "trig_weight": get_shifts("trig"),
     # "muon_weight": get_shifts("mu"),
     # "pdf_weight": get_shifts("pdf"),

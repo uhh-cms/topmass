@@ -3,4 +3,4 @@
 
 # provisioning imports
 import alljets.tasks.base
-import alljets.tasks.TriggerEffClosure
+import alljets.tasks.ProduceTriggerWeights
