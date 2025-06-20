@@ -17,6 +17,8 @@ from columnflow.production.util import attach_coffea_behavior
 # from columnflow.selection.util import create_collections_from_masks
 from columnflow.util import maybe_import
 
+from alljets.production.KinFit import kinFit
+
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 coffea = maybe_import("coffea")
@@ -42,8 +44,8 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "event",
         attach_coffea_behavior,
         "HLT.*",
-        "FitJet.*",
         "Jet.btagDeepFlavB",
+        "gen_top_decay",
     },
     produces={
         # new columns
@@ -53,10 +55,6 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "n_bjet",
         "maxbtag",
         "secmaxbtag",
-        "FitW1.*",
-        "FitW2.*",
-        "FitTop1.*",
-        "FitTop2.*",
         # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
     },
 )
@@ -71,11 +69,6 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             "type_name": "Jet",
             "check_attr": "metric_table",
             "skip_fields": "*Idx*G",
-        },
-        "FitJet": {
-            "type_name": "Jet",
-            "check_attr": "metric_table",
-            "skip_fields": "",
         },
     }
     events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
@@ -105,6 +98,86 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(
         events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1])
     )
+    return events
+
+
+@producer(
+    uses={
+        # nano columns
+        "Jet.pt",
+        "Jet.phi",
+        "Jet.eta",
+        "Jet.mass",
+        "event",
+        attach_coffea_behavior,
+        "Jet.btagDeepFlavB",
+        kinFit,
+        "gen_top_decay",
+    },
+    produces={
+        # new columns
+        "FitJet.*",
+        "FitChi2",
+        "fitCombinationType",
+        "FitW1.*",
+        "FitW2.*",
+        "FitTop1.*",
+        "FitTop2.*",
+        # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
+    },
+)
+def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    from alljets.scripts.example import combinationtype
+
+    EF = -99999.0
+
+    ht_sel_kin = ak.sum(events.Jet.pt, axis=1) >= 450
+
+    jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
+    # bjet_indices = indices[bjet_mask][:, :2]
+    bjet_sel_kin = (ak.sum(bjet_mask, axis=1) >= 2) & (
+        ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1)
+    )
+    jet_mask_kin = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+    jet_sel_kin = ak.sum(jet_mask_kin, axis=1) >= 6
+    kinFit_eventmask = ht_sel_kin & jet_sel_kin & bjet_sel_kin
+    kinFit_jetmask = (events[kinFit_eventmask].Jet.pt >= 40.0) & (
+        abs(events[kinFit_eventmask].Jet.eta) < 2.4
+    )
+    events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
+    jetcollections = {
+        "FitJet": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "",
+        },
+        "FitJet.reco": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "",
+        },
+        "gen_top_decay": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "",
+        },
+    }
+    events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
+    fitcomb = combinationtype(
+        events.FitJet.reco[kinFit_eventmask][:, 0],
+        events.FitJet.reco[kinFit_eventmask][:, 1],
+        events.FitJet.reco[kinFit_eventmask][:, 2],
+        events.FitJet.reco[kinFit_eventmask][:, 3],
+        events.FitJet.reco[kinFit_eventmask][:, 4],
+        events.FitJet.reco[kinFit_eventmask][:, 5],
+        events.gen_top_decay[kinFit_eventmask],
+    )
+    full_fitcomb = np.full(len(events), EF)
+    full_fitcomb[kinFit_eventmask] = fitcomb
+    events = set_ak_column(events, "fitCombinationType", full_fitcomb)
+
     W1 = events.FitJet[:, 2].add(events.FitJet[:, 3])
     W2 = events.FitJet[:, 4].add(events.FitJet[:, 5])
     Top1 = events.FitJet[:, 0].add(W1)
@@ -150,14 +223,6 @@ def cutflow_features(
     # apply object masks and create new collections
     # reduced_events = create_collections_from_masks(events, object_masks)
 
-    # create category ids per event and add categories back to the
-    events = self[category_ids](
-        # reduced_events,
-        # target_events=events,
-        events,
-        **kwargs,
-    )
-
     # add cutflow columns
     events = set_ak_column(
         events, "cutflow.jet6_pt", Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT)
@@ -181,6 +246,7 @@ def cutflow_features(
         normalization_weights,
         muon_weights,
         deterministic_seeds,
+        kinFitMatch,
     },
     produces={
         features,
@@ -188,13 +254,15 @@ def cutflow_features(
         normalization_weights,
         muon_weights,
         deterministic_seeds,
+        kinFitMatch,
     },
 )
 def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # features
 
     events = self[features](events, **kwargs)
-
+    # apply kinematic fit
+    events = self[kinFitMatch](events, **kwargs)
     # category ids
     events = self[category_ids](events, **kwargs)
 

@@ -12,8 +12,6 @@ from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.util import maybe_import
 
-from alljets.production.KinFit import kinFit
-
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
@@ -125,7 +123,6 @@ def jet_selection_init(self: Selector) -> None:
         "HLT.*",
         "gen_top_decay",
         "GenPart.*",
-        kinFit,
     },
     # "Jet.jetId", "Jet.puId", "Jet.genJetIdx", "GenJet.*",
     produces={
@@ -137,9 +134,6 @@ def jet_selection_init(self: Selector) -> None:
         "deltaRb",
         "reco_combination_type",
         "R2b4q",
-        "FitJet.*",
-        "FitChi2",
-        "fitCombinationType",
     },
     jet_pt=None,
     jet_trigger=None,
@@ -154,7 +148,6 @@ def jet_selection(
 ) -> tuple[ak.Array, SelectionResult]:
     # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
     EF = -99999.0  # define EMPTY_FLOAT
-    from alljets.production.KinFit import kinFit
 
     ht1_sel = ak.sum(events.Jet.pt, axis=1) >= 1
     ht_sel = ak.sum(events.Jet.pt, axis=1) >= 450
@@ -260,14 +253,10 @@ def jet_selection(
     for i in range(6):
         (mt_result_filled[i])[sixjets_sel] = ak.flatten(mt_result[i])
 
-    chi2_sel = ak.Array(
-        (mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
-    chi2_sel1 = ak.Array(
-        (mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
-    chi2_sel2 = ak.Array(
-        (mt_result_filled[5] < 10) & (mt_result_filled[5] > -1))
-    chi2_sel3 = ak.Array(
-        (mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
+    chi2_sel = ak.Array((mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
+    chi2_sel1 = ak.Array((mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
+    chi2_sel2 = ak.Array((mt_result_filled[5] < 10) & (mt_result_filled[5] > -1))
+    chi2_sel3 = ak.Array((mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
     # verify_jet_trigger = (check_trigger == True)
 
     events = set_ak_column(events, "Mt1", mt_result_filled[0])
@@ -276,23 +265,6 @@ def jet_selection(
     events = set_ak_column(events, "MW2", mt_result_filled[3])
     events = set_ak_column(events, "deltaRb", mt_result_filled[4])
     events = set_ak_column(events, "chi2", mt_result_filled[5])
-
-    ht_sel_kin = ak.sum(events.Jet.pt, axis=1) >= 450
-
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
-    # bjet_indices = indices[bjet_mask][:, :2]
-    bjet_sel_kin = (ak.sum(bjet_mask, axis=1) >= 2) & (
-        ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1)
-    )
-    jet_mask_kin = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
-    jet_sel_kin = ak.sum(jet_mask_kin, axis=1) >= 6
-    kinFit_eventmask = ht_sel_kin & jet_sel_kin & bjet_sel_kin
-    kinFit_jetmask = (events[kinFit_eventmask].Jet.pt >= 40.0) & (
-        abs(events[kinFit_eventmask].Jet.eta) < 2.4
-    )
-    events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
-    fitchi2_sel = events.FitChi2 < 10000
 
     def combinationtype(b1, b2, j1, j2, j3, j4, correctcomb):
 
@@ -350,7 +322,6 @@ def jet_selection(
             ],
             axis=0,
         )
-        import IPython
 
         type = matched * 1 + ak.any(drlist, axis=0)
         return type
@@ -385,32 +356,6 @@ def jet_selection(
         original = where[~mask]
         combined = ak.concatenate((original, cut_replaced), axis=1)
         return combined
-
-    jetcollections = {
-        "FitJet": {
-            "type_name": "Jet",
-            "check_attr": "metric_table",
-            "skip_fields": "",
-        },
-        "FitJet.reco": {
-            "type_name": "Jet",
-            "check_attr": "metric_table",
-            "skip_fields": "",
-        },
-    }
-    events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
-    fitcomb = combinationtype(
-        events.FitJet.reco[kinFit_eventmask][:, 0],
-        events.FitJet.reco[kinFit_eventmask][:, 1],
-        events.FitJet.reco[kinFit_eventmask][:, 2],
-        events.FitJet.reco[kinFit_eventmask][:, 3],
-        events.FitJet.reco[kinFit_eventmask][:, 4],
-        events.FitJet.reco[kinFit_eventmask][:, 5],
-        events.gen_top_decay[kinFit_eventmask],
-    )
-    full_fitcomb = np.full(len(events), EF)
-    full_fitcomb[kinFit_eventmask] = fitcomb
-    events = set_ak_column(events, "fitCombinationType", full_fitcomb)
 
     if len(ak.unzip(mt_result[6][:])) > 1:
         if (len(ak.unzip(ak.unzip(mt_result[6][:])[0])) > 1) & (
@@ -450,7 +395,6 @@ def jet_selection(
             "n25Chi2": chi2_sel1,
             "n10Chi2": chi2_sel2,
             "n5Chi2": chi2_sel3,
-            "kinfit_convergence": (fitchi2_sel),
         },
         objects={
             "Jet": {

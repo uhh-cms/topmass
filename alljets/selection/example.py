@@ -100,6 +100,7 @@ def muon_selection(
         btag_weights,
         gen_top_decay_products,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+        "gen_top_decay.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
     },
     exposed=True,
 )

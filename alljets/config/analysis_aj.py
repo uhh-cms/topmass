@@ -231,7 +231,7 @@ cfg.x.btag_working_points = DotDict.wrap(
         },
     },
 )
-
+cfg.x.fitchi2cut = 10
 # JEC uncertainty sources propagated to btag scale factors
 # (names derived from contents in BTV correctionlib file)
 cfg.x.btag_sf_jec_sources = [
@@ -530,6 +530,7 @@ cfg.x.keep_columns = DotDict.wrap(
             "combination_type",
             "R2b4q",
             "trig_ht",
+            "gen_top_decay.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
         },
         "cf.MergeSelectionMasks": {
             "normalization_weight",

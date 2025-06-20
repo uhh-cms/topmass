@@ -48,3 +48,21 @@ def add_categories(cfg: od.Config) -> None:
         selection="cat_0btj",
         label="0 b-tagged jets",
     )
+    add_category(
+        cfg,
+        name="fit_nconv",
+        selection="cat_fit_nconv",
+        label="kinfit not converged",
+    )
+    add_category(
+        cfg,
+        name="fit_conv_leq",
+        selection="cat_fit_conv_leq",
+        label="kinfit converged and below chi2 cut",
+    )
+    add_category(
+        cfg,
+        name="fit_conv_big",
+        selection="cat_fit_conv_big",
+        label="kinfit converged and above chi2 cut",
+    )
