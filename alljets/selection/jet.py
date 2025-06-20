@@ -148,19 +148,11 @@ def jet_selection(
 ) -> tuple[ak.Array, SelectionResult]:
     # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
     EF = -99999.0  # define EMPTY_FLOAT
-<<<<<<< HEAD
-
     ht1_sel = ak.sum(events.Jet.pt, axis=1) >= 1
-    ht_sel = ak.sum(events.Jet.pt, axis=1) >= 450
-    jet_mask = abs(events.Jet.eta) < 2.6
+    jet_mask0 = abs(events.Jet.eta) < 2.6
+    jet_mask = jet_mask0 & (events.Jet.pt >= 32.0)
+    ht_sel = ak.sum(events.Jet.pt[jet_mask], axis=1) >= 450
     jet_mask2 = (abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 40.0)
-=======
-    ht1_sel = (ak.sum(events.Jet.pt, axis=1) >= 1)
-    jet_mask0 = (abs(events.Jet.eta) < 2.6)
-    jet_mask = (jet_mask0 & (events.Jet.pt >= 32.0))
-    ht_sel = (ak.sum(events.Jet.pt[jet_mask], axis=1) >= 450)
-    jet_mask2 = ((abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 40.0))
->>>>>>> 6cf67c09b9549f9f3f09f0fe080cdb21e67cfe4c
     jet_sel = ak.sum(jet_mask2, axis=1) >= 6
     veto_jet = ~jet_mask
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
@@ -168,44 +160,32 @@ def jet_selection(
 
     # b-tagged jets (tight wp)
     bjet_mask = (jet_mask2) & (events.Jet.btagDeepFlavB >= wp_tight)
-<<<<<<< HEAD
-    # bjet_indices = indices[bjet_mask][:, :2]
+
     bjet_sel = (ak.sum(bjet_mask, axis=1) >= 2) & (
         ak.sum(jet_mask2[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1)
     )
     sixjets_sel = bjet_sel & (ak.sum(light_jet, axis=1) >= 4)
-=======
-
-    bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2) &
-                (ak.sum(jet_mask2[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1))
-                )
-    sixjets_sel = (bjet_sel & (ak.sum(light_jet, axis=1) >= 4))
 
     # B-Jet Rejection for bkg estimation
     wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
-    loose_bjet_mask = (events.Jet.btagDeepFlavB >= wp_loose)
-    bjet_rej = (ak.sum(((jet_mask2) & loose_bjet_mask), axis=1) == 0)
+    loose_bjet_mask = events.Jet.btagDeepFlavB >= wp_loose
+    bjet_rej = ak.sum(((jet_mask2) & loose_bjet_mask), axis=1) == 0
     sel_bjet_2or0 = ak.any([bjet_sel, bjet_rej], axis=0)
 
->>>>>>> 6cf67c09b9549f9f3f09f0fe080cdb21e67cfe4c
     # Trigger selection step is skipped for QCD MC, which has no Trigger columns
     if not self.dataset_inst.name.startswith("qcd"):
         ones = ak.ones_like(jet_sel)
         # trigger
         jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
-<<<<<<< HEAD
-        # alt_jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.alt_jet_trigger]
+        alt_jet_trigger_sel = (
+            ones if not self.jet_trigger else events.HLT[self.alt_jet_trigger]
+        )
         jet_base_trigger_sel = (
             ones if not self.jet_base_trigger else events.HLT[self.jet_base_trigger]
         )
     else:
-=======
-        alt_jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.alt_jet_trigger]
-        jet_base_trigger_sel = ones if not self.jet_base_trigger else events.HLT[self.jet_base_trigger]
-    else:
         jet_trigger_sel = True
         alt_jet_trigger_sel = True
->>>>>>> 6cf67c09b9549f9f3f09f0fe080cdb21e67cfe4c
         jet_base_trigger_sel = True
     signal_or_bkg_trigger = ak.any([jet_trigger_sel, alt_jet_trigger_sel], axis=0)
 
@@ -215,29 +195,20 @@ def jet_selection(
     mtsig = 27.07  # 15
     mu_tt = 2.07
     mu_w = 0.88
-<<<<<<< HEAD
-
-    def m(j1, j2):
-        return (j1.add(j2)).mass
-
-    def m3(j1, j2, j3):
-        return (j1.add(j2.add(j3))).mass
-
-    def dr(j1, j2):
-        return j1.delta_r(j2)
-
-    ljets = ak.combinations((events.Jet[light_jet])[sixjets_sel], 4, axis=1)
-    bjets = ak.combinations((events.Jet[bjet_mask])[sixjets_sel], 2, axis=1)
-=======
     m = lambda j1, j2: (j1.add(j2)).mass
     m3 = lambda j1, j2, j3: (j1.add(j2.add(j3))).mass
     dr = lambda j1, j2: j1.delta_r(j2)
 
     # Build jet combinations
-    bjet_after_jet_mask = (events.Jet[jet_mask2].btagDeepFlavB >= wp_tight)
-    ljet_after_jet_mask = (events.Jet[jet_mask2].btagDeepFlavB < wp_tight)
-    leading_six_sel = ((ak.num((events.Jet.pt[jet_mask2][:, :6])[bjet_after_jet_mask[:, :6]], axis=1) == 2) &
-                       (ak.num((events.Jet.pt[jet_mask2][:, :6])[ljet_after_jet_mask[:, :6]], axis=1) == 4))
+    bjet_after_jet_mask = events.Jet[jet_mask2].btagDeepFlavB >= wp_tight
+    ljet_after_jet_mask = events.Jet[jet_mask2].btagDeepFlavB < wp_tight
+    leading_six_sel = (
+        ak.num((events.Jet.pt[jet_mask2][:, :6])[bjet_after_jet_mask[:, :6]], axis=1)
+        == 2
+    ) & (
+        ak.num((events.Jet.pt[jet_mask2][:, :6])[ljet_after_jet_mask[:, :6]], axis=1)
+        == 4
+    )
     leading_six_or_bkg = ak.any([leading_six_sel, alt_jet_trigger_sel])
     # ljets = ak.combinations((events.Jet[light_jet])[sixjets_sel], 4, axis=1)
     # bjets = ak.combinations((events.Jet[bjet_mask])[sixjets_sel], 2, axis=1)
@@ -245,7 +216,9 @@ def jet_selection(
     bjets = ak.combinations((events.Jet[bjet_mask][:, :2])[sixjets_sel], 2, axis=1)
 
     # Pseudo recontruction for background
-    rej_jets = ((events.Jet[~loose_bjet_mask])[bjet_rej & alt_jet_trigger_sel & jet_sel & ht_sel])
+    rej_jets = (events.Jet[~loose_bjet_mask])[
+        bjet_rej & alt_jet_trigger_sel & jet_sel & ht_sel
+    ]
     rej_jets = rej_jets[ak.argsort((rej_jets.pt), axis=1, ascending=False)][:, :6]
 
     rng = np.random.default_rng()
@@ -263,7 +236,6 @@ def jet_selection(
     rej_bjets = ak.combinations(rej_jets[:, :2], 2, axis=1)
     rej_ljets = ak.combinations(rej_jets[:, 2:], 4, axis=1)
 
->>>>>>> 6cf67c09b9549f9f3f09f0fe080cdb21e67cfe4c
     # Building combination light jet mass functions
 
     def lpermutations(ljets):
@@ -316,21 +288,23 @@ def jet_selection(
         else:
             return [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]]
 
-<<<<<<< HEAD
     mt_result = mt(
         sixjetcombinations(
             bpermutations(ak.unzip(bjets)), lpermutations(ak.unzip(ljets))
         )
     )
-=======
-    mt_result = mt(sixjetcombinations(bpermutations(ak.unzip(bjets)), lpermutations(ak.unzip(ljets))))
-    mt_bkg_result = mt(sixjetcombinations(bpermutations(ak.unzip(rej_bjets)), lpermutations(ak.unzip(rej_ljets))))
->>>>>>> 6cf67c09b9549f9f3f09f0fe080cdb21e67cfe4c
+    mt_bkg_result = mt(
+        sixjetcombinations(
+            bpermutations(ak.unzip(rej_bjets)), lpermutations(ak.unzip(rej_ljets))
+        )
+    )
     chi2_cut = 50
     mt_result_filled = np.full((6, ak.num(events, axis=0)), EF)
     for i in range(6):
         (mt_result_filled[i])[sixjets_sel] = ak.flatten(mt_result[i])
-        (mt_result_filled[i])[bjet_rej & alt_jet_trigger_sel & jet_sel & ht_sel] = ak.flatten(mt_bkg_result[i])
+        (mt_result_filled[i])[bjet_rej & alt_jet_trigger_sel & jet_sel & ht_sel] = (
+            ak.flatten(mt_bkg_result[i])
+        )
 
     chi2_sel = ak.Array((mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
     chi2_sel1 = ak.Array((mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
@@ -459,9 +433,9 @@ def jet_selection(
         events = set_ak_column(events, "R2b4q", EF)
 
     # TODO: test mt cuts
-    mt_sel = (events.Mt1 < 150)
-    mt_sel2 = (events.Mt1 < 175)
-    mt_sel3 = (events.Mt1 < 125)
+    mt_sel = events.Mt1 < 150
+    mt_sel2 = events.Mt1 < 175
+    mt_sel3 = events.Mt1 < 125
     # build and return selection results
     # "objects" maps source columns to new columns and selections to be applied on the old columns
     # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
@@ -489,9 +463,8 @@ def jet_selection(
         },
         objects={
             "Jet": {
-<<<<<<< HEAD
                 "Jet": sorted_indices_from_mask(
-                    jet_mask, events.Jet.pt, ascending=False
+                    jet_mask0, events.Jet.pt, ascending=False
                 ),
                 "EventJet": sorted_indices_from_mask(
                     jet_mask2, events.Jet.pt, ascending=False
@@ -508,14 +481,6 @@ def jet_selection(
                 "JetsByBTag": sorted_indices_from_mask(
                     jet_mask, events.Jet.btagDeepFlavB, ascending=False
                 ),
-=======
-                "Jet": sorted_indices_from_mask(jet_mask0, events.Jet.pt, ascending=False),
-                "EventJet": sorted_indices_from_mask(jet_mask2, events.Jet.pt, ascending=False),
-                "Bjet": sorted_indices_from_mask(bjet_mask, events.Jet.pt, ascending=False),
-                "VetoJet": sorted_indices_from_mask(veto_jet, events.Jet.pt, ascending=False),
-                "LightJet": sorted_indices_from_mask(light_jet, events.Jet.pt, ascending=False),
-                "JetsByBTag": sorted_indices_from_mask(jet_mask, events.Jet.btagDeepFlavB, ascending=False),
->>>>>>> 6cf67c09b9549f9f3f09f0fe080cdb21e67cfe4c
             },
         },
         aux={
