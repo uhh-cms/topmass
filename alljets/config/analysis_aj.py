@@ -4,6 +4,10 @@
 Configuration of the topmass_alljets analysis.
 """
 
+from alljets.config.variables import add_variables
+from alljets.config.categories import add_categories
+from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
+from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
 import functools
 import os
 
@@ -34,7 +38,6 @@ analysis_aj = ana = od.Analysis(
 # Add hist hooks
 analysis_aj.x.hist_hooks = DotDict()
 # QCD hist hooks
-from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
 add_qcd_hooks(analysis_aj)
 
 # analysis-global versions
@@ -72,7 +75,6 @@ ana.x.config_groups = {}
 # ttbar and single top MCs, plus single muon data
 # update this config or add additional ones to accomodate the needs of your analysis
 
-from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
 
 # copy the campaign
 # (creates copies of all linked datasets, processes, etc. to allow for encapsulated customization)
@@ -314,8 +316,10 @@ cfg.add_shift(name="nominal", id=0)
 
 # tune shifts are covered by dedicated, varied datasets, so tag the shift as "disjoint_from_nominal"
 # (this is currently used to decide whether ML evaluations are done on the full shifted dataset)
-cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal"})
-cfg.add_shift(name="tune_down", id=2, type="shape", tags={"disjoint_from_nominal"})
+cfg.add_shift(name="tune_up", id=1, type="shape",
+              tags={"disjoint_from_nominal"})
+cfg.add_shift(name="tune_down", id=2, type="shape",
+              tags={"disjoint_from_nominal"})
 
 # fake jet energy correction shift, with aliases flaged as "selection_dependent", i.e. the aliases
 # affect columns that might change the output of the event selection
@@ -376,81 +380,6 @@ add_shift_aliases(
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = "2017"
 corr_postfix = ""
-<<<<<<< HEAD
-cfg.x.external_files = DotDict.wrap(
-    {
-        # lumi files
-        "lumi": {
-            "golden": (
-                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
-                "v1",
-            ),  # noqa
-            "normtag": (
-                "/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json",
-                "v1",
-            ),
-        },
-        # muon scale factors
-        "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
-        # btag scale factor
-        "btag_sf_corr": (
-            f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz",
-            "v1",
-        ),
-        # pileup weight corrections
-        "pu_sf": (
-            f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz",
-            "v1",
-        ),
-        # jet energy correction
-        "jet_jerc": (
-            f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz",
-            "v1",
-        ),
-        # electron scale factors
-        "electron_sf": (
-            f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz",
-            "v1",
-        ),
-        # prototype trigger weight corrections
-        "trig_sf": (
-            "/afs/desy.de/user/d/davidsto/public/mirrors/"
-            + "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht2.json.gz",
-            "v1",
-        ),
-        # prototype trigger weight corrections 1D pt
-        "trig_sf_pt": (
-            "/afs/desy.de/user/d/davidsto/public/mirrors/"
-            + "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-            "v1",
-        ),
-        # prototype trigger weight corrections 1D ht
-        "trig_sf_ht": (
-            "/afs/desy.de/user/d/davidsto/public/mirrors/"
-            + "trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-            "v1",
-        ),
-        # prototype trigger weight corrections 2x 1D first ht second pt
-        "trig_sf_pt_after_ht": (
-            "/afs/desy.de/user/d/davidsto/public/mirrors/"
-            + "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_jet6_pt_4_ht_dummy.json.gz",
-            "v1",
-        ),
-        # prototype trigger weight corrections 2x 1D first pt second ht
-        "trig_sf_ht_after_pt": (
-            "/afs/desy.de/user/d/davidsto/public/mirrors/"
-            + "second_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-            "v1",
-        ),
-        # prototype trigger weight corrections 3x 1D first ht second pt third ht
-        "trig_sf_ht_after_pt_after_ht": (
-            "/afs/desy.de/user/d/davidsto/public/mirrors/"
-            + "third_trig_cor_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_PFHT350_ht7_jet6_ptdummy.json.gz",
-            "v1",
-        ),
-    }
-)
-=======
 cfg.x.external_files = DotDict.wrap({
     # lumi files
     "lumi": {
@@ -473,7 +402,6 @@ cfg.x.external_files = DotDict.wrap({
     # electron scale factors
     "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
 })
->>>>>>> 6cf67c09b9549f9f3f09f0fe080cdb21e67cfe4c
 
 cfg.x.trigger = {
     "tt_fh": [
@@ -518,7 +446,6 @@ cfg.x.bkg_trigger = {
 cfg.x.reduced_file_size = 512.0
 
 # columns to keep after certain steps
-<<<<<<< HEAD
 cfg.x.keep_columns = DotDict.wrap(
     {
         "cf.ReduceEvents": {
@@ -607,50 +534,9 @@ cfg.x.keep_columns = DotDict.wrap(
         },
     }
 )
-=======
-cfg.x.keep_columns = DotDict.wrap({
-    "cf.ReduceEvents": {
-        # general event info
-        "run", "luminosityBlock", "event",
-        # object info
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Bjet.*", "VetoJet.*", "LightJet.*", "JetsByBTag.*",
-        # "EventJet.*",
-        "Jet.btagDeepFlavB", "Jet.hadronFlavour",
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
-        "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
-        "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
-        "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350",
-        "HLT.PFHT380_SixPFJet32", "HLT.Physics", "HLT.PFHT1050", "HLT.PFHT890",
-        # columns added during selection
-        "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight", "trig_weight", "trig_weight_up",
-        "trig_weight_down", "murmuf_weight", "pu_weight", "btag_weight", "combination_type", "R2b4q", "trig_ht",
-    },
-    "cf.MergeSelectionMasks": {
-        "normalization_weight", "process_id", "category_ids", "cutflow.*",
-    },
-    "cf.UniteColumns": {
-        "*_weight", "Jet.*", "combination_type", "ht", "Mt*", "MW*", "trig_bits",
-    },
-})
->>>>>>> 6cf67c09b9549f9f3f09f0fe080cdb21e67cfe4c
-
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
-<<<<<<< HEAD
-cfg.x.event_weights = DotDict(
-    {
-        "normalization_weight": [],
-        # "btag_weight": [],
-        # "trig_weight": [],
-        # "trig_weight": get_shifts("trig"),
-        # "muon_weight": get_shifts("mu"),
-        # "pdf_weight": get_shifts("pdf"),
-        # "murmuf_weight": get_shifts("murmuf"),
-    }
-)
-=======
 cfg.x.event_weights = DotDict({
     "normalization_weight": [],
     # "btag_weight": [],
@@ -660,7 +546,6 @@ cfg.x.event_weights = DotDict({
     # "pdf_weight": get_shifts("pdf"),
     # "murmuf_weight": get_shifts("murmuf"),
 })
->>>>>>> 6cf67c09b9549f9f3f09f0fe080cdb21e67cfe4c
 
 # versions per task family, either referring to strings or to callables receving the invoking
 # task instance and parameters to be passed to the task family
@@ -675,10 +560,8 @@ cfg.x.versions = {
 cfg.add_channel(name="mutau", id=1)
 
 # add categories using the "add_category" tool which adds auto-generated ids
-from alljets.config.categories import add_categories
 
 add_categories(cfg)
 # add variables
-from alljets.config.variables import add_variables
 
 add_variables(cfg)
