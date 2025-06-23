@@ -4,15 +4,12 @@
 Configuration of the topmass_alljets analysis.
 """
 
-from alljets.config.variables import add_variables
-from alljets.config.categories import add_categories
-from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
-from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
 import functools
 import os
 
 import law
 import order as od
+from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
 from columnflow.config_util import (
     add_shift_aliases,
     get_root_processes_from_campaign,
@@ -22,6 +19,9 @@ from columnflow.config_util import (
 from columnflow.util import DotDict, maybe_import
 from scinum import Number
 
+from alljets.config.categories import add_categories
+from alljets.config.variables import add_variables
+from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
 
 ak = maybe_import("awkward")
 
@@ -205,11 +205,52 @@ cfg.x.shift_groups = {}
 # (used in cutflow tasks)
 cfg.x.selector_step_groups = {
     "default": ["muon", "jet"],
-    "default_Mt": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT", "Rbb", "LeadingSix", "n5Chi2", "Mt"],
-    "default_Rbb": ["Rbb", "n5Chi2", "All", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
-    "default_LS": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT", "Rbb", "LeadingSix", "n5Chi2"],
-    "default_bkg_n5Chi2": ["All", "n5Chi2", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
-    "default_bkg_n10Chi2": ["All", "n10Chi2", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
+    "default_Mt": [
+        "All",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+        "Rbb",
+        "LeadingSix",
+        "n5Chi2",
+        "Mt",
+    ],
+    "default_Rbb": [
+        "Rbb",
+        "n5Chi2",
+        "All",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+    ],
+    "default_LS": [
+        "All",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+        "Rbb",
+        "LeadingSix",
+        "n5Chi2",
+    ],
+    "default_bkg_n5Chi2": [
+        "All",
+        "n5Chi2",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+    ],
+    "default_bkg_n10Chi2": [
+        "All",
+        "n10Chi2",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+    ],
     "default_bkg_chi2": ["All", "Chi2", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
     "default_bkg": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
     "trig_eff_ht": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
@@ -316,10 +357,8 @@ cfg.add_shift(name="nominal", id=0)
 
 # tune shifts are covered by dedicated, varied datasets, so tag the shift as "disjoint_from_nominal"
 # (this is currently used to decide whether ML evaluations are done on the full shifted dataset)
-cfg.add_shift(name="tune_up", id=1, type="shape",
-              tags={"disjoint_from_nominal"})
-cfg.add_shift(name="tune_down", id=2, type="shape",
-              tags={"disjoint_from_nominal"})
+cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal"})
+cfg.add_shift(name="tune_down", id=2, type="shape", tags={"disjoint_from_nominal"})
 
 # fake jet energy correction shift, with aliases flaged as "selection_dependent", i.e. the aliases
 # affect columns that might change the output of the event selection
@@ -380,28 +419,43 @@ add_shift_aliases(
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = "2017"
 corr_postfix = ""
-cfg.x.external_files = DotDict.wrap({
-    # lumi files
-    "lumi": {
-        "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
-        "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
-    },
-
-    # muon scale factors
-    "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
-
-    # btag scale factor
-    "btag_sf_corr": (f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz", "v1"),
-
-    # pileup weight corrections
-    "pu_sf": (f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz", "v1"),
-
-    # jet energy correction
-    "jet_jerc": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
-
-    # electron scale factors
-    "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
-})
+cfg.x.external_files = DotDict.wrap(
+    {
+        # lumi files
+        "lumi": {
+            "golden": (
+                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
+                "v1",
+            ),  # noqa
+            "normtag": (
+                "/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json",
+                "v1",
+            ),
+        },
+        # muon scale factors
+        "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
+        # btag scale factor
+        "btag_sf_corr": (
+            f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz",
+            "v1",
+        ),
+        # pileup weight corrections
+        "pu_sf": (
+            f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz",
+            "v1",
+        ),
+        # jet energy correction
+        "jet_jerc": (
+            f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz",
+            "v1",
+        ),
+        # electron scale factors
+        "electron_sf": (
+            f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz",
+            "v1",
+        ),
+    }
+)
 
 cfg.x.trigger = {
     "tt_fh": [
@@ -494,6 +548,7 @@ cfg.x.keep_columns = DotDict.wrap(
             "HLT.Mu50",
             "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
             "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
+            "HLT.PFHT380_SixPFJet32",
             "HLT.IsoMu24",
             "HLT.PFHT370",
             "HLT.PFHT350",
@@ -537,15 +592,17 @@ cfg.x.keep_columns = DotDict.wrap(
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
-cfg.x.event_weights = DotDict({
-    "normalization_weight": [],
-    # "btag_weight": [],
-    "trig_weight": [],
-    # "trig_weight": get_shifts("trig"),
-    # "muon_weight": get_shifts("mu"),
-    # "pdf_weight": get_shifts("pdf"),
-    # "murmuf_weight": get_shifts("murmuf"),
-})
+cfg.x.event_weights = DotDict(
+    {
+        "normalization_weight": [],
+        # "btag_weight": [],
+        # "trig_weight": [],
+        # "trig_weight": get_shifts("trig"),
+        # "muon_weight": get_shifts("mu"),
+        # "pdf_weight": get_shifts("pdf"),
+        # "murmuf_weight": get_shifts("murmuf"),
+    }
+)
 
 # versions per task family, either referring to strings or to callables receving the invoking
 # task instance and parameters to be passed to the task family
