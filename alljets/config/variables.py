@@ -788,7 +788,7 @@ def add_variables(cfg: od.Config) -> None:
 
     def build_w1jet(events, which=None):
         events = attach_coffea_behavior(
-            events, {"FitW1": default_coffea_collections["Jet"]}
+            events, {"FitW1": default_coffea_collections["Jet"]},
         )
         W1jets = events.FitW1
         if which is None:
@@ -820,7 +820,7 @@ def add_variables(cfg: od.Config) -> None:
 
     def build_top1jet(events, which=None):
         events = attach_coffea_behavior(
-            events, {"FitTop1": default_coffea_collections["Jet"]}
+            events, {"FitTop1": default_coffea_collections["Jet"]},
         )
         Top1jets = events.FitTop1
         if which is None:

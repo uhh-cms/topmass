@@ -424,7 +424,9 @@ cfg.x.external_files = DotDict.wrap(
         # lumi files
         "lumi": {
             "golden": (
-                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
+                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collision"
+                "/s17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_"
+                "Collisions17_GoldenJSON.txt",
                 "v1",
             ),  # noqa
             "normtag": (
@@ -484,78 +486,87 @@ jec_version = {2016: "V7", 2017: "V5", 2018: "V5"}[year]
 jer_campaign = f"Summer{'20' if year == 2016 else '19'}UL{year2}{campaign.x.postfix}"
 jer_version = "JR" + {2016: "V3", 2017: "V2", 2018: "V2"}[year]
 jet_type = "AK4PFchs"
-cfg.x.jec = DotDict.wrap({
-    "Jet": {
-        "campaign": jec_campaign,
-        "version": jec_version,
-        "jet_type": jet_type,
-        "levels": ["L1FastJet", "L2Relative", "L2L3Residual", "L3Absolute"],
-        "levels_for_type1_met": ["L1FastJet"],
-        "uncertainty_sources": list(filter(bool, [
-            # "AbsoluteStat",
-            # "AbsoluteScale",
-            # "AbsoluteSample",
-            # "AbsoluteFlavMap",
-            # "AbsoluteMPFBias",
-            # "Fragmentation",
-            # "SinglePionECAL",
-            # "SinglePionHCAL",
-            # "FlavorQCD",
-            # "TimePtEta",
-            # "RelativeJEREC1",
-            # "RelativeJEREC2",
-            # "RelativeJERHF",
-            # "RelativePtBB",
-            # "RelativePtEC1",
-            # "RelativePtEC2",
-            # "RelativePtHF",
-            # "RelativeBal",
-            # "RelativeSample",
-            # "RelativeFSR",
-            # "RelativeStatFSR",
-            # "RelativeStatEC",
-            # "RelativeStatHF",
-            # "PileUpDataMC",
-            # "PileUpPtRef",
-            # "PileUpPtBB",
-            # "PileUpPtEC1",
-            # "PileUpPtEC2",
-            # "PileUpPtHF",
-            # "PileUpMuZero",
-            # "PileUpEnvelope",
-            # "SubTotalPileUp",
-            # "SubTotalRelative",
-            # "SubTotalPt",
-            # "SubTotalScale",
-            # "SubTotalAbsolute",
-            # "SubTotalMC",
-            "Total",
-            # "TotalNoFlavor",
-            # "TotalNoTime",
-            # "TotalNoFlavorNoTime",
-            # "FlavorZJet",
-            # "FlavorPhotonJet",
-            # "FlavorPureGluon",
-            # "FlavorPureQuark",
-            # "FlavorPureCharm",
-            # "FlavorPureBottom",
-            # "CorrelationGroupMPFInSitu",
-            # "CorrelationGroupIntercalibration",
-            # "CorrelationGroupbJES",
-            # "CorrelationGroupFlavor",
-            # "CorrelationGroupUncorrelated",
-        ])),
-    },
-})
+cfg.x.jec = DotDict.wrap(
+    {
+        "Jet": {
+            "campaign": jec_campaign,
+            "version": jec_version,
+            "jet_type": jet_type,
+            "levels": ["L1FastJet", "L2Relative", "L2L3Residual", "L3Absolute"],
+            "levels_for_type1_met": ["L1FastJet"],
+            "uncertainty_sources": list(
+                filter(
+                    bool,
+                    [
+                        # "AbsoluteStat",
+                        # "AbsoluteScale",
+                        # "AbsoluteSample",
+                        # "AbsoluteFlavMap",
+                        # "AbsoluteMPFBias",
+                        # "Fragmentation",
+                        # "SinglePionECAL",
+                        # "SinglePionHCAL",
+                        # "FlavorQCD",
+                        # "TimePtEta",
+                        # "RelativeJEREC1",
+                        # "RelativeJEREC2",
+                        # "RelativeJERHF",
+                        # "RelativePtBB",
+                        # "RelativePtEC1",
+                        # "RelativePtEC2",
+                        # "RelativePtHF",
+                        # "RelativeBal",
+                        # "RelativeSample",
+                        # "RelativeFSR",
+                        # "RelativeStatFSR",
+                        # "RelativeStatEC",
+                        # "RelativeStatHF",
+                        # "PileUpDataMC",
+                        # "PileUpPtRef",
+                        # "PileUpPtBB",
+                        # "PileUpPtEC1",
+                        # "PileUpPtEC2",
+                        # "PileUpPtHF",
+                        # "PileUpMuZero",
+                        # "PileUpEnvelope",
+                        # "SubTotalPileUp",
+                        # "SubTotalRelative",
+                        # "SubTotalPt",
+                        # "SubTotalScale",
+                        # "SubTotalAbsolute",
+                        # "SubTotalMC",
+                        "Total",
+                        # "TotalNoFlavor",
+                        # "TotalNoTime",
+                        # "TotalNoFlavorNoTime",
+                        # "FlavorZJet",
+                        # "FlavorPhotonJet",
+                        # "FlavorPureGluon",
+                        # "FlavorPureQuark",
+                        # "FlavorPureCharm",
+                        # "FlavorPureBottom",
+                        # "CorrelationGroupMPFInSitu",
+                        # "CorrelationGroupIntercalibration",
+                        # "CorrelationGroupbJES",
+                        # "CorrelationGroupFlavor",
+                        # "CorrelationGroupUncorrelated",
+                    ],
+                )
+            ),
+        },
+    }
+)
 
 # JER
-cfg.x.jer = DotDict.wrap({
-    "Jet": {
-        "campaign": jer_campaign,
-        "version": jer_version,
-        "jet_type": jet_type,
-    },
-})
+cfg.x.jer = DotDict.wrap(
+    {
+        "Jet": {
+            "campaign": jer_campaign,
+            "version": jer_version,
+            "jet_type": jet_type,
+        },
+    }
+)
 # IsoMu24, Mu50, PFHT350 for MC with all events: Physics
 #
 # if year == 2017:

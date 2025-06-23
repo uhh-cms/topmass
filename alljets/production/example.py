@@ -93,13 +93,20 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
     # events = set_ak_column(events, "ht", (ak.sum(events.Jet.pt, axis=1) + ak.sum(events.VetoJet.pt, axis=1)))
     events = set_ak_column(
-        events, "ht_old", (ak.sum(events.Jet[(abs(events.Jet.eta) < 2.4)].pt, axis=1))
+        events,
+        "ht_old",
+        (ak.sum(events.Jet[(abs(events.Jet.eta) < 2.4)].pt, axis=1)),
     )
     events = set_ak_column(
-        events, "ht", (ak.sum(events.Jet[(events.Jet.pt >= 30.0)].pt, axis=1))
+        events,
+        "ht",
+        (ak.sum(events.Jet[(events.Jet.pt >= 30.0)].pt, axis=1)),
     )
     events = set_ak_column(
-        events, "n_jet", ak.num(events.Jet.pt, axis=1), value_type=np.int32
+        events,
+        "n_jet",
+        ak.num(events.Jet.pt, axis=1),
+        value_type=np.int32,
     )
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     events = set_ak_column(
@@ -245,16 +252,22 @@ def cutflow_features(
 
     # add cutflow columns
     events = set_ak_column(
-        events, "cutflow.jet6_pt", Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT)
+        events,
+        "cutflow.jet6_pt",
+        Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT),
     )
     events = set_ak_column(events, "cutflow.ht", ak.sum(events.Jet.pt, axis=1))
     events = set_ak_column(
-        events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT)
+        events,
+        "cutflow.jet1_pt",
+        Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT),
     )
     events = set_ak_column(events, "cutflow.n_jet", ak.num(events.Jet.pt, axis=1))
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     events = set_ak_column(
-        events, "cutflow.n_bjet", ak.sum((events.Jet.btagDeepFlavB >= wp_tight), axis=1)
+        events,
+        "cutflow.n_bjet",
+        ak.sum((events.Jet.btagDeepFlavB >= wp_tight), axis=1),
     )
     return events
 
@@ -332,10 +345,16 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         # normalization weights
         events = self[normalization_weights](events, **kwargs)
         events = set_ak_column(
-            events, "normalization_weight", np.ones(len(events)), value_type=np.float32
+            events,
+            "normalization_weight",
+            np.ones(len(events)),
+            value_type=np.float32,
         )
         events = set_ak_column(
-            events, "mc_weight", np.ones(len(events)), value_type=np.float32
+            events,
+            "mc_weight",
+            np.ones(len(events)),
+            value_type=np.float32,
         )
         # muon weights
         # events = self[muon_weights](events, **kwargs)
@@ -364,7 +383,7 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                 ak.flatten(
                     ak.nan_to_none(
                         ak.unzip(ak.where(events.HLT[trigger], id, np.float64(np.nan))),
-                    )
+                    ),
                 )
             )
             trig_passed_orth = ak.flatten(
@@ -375,8 +394,8 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                             & ak.singletons(ak.flatten(ak.unzip(events.HLT[trigger]))),
                             id,
                             np.float64(np.nan),
-                        )
-                    )
+                        ),
+                    ),
                 ),
                 axis=1,
             )

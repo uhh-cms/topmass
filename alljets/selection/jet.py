@@ -71,13 +71,13 @@ def jet_selection(
         objects={
             "Jet": {
                 "Jet": sorted_indices_from_mask(
-                    jet_mask, events.Jet.pt, ascending=False
+                    jet_mask, events.Jet.pt, ascending=False,
                 ),
                 "Bjet": sorted_indices_from_mask(
-                    bjet_mask, events.Jet.pt, ascending=False
+                    bjet_mask, events.Jet.pt, ascending=False,
                 ),
                 "VetoJet": sorted_indices_from_mask(
-                    veto_jet, events.Jet.pt, ascending=False
+                    veto_jet, events.Jet.pt, ascending=False,
                 ),
             },
         },
@@ -187,7 +187,8 @@ def jet_selection(
         jet_trigger_sel = True
         alt_jet_trigger_sel = True
         jet_base_trigger_sel = True
-    signal_or_bkg_trigger = ak.any([jet_trigger_sel, alt_jet_trigger_sel], axis=0)
+    signal_or_bkg_trigger = ak.any(
+        [jet_trigger_sel, alt_jet_trigger_sel], axis=0)
 
     # Preparation for reconstruction
     mwref = 80.4
@@ -195,34 +196,38 @@ def jet_selection(
     mtsig = 27.07  # 15
     mu_tt = 2.07
     mu_w = 0.88
-    m = lambda j1, j2: (j1.add(j2)).mass
-    m3 = lambda j1, j2, j3: (j1.add(j2.add(j3))).mass
-    dr = lambda j1, j2: j1.delta_r(j2)
+    def m(j1, j2): return (j1.add(j2)).mass
+    def m3(j1, j2, j3): return (j1.add(j2.add(j3))).mass
+    def dr(j1, j2): return j1.delta_r(j2)
 
     # Build jet combinations
     bjet_after_jet_mask = events.Jet[jet_mask2].btagDeepFlavB >= wp_tight
     ljet_after_jet_mask = events.Jet[jet_mask2].btagDeepFlavB < wp_tight
     leading_six_sel = (
-        ak.num((events.Jet.pt[jet_mask2][:, :6])[bjet_after_jet_mask[:, :6]], axis=1)
-        == 2
+        ak.num((events.Jet.pt[jet_mask2][:, :6])[
+               bjet_after_jet_mask[:, :6]], axis=1) == 2
     ) & (
-        ak.num((events.Jet.pt[jet_mask2][:, :6])[ljet_after_jet_mask[:, :6]], axis=1)
-        == 4
+        ak.num((events.Jet.pt[jet_mask2][:, :6])[
+               ljet_after_jet_mask[:, :6]], axis=1) == 4
     )
     leading_six_or_bkg = ak.any([leading_six_sel, alt_jet_trigger_sel])
     # ljets = ak.combinations((events.Jet[light_jet])[sixjets_sel], 4, axis=1)
     # bjets = ak.combinations((events.Jet[bjet_mask])[sixjets_sel], 2, axis=1)
-    ljets = ak.combinations((events.Jet[light_jet][:, :4])[sixjets_sel], 4, axis=1)
-    bjets = ak.combinations((events.Jet[bjet_mask][:, :2])[sixjets_sel], 2, axis=1)
+    ljets = ak.combinations((events.Jet[light_jet][:, :4])[
+                            sixjets_sel], 4, axis=1)
+    bjets = ak.combinations((events.Jet[bjet_mask][:, :2])[
+                            sixjets_sel], 2, axis=1)
 
     # Pseudo recontruction for background
     rej_jets = (events.Jet[~loose_bjet_mask])[
         bjet_rej & alt_jet_trigger_sel & jet_sel & ht_sel
     ]
-    rej_jets = rej_jets[ak.argsort((rej_jets.pt), axis=1, ascending=False)][:, :6]
+    rej_jets = rej_jets[ak.argsort(
+        (rej_jets.pt), axis=1, ascending=False)][:, :6]
 
     rng = np.random.default_rng()
-    rng_index = rng.permuted(np.full((len(rej_jets), 6), [0, 1, 2, 3, 4, 5]), axis=1)
+    rng_index = rng.permuted(
+        np.full((len(rej_jets), 6), [0, 1, 2, 3, 4, 5]), axis=1)
 
     rej_jets = rej_jets[ak.Array(rng_index).to_list()]
     # rej_bjets = ak.combinations((rej_jets[ak.argsort(
@@ -290,12 +295,13 @@ def jet_selection(
 
     mt_result = mt(
         sixjetcombinations(
-            bpermutations(ak.unzip(bjets)), lpermutations(ak.unzip(ljets))
+            bpermutations(ak.unzip(bjets)), lpermutations(ak.unzip(ljets)),
         )
     )
     mt_bkg_result = mt(
         sixjetcombinations(
-            bpermutations(ak.unzip(rej_bjets)), lpermutations(ak.unzip(rej_ljets))
+            bpermutations(ak.unzip(rej_bjets)), lpermutations(
+                ak.unzip(rej_ljets)),
         )
     )
     chi2_cut = 50
@@ -306,10 +312,14 @@ def jet_selection(
             ak.flatten(mt_bkg_result[i])
         )
 
-    chi2_sel = ak.Array((mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
-    chi2_sel1 = ak.Array((mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
-    chi2_sel2 = ak.Array((mt_result_filled[5] < 10) & (mt_result_filled[5] > -1))
-    chi2_sel3 = ak.Array((mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
+    chi2_sel = ak.Array(
+        (mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
+    chi2_sel1 = ak.Array(
+        (mt_result_filled[5] < 25) & (mt_result_filled[5] > -1))
+    chi2_sel2 = ak.Array(
+        (mt_result_filled[5] < 10) & (mt_result_filled[5] > -1))
+    chi2_sel3 = ak.Array(
+        (mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
     Rbb_sel = ak.Array(mt_result_filled[4] > 2)
 
     events = set_ak_column(events, "Mt1", mt_result_filled[0])
@@ -391,7 +401,7 @@ def jet_selection(
         j3 = ak.flatten(j3)
         j4 = ak.flatten(j4)
         type_unfilled = combinationtype(
-            b1, b2, j1, j2, j3, j4, events.gen_top_decay[sixjets_sel]
+            b1, b2, j1, j2, j3, j4, events.gen_top_decay[sixjets_sel],
         )
         type[0][sixjets_sel] = type_unfilled
         type = ak.flatten(type)
@@ -418,10 +428,10 @@ def jet_selection(
                 ak.unzip(ak.unzip(mt_result[6][:])[0])[0].pt
                 + ak.unzip(ak.unzip(mt_result[6][:])[0])[1].pt
             ) / (
-                ak.unzip(ak.unzip(mt_result[6][:])[1])[0].pt
-                + ak.unzip(ak.unzip(mt_result[6][:])[1])[1].pt
-                + ak.unzip(ak.unzip(mt_result[6][:])[1])[2].pt
-                + ak.unzip(ak.unzip(mt_result[6][:])[1])[3].pt
+                ak.unzip(ak.unzip(mt_result[6][:])[1])[0].pt +
+                ak.unzip(ak.unzip(mt_result[6][:])[1])[1].pt +
+                ak.unzip(ak.unzip(mt_result[6][:])[1])[2].pt +
+                ak.unzip(ak.unzip(mt_result[6][:])[1])[3].pt
             )
             R2b4q_filled = np.full((1, ak.num(events, axis=0)), EF)
             R2b4q_filled[0][sixjets_sel] = ak.flatten(R2b4q)
@@ -464,22 +474,22 @@ def jet_selection(
         objects={
             "Jet": {
                 "Jet": sorted_indices_from_mask(
-                    jet_mask0, events.Jet.pt, ascending=False
+                    jet_mask0, events.Jet.pt, ascending=False,
                 ),
                 "EventJet": sorted_indices_from_mask(
-                    jet_mask2, events.Jet.pt, ascending=False
+                    jet_mask2, events.Jet.pt, ascending=False,
                 ),
                 "Bjet": sorted_indices_from_mask(
-                    bjet_mask, events.Jet.pt, ascending=False
+                    bjet_mask, events.Jet.pt, ascending=False,
                 ),
                 "VetoJet": sorted_indices_from_mask(
-                    veto_jet, events.Jet.pt, ascending=False
+                    veto_jet, events.Jet.pt, ascending=False,
                 ),
                 "LightJet": sorted_indices_from_mask(
-                    light_jet, events.Jet.pt, ascending=False
+                    light_jet, events.Jet.pt, ascending=False,
                 ),
                 "JetsByBTag": sorted_indices_from_mask(
-                    jet_mask, events.Jet.btagDeepFlavB, ascending=False
+                    jet_mask, events.Jet.btagDeepFlavB, ascending=False,
                 ),
             },
         },
@@ -488,52 +498,3 @@ def jet_selection(
             "n_bjets": ak.sum(bjet_mask, axis=1),
         },
     )
-
-
-@jet_selection.init
-def jet_selection_init(self: Selector) -> None:
-    year = self.config_inst.campaign.x.year
-
-    # NOTE: the none will not be overwritten later when doing this...
-    # self.jet_trigger = None
-
-    # Jet pt thresholds (if not set manually) based on year (1 pt above trigger threshold)
-    # When jet pt thresholds are set manually, don't use any trigger
-    if not self.jet_pt:
-        self.jet_pt = {2016: 31, 2017: 33, 2018: 33}[year]
-
-        # Trigger choice based on year of data-taking (for now: only single trigger)
-        self.jet_trigger = {
-            2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
-            # or "HLT_PFHT450_SixJet40_BTagCSV_p056")
-            2017: "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
-            # "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2" or "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2"
-            # or "PFHT430_SixPFJet40_PFBTagCSV_1p5"
-            # Base Trigger: "PFHT370"
-            2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
-            # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
-        }[year]
-        self.uses.add(f"HLT.{self.jet_trigger}")
-
-        # Trigger choice based on year of data-taking (for now: only single trigger)
-        self.jet_base_trigger = {
-            2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
-            # or "HLT_PFHT450_SixJet40_BTagCSV_p056")
-            2017: "PFHT350",
-            # Base Trigger: "PFHT370", "PFHT350", "IsoMu24", "Physics"
-            2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
-            # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
-        }[year]
-        self.uses.add(f"HLT.{self.jet_base_trigger}")
-
-        self.alt_jet_trigger = {
-            2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
-            # or "HLT_PFHT450_SixJet40_BTagCSV_p056")
-            2017: "PFHT380_SixPFJet32",
-            # "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2" or "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2"
-            # or "PFHT430_SixPFJet40_PFBTagCSV_1p5"
-            # Base Trigger: "PFHT370"
-            2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
-            # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
-        }[year]
-        self.uses.add(f"HLT.{self.alt_jet_trigger}")

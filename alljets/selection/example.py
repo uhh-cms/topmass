@@ -119,7 +119,7 @@ def example(
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(
-            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
@@ -137,11 +137,11 @@ def example(
 
     # combined event selection after all steps
     results.event = (
-        results.steps.jet
-        & results.steps.Trigger
-        & results.steps.BTag
-        & results.steps.HT  # results.steps.FitChi2 & results.steps.Chi2 &
-        & results.steps.SixJets
+        results.steps.jet &
+        results.steps.Trigger &
+        results.steps.BTag &
+        results.steps.HT &  # results.steps.FitChi2 & results.steps.Chi2 &
+        results.steps.SixJets
     )
     # results.steps.BaseTrigger
 
@@ -263,7 +263,7 @@ def example_trig_weight(
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(
-            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
@@ -279,13 +279,13 @@ def example_trig_weight(
 
     # combined event selection after all steps
     results.event = (
-        results.steps.muon
-        & results.steps.jet
-        & results.steps.Trigger
-        & results.steps.BTag
-        & results.steps.HT
-        & results.steps.n10Chi2
-        & results.steps.SixJets
+        results.steps.muon &
+        results.steps.jet &
+        results.steps.Trigger &
+        results.steps.BTag &
+        results.steps.HT &
+        results.steps.n10Chi2 &
+        results.steps.SixJets
     )
     # results.steps.BaseTrigger
 
@@ -420,9 +420,9 @@ def trigger_eff(
 
     trig_ht = ak.sum(
         events.TrigObj.pt[
-            (events.TrigObj.pt >= 32)
-            & (abs(events.TrigObj.eta) <= 2.6)
-            & (events.TrigObj.id == 1)
+            (events.TrigObj.pt >= 32) &
+            (abs(events.TrigObj.eta) <= 2.6) &
+            (events.TrigObj.id == 1)
         ],
         axis=1,
     )
@@ -431,7 +431,7 @@ def trigger_eff(
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(
-            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
@@ -443,12 +443,12 @@ def trigger_eff(
 
     # combined event selection after all steps: Choose one of the trigger efficiency selector steps
     results.event = (
-        results.steps.All
-        & results.steps.BaseTrigger
-        & results.steps.SixJets
-        & results.steps.BTag
-        & results.steps.jet
-        & results.steps.HT
+        results.steps.All &
+        results.steps.BaseTrigger &
+        results.steps.SixJets &
+        results.steps.BTag &
+        results.steps.jet &
+        results.steps.HT
     )
 
     # create process ids
@@ -458,7 +458,7 @@ def trigger_eff(
     if self.dataset_inst.is_mc:
         # events = self[mc_weight](events, **kwargs)
         events = set_ak_column(
-            events, "mc_weight", np.ones(len(events)), value_type=np.float32
+            events, "mc_weight", np.ones(len(events)), value_type=np.float32,
         )
         # events = self[trig_weights](events, **kwargs)
 
@@ -504,5 +504,3 @@ def trigger_eff(
     )
 
     return events, results
-
-

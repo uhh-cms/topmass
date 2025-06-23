@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from columnflow.columnar_util import EMPTY_FLOAT, Route, flat_np_view, set_ak_column
+from columnflow.columnar_util import EMPTY_FLOAT, flat_np_view, set_ak_column
 from columnflow.production import Producer, producer
 
 # from columnflow.selection.util import create_collections_from_masks
@@ -30,7 +30,7 @@ def kinFit(
     events: ak.Array,
     sel_jet_mask: ak.Array,
     eventmask: ak.Array,
-    **kwargs
+    **kwargs,
 ) -> ak.Array:
     import pyKinFit
 
