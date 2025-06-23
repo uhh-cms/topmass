@@ -196,9 +196,15 @@ def jet_selection(
     mtsig = 27.07  # 15
     mu_tt = 2.07
     mu_w = 0.88
-    def m(j1, j2): return (j1.add(j2)).mass
-    def m3(j1, j2, j3): return (j1.add(j2.add(j3))).mass
-    def dr(j1, j2): return j1.delta_r(j2)
+
+    def m(j1, j2):
+        return (j1.add(j2)).mass
+
+    def m3(j1, j2, j3):
+        return (j1.add(j2.add(j3))).mass
+
+    def dr(j1, j2):
+        return j1.delta_r(j2)
 
     # Build jet combinations
     bjet_after_jet_mask = events.Jet[jet_mask2].btagDeepFlavB >= wp_tight
@@ -296,7 +302,7 @@ def jet_selection(
     mt_result = mt(
         sixjetcombinations(
             bpermutations(ak.unzip(bjets)), lpermutations(ak.unzip(ljets)),
-        )
+        ),
     )
     mt_bkg_result = mt(
         sixjetcombinations(

@@ -116,14 +116,18 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         value_type=np.int32,
     )
     events = set_ak_column(
-        events, "maxbtag", (ak.max(events.Jet.btagDeepFlavB, axis=1))
+        events,
+        "maxbtag",
+        (ak.max(events.Jet.btagDeepFlavB, axis=1)),
     )
     # Insert dummy value for one jet events
     secmax = ak.sort(events.Jet.btagDeepFlavB, axis=1, ascending=False)
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
     events = set_ak_column(events, "deltaMt", (events.Mt1 - events.Mt2))
     events = set_ak_column(
-        events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1])
+        events,
+        "secmaxbtag",
+        (ak.concatenate([secmax, empty, empty], axis=1)[:, 1]),
     )
     return events
 
@@ -384,7 +388,7 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                     ak.nan_to_none(
                         ak.unzip(ak.where(events.HLT[trigger], id, np.float64(np.nan))),
                     ),
-                )
+                ),
             )
             trig_passed_orth = ak.flatten(
                 ak.singletons(
@@ -435,7 +439,8 @@ def trigger_prod_init(self: Producer) -> None:
 
 # producers for single channels
 tt_fh_trigger_prod = trigger_prod.derive(
-    "tt_fh_trigger_prod", cls_dict={"channel": ["tt_fh"]}
+    "tt_fh_trigger_prod",
+    cls_dict={"channel": ["tt_fh"]},
 )
 
 # Trigger categories

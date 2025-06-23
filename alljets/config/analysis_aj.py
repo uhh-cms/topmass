@@ -456,7 +456,7 @@ cfg.x.external_files = DotDict.wrap(
             f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz",
             "v1",
         ),
-    }
+    },
 )
 
 cfg.x.trigger = {
@@ -551,10 +551,10 @@ cfg.x.jec = DotDict.wrap(
                         # "CorrelationGroupFlavor",
                         # "CorrelationGroupUncorrelated",
                     ],
-                )
+                ),
             ),
         },
-    }
+    },
 )
 
 # JER
@@ -565,7 +565,7 @@ cfg.x.jer = DotDict.wrap(
             "version": jer_version,
             "jet_type": jet_type,
         },
-    }
+    },
 )
 # IsoMu24, Mu50, PFHT350 for MC with all events: Physics
 #
@@ -682,7 +682,7 @@ cfg.x.keep_columns = DotDict.wrap(
             "MW*",
             "trig_bits",
         },
-    }
+    },
 )
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 # TODO: Add BTag weight shifts
@@ -696,7 +696,7 @@ cfg.x.event_weights = DotDict(
         # "muon_weight": get_shifts("mu"),
         # "pdf_weight": get_shifts("pdf"),
         # "murmuf_weight": get_shifts("murmuf"),
-    }
+    },
 )
 
 # versions per task family, either referring to strings or to callables receving the invoking
