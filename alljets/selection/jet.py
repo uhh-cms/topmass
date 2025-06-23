@@ -308,7 +308,7 @@ def jet_selection(
         sixjetcombinations(
             bpermutations(ak.unzip(rej_bjets)), lpermutations(
                 ak.unzip(rej_ljets)),
-        )
+        ),
     )
     chi2_cut = 50
     mt_result_filled = np.full((6, ak.num(events, axis=0)), EF)
@@ -431,8 +431,8 @@ def jet_selection(
             len(ak.unzip(ak.unzip(mt_result[6][:])[1])) > 3
         ):
             R2b4q = (
-                ak.unzip(ak.unzip(mt_result[6][:])[0])[0].pt
-                + ak.unzip(ak.unzip(mt_result[6][:])[0])[1].pt
+                ak.unzip(ak.unzip(mt_result[6][:])[0])[0].pt +
+                ak.unzip(ak.unzip(mt_result[6][:])[0])[1].pt
             ) / (
                 ak.unzip(ak.unzip(mt_result[6][:])[1])[0].pt +
                 ak.unzip(ak.unzip(mt_result[6][:])[1])[1].pt +

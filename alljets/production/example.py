@@ -394,8 +394,8 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                 ak.singletons(
                     ak.nan_to_none(
                         ak.where(
-                            ak.singletons(ak.flatten(ak.unzip(events.HLT[ref_trig])))
-                            & ak.singletons(ak.flatten(ak.unzip(events.HLT[trigger]))),
+                            ak.singletons(ak.flatten(ak.unzip(events.HLT[ref_trig]))) &
+                            ak.singletons(ak.flatten(ak.unzip(events.HLT[trigger]))),
                             id,
                             np.float64(np.nan),
                         ),
