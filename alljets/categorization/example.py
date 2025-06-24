@@ -86,6 +86,12 @@ def cat_fit_nconv(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arr
     return events, (events.FitChi2 >= 10000)
 
 
+@categorizer(uses={"FitChi2"})
+def cat_fit_conv(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    # kinematic fit has not converged
+    return events, (events.FitChi2 < 10000)
+
+
 @categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*"})
 def cat_2btj_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     # two or more b-jets
