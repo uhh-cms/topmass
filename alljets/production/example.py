@@ -158,25 +158,12 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     },
 )
 def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-    from alljets.scripts.example import combinationtype
+    from alljets.scripts.default import combinationtype
 
     EF = -99999.0
 
-    ht_sel_kin = ak.sum(events.Jet.pt, axis=1) >= 450
-
-    jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
-    # bjet_indices = indices[bjet_mask][:, :2]
-    bjet_sel_kin = (ak.sum(bjet_mask, axis=1) >= 2) & (
-        ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1)
-    )
-    jet_mask_kin = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
-    jet_sel_kin = ak.sum(jet_mask_kin, axis=1) >= 6
-    kinFit_eventmask = ht_sel_kin & jet_sel_kin & bjet_sel_kin
-    kinFit_jetmask = (events[kinFit_eventmask].Jet.pt >= 40.0) & (
-        abs(events[kinFit_eventmask].Jet.eta) < 2.4
-    )
+    kinFit_eventmask = len(events) * [True]
+    kinFit_jetmask = (events[kinFit_eventmask].Jet.pt >= 40.0) & (abs(events[kinFit_eventmask].Jet.eta) < 2.4)
     events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
     jetcollections = {
         "FitJet": {
