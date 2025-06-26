@@ -81,7 +81,7 @@ def trig_weights_requires(self: Producer, task: law.Task, reqs: dict) -> None:
     from alljets.tasks.ProduceTriggerWeights import ProduceTriggerWeight
     reqs["external_files"] = ProduceTriggerWeight(
         version=task.version,
-        datasets="tt_fh_powheg,data*",
+        datasets="tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,data*",
         configs=task.config,
         selector="trigger_eff",
         producers="no_norm,trigger_prod",
