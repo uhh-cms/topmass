@@ -425,6 +425,18 @@ add_shift_aliases(
     },
 )
 
+"pu_weight_minbias_xs_up"
+# Pile-up shifts
+cfg.add_shift(name="pu_weight_minbias_xs_up", id=150, type="shape")
+cfg.add_shift(name="pu_weight_minbias_xs_down", id=151, type="shape")
+add_shift_aliases(
+    cfg,
+    "pu_weight_minbias_xs",
+    {
+        "pu_weight": "pu_weight_minbias_xs_{direction}",
+    },
+)
+
 # external files
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = 2017
@@ -701,12 +713,13 @@ get_shifts = functools.partial(get_shifts_from_sources, cfg)
 cfg.x.event_weights = DotDict(
     {
         "normalization_weight": [],
-        # "btag_weight": [],
+        "btag_weight": [],
         # "trig_weight": [],
-        # "trig_weight": get_shifts("trig"),
+        "trig_weight": get_shifts("trig"),
         # "muon_weight": get_shifts("mu"),
-        # "pdf_weight": get_shifts("pdf"),
-        # "murmuf_weight": get_shifts("murmuf"),
+        "pdf_weight": get_shifts("pdf"),
+        "murmuf_weight": get_shifts("murmuf"),
+        "pu_weight": get_shifts("pu_weight_minbias_xs")
     },
 )
 
