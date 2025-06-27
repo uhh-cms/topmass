@@ -62,6 +62,7 @@ def jet_selection(
         alt_jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.alt_jet_trigger]
         jet_base_trigger_sel = ones if not self.jet_base_trigger else events.HLT[self.jet_base_trigger]
     else:
+
         jet_trigger_sel = [True] * len(events)
         alt_jet_trigger_sel = [True] * len(events)
         jet_base_trigger_sel = [True] * len(events)
@@ -73,6 +74,7 @@ def jet_selection(
     mtsig = 15  # Jette: 27.07
     mu_tt = 0  # Jette: 2.07
     mu_w = 0  # Jette: 0.88
+
     m = lambda j1, j2: (j1.add(j2)).mass
     m3 = lambda j1, j2, j3: (j1.add(j2.add(j3))).mass
     dr = lambda j1, j2: j1.delta_r(j2)
