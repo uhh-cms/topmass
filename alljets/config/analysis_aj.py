@@ -151,12 +151,12 @@ dataset_names = [
     "tt_sl_powheg",
     "tt_dl_powheg",
     "tt_fh_powheg",
-    "tt_fh_mt166p5_powheg",
-    "tt_fh_mt169p5_powheg",
-    "tt_fh_mt171p5_powheg",
-    "tt_fh_mt173p5_powheg",
-    "tt_fh_mt175p5_powheg",
-    "tt_fh_mt178p5_powheg",
+    # "tt_fh_mt166p5_powheg",
+    # "tt_fh_mt169p5_powheg",
+    # "tt_fh_mt171p5_powheg",
+    # "tt_fh_mt173p5_powheg",
+    # "tt_fh_mt175p5_powheg",
+    # "tt_fh_mt178p5_powheg",
 ]
 for dataset_name in dataset_names:
     # add the dataset
@@ -425,7 +425,6 @@ add_shift_aliases(
     },
 )
 
-"pu_weight_minbias_xs_up"
 # Pile-up shifts
 cfg.add_shift(name="pu_weight_minbias_xs_up", id=150, type="shape")
 cfg.add_shift(name="pu_weight_minbias_xs_down", id=151, type="shape")
