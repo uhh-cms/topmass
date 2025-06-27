@@ -4,19 +4,24 @@
 Configuration of the topmass_alljets analysis.
 """
 
-import os
 import functools
+import os
 
 import law
 import order as od
-from scinum import Number
-
-from columnflow.util import DotDict, maybe_import
+from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
 from columnflow.config_util import (
-    get_root_processes_from_campaign, add_shift_aliases, get_shifts_from_sources,
+    add_shift_aliases,
+    get_root_processes_from_campaign,
+    get_shifts_from_sources,
     verify_config_processes,
 )
+from columnflow.util import DotDict, maybe_import
+from scinum import Number
 
+from alljets.config.categories import add_categories
+from alljets.config.variables import add_variables
+from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
 
 ak = maybe_import("awkward")
 
@@ -33,7 +38,6 @@ analysis_aj = ana = od.Analysis(
 # Add hist hooks
 analysis_aj.x.hist_hooks = DotDict()
 # QCD hist hooks
-from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
 add_qcd_hooks(analysis_aj)
 
 # analysis-global versions
@@ -45,12 +49,13 @@ ana.x.versions = {}
 ana.x.bash_sandboxes = [
     "$CF_BASE/sandboxes/cf.sh",
     law.config.get("analysis", "default_columnar_sandbox"),
+    # "$AJ_BASE/sandboxes/example.sh"
 ]
 
 # files of cmssw sandboxes that might be required by remote tasks
 # (used in cf.HTCondorWorkflow)
 ana.x.cmssw_sandboxes = [
-    # "$CF_BASE/sandboxes/cmssw_default.sh",
+    "$AJ_BASE/sandboxes/cmsswtest.sh",
 ]
 
 # clear the list when cmssw bundling is disabled
@@ -69,8 +74,6 @@ ana.x.config_groups = {}
 # an example config is setup below, based on cms NanoAOD v9 for Run2 2017, focussing on
 # ttbar and single top MCs, plus single muon data
 # update this config or add additional ones to accomodate the needs of your analysis
-
-from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
 
 
 # copy the campaign
@@ -134,9 +137,26 @@ dataset_names = [
     "qcd_ht700to1000_madgraph",
     "qcd_ht1000to1500_madgraph",
     "qcd_ht1500to2000_madgraph",
+    #  "qcd_ht2000_madgraph",
+    # These are not in 2017 nano v9:
+    # "st_schannel_lep_amcatnlo",
+    # "st_schannel_had_amcatnlo",
+    # "dy_lep_pt50To100_amcatnlo",
+    # "dy_lep_pt100To250_amcatnlo",
+    # "dy_lep_pt250To400_amcatnlo",
+    # "dy_lep_pt400To650_amcatnlo",
+    # "dy_lep_pt650_amcatnlo",
     "qcd_ht2000toinf_madgraph",
     # signals
+    "tt_sl_powheg",
+    "tt_dl_powheg",
     "tt_fh_powheg",
+    # "tt_fh_mt166p5_powheg",
+    # "tt_fh_mt169p5_powheg",
+    # "tt_fh_mt171p5_powheg",
+    # "tt_fh_mt173p5_powheg",
+    # "tt_fh_mt175p5_powheg",
+    # "tt_fh_mt178p5_powheg",
 ]
 for dataset_name in dataset_names:
     # add the dataset
@@ -187,11 +207,60 @@ cfg.x.shift_groups = {}
 # (used in cutflow tasks)
 cfg.x.selector_step_groups = {
     "default": ["muon", "jet"],
-    "default_Mt": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT", "Rbb", "LeadingSix", "n5Chi2", "Mt"],
-    "default_Rbb": ["Rbb", "n5Chi2", "All", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
-    "default_LS": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT", "Rbb", "LeadingSix", "n5Chi2"],
-    "default_bkg_n5Chi2": ["All", "n5Chi2", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
-    "default_bkg_n10Chi2": ["All", "n10Chi2", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
+    "default_Mt": [
+        "All",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+        "Rbb",
+        "LeadingSix",
+        "n5Chi2",
+        "Mt",
+    ],
+    "default_Rbb": [
+        "All",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+        "Rbb",
+    ],
+    "default_LS": [
+        "All",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+        "Rbb",
+        "LeadingSix",
+    ],
+    "default_LS_Chi2": [
+        "All",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+        "Rbb",
+        "LeadingSix",
+        "n5Chi2",
+    ],
+    "default_bkg_n5Chi2": [
+        "All",
+        "n5Chi2",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+    ],
+    "default_bkg_n10Chi2": [
+        "All",
+        "n10Chi2",
+        "SignalOrBkgTrigger",
+        "BTag20",
+        "jet",
+        "HT",
+    ],
     "default_bkg_chi2": ["All", "Chi2", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
     "default_bkg": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
     "trig_eff_ht": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
@@ -215,11 +284,14 @@ cfg.x.validate_dataset_lfns = False
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2?rev=2#Combination_and_correlations: 41480
 # Luminosity by trigger: PFHT380_SixPFJet32_DoublePFBTagCSV_2p2: 36674
 # PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2: 27121
-cfg.x.luminosity = Number(36674, {
-    "lumi_13TeV_2017": 0.02j,
-    "lumi_13TeV_1718": 0.006j,
-    "lumi_13TeV_correlated": 0.009j,
-})
+cfg.x.luminosity = Number(
+    36674,
+    {
+        "lumi_13TeV_2017": 0.02j,
+        "lumi_13TeV_1718": 0.006j,
+        "lumi_13TeV_correlated": 0.009j,
+    },
+)
 
 # b-tag working points
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
@@ -237,7 +309,7 @@ cfg.x.btag_working_points = DotDict.wrap(
         },
     },
 )
-
+cfg.x.fitchi2cut = 10
 # JEC uncertainty sources propagated to btag scale factors
 # (names derived from contents in BTV correctionlib file)
 cfg.x.btag_sf_jec_sources = [
@@ -353,36 +425,66 @@ add_shift_aliases(
     },
 )
 
+# Pile-up shifts
+cfg.add_shift(name="pu_weight_minbias_xs_up", id=150, type="shape")
+cfg.add_shift(name="pu_weight_minbias_xs_down", id=151, type="shape")
+add_shift_aliases(
+    cfg,
+    "pu_weight_minbias_xs",
+    {
+        "pu_weight": "pu_weight_minbias_xs_{direction}",
+    },
+)
+
 # external files
-# json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-849c6a6e" copied usage in hbt
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
 year = 2017
 corr_postfix = ""
-cfg.x.external_files = DotDict.wrap({
-    # lumi files
-    "lumi": {
-        "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
-        "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
+cfg.x.external_files = DotDict.wrap(
+    {
+        # lumi files
+        "lumi": {
+            "golden": (
+                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collision"
+                "s17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_"
+                "Collisions17_GoldenJSON.txt",
+                "v1",
+            ),  # noqa
+            "normtag": (
+                "/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json",
+                "v1",
+            ),
+        },
+        # muon scale factors
+        "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
+        # btag scale factor
+        "btag_sf_corr": (
+            f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz",
+            "v1",
+        ),
+        # pileup weight corrections
+        "pu_sf": (
+            f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz",
+            "v1",
+        ),
+        # jet energy correction
+        "jet_jerc": (
+            f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz",
+            "v1",
+        ),
+        # electron scale factors
+        "electron_sf": (
+            f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz",
+            "v1",
+        ),
     },
-
-    # muon scale factors
-    "muon_sf": (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
-
-    # btag scale factor
-    "btag_sf_corr": (f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz", "v1"),
-
-    # pileup weight corrections
-    "pu_sf": (f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz", "v1"),
-
-    # jet energy correction
-    "jet_jerc": (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
-
-    # electron scale factors
-    "electron_sf": (f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz", "v1"),
-})
+)
 
 cfg.x.trigger = {
-    "tt_fh": ["PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2"],
+    "tt_fh": [
+        "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
+        "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+    ],
 }
 
 cfg.x.ref_trigger = {
@@ -405,78 +507,87 @@ jec_version = {2016: "V7", 2017: "V5", 2018: "V5"}[year]
 jer_campaign = f"Summer{'20' if year == 2016 else '19'}UL{year2}{campaign.x.postfix}"
 jer_version = "JR" + {2016: "V3", 2017: "V2", 2018: "V2"}[year]
 jet_type = "AK4PFchs"
-cfg.x.jec = DotDict.wrap({
-    "Jet": {
-        "campaign": jec_campaign,
-        "version": jec_version,
-        "jet_type": jet_type,
-        "levels": ["L1FastJet", "L2Relative", "L2L3Residual", "L3Absolute"],
-        "levels_for_type1_met": ["L1FastJet"],
-        "uncertainty_sources": list(filter(bool, [
-            # "AbsoluteStat",
-            # "AbsoluteScale",
-            # "AbsoluteSample",
-            # "AbsoluteFlavMap",
-            # "AbsoluteMPFBias",
-            # "Fragmentation",
-            # "SinglePionECAL",
-            # "SinglePionHCAL",
-            # "FlavorQCD",
-            # "TimePtEta",
-            # "RelativeJEREC1",
-            # "RelativeJEREC2",
-            # "RelativeJERHF",
-            # "RelativePtBB",
-            # "RelativePtEC1",
-            # "RelativePtEC2",
-            # "RelativePtHF",
-            # "RelativeBal",
-            # "RelativeSample",
-            # "RelativeFSR",
-            # "RelativeStatFSR",
-            # "RelativeStatEC",
-            # "RelativeStatHF",
-            # "PileUpDataMC",
-            # "PileUpPtRef",
-            # "PileUpPtBB",
-            # "PileUpPtEC1",
-            # "PileUpPtEC2",
-            # "PileUpPtHF",
-            # "PileUpMuZero",
-            # "PileUpEnvelope",
-            # "SubTotalPileUp",
-            # "SubTotalRelative",
-            # "SubTotalPt",
-            # "SubTotalScale",
-            # "SubTotalAbsolute",
-            # "SubTotalMC",
-            "Total",
-            # "TotalNoFlavor",
-            # "TotalNoTime",
-            # "TotalNoFlavorNoTime",
-            # "FlavorZJet",
-            # "FlavorPhotonJet",
-            # "FlavorPureGluon",
-            # "FlavorPureQuark",
-            # "FlavorPureCharm",
-            # "FlavorPureBottom",
-            # "CorrelationGroupMPFInSitu",
-            # "CorrelationGroupIntercalibration",
-            # "CorrelationGroupbJES",
-            # "CorrelationGroupFlavor",
-            # "CorrelationGroupUncorrelated",
-        ])),
+cfg.x.jec = DotDict.wrap(
+    {
+        "Jet": {
+            "campaign": jec_campaign,
+            "version": jec_version,
+            "jet_type": jet_type,
+            "levels": ["L1FastJet", "L2Relative", "L2L3Residual", "L3Absolute"],
+            "levels_for_type1_met": ["L1FastJet"],
+            "uncertainty_sources": list(
+                filter(
+                    bool,
+                    [
+                        # "AbsoluteStat",
+                        # "AbsoluteScale",
+                        # "AbsoluteSample",
+                        # "AbsoluteFlavMap",
+                        # "AbsoluteMPFBias",
+                        # "Fragmentation",
+                        # "SinglePionECAL",
+                        # "SinglePionHCAL",
+                        # "FlavorQCD",
+                        # "TimePtEta",
+                        # "RelativeJEREC1",
+                        # "RelativeJEREC2",
+                        # "RelativeJERHF",
+                        # "RelativePtBB",
+                        # "RelativePtEC1",
+                        # "RelativePtEC2",
+                        # "RelativePtHF",
+                        # "RelativeBal",
+                        # "RelativeSample",
+                        # "RelativeFSR",
+                        # "RelativeStatFSR",
+                        # "RelativeStatEC",
+                        # "RelativeStatHF",
+                        # "PileUpDataMC",
+                        # "PileUpPtRef",
+                        # "PileUpPtBB",
+                        # "PileUpPtEC1",
+                        # "PileUpPtEC2",
+                        # "PileUpPtHF",
+                        # "PileUpMuZero",
+                        # "PileUpEnvelope",
+                        # "SubTotalPileUp",
+                        # "SubTotalRelative",
+                        # "SubTotalPt",
+                        # "SubTotalScale",
+                        # "SubTotalAbsolute",
+                        # "SubTotalMC",
+                        "Total",
+                        # "TotalNoFlavor",
+                        # "TotalNoTime",
+                        # "TotalNoFlavorNoTime",
+                        # "FlavorZJet",
+                        # "FlavorPhotonJet",
+                        # "FlavorPureGluon",
+                        # "FlavorPureQuark",
+                        # "FlavorPureCharm",
+                        # "FlavorPureBottom",
+                        # "CorrelationGroupMPFInSitu",
+                        # "CorrelationGroupIntercalibration",
+                        # "CorrelationGroupbJES",
+                        # "CorrelationGroupFlavor",
+                        # "CorrelationGroupUncorrelated",
+                    ],
+                ),
+            ),
+        },
     },
-})
+)
 
 # JER
-cfg.x.jer = DotDict.wrap({
-    "Jet": {
-        "campaign": jer_campaign,
-        "version": jer_version,
-        "jet_type": jet_type,
+cfg.x.jer = DotDict.wrap(
+    {
+        "Jet": {
+            "campaign": jer_campaign,
+            "version": jer_version,
+            "jet_type": jet_type,
+        },
     },
-})
+)
 # IsoMu24, Mu50, PFHT350 for MC with all events: Physics
 #
 # if year == 2017:
@@ -505,44 +616,111 @@ cfg.x.jer = DotDict.wrap({
 cfg.x.reduced_file_size = 512.0
 
 # columns to keep after certain steps
-cfg.x.keep_columns = DotDict.wrap({
-    "cf.ReduceEvents": {
-        # general event info
-        "run", "luminosityBlock", "event",
-        # object info
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Bjet.*", "VetoJet.*", "LightJet.*", "JetsByBTag.*",
-        # "EventJet.*",
-        "Jet.btagDeepFlavB", "Jet.hadronFlavour",
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
-        "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
-        "PV.npvs", "PV.npvsGood", "DeltaR", "GenPart.*",
-        "MW1", "MW2", "Mt1", "Mt2", "chi2", "deltaRb", "HLT.Mu50", "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", "HLT.IsoMu24", "HLT.PFHT370", "HLT.PFHT350",
-        "HLT.PFHT380_SixPFJet32", "HLT.Physics", "HLT.PFHT1050", "HLT.PFHT890",
-        # columns added during selection
-        "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight", "trig_weight", "trig_weight_up",
-        "trig_weight_down", "murmuf_weight", "pu_weight", "btag_weight", "combination_type", "R2b4q", "trig_ht",
+cfg.x.keep_columns = DotDict.wrap(
+    {
+        "cf.ReduceEvents": {
+            # general event info
+            "run",
+            "luminosityBlock",
+            "event",
+            # object info
+            "Jet.pt",
+            "Jet.eta",
+            "Jet.phi",
+            "Jet.mass",
+            "Bjet.*",
+            "VetoJet.*",
+            "LightJet.*",
+            "JetsByBTag.*",
+            # "EventJet.*",
+            "Jet.btagDeepFlavB",
+            "Jet.hadronFlavour",
+            "Muon.pt",
+            "Muon.eta",
+            "Muon.phi",
+            "Muon.mass",
+            "Muon.pfRelIso04_all",
+            "MET.pt",
+            "MET.phi",
+            "MET.significance",
+            "MET.covXX",
+            "MET.covXY",
+            "MET.covYY",
+            "PV.npvs",
+            "FitJet.*",
+            "FitChi2",
+            "fitCombinationType",
+            "reco_combination_type",
+            "PV.npvs",
+            "PV.npvsGood",
+            "DeltaR",
+            "GenPart.*",
+            "MW1",
+            "MW2",
+            "Mt1",
+            "Mt2",
+            "chi2",
+            "deltaRb",
+            "HLT.Mu50",
+            "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+            "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
+            "HLT.PFHT380_SixPFJet32",
+            "HLT.IsoMu24",
+            "HLT.PFHT370",
+            "HLT.PFHT350",
+            "HLT.Physics",
+            "HLT.PFHT1050",
+            "HLT.PFHT890",
+            # columns added during selection
+            "deterministic_seed",
+            "process_id",
+            "mc_weight",
+            "cutflow.*",
+            "pdf_weight",
+            "trig_weight",
+            "trig_weight_up",
+            "trig_weight_down",
+            "murmuf_weight",
+            "pu_weight",
+            "btag_weight",
+            "combination_type",
+            "R2b4q",
+            "trig_ht",
+            "gen_top_decay",
+            "gen_top_decay.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
+        },
+        "cf.MergeSelectionMasks": {
+            "normalization_weight",
+            "process_id",
+            "category_ids",
+            "cutflow.*",
+        },
+        "cf.UniteColumns": {
+            "*_weight",
+            "Jet.*",
+            "combination_type",
+            "ht",
+            "Mt*",
+            "MW*",
+            "trig_bits",
+        },
     },
-    "cf.MergeSelectionMasks": {
-        "normalization_weight", "process_id", "category_ids", "cutflow.*",
-    },
-    "cf.UniteColumns": {
-        "*_weight", "Jet.*", "combination_type", "ht", "Mt*", "MW*", "trig_bits",
-    },
-})
-
+)
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
-cfg.x.event_weights = DotDict({
-    "normalization_weight": [],
-    # "btag_weight": [],
-    "trig_weight": [],
-    # "trig_weight": get_shifts("trig"),
-    # "muon_weight": get_shifts("mu"),
-    # "pdf_weight": get_shifts("pdf"),
-    # "murmuf_weight": get_shifts("murmuf"),
-})
+cfg.x.event_weights = DotDict(
+    {
+        "normalization_weight": [],
+        "btag_weight": [],
+        # "trig_weight": [],
+        "trig_weight": get_shifts("trig"),
+        # "muon_weight": get_shifts("mu"),
+        "pdf_weight": get_shifts("pdf"),
+        "murmuf_weight": get_shifts("murmuf"),
+        "pu_weight": get_shifts("pu_weight_minbias_xs")
+    },
+)
 
 # versions per task family, either referring to strings or to callables receving the invoking
 # task instance and parameters to be passed to the task family
@@ -557,8 +735,8 @@ cfg.x.versions = {
 cfg.add_channel(name="mutau", id=1)
 
 # add categories using the "add_category" tool which adds auto-generated ids
-from alljets.config.categories import add_categories
+
 add_categories(cfg)
 # add variables
-from alljets.config.variables import add_variables
+
 add_variables(cfg)

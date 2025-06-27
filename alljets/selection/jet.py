@@ -62,17 +62,19 @@ def jet_selection(
         alt_jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.alt_jet_trigger]
         jet_base_trigger_sel = ones if not self.jet_base_trigger else events.HLT[self.jet_base_trigger]
     else:
-        jet_trigger_sel = True
-        alt_jet_trigger_sel = True
-        jet_base_trigger_sel = True
+
+        jet_trigger_sel = [True] * len(events)
+        alt_jet_trigger_sel = [True] * len(events)
+        jet_base_trigger_sel = [True] * len(events)
     signal_or_bkg_trigger = ak.any([jet_trigger_sel, alt_jet_trigger_sel], axis=0)
 
     # Preparation for reconstruction
-    mwref = 80.4
-    mwsig = 11.01  # 12
-    mtsig = 27.07  # 15
-    mu_tt = 2.07
-    mu_w = 0.88
+    mwref = 80.36
+    mwsig = 12  # Jette: 11.01
+    mtsig = 15  # Jette: 27.07
+    mu_tt = 0  # Jette: 2.07
+    mu_w = 0  # Jette: 0.88
+
     m = lambda j1, j2: (j1.add(j2)).mass
     m3 = lambda j1, j2, j3: (j1.add(j2.add(j3))).mass
     dr = lambda j1, j2: j1.delta_r(j2)
@@ -82,6 +84,7 @@ def jet_selection(
     ljet_after_jet_mask = (events.Jet[jet_mask2].btagDeepFlavB < wp_tight)
     leading_six_sel = ((ak.num((events.Jet.pt[jet_mask2][:, :6])[bjet_after_jet_mask[:, :6]], axis=1) == 2) &
                        (ak.num((events.Jet.pt[jet_mask2][:, :6])[ljet_after_jet_mask[:, :6]], axis=1) == 4))
+
     leading_six_or_bkg = ak.any([leading_six_sel, alt_jet_trigger_sel])
     # ljets = ak.combinations((events.Jet[light_jet])[sixjets_sel], 4, axis=1)
     # bjets = ak.combinations((events.Jet[bjet_mask])[sixjets_sel], 2, axis=1)
