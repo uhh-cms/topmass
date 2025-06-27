@@ -13,6 +13,7 @@ from columnflow.production.cms.muon import muon_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.normalization import normalization_weights
 from columnflow.production.util import attach_coffea_behavior
+from columnflow.production.cms.gen_top_decay import gen_top_decay_products
 
 # from columnflow.selection.util import create_collections_from_masks
 from columnflow.util import maybe_import
@@ -45,7 +46,6 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         attach_coffea_behavior,
         "HLT.*",
         "Jet.btagDeepFlavB",
-        "gen_top_decay",
         "Mt1",
         "Mt2",
     },
@@ -147,13 +147,13 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     },
     produces={
         # new columns
-        "FitJet.*",
-        "FitChi2",
+        kinFit,
         "fitCombinationType",
         "FitW1.*",
         "FitW2.*",
         "FitTop1.*",
         "FitTop2.*",
+        "FitRbb",
         # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
     },
 )
@@ -162,57 +162,79 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     EF = -99999.0
 
-    ht_sel_kin = ak.sum(events.Jet.pt, axis=1) >= 450
+    ht_sel_kin = ak.sum(events.Jet.pt, axis=1) >= 1
 
     jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_tight)
+    # wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    bjet_mask = (jet_mask)
+    # & (events.Jet.btagDeepFlavB >= wp_tight)
     # bjet_indices = indices[bjet_mask][:, :2]
-    bjet_sel_kin = (ak.sum(bjet_mask, axis=1) >= 2) & (
-        ak.sum(jet_mask[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1)
-    )
+    bjet_sel_kin = (ak.sum(bjet_mask, axis=1) >= 2)
     jet_mask_kin = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
     jet_sel_kin = ak.sum(jet_mask_kin, axis=1) >= 6
     kinFit_eventmask = ht_sel_kin & jet_sel_kin & bjet_sel_kin
     kinFit_jetmask = (events[kinFit_eventmask].Jet.pt >= 40.0) & (
         abs(events[kinFit_eventmask].Jet.eta) < 2.4
     )
-    events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
-    jetcollections = {
-        "FitJet": {
-            "type_name": "Jet",
-            "check_attr": "metric_table",
-            "skip_fields": "",
-        },
-        "FitJet.reco": {
-            "type_name": "Jet",
-            "check_attr": "metric_table",
-            "skip_fields": "",
-        },
-        "gen_top_decay": {
-            "type_name": "Jet",
-            "check_attr": "metric_table",
-            "skip_fields": "",
-        },
-    }
-    events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
-    fitcomb = combinationtype(
-        events.FitJet.reco[kinFit_eventmask][:, 0],
-        events.FitJet.reco[kinFit_eventmask][:, 1],
-        events.FitJet.reco[kinFit_eventmask][:, 2],
-        events.FitJet.reco[kinFit_eventmask][:, 3],
-        events.FitJet.reco[kinFit_eventmask][:, 4],
-        events.FitJet.reco[kinFit_eventmask][:, 5],
-        events.gen_top_decay[kinFit_eventmask],
-    )
-    full_fitcomb = np.full(len(events), EF)
-    full_fitcomb[kinFit_eventmask] = fitcomb
-    events = set_ak_column(events, "fitCombinationType", full_fitcomb)
 
+    events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
+
+    if events.gen_top_decay.ndim > 1:
+        jetcollections = {
+            "FitJet": {
+                "type_name": "Jet",
+                "check_attr": "metric_table",
+                "skip_fields": "",
+            },
+            "FitJet.reco": {
+                "type_name": "Jet",
+                "check_attr": "metric_table",
+                "skip_fields": "",
+            },
+            "gen_top_decay": {
+                "type_name": "Jet",
+                "check_attr": "metric_table",
+                "skip_fields": "",
+            },
+        }
+        events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
+        fitcomb = combinationtype(
+            events.FitJet.reco[kinFit_eventmask][:, 0],
+            events.FitJet.reco[kinFit_eventmask][:, 1],
+            events.FitJet.reco[kinFit_eventmask][:, 2],
+            events.FitJet.reco[kinFit_eventmask][:, 3],
+            events.FitJet.reco[kinFit_eventmask][:, 4],
+            events.FitJet.reco[kinFit_eventmask][:, 5],
+            events.gen_top_decay[kinFit_eventmask],
+        )
+        full_fitcomb = np.full(len(events), EF)
+        full_fitcomb[kinFit_eventmask] = fitcomb
+        events = set_ak_column(events, "fitCombinationType", full_fitcomb)
+    else:
+        events = set_ak_column(events, "fitCombinationType", 0)
+        jetcollections = {
+            "FitJet": {
+                "type_name": "Jet",
+                "check_attr": "metric_table",
+                "skip_fields": "",
+            },
+            "FitJet.reco": {
+                "type_name": "Jet",
+                "check_attr": "metric_table",
+                "skip_fields": "",
+            },
+        }
+        events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
+
+    B1 = events.FitJet[:, 0]
+    B2 = events.FitJet[:, 1]
     W1 = events.FitJet[:, 2].add(events.FitJet[:, 3])
     W2 = events.FitJet[:, 4].add(events.FitJet[:, 5])
     Top1 = events.FitJet[:, 0].add(W1)
     Top2 = events.FitJet[:, 1].add(W2)
+    events = set_ak_column(events, "FitRbb", B1.delta_r(B2))
+    events = set_ak_column(events, "FitB1", B1)
+    events = set_ak_column(events, "FitB2", B2)
     events = set_ak_column(events, "FitW1", W1)
     events = set_ak_column(events, "FitW2", W2)
     events = set_ak_column(events, "FitTop1", Top1)
@@ -284,6 +306,8 @@ def cutflow_features(
         muon_weights,
         deterministic_seeds,
         kinFitMatch,
+        gen_top_decay_products,
+        attach_coffea_behavior,
     },
     produces={
         features,
@@ -292,10 +316,17 @@ def cutflow_features(
         muon_weights,
         deterministic_seeds,
         kinFitMatch,
+        gen_top_decay_products,
+        "gen_top_decay",
+        attach_coffea_behavior,
     },
 )
 def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    # attach coffea behavior
+    events = self[attach_coffea_behavior](events, **kwargs)
     # features
+    if not self.dataset_inst.has_tag("has_top"):
+        events = set_ak_column(events, "gen_top_decay", False)
 
     events = self[features](events, **kwargs)
     # apply kinematic fit
@@ -324,6 +355,7 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         category_ids,
         muon_weights,
         deterministic_seeds,
+        kinFitMatch,
     },
     produces={
         normalization_weights,
@@ -331,13 +363,17 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         category_ids,
         muon_weights,
         deterministic_seeds,
+        kinFitMatch,
     },
 )
 def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # features
-
+    if not self.dataset_inst.has_tag("has_top"):
+        events = set_ak_column(events, "gen_top_decay", False)
     events = self[features](events, **kwargs)
 
+    # fake kinfit for trig weights creation
+    events = set_ak_column(events, "FitChi2", 0)
     # category ids
     events = self[category_ids](events, **kwargs)
 

@@ -80,6 +80,7 @@ def muon_selection(
         murmuf_weights,
         pu_weight,
         btag_weights,
+        gen_top_decay_products,
     },
     produces={
         # selectors / producers whose newly created columns should be kept
@@ -94,6 +95,7 @@ def muon_selection(
         gen_top_decay_products,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "gen_top_decay.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
+        "gen_top_decay",
     },
     exposed=True,
 )
@@ -237,6 +239,8 @@ def example(
         btag_weights,
         gen_top_decay_products,
         trig_weights,
+        "gen_top_decay.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
+        "gen_top_decay",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
     },
     exposed=True,
@@ -461,9 +465,6 @@ def trigger_eff(
             events, "mc_weight", np.ones(len(events)), value_type=np.float32,
         )
         # events = self[trig_weights](events, **kwargs)
-
-        if self.dataset_inst.has_tag("has_top"):
-            events = self[gen_top_decay_products](events, **kwargs)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)
