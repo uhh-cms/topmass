@@ -151,12 +151,12 @@ dataset_names = [
     "tt_sl_powheg",
     "tt_dl_powheg",
     "tt_fh_powheg",
-    # "tt_fh_mt166p5_powheg",
-    # "tt_fh_mt169p5_powheg",
-    # "tt_fh_mt171p5_powheg",
-    # "tt_fh_mt173p5_powheg",
-    # "tt_fh_mt175p5_powheg",
-    # "tt_fh_mt178p5_powheg",
+    "tt_fh_mt166p5_powheg",
+    "tt_fh_mt169p5_powheg",
+    "tt_fh_mt171p5_powheg",
+    "tt_fh_mt173p5_powheg",
+    "tt_fh_mt175p5_powheg",
+    "tt_fh_mt178p5_powheg",
 ]
 for dataset_name in dataset_names:
     # add the dataset
