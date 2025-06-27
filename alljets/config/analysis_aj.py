@@ -137,6 +137,8 @@ dataset_names = [
     "qcd_ht2000toinf_madgraph",
     # signals
     "tt_fh_powheg",
+    "tt_sl_powheg",
+    "tt_dl_powheg",
 ]
 for dataset_name in dataset_names:
     # add the dataset
@@ -353,6 +355,18 @@ add_shift_aliases(
     },
 )
 
+# Pile-up shifts
+cfg.add_shift(name="pu_weight_minbias_xs_up", id=150, type="shape")
+cfg.add_shift(name="pu_weight_minbias_xs_down", id=151, type="shape")
+add_shift_aliases(
+    cfg,
+    "pu_weight_minbias_xs",
+    {
+        "pu_weight": "pu_weight_minbias_xs_{direction}",
+    },
+)
+
+
 # external files
 # json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-849c6a6e" copied usage in hbt
 json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
@@ -534,15 +548,18 @@ cfg.x.keep_columns = DotDict.wrap({
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 # TODO: Add BTag weight shifts
 get_shifts = functools.partial(get_shifts_from_sources, cfg)
-cfg.x.event_weights = DotDict({
-    "normalization_weight": [],
-    # "btag_weight": [],
-    "trig_weight": [],
-    # "trig_weight": get_shifts("trig"),
-    # "muon_weight": get_shifts("mu"),
-    # "pdf_weight": get_shifts("pdf"),
-    # "murmuf_weight": get_shifts("murmuf"),
-})
+cfg.x.event_weights = DotDict(
+    {
+        "normalization_weight": [],
+        "btag_weight": [],
+        # "trig_weight": [],
+        "trig_weight": get_shifts("trig"),
+        # "muon_weight": get_shifts("mu"),
+        "pdf_weight": get_shifts("pdf"),
+        "murmuf_weight": get_shifts("murmuf"),
+        "pu_weight": get_shifts("pu_weight_minbias_xs"),
+    },
+)
 
 # versions per task family, either referring to strings or to callables receving the invoking
 # task instance and parameters to be passed to the task family
