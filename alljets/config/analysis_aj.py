@@ -161,8 +161,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-    for info in dataset.info.values():
-        info.n_files = min(info.n_files, 1)
+    # for info in dataset.info.values():
+    #    info.n_files = min(info.n_files, 1)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")

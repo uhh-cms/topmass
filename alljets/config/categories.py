@@ -86,11 +86,11 @@ def add_categories(cfg: od.Config) -> None:
         tags={"2btj"},
     )
 
-    main_categories = {
-        # number of jets
-        "njets": CategoryGroup(["incl", "6j", "7j"], is_complete=True, has_overlap=True),
-        # number of btagged jets
-        "sigorbkg": CategoryGroup(["sig", "bkg"], is_complete=False, has_overlap=False),
-        # kinematic fit convergence
-        "kinfitconv": CategoryGroup(["fit_conv", "fit_nconv"], is_complete=True, has_overlap=False),
-    }
+#    main_categories = {
+#        # number of jets
+#        "njets": CategoryGroup(["incl", "6j", "7j"], is_complete=True, has_overlap=True),
+#        # number of btagged jets
+#        "sigorbkg": CategoryGroup(["sig", "bkg"], is_complete=False, has_overlap=False),
+#        # kinematic fit convergence
+#        "kinfitconv": CategoryGroup(["fit_conv", "fit_nconv"], is_complete=True, has_overlap=False),
+#    }
