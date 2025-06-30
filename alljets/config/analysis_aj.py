@@ -151,12 +151,12 @@ dataset_names = [
     "tt_sl_powheg",
     "tt_dl_powheg",
     "tt_fh_powheg",
-    # "tt_fh_mt166p5_powheg",
-    # "tt_fh_mt169p5_powheg",
-    # "tt_fh_mt171p5_powheg",
-    # "tt_fh_mt173p5_powheg",
-    # "tt_fh_mt175p5_powheg",
-    # "tt_fh_mt178p5_powheg",
+    "tt_fh_mt166p5_powheg",
+    "tt_fh_mt169p5_powheg",
+    "tt_fh_mt171p5_powheg",
+    "tt_fh_mt173p5_powheg",
+    "tt_fh_mt175p5_powheg",
+    "tt_fh_mt178p5_powheg",
 ]
 for dataset_name in dataset_names:
     # add the dataset
@@ -714,7 +714,7 @@ cfg.x.event_weights = DotDict(
         "normalization_weight": [],
         "btag_weight": [],
         # "trig_weight": [],
-        "trig_weight": get_shifts("trig"),
+        # "trig_weight": get_shifts("trig"),
         # "muon_weight": get_shifts("mu"),
         "pdf_weight": get_shifts("pdf"),
         "murmuf_weight": get_shifts("murmuf"),
