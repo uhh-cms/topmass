@@ -26,7 +26,7 @@ law run cf.PlotVariables1D --version [version name] --datasets 'data*',tt_fh_pow
 ### Trigger efficiency plots (bin_sel variable dictates the trigger choice):
 ```
 law run cf.PlotVariables1D --version [version name] --datasets data_jetht_d,data_jetht_e,data_jetht_f,tt_fh_powheg --variables jet6_pt-ht1-trig_bits 
---selector trigger_eff --producers example,trigger_prod --plot-function alljets.plotting.trigger_eff_plot_procs_binned.plot_efficiencies 
+--selector trigger_eff --producers default,trigger_prod --plot-function alljets.plotting.trigger_eff_plot_procs_binned.plot_efficiencies
 --cf.MergeHistograms-{workflow=htcondor,htcondor-memory=3000} --cf.ReduceEvents-{workflow=htcondor,htcondor-memory=3000} 
 --general-settings "bin_sel=1"
 ```

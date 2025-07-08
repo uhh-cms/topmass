@@ -20,7 +20,7 @@ from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
 from alljets.selection.jet import jet_selection
 
-from alljets.production.example import cutflow_features
+from alljets.production.default import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights
 
 np = maybe_import("numpy")

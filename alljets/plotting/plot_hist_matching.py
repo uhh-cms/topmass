@@ -33,7 +33,7 @@ logger = law.logger.get_logger(__name__)
 law run cf.PlotVariables1D --version v1
 --processes tt --variables jet6_pt-trig_bits
 --datasets tt_fh_powheg --selector trigger_sel
---producers example,trigger_prod
+--producers default,trigger_prod
 --plot-function alljets.plotting.trigger_eff_plot.plot_efficiencies
 """
 

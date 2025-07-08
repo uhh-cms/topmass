@@ -215,7 +215,7 @@ tt_fh_trigger_prod = trigger_prod.derive("tt_fh_trigger_prod", cls_dict={"channe
         features, category_ids, normalization_weights, muon_weights, deterministic_seeds,
     },
 )
-def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # features
 
     events = self[features](events, **kwargs)
