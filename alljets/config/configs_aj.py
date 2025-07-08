@@ -735,6 +735,7 @@ def add_config(
                 "PV.{npvs,npvsGood}",
                 "FitJet.*",
                 "FitChi2",
+                "FitPgof",
                 "fitCombinationType",
                 "reco_combination_type",
                 "DeltaR",
@@ -745,7 +746,7 @@ def add_config(
                 "Mt2",
                 "chi2",
                 "deltaRb",
-                "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2, PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,PFHT380_SixPFJet32,IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}",
+                "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,PFHT380_SixPFJet32,IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}",
                 # columns added during selection
                 "deterministic_seed",
                 "process_id",
