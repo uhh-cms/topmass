@@ -15,6 +15,9 @@ from columnflow.production.util import attach_coffea_behavior
 # from columnflow.selection.util import create_collections_from_masks
 from columnflow.util import maybe_import
 from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
+# GenPart
+from columnflow.production.cms.gen_top_decay import gen_top_decay_products
+from alljets.selection.top_decay_products_Q import top_decay_products_Q
 
 
 np = maybe_import("numpy")
@@ -30,14 +33,54 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "LightJet.phi", "Jet.eta", "Bjet.eta", "LightJet.eta",
         "Jet.mass", "VetoJet.pt", "Bjet.mass", "LightJet.mass",
         "event", attach_coffea_behavior, "HLT.*",
+        # GenPart
+        "GenPart.*", "GenJet.*", gen_top_decay_products, top_decay_products_Q,
+        # "top_family.mass", "top_family.pt", "top_family.genPartIdxMother", "top_family.pdgId", "top_family.status",
+        # "top_family.statusFlags", "top_family.eta", "top_family.phi",
+        "gen_top_decay.eta", "gen_top_decay.phi", "gen_top_decay.pt", "gen_top_decay.mass", "gen_top_decay.genPartIdxMother",
+        "gen_top_decay.pdgId", "gen_top_decay.status", "gen_top_decay.statusFlags",
+        "gen_top_decay_last_copy.eta", "gen_top_decay_last_copy.phi", "gen_top_decay_last_copy.pt", "gen_top_decay_last_copy.mass", "gen_top_decay_last_copy.genPartIdxMother",
+        "gen_top_decay_last_copy.pdgId", "gen_top_decay_last_copy.status", "gen_top_decay_last_copy.statusFlags",
+        "gen_top_decay_last_isHardProcess.eta", "gen_top_decay_last_isHardProcess.phi", "gen_top_decay_last_isHardProcess.pt", "gen_top_decay_last_isHardProcess.mass", "gen_top_decay_last_isHardProcess.genPartIdxMother",
+        "gen_top_decay_last_isHardProcess.pdgId", "gen_top_decay_last_isHardProcess.status", "gen_top_decay_last_isHardProcess.statusFlags",
     },
     produces={
         # new columns
         "ht", "ht_old", "n_jet", "n_bjet", "maxbtag", "secmaxbtag",
         # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
+        # GenPart 
+        "GenPart_pdgIdMother", "n_MotherTop",
+        "reco_mt_bW", "reco_mW_q1q2", "reco_mt_q1q2b",
+        # "reco_pt_t_bW",  "reco_pt_W_q1q2", "reco_pt_t_q1q2b",
+        # "reco_mt_bW_Q", "reco_mW_q1q2_Q", "reco_mt_q1q2b_Q", "reco_pt_t_bW_Q",  "reco_pt_W_q1q2_Q", "reco_pt_t_q1q2b_Q",
+        "gen_top_deltaR", "gen_b_deltaR", "gen_q1q2_deltaR", "gen_bW_deltaR", "gen_Wq1_deltaR", "gen_Wq2_deltaR",
+        "gen_min_deltaR", "gen_max_deltaR",
+        "diff_mt_bW", "diff_mW_q1q2", "diff_mt_q1q2b",
+        "diff_p_t_bW", "diff_p_W_q1q2", "diff_p_t_q1q2b",
+        "diff_mt_bW_with_b_mass",
+        "b_mass", "reco_pt_t_q1q2b","reco_p_t_q1q2b", "gen_top_p",
+        "diff_mt_bW_last_copy", "diff_min_deltaR"
+        
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    mass = ak.to_numpy(events.gen_top_decay.mass)
+    mass[:,:,1] = 4.183
+    mass = ak.Array(mass)
+    eta = events.gen_top_decay.eta
+    genPartIdxMother = events.gen_top_decay.genPartIdxMother
+    pdgId =  events.gen_top_decay.pdgId
+    phi = events.gen_top_decay.phi
+    pt  = events.gen_top_decay.pt
+    status = events.gen_top_decay.status
+    events = set_ak_column(events, "gen_top_decay_b_mass.mass", mass)
+    events = set_ak_column(events, "gen_top_decay_b_mass.eta", eta)
+    events = set_ak_column(events, "gen_top_decay_b_mass.genPartIdxMother", genPartIdxMother)
+    events = set_ak_column(events, "gen_top_decay_b_mass.pdgId", pdgId)
+    events = set_ak_column(events, "gen_top_decay_b_mass.phi", phi)
+    events = set_ak_column(events, "gen_top_decay_b_mass.pt", pt)
+    events = set_ak_column(events, "gen_top_decay_b_mass.status", status)
+
     jetcollections = {
         "Bjet": {
             "type_name": "Jet",
@@ -49,6 +92,32 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             "check_attr": "metric_table",
             "skip_fields": "*Idx*G",
         },
+         "GenPart": {
+            "type_name": "GenParticle",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+        },
+         "gen_top_decay": {
+            "type_name": "GenParticle",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+         },
+          "gen_top_decay_b_mass": {
+            "type_name": "GenParticle",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+         },
+          "gen_top_decay_last_copy": {
+            "type_name": "GenParticle",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+         },
+         "gen_top_decay_last_isHardProcess": {
+            "type_name": "GenParticle",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+         },
+
     }
     events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
     # events = set_ak_column(events, "ht", (ak.sum(events.Jet.pt, axis=1) + ak.sum(events.VetoJet.pt, axis=1)))
@@ -67,6 +136,65 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
     events = set_ak_column(events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1]))
 
+    # GenPart
+    events = set_ak_column(events, "GenPart_pdgIdMother", events.GenPart[events.GenPart.genPartIdxMother].pdgId)
+    events = set_ak_column(events, "n_MotherTop", ak.sum(events.GenPart[events.GenPart.genPartIdxMother].pdgId==6, axis=-1))
+
+    # reco Mass
+    reco_mt_bW = (events.gen_top_decay[:,:,1]+events.gen_top_decay[:,:,2])
+    reco_mt_bW_b_mass = (events.gen_top_decay_b_mass[:,:,1]+events.gen_top_decay_b_mass[:,:,2])
+    reco_mt_bW_last_copy = (events.gen_top_decay_last_copy[:,:,1]+events.gen_top_decay_last_copy[:,:,2])
+
+    reco_mW_q1q2 = (events.gen_top_decay[:,:,3]+events.gen_top_decay[:,:,4])
+
+    reco_mt_q1q2b = ((events.gen_top_decay[:,:,3]+events.gen_top_decay[:,:,4]) + events.gen_top_decay[:,:,1])
+    #reco_mt_q1q2b_last_copy = ((events.gen_top_decay_last_copy[:,:,3]+events.gen_top_decay_last_copy[:,:,4]) + events.gen_top_decay_last_copy[:,:,1])
+
+    events = set_ak_column(events, "reco_mt_bW", reco_mt_bW.mass)
+    events = set_ak_column(events, "reco_mW_q1q2", reco_mW_q1q2.mass)
+    events = set_ak_column(events, "reco_mt_q1q2b", reco_mt_q1q2b.mass)
+
+    events = set_ak_column(events, "diff_p_t_bW", events.gen_top_decay.p[:,:,0]- reco_mt_bW.p)
+    events = set_ak_column(events, "diff_p_W_q1q2", events.gen_top_decay.p[:,:,2] - reco_mW_q1q2.p)
+    events = set_ak_column(events, "diff_p_t_q1q2b", events.gen_top_decay.p[:,:,0] - reco_mt_q1q2b.p)
+
+    events = set_ak_column(events, "diff_mt_bW", events.gen_top_decay.mass[:,:,0]- reco_mt_bW.mass)
+    events = set_ak_column(events, "diff_mW_q1q2", events.gen_top_decay.mass[:,:,2] - reco_mW_q1q2.mass)
+    events = set_ak_column(events, "diff_mt_q1q2b", events.gen_top_decay.mass[:,:,0] - reco_mt_q1q2b.mass)
+
+    events = set_ak_column(events, "diff_mt_bW_last_copy", events.gen_top_decay_last_copy.mass[:,:,0]- reco_mt_bW_last_copy.mass)
+    #events = set_ak_column(events, "diff_mt_q1q2b_last_copy", events.gen_top_decay_last_copy.mass[:,:,0] - reco_mt_q1q2b_last_copy.mass)
+
+    events = set_ak_column(events, "diff_mt_bW_with_b_mass", events.gen_top_decay.mass[:,:,0]- reco_mt_bW_b_mass.mass)
+
+    # GenPart pt
+    events = set_ak_column(events, "reco_pt_t_bW", reco_mt_bW.pt)
+    #events = set_ak_column(events, "reco_pt_W_q1q2", reco_mW_q1q2.pt)
+    events = set_ak_column(events, "reco_pt_t_q1q2b", reco_mt_q1q2b.pt)
+    events = set_ak_column(events, "reco_p_t_q1q2b", reco_mt_q1q2b.p)
+
+    # Gen p
+    events = set_ak_column(events, "gen_top_p", events.gen_top_decay.p)
+    
+    # Gen Delta R
+    events = set_ak_column(events, "gen_top_deltaR", events.gen_top_decay[:,:,0][:,0].delta_r(events.gen_top_decay[:,:,0][:,1]) )
+    events = set_ak_column(events, "gen_b_deltaR", events.gen_top_decay[:,:,1][:,0].delta_r(events.gen_top_decay[:,:,1][:,1]) )
+    events = set_ak_column(events, "gen_q1q2_deltaR", events.gen_top_decay[:,:,3].delta_r(events.gen_top_decay[:,:,4]) )
+    events = set_ak_column(events, "gen_bW_deltaR", events.gen_top_decay[:,:,1].delta_r(events.gen_top_decay[:,:,2]) )
+    events = set_ak_column(events, "gen_Wq1_deltaR", events.gen_top_decay[:,:,2].delta_r(events.gen_top_decay[:,:,3]) )
+    events = set_ak_column(events, "gen_Wq2_deltaR", events.gen_top_decay[:,:,2].delta_r(events.gen_top_decay[:,:,4]) )
+
+    # Max/Min Delta R
+    genPart1, genPart2 = ak.unzip(ak.combinations(events.gen_top_decay[(abs(events.gen_top_decay.pdgId) < 6)],2,axis=2))
+    genPart1_isHardProcess, genPart2_isHardProcess = ak.unzip(ak.combinations(events.gen_top_decay_last_isHardProcess[(abs(events.gen_top_decay_last_isHardProcess.pdgId) < 6)],2,axis=2))
+    events = set_ak_column(events, "gen_max_deltaR", ak.max(genPart1.delta_r(genPart2),axis=2))
+    events = set_ak_column(events, "gen_min_deltaR", ak.min(genPart1.delta_r(genPart2),axis=2))
+    events = set_ak_column(events, "gen_min_deltaR_isHardProcess", ak.min(genPart1_isHardProcess.delta_r(genPart2_isHardProcess),axis=2))
+
+    events = set_ak_column(events, "b_mass", (events.gen_top_decay[:,:,0] - events.gen_top_decay[:,:,2]).mass)
+    print(events.gen_top_decay[:,:,0].hasFlags("isLastCopy"))
+
+    events = set_ak_column(events, "diff_min_deltaR", events.gen_min_deltaR - events.gen_min_deltaR_isHardProcess)
     return events
 
 

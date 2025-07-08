@@ -3,7 +3,6 @@
 """
 Exemplary selection methods.
 """
-
 from collections import defaultdict
 
 from columnflow.selection import Selector, SelectionResult, selector
@@ -19,6 +18,7 @@ from columnflow.production.util import attach_coffea_behavior
 from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
 from alljets.selection.jet import jet_selection
+from alljets.selection.gen_top_decay_test import gen_top_decay_products_test
 
 from alljets.production.example import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights, trig_weights_pt, trig_weights_ht
@@ -66,7 +66,6 @@ def muon_selection(
 # (those that can be invoked from the command line)
 #
 
-
 @selector(
     uses={
         # selectors / producers called within _this_ selector
@@ -80,6 +79,7 @@ def muon_selection(
         btag_weights,
         attach_coffea_behavior,
         gen_top_decay_products,
+        gen_top_decay_products_test,
     },
     produces={
         # selectors / producers whose newly created columns should be kept
@@ -89,8 +89,18 @@ def muon_selection(
         murmuf_weights,
         pu_weight,
         btag_weights,
-        gen_top_decay_products,
+        #gen_top_decay_products,
+        #top_decay_products_Q,
+        #"top_family.*",
+        #"gen_top_decay.*",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+        # GenPart Mass Tests
+        # "reco_mt_bW", "reco_mW_q1q2", "reco_mt_q1q2b", "reco_pt_t_bW",  "reco_pt_W_q1q2", "reco_pt_t_q1q2b",
+        # "reco_mt_bW_Q", "reco_mW_q1q2_Q", "reco_mt_q1q2b_Q", "reco_pt_t_bW_Q",  "reco_pt_W_q1q2_Q", "reco_pt_t_q1q2b_Q",
+        # GenPart Delta R Tests
+        # "gen_top_deltaR", "gen_b_deltaR", "gen_q1q2_deltaR", "gen_bW_deltaR", "gen_max_deltaR", "gen_Wq1_deltaR", "gen_Wq2_deltaR",
+        # "gen_min_deltaR",
+        "gen_top_decay.*", "GenPart.*","gen_top_decay.statusFlags", "gen_top_decay_last_copy.*","gen_top_decay_last_isHardProcess.*"
     },
     exposed=True,
 )
@@ -102,17 +112,20 @@ def example(
 ) -> tuple[ak.Array, SelectionResult]:
     # ensure coffea behavior
     events = self[attach_coffea_behavior](events, **kwargs)
-
+    #import pdb; pdb.set_trace()
     # prepare the selection results that are updated at every step
     results = SelectionResult()
+    
 
     # Produce gen_top_decay
     if self.dataset_inst.has_tag("has_top"):
-        events = self[gen_top_decay_products](events, **kwargs)
+        # Flags: "isHardProcess"
+        # events = self[gen_top_decay_products](events, **kwargs)
+        # Flags: "isFirstCopy", "fromHardProcess"
+        events = self[gen_top_decay_products_test](events, **kwargs)
     else:
         events = set_ak_column(events, "gen_top_decay", False)
         events = set_ak_column(events, "GenPart.eta", False)
-
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
@@ -131,8 +144,11 @@ def example(
     # combined event selection after all steps
     results.event = (results.steps.muon & results.steps.jet &
                     results.steps.Trigger & results.steps.BTag &
-                    results.steps.HT & results.steps.Chi2 & results.steps.n25Chi2 &
-                    results.steps.n10Chi2 & results.steps.n5Chi2 & results.steps.SixJets)
+                    results.steps.HT &
+                    # results.steps.Chi2 & results.steps.n25Chi2 & results.steps.n10Chi2 & results.steps.n5Chi2 &
+                    results.steps.SixJets 
+                    # & results.steps.Gen_PT 
+                    )
     # results.steps.BaseTrigger
 
     # create process ids
@@ -194,7 +210,6 @@ def example(
         group_map=group_map,
         **kwargs,
     )
-
     return events, results
 
 
@@ -223,6 +238,7 @@ def example(
         btag_weights,
         gen_top_decay_products,
         trig_weights,
+        # "gen_top_decay.*",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
     },
     exposed=True,
@@ -368,6 +384,7 @@ def example_trig_weight(
         btag_weights,
         gen_top_decay_products,
         trig_weights,
+        # "gen_top_decay.*",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "trig_ht",
     },
@@ -497,6 +514,7 @@ def trigger_eff(
         btag_weights,
         gen_top_decay_products,
         trig_weights_pt,
+        # "gen_top_decay.*",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "trig_ht",
     },
@@ -626,6 +644,7 @@ def trigger_eff_pt(
         btag_weights,
         gen_top_decay_products,
         trig_weights_ht,
+        # "gen_top_decay.*",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "trig_ht",
     },
@@ -757,6 +776,7 @@ def trigger_eff_ht(
         gen_top_decay_products,
         trig_weights_ht,
         trig_weights_pt_after_ht,
+        # "gen_top_decay.*",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "trig_ht",
     },
@@ -894,6 +914,7 @@ def trigger_eff_pt_after_ht(
         gen_top_decay_products,
         trig_weights_pt,
         trig_weights_ht_after_pt,
+        # "gen_top_decay.*",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "trig_ht",
     },

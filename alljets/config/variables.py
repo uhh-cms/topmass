@@ -649,3 +649,526 @@ def add_variables(cfg: od.Config) -> None:
         binning=(3, -0.5, 2.5),
         x_title=r"trig bits",
     )
+    # GenParticals and GenJets
+    cfg.add_variable(
+        name="GenPart_eta",
+        expression="GenPart.eta",
+        binning=(30, -3.0, 3.0),
+        unit="",
+        x_title=r"$\eta$ of all GenParticals",
+    )
+    cfg.add_variable(
+        name="GenJet_phi",
+        expression="GenJet.phi",
+        binning=(30, -3.0, 3.0),
+        unit="",
+        x_title=r"$\phi$ of all GenJets",
+    )
+    cfg.add_variable(
+        name="GenJet_pt",
+        expression="GenJet.pt",
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T$ of all GenJets",
+    )
+    cfg.add_variable(
+        name="GenJet_mass",
+        expression="GenJet.mass",
+        binning=(30, 0, 100),
+        unit="GeV",
+        x_title=r"$\phi$ of all GenJets",
+    )
+    cfg.add_variable(
+        name="GenPart_MotherID",
+        expression="GenPart.genPartIdxMother",
+        binning=(150, 0, 150),
+        unit="",
+        x_title=r"ID of the Motherpartical",
+    )
+    cfg.add_variable(
+        name="GenPart_pdgID",
+        expression="GenPart.pdgId",
+        binning=(100, -50, 50),
+        unit="",
+        x_title=r"PDG ID of the GenParticals",
+    )
+    cfg.add_variable(
+        name="GenPart_MotherpdgID",
+        expression="GenPart_pdgIdMother",
+        binning=(100, -50, 50),
+        unit="",
+        x_title=r"PDG ID of the Motherpartical",
+    )
+    cfg.add_variable(
+        name="n_MotherTop10",
+        expression="n_MotherTop",
+        binning=(15, 0, 15),
+        unit="",
+        x_title=r"Number of GenPart wiht a t-quark as Mother",
+    )
+    cfg.add_variable(
+        name="n_top",
+        expression="n_top",
+        binning=(10, 0, 10),
+        unit="",
+        x_title=r"Number of t-quark in a Event",
+    )
+    #gen t1
+    cfg.add_variable(
+        name="gen_top1_mass",
+        expression="gen_top_decay.mass[:,0,0]",
+        binning=(40, 150, 190),
+        unit="GeV",
+        x_title=r"$m_t^\text{gen}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_pt",
+        expression="gen_top_decay.pt[:,0,0]",
+        binning=(40, 0.0,700.0),
+        unit="GeV",
+        x_title=r"$p_{T,t}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_p",
+        expression="gen_top_p[:,0,0]",
+        binning=(40, 0.0,700.0),
+        unit="GeV",
+        x_title=r"$p_{T,t}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_mass_Q",
+        expression="top_family.mass[:,[0],0]",
+        binning=(40, 150, 190),
+        unit="GeV",
+        x_title=r"$m_{T,t}$",
+    )
+    #gen t2
+    cfg.add_variable(
+        name="gen_top2_mass",
+        expression="gen_top_decay.mass[:,1,0]",
+        binning=(40, 150, 190),
+        unit="GeV",
+        x_title=r"$m_\overline{t}^\text{gen}$",
+    )
+    cfg.add_variable(
+        name="gen_top2_pt",
+        expression="gen_top_decay.pt[:,1,0]",
+        binning=(40, 0.0,700.0),
+        unit="GeV",
+        x_title=r"$p_{T,\overline{t}}$",
+    )
+    # gen b
+    cfg.add_variable(
+        name="gen_b_mass",
+        expression="gen_top_decay.mass[:,:,1]",
+        binning=(40, 0, 40),
+        unit="GeV",
+        x_title=r"Mass of the gen-b-Quark",
+    )
+    cfg.add_variable(
+        name="gen_b_pt",
+        expression="gen_top_decay.pt[:,:,1]",
+        binning=(40, 0, 400),
+        unit="GeV",
+        x_title=r"$p_T$ of the gen-b-Quark",
+    )
+    # gen W
+    cfg.add_variable(
+        name="gen_W1_mass",
+        expression="gen_top_decay.mass[:,0,2]",
+        binning=(40, 65, 95),
+        unit="GeV",
+        x_title=r"$m_{W^+}^\text{gen}$",
+    )
+    cfg.add_variable(
+        name="gen_W2_mass",
+        expression="gen_top_decay.mass[:,1,2]",
+        binning=(40, 65, 95),
+        unit="GeV",
+        x_title=r"$m_{W^-}^\text{gen}$",
+    )
+    cfg.add_variable(
+        name="gen_W1_pt",
+        expression="gen_top_decay.pt[:,0,2]",
+        binning=(40, 0, 500),
+        unit="GeV",
+        x_title=r"$p_{T,W^+}^\text{gen}$",
+    )
+    cfg.add_variable(
+        name="gen_W2_pt",
+        expression="gen_top_decay.pt[:,1,2]",
+        binning=(40, 0, 500),
+        unit="GeV",
+        x_title=r"$p_{T,W^-}^\text{gen}$",
+    )
+    # gen q1 and q2
+    cfg.add_variable(
+        name="gen_q1_pt",
+        expression="gen_top_decay.pt[:,:,3]",
+        binning=(40, 0, 400),
+        unit="GeV",
+        x_title=r"$p_T$ of the gen-quark 1",
+    )
+    cfg.add_variable(
+        name="gen_q2_pt",
+        expression="gen_top_decay.pt[:,:,4]",
+        binning=(40, 0, 400),
+        unit="GeV",
+        x_title=r"$p_T$ of the gen-quark 2",
+    )
+    # Delta R
+    cfg.add_variable(
+        name="gen_top_deltaR",
+        expression="gen_top_deltaR",
+        binning=(40, 0, 6),
+        unit="",
+        x_title=r"$\Delta R_{t\overline{t}}$",
+    )
+    cfg.add_variable(
+        name="gen_b_deltaR",
+        expression="gen_b_deltaR",
+        binning=(40, 0, 6),
+        unit="",
+        x_title=r"$\Delta R_{b\overline{b}}$",
+    )
+    cfg.add_variable(
+        name="gen_q1q2_deltaR",
+        expression="gen_q1q2_deltaR[:,0]",
+        binning=(40, 0, 5),
+        unit="",
+        x_title=r"$\Delta R_{q1q2}$",
+    )
+    cfg.add_variable(
+        name="gen_q3q4_deltaR",
+        expression="gen_q1q2_deltaR[:,1]",
+        binning=(40, 0, 5),
+        unit="",
+        x_title=r"$\Delta R_{q3q4}$",
+    )
+    cfg.add_variable(
+        name="gen_b1W1_deltaR",
+        expression="gen_bW_deltaR[:,0]",
+        binning=(40, 0, 5),
+        unit="",
+        x_title=r"$\Delta R_{bW^+}$",
+    )
+    cfg.add_variable(
+        name="gen_b2W2_deltaR",
+        expression="gen_bW_deltaR[:,1]",
+        binning=(40, 0, 5),
+        unit="",
+        x_title=r"$\Delta R_{\overline{b}W^-}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_max_deltaR",
+        expression="gen_max_deltaR[:,0]",
+        binning=(40, 0, 5),
+        unit="",
+        x_title=r"$\Delta R_{\text{max},t}$",
+    )
+    cfg.add_variable(
+        name="gen_top2_max_deltaR",
+        expression="gen_max_deltaR[:,1]",
+        binning=(40, 0, 5),
+        unit="",
+        x_title=r"$\Delta R_{\text{max},\overline{t}}$",
+    )
+    cfg.add_variable(
+        name="gen_W1q1_deltaR",
+        expression="gen_Wq1_deltaR[:,0]",
+        binning=(40, 0, 5),
+        unit="",
+        x_title=r"$\Delta R_{W^+q1}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_min_deltaR",
+        expression="gen_min_deltaR[:,0]",
+        binning=(40, 0, 4),
+        unit="",
+        x_title=r"$\Delta R_{\text{min},t}$",
+    )
+    cfg.add_variable(
+        name="gen_top2_min_deltaR",
+        expression="gen_min_deltaR[:,1]",
+        binning=(40, 0, 4),
+        unit="",
+        x_title=r"$\Delta R_{\text{min},\overline{t}}$",
+    )
+    # gen m_reco
+    cfg.add_variable(
+        name="reco_mt1_bW",
+        expression="reco_mt_bW[:,0]",
+        binning=(40, 150, 190),
+        unit="GeV",
+        x_title=r"$m_\text{t}^{bW^+}$",
+    )
+    cfg.add_variable(
+        name="reco_mt2_bW",
+        expression="reco_mt_bW[:,1]",
+        binning=(40, 150, 190),
+        unit="GeV",
+        x_title=r"$m_{\overline{t}}^{\overline{b}W^-}$",
+    )
+    cfg.add_variable(
+        name="reco_mW1_q1q2",
+        expression="reco_mW_q1q2[:,0]",
+        binning=(40, 65, 95),
+        unit="GeV",
+        x_title=r"$m_{W^+}^{q1q2}$",
+    )
+    cfg.add_variable(
+        name="reco_mW2_q3q4",
+        expression="reco_mW_q1q2[:,1]",
+        binning=(40, 65, 95),
+        unit="GeV",
+        x_title=r"$m_{W^-}^{q3q4}$",
+    )
+    cfg.add_variable(
+        name="reco_mt1_q1q2b",
+        expression="reco_mt_q1q2b[:,0]",
+        binning=(40, 150, 190),
+        unit="GeV",
+        x_title=r"$m_\text{t}^{q1q2b}$",
+    )
+    cfg.add_variable(
+        name="reco_mt2_q3q4b",
+        expression="reco_mt_q1q2b[:,1]",
+        binning=(40, 150, 190),
+        unit="GeV",
+        x_title=r"$m_{\overline{t}}^{q3q4\overline{b}}$",
+    )
+    cfg.add_variable(
+        name="reco_mt1_q1q2b_Q",
+        expression="reco_mt_q1q2b_Q[:,0,0]",
+        binning=(40, 150, 190),
+        unit="GeV",
+        x_title=r"$m_{\overline{t}}^{q3q4\overline{b}}$",
+    )
+    # gen reco pt
+    cfg.add_variable(
+       	name="reco_pt_t1_bW",
+       	expression="reco_pt_t_bW[:,0]",
+       	binning=(40, 0.0,700.0),
+       	unit="GeV",
+       	x_title=r"$p_\text{T,t}^{bW^+}$",
+    )
+    cfg.add_variable(
+        name="reco_pt_t2_bW",
+        expression="reco_pt_t_bW[:,1]",
+        binning=(40, 0.0,700.0),
+        unit="GeV",
+        x_title=r"$p_{T,\overline{t}}^{\overline{b}W^-}$",
+    )
+    cfg.add_variable(
+        name="reco_pt_W1_q1q2",
+        expression="reco_pt_W_q1q2[:,0]",
+        binning=(40, 0, 500),
+        unit="GeV",
+        x_title=r"$p_{T,W^+}^{q1q2}$",
+    )
+    cfg.add_variable(
+        name="reco_pt_W2_q3q4",
+        expression="reco_pt_W_q1q2[:,1]",
+        binning=(40, 0, 500),
+        unit="GeV",
+        x_title=r"$p_{T,W^-}^{q3q4}$",
+    )
+    cfg.add_variable(
+        name="reco_pt_t_q1q2b",
+        expression="reco_pt_t_q1q2b[:,0]",
+        binning=(40, 0.0,700.0),
+        unit="GeV",
+        x_title=r"$p_{T,\overline{t}}^{q1q2b}$",
+    )
+    cfg.add_variable(
+        name="reco_pt_t_q3q4b",
+        expression="reco_pt_t_q1q2b[:,1]",
+        binning=(40, 0.0,700.0),
+        unit="GeV",
+        x_title=r"$p_{T,\overline{t}}^{q3q4\overline{b}}$",
+    )
+    cfg.add_variable(
+        name="reco_p_t_q1q2b",
+        expression="reco_p_t_q1q2b[:,0]",
+        binning=(40, 0.0,700.0),
+        unit="GeV",
+        x_title=r"$p_{t}^{q1q2b}$",
+    )
+    # Gen mass diff
+    cfg.add_variable(
+        name="diff_mt1_bW",
+        expression="diff_mt_bW[:,0]",
+        binning=(80, -2.0,2.0),
+        unit="GeV",
+        x_title=r"$ m_t^{gen}-m_t^{bW^+}$",
+    )
+    cfg.add_variable(
+        name="diff_mt1_bW_last_copy",
+        expression="diff_mt_bW_last_copy[:,0]",
+        binning=(80, -2.0,2.0),
+        unit="GeV",
+        x_title=r"$ m_t^{gen}-m_t^{bW^+}$",
+    )
+    cfg.add_variable(
+        name="diff_mt1_bW_with_bmass",
+        expression="diff_mt_bW_with_b_mass[:,0]",
+        binning=(80, -2.0,2.0),
+        unit="GeV",
+        x_title=r"$ m_t^{gen}-m_t^{bW^+}$",
+    )
+    cfg.add_variable(
+        name="diff_mt2_bW",
+        expression="diff_mt_bW[:,1]",
+        binning=(80, -2.0,2.0), 
+        unit="GeV",
+        x_title=r"$ m_\overline{t}^{gen}-m_\overline{t}^{\overline{b}W^-}$",
+    )
+    cfg.add_variable(
+        name="diff_mW1_q1q2",
+        expression="diff_mW_q1q2[:,0]",
+        binning=(80, -2.0,2.0), 
+        unit="GeV",
+        x_title=r"$ m_W^{+, gen}-m_W^{+,q1q2}$",
+    )
+    cfg.add_variable(
+        name="diff_mW2_q1q2",
+        expression="diff_mW_q1q2[:,1]",
+        binning=(80, -2.0,2.0), 
+        unit="GeV",
+        x_title=r"$ m_W^{-,gen}-m_W^{-,q3q4}$",
+    )
+    cfg.add_variable(
+        name="diff_mt1_q1q2b",
+        expression="diff_mt_q1q2b[:,0]",
+        binning=(100, -3.0,8.0), 
+        unit="GeV",
+        x_title=r"$ m_t^{gen}-m_t^{bq1q2}$",
+    )
+    cfg.add_variable(
+        name="diff_mt1_q1q2b_last_copy",
+        expression="diff_mt_q1q2b_last_copy[:,0]",
+        binning=(100, -3.0,8.0), 
+        unit="GeV",
+        x_title=r"$ m_t^{gen}-m_t^{bq1q2}$",
+    )
+    cfg.add_variable(
+        name="diff_mt2_q3q4b",
+        expression="diff_mt_q1q2b[:,0]",
+        binning=(100, -3.0,8.0), 
+        unit="GeV",
+        x_title=r"$ m_\overline{t}^{gen}-m_\overline{t}^{\overline{b}q3q4}$",
+    )
+    # p diff
+    cfg.add_variable(
+        name="diff_p_t1_bW",
+        expression="diff_p_t_bW[:,0]",
+        binning=(80, -10.0,10.0),
+        unit="GeV",
+        x_title=r"$ p_t^{gen}-p_t^{bW^+}$",
+    )
+    cfg.add_variable(
+        name="diff_p_t2_bW",
+        expression="diff_p_t_bW[:,1]",
+        binning=(80, -10.0,10.0), 
+        unit="GeV",
+        x_title=r"$ p_\overline{t}^{gen}-p_\overline{t}^{\overline{b}W^-}$",
+    )
+    cfg.add_variable(
+        name="diff_p_W1_q1q2",
+        expression="diff_p_W_q1q2[:,0]",
+        binning=(80, -10.0,10.0), 
+        unit="GeV",
+        x_title=r"$ p_{W^+}^{gen}-p_{W^+}^{q1q2}$",
+    )
+    cfg.add_variable(
+        name="diff_p_W2_q1q2",
+        expression="diff_p_W_q1q2[:,1]",
+        binning=(80, -10.0,10.0), 
+        unit="GeV",
+        x_title=r"$ p_{W^-}^{gen}-p_{W^-}^{q3q4}$",
+    )
+    cfg.add_variable(
+        name="diff_p_t1_q1q2b",
+        expression="diff_p_t_q1q2b[:,0]",
+        binning=(100, -5.0,10.0), 
+        unit="GeV",
+        x_title=r"$ p_t^{gen}-p_t^{bq1q2}$",
+    )
+    cfg.add_variable(
+        name="diff_p_t2_q3q4b",
+        expression="diff_p_t_q1q2b[:,0]",
+        binning=(100, -5.0,10.0), 
+        unit="GeV",
+        x_title=r"$ p_\overline{t}^{gen}-p_\overline{t}^{\overline{b}q3q4}$",
+    )
+    cfg.add_variable(
+        name="b1_mass",
+        expression="b_mass[:,0]",
+        binning=(100, -15.0,15.0), 
+        unit="GeV",
+        x_title=r"$m_b$",
+    )
+    # delta_fractions
+    cfg.add_variable(
+        name="deltaR_fraction_04",
+        expression="deltaR_fraction_04",
+        binning=(10, 0.0, 10.0), 
+        unit="",
+        x_title=r"Fraction of objects with ΔR < 0.4",
+    )
+    cfg.add_variable(
+        name="gen_top1_min_deltaR_3bins",
+        expression="gen_min_deltaR[:,0]",
+        binning=[0, 0.4, 1, 6],
+        unit="",
+        x_title=r"$\Delta R_{\text{min},t}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_min_deltaR_2bins",
+        expression="gen_min_deltaR[:,0]",
+        binning=[0, 1, 6],
+        unit="",
+        x_title=r"$\Delta R_{\text{min},t}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_min_deltaR_2bins_04",
+        expression="gen_min_deltaR[:,0]",
+        binning=[0, 0.4, 6],
+        unit="",
+        x_title=r"$\Delta R_{\text{min},t}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_min_deltaR_2bins_08",
+        expression="gen_min_deltaR[:,0]",
+        binning=[0, 0.8, 6],
+        unit="",
+        x_title=r"$\Delta R_{\text{min},t}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_min_deltaR_4bins",
+        expression="gen_min_deltaR[:,0]",
+        binning=[0,0.4, 0.8,1, 6],
+        unit="",
+        x_title=r"$\Delta R_{\text{min},t}$",
+    )
+    cfg.add_variable(
+        name="gen_top1_max_deltaR_4bins",
+        expression="gen_max_deltaR[:,0]",
+        binning=[0,0.4, 0.8,1, 20],
+        unit="",
+        x_title=r"$\Delta R_{\text{min},t}$",
+    )
+    cfg.add_variable(
+        name="gen_b1W1_deltaR_4bins",
+        expression="gen_b1W1_deltaR[:,0]",
+        binning=[0,0.4, 0.8,1, 20],
+        unit="",
+        x_title=r"$\Delta R_{\text{min},t}$",
+    )
+    cfg.add_variable(
+        name="diff_min_deltaR",
+        expression="diff_min_deltaR[:,0]",
+        binning=(100, -1.0,1.0),
+        unit="",
+        x_title=r"Diff $\Delta R_{\text{min},t}$",
+    )

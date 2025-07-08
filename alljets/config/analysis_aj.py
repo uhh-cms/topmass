@@ -99,10 +99,10 @@ dataset_names = [
     # data
     # Trigger does not work for set B
     # "data_jetht_b",
-    "data_jetht_c",
-    "data_jetht_d",
-    "data_jetht_e",
-    "data_jetht_f",
+    # "data_jetht_c",
+    # "data_jetht_d",
+    # "data_jetht_e",
+    # "data_jetht_f",
     # backgrounds
     # "tt_sl_powheg",
     # "tt_dl_powheg",
@@ -113,12 +113,12 @@ dataset_names = [
     # "qcd_ht50to100_madgraph",
     # "qcd_ht100to200_madgraph",
     # "qcd_ht200to300_madgraph",
-    "qcd_ht300to500_madgraph",
-    "qcd_ht500to700_madgraph",
-    "qcd_ht700to1000_madgraph",
-    "qcd_ht1000to1500_madgraph",
-    "qcd_ht1500to2000_madgraph",
-    "qcd_ht2000toinf_madgraph",
+    # "qcd_ht300to500_madgraph",
+    # "qcd_ht500to700_madgraph",
+    # "qcd_ht700to1000_madgraph",
+    # "qcd_ht1000to1500_madgraph",
+    # "qcd_ht1500to2000_madgraph",
+    # "qcd_ht2000toinf_madgraph",
     # signals
     "tt_fh_powheg",
 ]
@@ -128,7 +128,7 @@ for dataset_name in dataset_names:
 
     # for testing purposes, limit the number of files to 2
     # for info in dataset.info.values():
-    #     info.n_files = min(info.n_files, 1)
+    #      info.n_files = min(info.n_files, 1)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -268,6 +268,7 @@ cfg.add_shift(name="nominal", id=0)
 # (this is currently used to decide whether ML evaluations are done on the full shifted dataset)
 cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal"})
 cfg.add_shift(name="tune_down", id=2, type="shape", tags={"disjoint_from_nominal"})
+cfg.add_shift(name="rtt_up", id=3, type="shape", tags={"disjoint_from_nominal"})
 
 # fake jet energy correction shift, with aliases flaged as "selection_dependent", i.e. the aliases
 # affect columns that might change the output of the event selection
@@ -440,6 +441,20 @@ cfg.x.keep_columns = DotDict.wrap({
         # columns added during selection
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight", "trig_weight", "trig_weight_up",
         "trig_weight_down", "murmuf_weight", "pu_weight", "btag_weight", "combination_type", "R2b4q", "trig_ht",
+        # GenJets
+        "GenJet.*",
+        # Gen top decay products:
+        "gen_top_decay.eta", "gen_top_decay.phi", "gen_top_decay.pt", "gen_top_decay.mass", "gen_top_decay.genPartIdxMother",
+        "gen_top_decay.pdgId", "gen_top_decay.status", "gen_top_decay.statusFlags",
+        "gen_top_decay_last_copy.eta", "gen_top_decay_last_copy.phi", "gen_top_decay_last_copy.pt", "gen_top_decay_last_copy.mass", "gen_top_decay_last_copy.genPartIdxMother",
+        "gen_top_decay_last_copy.pdgId", "gen_top_decay_last_copy.status", "gen_top_decay_last_copy.statusFlags",
+        "gen_top_decay_last_isHardProcess.eta", "gen_top_decay_last_isHardProcess.phi", "gen_top_decay_last_isHardProcess.pt", "gen_top_decay_last_isHardProcess.mass", "gen_top_decay_last_isHardProcess.genPartIdxMother",
+        "gen_top_decay_last_isHardProcess.pdgId", "gen_top_decay_last_isHardProcess.status", "gen_top_decay_last_isHardProcess.statusFlags",
+        # GenPart Mass Tests
+        # "reco_mt_bW", "reco_mW_q1q2", "reco_mt_q1q2b", "reco_pt_t_bW",  "reco_pt_W_q1q2", "reco_pt_t_q1q2b",
+        # "reco_mt_bW_Q", "reco_mW_q1q2_Q", "reco_mt_q1q2b_Q", "reco_pt_t_bW_Q",  "reco_pt_W_q1q2_Q", "reco_pt_t_q1q2b_Q",
+        # GenPart Delta R Tests
+        # "gen_top_deltaR", "gen_b_deltaR", "gen_q1q2_deltaR", "gen_bW_deltaR", "gen_max_deltaR", "gen_Wq1_deltaR", "gen_Wq2_deltaR", "gen_min_deltaR",
     },
     "cf.MergeSelectionMasks": {
         "normalization_weight", "process_id", "category_ids", "cutflow.*",
