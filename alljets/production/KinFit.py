@@ -20,6 +20,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "FitJet.phi",
         "FitJet.mass",
         "FitChi2",
+        "FitPgof",
     },
     jet_pt=None,
     jet_trigger=None,
@@ -38,7 +39,7 @@ def kinFit(
     sel_Jets = sel_events.Jet[sel_jet_mask]
     sorted_indices = ak.argsort(sel_Jets.btagDeepFlavB, ascending=False)
     sorted_jets = sel_Jets[sorted_indices]
-    fitPt, fitEta, fitPhi, fitMass, indexlist, fitChi2 = pyKinFit.setBestCombi(
+    fitPt, fitEta, fitPhi, fitMass, indexlist, fitChi2, fitPgof = pyKinFit.setBestCombi(
         ak.to_list(sorted_jets.pt),
         ak.to_list(sorted_jets.eta),
         ak.to_list(sorted_jets.phi),
@@ -96,5 +97,8 @@ def kinFit(
     events = set_ak_column(events, "FitJet", fitJet_record)
     total_chi2 = np.full(len(events), EMPTY_FLOAT)
     total_chi2[eventmask] = ak.Array(fitChi2)
+    total_pgof = np.full(len(events), EMPTY_FLOAT)
+    total_pgof[eventmask] = ak.Array(fitPgof)
     events = set_ak_column(events, "FitChi2", total_chi2)
+    events = set_ak_column(events, "FitPgof", total_pgof)
     return events
