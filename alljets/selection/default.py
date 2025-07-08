@@ -93,7 +93,7 @@ def muon_selection(
     },
     exposed=True,
 )
-def example(
+def default(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
@@ -226,7 +226,7 @@ def example(
     },
     exposed=True,
 )
-def example_trig_weight(
+def default_trig_weight(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,

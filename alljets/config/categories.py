@@ -10,7 +10,7 @@ from columnflow.config_util import add_category
 
 
 # add categories using the "add_category" tool which adds auto-generated ids
-# the "selection" entries refer to names of selectors, e.g. in selection/example.py
+# the "selection" entries refer to names of selectors, e.g. in selection/default.py
 def add_categories(cfg: od.Config) -> None:
     add_category(
         cfg,
