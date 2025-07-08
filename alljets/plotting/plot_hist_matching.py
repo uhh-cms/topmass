@@ -54,8 +54,6 @@ def plot_hist_matching(
     """
     TODO.
     """
-    import IPython
-    IPython.embed()
     remove_residual_axis(hists, "shift")
 
     variable_inst = variable_insts[0]
