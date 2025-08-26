@@ -460,10 +460,10 @@ def add_config(
                             "CorrelationGroupFlavor",
                             "CorrelationGroupUncorrelated",
                         ],
-                    )
+                    ),
                 ),
             },
-        }
+        },
     )
 
     # JER
@@ -474,17 +474,17 @@ def add_config(
                 "version": jer_version,
                 "jet_type": jet_type,
             },
-        }
+        },
     )
 
     # updated jet id
     from columnflow.production.cms.jet import JetIdConfig
 
     cfg.x.jet_id = JetIdConfig(
-        corrections={"AK4PUPPI_Tight": 2, "AK4PUPPI_TightLeptonVeto": 3}
+        corrections={"AK4PUPPI_Tight": 2, "AK4PUPPI_TightLeptonVeto": 3},
     )
     cfg.x.fatjet_id = JetIdConfig(
-        corrections={"AK8PUPPI_Tight": 2, "AK8PUPPI_TightLeptonVeto": 3}
+        corrections={"AK8PUPPI_Tight": 2, "AK8PUPPI_TightLeptonVeto": 3},
     )
 
     # trigger sf corrector
@@ -657,7 +657,7 @@ def add_config(
     # common files
     # (versions in the end are for hashing in cases where file contents changed but paths did not)
     add_external(
-          # lumi files
+        # lumi files
         "lumi", {
             "golden": (
                 "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collision"
@@ -685,7 +685,7 @@ def add_config(
     )
     # jet energy correction
     add_external(
-        "jet_jerc", (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1")
+        "jet_jerc", (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
     )
     # btag scale factor
     add_external(
@@ -740,7 +740,8 @@ def add_config(
                 "Mt2",
                 "chi2",
                 "deltaRb",
-                "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,PFHT380_SixPFJet32,IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}",
+                "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,PFHT380_SixPFJet32_DoublePFBTagCSV_2p2}",
+                "HLT.{PFHT380_SixPFJet32,IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}",
                 # columns added during selection
                 "deterministic_seed",
                 "process_id",
@@ -777,9 +778,9 @@ def add_config(
         },
     )
 
- ################################################################################################
- # weights
- ################################################################################################
+    ################################################################################################
+    # weights
+    ################################################################################################
 
     # configurations for all possible event weight columns as keys in an OrderedDict,
     # mapped to shift instances they depend on
@@ -795,15 +796,15 @@ def add_config(
             # "muon_weight": get_shifts("mu"),
             "pdf_weight": get_shifts("pdf"),
             "murmuf_weight": get_shifts("murmuf"),
-            "pu_weight": get_shifts("pu_weight_minbias_xs")
+            "pu_weight": get_shifts("pu_weight_minbias_xs"),
         },
     )
     # define per-dataset event weights
     cfg.x.shift_groups = {}
 
-################################################################################################
+    ################################################################################################
     # external configs: channels, categories, met filters, triggers, variables
-################################################################################################
+    ################################################################################################
     cfg.x.met_name = "MET"
     cfg.x.raw_met_name = "RawMET"
 

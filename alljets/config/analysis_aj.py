@@ -56,6 +56,8 @@ if not law.util.flag_to_bool(os.getenv("AJ_BUNDLE_CMSSW", "1")):
 # config groups for conveniently looping over certain configs
 # (used in wrapper_factory)
 ana.x.config_groups = {}
+
+
 # setup configs
 def add_lazy_config(
     *,
@@ -69,7 +71,7 @@ def add_lazy_config(
     def create_factory(
         config_id: int,
         config_name_postfix: str = "",
-        limit_dataset_files: Optional[int] = None
+        limit_dataset_files: Optional[int] = None,
     ):
         def factory(configs: od.UniqueObjectIndex):
             # import the campaign
@@ -93,8 +95,9 @@ def add_lazy_config(
     if add_limited:
         analysis_aj.configs.add_lazy_factory(
             f"{config_name}_limited", create_factory(
-                config_id + 200, "_limited", 2)
+                config_id + 200, "_limited", 2),
         )
+
 
 # 2017,
 add_lazy_config(
