@@ -145,9 +145,9 @@ def add_config(
             year=2017,
             values=[
                 "data_jetht_c",
-                "data_jetht_d",
-                "data_jetht_e",
-                "data_jetht_f",
+                # "data_jetht_d",
+                # "data_jetht_e",
+                # "data_jetht_f",
             ],
         ),
         *if_era(
@@ -177,22 +177,22 @@ def add_config(
         # "qcd_ht50to100_madgraph",
         # "qcd_ht100to200_madgraph",
         # "qcd_ht200to300_madgraph",
-        "qcd_ht300to500_madgraph",
-        "qcd_ht500to700_madgraph",
-        "qcd_ht700to1000_madgraph",
-        "qcd_ht1000to1500_madgraph",
-        "qcd_ht1500to2000_madgraph",
-        "qcd_ht2000toinf_madgraph",
+        # "qcd_ht300to500_madgraph",
+        # "qcd_ht500to700_madgraph",
+        # "qcd_ht700to1000_madgraph",
+        # "qcd_ht1000to1500_madgraph",
+        # "qcd_ht1500to2000_madgraph",
+        # "qcd_ht2000toinf_madgraph",
         # signals
-        "tt_sl_powheg",
-        "tt_dl_powheg",
+        # "tt_sl_powheg",
+        # "tt_dl_powheg",
         "tt_fh_powheg",
-        "tt_fh_mt166p5_powheg",
-        "tt_fh_mt169p5_powheg",
-        "tt_fh_mt171p5_powheg",
-        "tt_fh_mt173p5_powheg",
-        "tt_fh_mt175p5_powheg",
-        "tt_fh_mt178p5_powheg",
+        # "tt_fh_mt166p5_powheg",
+        # "tt_fh_mt169p5_powheg",
+        # "tt_fh_mt171p5_powheg",
+        # "tt_fh_mt173p5_powheg",
+        # "tt_fh_mt175p5_powheg",
+        # "tt_fh_mt178p5_powheg",
     ]
     for dataset_name in dataset_names:
         # skip when in sync mode and not exiting
@@ -206,6 +206,7 @@ def add_config(
         if dataset.name.startswith("st_"):
             dataset.add_tag({"has_top", "single_top", "st"})
         # apply an optional limit on the number of files
+        limit_dataset_files = 1
         if limit_dataset_files:
             for info in dataset.info.values():
                 info.n_files = min(info.n_files, limit_dataset_files)
