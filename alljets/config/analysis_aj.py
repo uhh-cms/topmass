@@ -114,8 +114,3 @@ add_lazy_config(
     config_id=2017,
     add_limited=True,
 )
-
-
-# an example config is setup below, based on cms NanoAOD v9 for Run2 2017, focussing on
-# ttbar and single top MCs, plus single muon data
-# update this config or add additional ones to accomodate the needs of your analysis
