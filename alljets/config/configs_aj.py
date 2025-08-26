@@ -231,9 +231,9 @@ def add_config(
 
     # default objects
     cfg.x.default_calibrator = "default"
-    cfg.x.default_selector = "example"
+    cfg.x.default_selector = "default"
     cfg.x.default_reducer = "cf_default"
-    cfg.x.default_producer = "example"
+    cfg.x.default_producer = "default"
     cfg.x.default_ml_model = None
     cfg.x.default_inference_model = "default_no_shifts"
     cfg.x.default_categories = ("incl",)
