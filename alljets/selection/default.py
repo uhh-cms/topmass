@@ -89,6 +89,7 @@ def muon_selection(
         pu_weight,
         btag_weights,
         gen_top_decay_products,
+        "trig_weight",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
     },
     exposed=True,
@@ -156,6 +157,10 @@ def default(
         # btag weights
         jet_mask = ((events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4))
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
+
+    events = set_ak_column(
+        events, "trig_weight", np.ones(len(events)), value_type=np.float32,
+    )
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)
