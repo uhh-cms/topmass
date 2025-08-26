@@ -7,20 +7,15 @@ Configuration of the ttbar analysis.
 from __future__ import annotations
 
 import functools
-import itertools
 import os
-import re
 
 import law
 import order as od
-import yaml
-from columnflow.columnar_util import ColumnCollection, skip_column
 from columnflow.config_util import (add_shift_aliases,
                                     get_root_processes_from_campaign,
                                     get_shifts_from_sources,
                                     verify_config_processes)
-from columnflow.tasks.external import ExternalFile as Ext
-from columnflow.util import DotDict, dev_sandbox
+from columnflow.util import DotDict
 from scinum import Number
 
 thisdir = os.path.dirname(os.path.abspath(__file__))

@@ -4,23 +4,14 @@
 Configuration of the topmass_alljets analysis.
 """
 
-from alljets.config.variables import add_variables
-from alljets.config.categories import add_categories
 from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
-import functools
 import importlib
 import os
 
 import law
 import order as od
 from alljets.config.configs_aj import add_config
-from cmsdb.campaigns.run2_2017_nano_v9 import campaign_run2_2017_nano_v9
-from columnflow.config_util import (
-    get_root_processes_from_campaign, add_shift_aliases, get_shifts_from_sources,
-    verify_config_processes,
-)
 from columnflow.util import DotDict, maybe_import
-from scinum import Number
 from typing import Optional
 
 
@@ -39,7 +30,6 @@ analysis_aj = ana = od.Analysis(
 # Add hist hooks
 analysis_aj.x.hist_hooks = DotDict()
 # QCD hist hooks
-from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
 add_qcd_hooks(analysis_aj)
 
 # analysis-global versions
