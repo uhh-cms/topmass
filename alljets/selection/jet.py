@@ -32,6 +32,7 @@ def jet_selection(
     EF = -99999.0  # define EMPTY_FLOAT
     ht1_sel = (ak.sum(events.Jet.pt, axis=1) >= 1)
     ht_sel = (ak.sum(events.Jet.pt, axis=1) >= 450)
+    # gen_pt_cut = ak.fill_none((events.gen_top_decay[:,0,0].pt < 300),False)
     jet_mask = ((abs(events.Jet.eta) < 2.6))
     jet_mask2 = ((abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 40.0))
     jet_sel = ak.sum(jet_mask2, axis=1) >= 6
@@ -41,9 +42,7 @@ def jet_selection(
     # b-tagged jets (tight wp)
     bjet_mask = (jet_mask2) & (events.Jet.btagDeepFlavB >= wp_tight)
     # bjet_indices = indices[bjet_mask][:, :2]
-    bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2) &
-                (ak.sum(jet_mask2[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1))
-                )
+    bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2))
     sixjets_sel = (bjet_sel & (ak.sum(light_jet, axis=1) >= 4))
     # Trigger selection step is skipped for QCD MC, which has no Trigger columns
     if not self.dataset_inst.name.startswith("qcd"):
@@ -195,6 +194,7 @@ def jet_selection(
             # "AltTrigger": alt_jet_trigger_sel,
             "Trigger": jet_trigger_sel,
             "HT": ht_sel,
+            # "Gen_PT": gen_pt_cut,
             "jet": jet_sel,
             "BTag": bjet_sel,
             "SixJets": sixjets_sel,

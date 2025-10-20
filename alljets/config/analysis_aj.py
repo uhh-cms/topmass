@@ -127,8 +127,8 @@ for dataset_name in dataset_names:
     dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
     # for testing purposes, limit the number of files to 2
-    # for info in dataset.info.values():
-    #      info.n_files = min(info.n_files, 1)
+    for info in dataset.info.values():
+        info.n_files = min(info.n_files, 3)
     # # Add has_top tag to tt events
     if dataset_name.startswith("tt_"):
         dataset.add_tag("has_top")
@@ -442,19 +442,27 @@ cfg.x.keep_columns = DotDict.wrap({
         "deterministic_seed", "process_id", "mc_weight", "cutflow.*", "pdf_weight", "trig_weight", "trig_weight_up",
         "trig_weight_down", "murmuf_weight", "pu_weight", "btag_weight", "combination_type", "R2b4q", "trig_ht",
         # GenJets
-        "GenJet.*",
+        "GenJet.*", "GenJetAK8.*",
         # Gen top decay products:
-        "gen_top_decay.eta", "gen_top_decay.phi", "gen_top_decay.pt", "gen_top_decay.mass", "gen_top_decay.genPartIdxMother",
+        "gen_top_decay.eta", "gen_top_decay.phi", "gen_top_decay.pt",
+        "gen_top_decay.mass", "gen_top_decay.genPartIdxMother",
         "gen_top_decay.pdgId", "gen_top_decay.status", "gen_top_decay.statusFlags",
-        "gen_top_decay_last_copy.eta", "gen_top_decay_last_copy.phi", "gen_top_decay_last_copy.pt", "gen_top_decay_last_copy.mass", "gen_top_decay_last_copy.genPartIdxMother",
+        "gen_top_decay_last_copy.eta", "gen_top_decay_last_copy.phi",
+        "gen_top_decay_last_copy.pt",
+        "gen_top_decay_last_copy.mass", "gen_top_decay_last_copy.genPartIdxMother",
         "gen_top_decay_last_copy.pdgId", "gen_top_decay_last_copy.status", "gen_top_decay_last_copy.statusFlags",
-        "gen_top_decay_last_isHardProcess.eta", "gen_top_decay_last_isHardProcess.phi", "gen_top_decay_last_isHardProcess.pt", "gen_top_decay_last_isHardProcess.mass", "gen_top_decay_last_isHardProcess.genPartIdxMother",
-        "gen_top_decay_last_isHardProcess.pdgId", "gen_top_decay_last_isHardProcess.status", "gen_top_decay_last_isHardProcess.statusFlags",
+        "gen_top_decay_isHardProcess.eta", "gen_top_decay_isHardProcess.phi", "gen_top_decay_isHardProcess.pt",
+        "gen_top_decay_isHardProcess.mass", "gen_top_decay_isHardProcess.genPartIdxMother",
+        "gen_top_decay_isHardProcess.pdgId", "gen_top_decay_isHardProcess.status",
+        "gen_top_decay_isHardProcess.statusFlags",
         # GenPart Mass Tests
         # "reco_mt_bW", "reco_mW_q1q2", "reco_mt_q1q2b", "reco_pt_t_bW",  "reco_pt_W_q1q2", "reco_pt_t_q1q2b",
-        # "reco_mt_bW_Q", "reco_mW_q1q2_Q", "reco_mt_q1q2b_Q", "reco_pt_t_bW_Q",  "reco_pt_W_q1q2_Q", "reco_pt_t_q1q2b_Q",
+        # "reco_mt_bW_Q", "reco_mW_q1q2_Q", "reco_mt_q1q2b_Q", "reco_pt_t_bW_Q",
+        # "reco_pt_W_q1q2_Q", "reco_pt_t_q1q2b_Q",
         # GenPart Delta R Tests
-        # "gen_top_deltaR", "gen_b_deltaR", "gen_q1q2_deltaR", "gen_bW_deltaR", "gen_max_deltaR", "gen_Wq1_deltaR", "gen_Wq2_deltaR", "gen_min_deltaR",
+        # "gen_top_deltaR", "gen_b_deltaR", "gen_q1q2_deltaR",
+        # "gen_bW_deltaR", "gen_max_deltaR", "gen_Wq1_deltaR",
+        # "gen_Wq2_deltaR", "gen_min_deltaR",
     },
     "cf.MergeSelectionMasks": {
         "normalization_weight", "process_id", "category_ids", "cutflow.*",

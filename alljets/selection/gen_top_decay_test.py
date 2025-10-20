@@ -13,7 +13,7 @@ ak = maybe_import("awkward")
 
 @producer(
     uses={"GenPart.{genPartIdxMother,pdgId,statusFlags}"},
-    produces={"gen_top_decay", "gen_top_decay_last_copy","gen_top_decay_last_isHardProcess"},
+    produces={"gen_top_decay", "gen_top_decay_last_copy", "gen_top_decay_isHardProcess"},
 )
 def gen_top_decay_products_test(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
@@ -66,7 +66,6 @@ def gen_top_decay_products_test(self: Producer, events: ak.Array, **kwargs) -> a
     # distinct W children
     w_children = w.distinctChildrenDeep[w.distinctChildrenDeep.hasFlags(*children_gen_flags)]
     w_children_old = w_old.distinctChildrenDeep[w_old.distinctChildrenDeep.hasFlags("isHardProcess")]
-    
 
     # reorder the first two W children (leptons or quarks) so that the charged lepton / down-type
     # quark is listed first (they have an odd pdgId)
@@ -81,14 +80,13 @@ def gen_top_decay_products_test(self: Producer, events: ak.Array, **kwargs) -> a
 
     # last Copy func
     last_copy_t = t.distinctChildren[t.distinctChildren.hasFlags(*mother_gen_flags)]
-    t_children2 = ak.where(ak.num(last_copy_t) < 4,t_children,last_copy_t)
-    #import IPython; IPython.embed()
-    b2 = ak.flatten(t_children2[abs(t_children2.pdgId) == 5],2)
+    t_children2 = ak.where(ak.num(last_copy_t) < 4, t_children, last_copy_t)
+    b2 = ak.flatten(t_children2[abs(t_children2.pdgId) == 5], 2)
 
-    w2 =  ak.flatten(t_children2[abs(t_children2.pdgId) == 24],2)
+    w2 = ak.flatten(t_children2[abs(t_children2.pdgId) == 24], 2)
     last_copy_w = w2.distinctChildrenDeep[w2.distinctChildrenDeep.hasFlags(*mother_gen_flags)]
     first_copy_w = w2.distinctChildrenDeep[w2.distinctChildrenDeep.hasFlags(*children_gen_flags)]
-    w_children2 = ak.where(ak.num(last_copy_w) < 4,first_copy_w,last_copy_w)
+    w_children2 = ak.where(ak.num(last_copy_w) < 4, first_copy_w, last_copy_w)
     w_children2_firsttwo = w_children2[:, :, :2]
     w_children2_firsttwo = w_children2_firsttwo[(w_children2_firsttwo.pdgId % 2 == 0) * 1]
     w_children2_rest = w_children2[:, :, 2:]
@@ -129,7 +127,7 @@ def gen_top_decay_products_test(self: Producer, events: ak.Array, **kwargs) -> a
     # save the column
     events = set_ak_column(events, "gen_top_decay", groups)
     events = set_ak_column(events, "gen_top_decay_last_copy", groups2)
-    events = set_ak_column(events, "gen_top_decay_last_isHardProcess", groups_old)
+    events = set_ak_column(events, "gen_top_decay_isHardProcess", groups_old)
     return events
 
 

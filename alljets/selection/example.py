@@ -80,6 +80,7 @@ def muon_selection(
         attach_coffea_behavior,
         gen_top_decay_products,
         gen_top_decay_products_test,
+        "GenJet*",
     },
     produces={
         # selectors / producers whose newly created columns should be kept
@@ -89,18 +90,21 @@ def muon_selection(
         murmuf_weights,
         pu_weight,
         btag_weights,
-        #gen_top_decay_products,
-        #top_decay_products_Q,
-        #"top_family.*",
-        #"gen_top_decay.*",
+        # gen_top_decay_products,
+        # top_decay_products_Q,
+        # "top_family.*",
+        # "gen_top_decay.*",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         # GenPart Mass Tests
         # "reco_mt_bW", "reco_mW_q1q2", "reco_mt_q1q2b", "reco_pt_t_bW",  "reco_pt_W_q1q2", "reco_pt_t_q1q2b",
-        # "reco_mt_bW_Q", "reco_mW_q1q2_Q", "reco_mt_q1q2b_Q", "reco_pt_t_bW_Q",  "reco_pt_W_q1q2_Q", "reco_pt_t_q1q2b_Q",
+        # "reco_mt_bW_Q", "reco_mW_q1q2_Q", "reco_mt_q1q2b_Q",
+        # "reco_pt_t_bW_Q",  "reco_pt_W_q1q2_Q", "reco_pt_t_q1q2b_Q",
         # GenPart Delta R Tests
-        # "gen_top_deltaR", "gen_b_deltaR", "gen_q1q2_deltaR", "gen_bW_deltaR", "gen_max_deltaR", "gen_Wq1_deltaR", "gen_Wq2_deltaR",
+        # "gen_top_deltaR", "gen_b_deltaR", "gen_q1q2_deltaR",
+        # "gen_bW_deltaR", "gen_max_deltaR", "gen_Wq1_deltaR", "gen_Wq2_deltaR",
         # "gen_min_deltaR",
-        "gen_top_decay.*", "GenPart.*","gen_top_decay.statusFlags", "gen_top_decay_last_copy.*","gen_top_decay_last_isHardProcess.*"
+        "gen_top_decay.*", "GenPart.*", "gen_top_decay.statusFlags",
+        "gen_top_decay_last_copy.*", "gen_top_decay_isHardProcess.*",
     },
     exposed=True,
 )
@@ -112,10 +116,9 @@ def example(
 ) -> tuple[ak.Array, SelectionResult]:
     # ensure coffea behavior
     events = self[attach_coffea_behavior](events, **kwargs)
-    #import pdb; pdb.set_trace()
+
     # prepare the selection results that are updated at every step
     results = SelectionResult()
-    
 
     # Produce gen_top_decay
     if self.dataset_inst.has_tag("has_top"):
@@ -146,9 +149,8 @@ def example(
                     results.steps.Trigger & results.steps.BTag &
                     results.steps.HT &
                     # results.steps.Chi2 & results.steps.n25Chi2 & results.steps.n10Chi2 & results.steps.n5Chi2 &
-                    results.steps.SixJets 
-                    # & results.steps.Gen_PT 
-                    )
+                    # results.steps.Gen_P &
+                    results.steps.SixJets)
     # results.steps.BaseTrigger
 
     # create process ids
