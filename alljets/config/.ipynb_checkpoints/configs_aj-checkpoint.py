@@ -233,7 +233,7 @@ def add_config(
     cfg.x.default_calibrator = "default"
     cfg.x.default_selector = "example_trig_weight"
     cfg.x.default_reducer = "cf_default"
-    cfg.x.default_producer = ["example", "kinFitMatch"]
+    cfg.x.default_producer = "example"
     cfg.x.default_ml_model = None
     cfg.x.default_inference_model = "default_no_shifts"
     cfg.x.default_categories = ("incl",)
@@ -260,7 +260,7 @@ def add_config(
     # selector step groups for conveniently looping over certain steps
     # (used in cutflow tasks)
     cfg.x.selector_step_groups = {
-        "default": [],
+        "default": ["muon", "jet"],
         "default_Mt": [
             "All",
             "SignalOrBkgTrigger",
@@ -844,9 +844,8 @@ def add_config(
                 "combination_type",
                 "R2b4q",
                 "trig_ht",
-                "gen_top",
-                "gen_top.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
-                ColumnCollection.ALL_FROM_SELECTOR,
+                "gen_top_decay",
+                "gen_top_decay.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
             },
             "cf.MergeSelectionMasks": {
                 "normalization_weight",
@@ -880,7 +879,7 @@ def add_config(
             "normalization_weight": [],
             # "btag_weight": [],
             # "trig_weight": [],
-             "trig_weight": get_shifts("trig"),
+            # "trig_weight": get_shifts("trig"),
             # "muon_weight": get_shifts("mu"),
             "pdf_weight": get_shifts("pdf"),
             "murmuf_weight": get_shifts("murmuf"),

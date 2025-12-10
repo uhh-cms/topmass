@@ -200,7 +200,7 @@ def add_variables(cfg: od.Config) -> None:
         name="jet6_pt",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(20, 0.0, 100.0),
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )
@@ -954,7 +954,7 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="fit_Top1_mass_130_500",
+        name="fit_Top1_mass_1",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
         binning=(100, 130, 500),

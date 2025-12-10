@@ -25,6 +25,12 @@ def add_categories(cfg: od.Config) -> None:
     )
     add_category(
         cfg,
+        name="6j100pt",
+        selection="cat_6j100pt",
+        label=r"6 jets with $p_T > 100\,\mathrm{GeV}$",
+    )
+    add_category(
+        cfg,
         name="7j",
         selection="cat_7j",
         label="7+ jets",
@@ -70,6 +76,12 @@ def add_categories(cfg: od.Config) -> None:
         name="fit_conv_big",
         selection="cat_fit_conv_big",
         label="kinfit converged and $P_{gof} > 0.1$ ",
+    )
+    add_category(
+        cfg,
+        name="fit_Pgof_02",
+        selection="cat_fit_Pgof_02",
+        label="kinfit $P_{gof} > 0.2$ ",
     )
     add_category(
         cfg,

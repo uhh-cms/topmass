@@ -173,10 +173,6 @@ def plot_hist_matching_MC(
     """
     Matching for MC only
     
-    law run cf.PlotVariables1D --version v1 --configs 2017_v9_limited --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg --variables reco_Top1_mass-fit_combination_type --cf.CalibrateEvents-{workflow=htcondor,htcondor-memory=12GB} --cf.SelectEvents-{workflow=htcondor,htcondor-memory=8GB} --cf.ReduceEvents-{workflow=htcondor,htcondor-memory=8GB} --cf.ProduceColumns-{workflow=htcondor,htcondor-memory=8GB,max-runtime=4h} --categories incl --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching_MC
-
-    Example command to run the plot function. The matching information is stored in 'fit_combination_type' column. Here, a 2D histogram is created with the information of the matching type on an additional axis.
-    
     """
     n_processes = len(list(hists.keys()))
     keys = hists.keys()
@@ -191,49 +187,38 @@ def plot_hist_matching_MC(
     hists = apply_density(hists, density)
     plot_config = OrderedDict()
     # for updating labels of individual selector steps
-    # --- correct ---
-    plot_config["hist_correct"] = {
-        "method": "draw_hist",
-        "hist": hists[0][list(hists[0].keys())[tt_index]][0, :, 3],  # correct
-        "kwargs": {
-            "color": "#cc0000",
-            "histtype": "fill",
-            "label": f"{list(hists[0].keys())[tt_index].name}, correct",
-            "zorder": 3,
-        },
-    }
+    
 
-    # --- wrong ---
     plot_config["hist_wrong"] = {
         "method": "draw_hist",
-        "hist": (
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 3]  # correct
-            + hists[0][list(hists[0].keys())[tt_index]][0, :, 2]  # wrong
-        ),
+        "hist": hists[0][list(hists[0].keys())[tt_index]][0, :, 3] + hists[0][list(hists[0].keys())[tt_index]][0, :, 2] + hists[0][list(hists[0].keys())[tt_index]][0, :, 1],
         "kwargs": {
-            "color": "#ff6666",
+            "color": "#f08181",
             "histtype": "fill",
             "label": f"{list(hists[0].keys())[tt_index].name}, wrong",
-            "zorder": 2,
         },
     }
 
-    # --- unmatched ---
     plot_config["hist_unmatched"] = {
         "method": "draw_hist",
-        "hist": (
-              hists[0][list(hists[0].keys())[tt_index]][0, :, 3]  # correct
-            + hists[0][list(hists[0].keys())[tt_index]][0, :, 2]  # wrong
-            + hists[0][list(hists[0].keys())[tt_index]][0, :, 1]  # unmatched
-        ),
+        "hist": hists[0][list(hists[0].keys())[tt_index]][0, :, 3] + hists[0][list(hists[0].keys())[tt_index]][0, :, 1],
         "kwargs": {
-            "color": "#ffcccc",
+            "color": "#a33333",
             "histtype": "fill",
             "label": f"{list(hists[0].keys())[tt_index].name}, unmatched",
-            "zorder": 1,   
         },
     }
     
+    plot_config["hist_correct"] = {
+        "method": "draw_hist",
+        "hist": hists[0][list(hists[0].keys())[tt_index]][0, :, 3],
+        "kwargs": {
+            "color": "#380000",
+            "histtype": "fill",
+            "label": f"{list(hists[0].keys())[tt_index].name}, correct",
+        },
+    }
+
     plot_config[f"hist_total_uncert"] = {
         "method": "draw_stat_error_bands",
         "hist": hists[0][list(hists[0].keys())[tt_index]][0, :, 3] + hists[0][list(hists[0].keys())[tt_index]][0, :, 2] + hists[0][list(hists[0].keys())[tt_index]][0, :, 1],
@@ -326,6 +311,8 @@ def plot_hist_chi2cuts(
             "label": f"Number of events",
         },
     }
+    import IPython
+    IPython.embed()
     # setup style config
     default_style_config = prepare_style_config(
         config_inst, category_inst, variable_inst, density, shape_norm, yscale,

@@ -141,6 +141,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "Jet.mass",
         "event",
         attach_coffea_behavior,
+        gen_top_lookup,
         "Jet.btagDeepFlavB",
         kinFit,
         "gen_top",
@@ -158,11 +159,18 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "RecoW2.*",
         "RecoTop1.*",
         "RecoTop2.*",
+        gen_top_lookup,
+        "gen_top",
         # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
     },
 )
 def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     from alljets.scripts.default import combinationtype
+    
+    events = self[attach_coffea_behavior](events, **kwargs)
+    # features
+    if not self.dataset_inst.has_tag("has_top"):
+        events = set_ak_column(events, "gen_top", False)
 
     EF = -99999.0
     kinFit_jetmask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
@@ -314,7 +322,7 @@ def cutflow_features(
         muon_weights,
         deterministic_seeds,
         kinFitMatch,
-        gen_top_lookup,
+        #gen_top_lookup,
         attach_coffea_behavior,
     },
     produces={
@@ -324,27 +332,23 @@ def cutflow_features(
         muon_weights,
         deterministic_seeds,
         kinFitMatch,
-        gen_top_lookup,
-        "gen_top",
+        #gen_top_lookup,
+        #"gen_top",
         attach_coffea_behavior,
     },
+    require_producers={"kinFitMatch"}
 )
 def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # attach coffea behavior
     events = self[attach_coffea_behavior](events, **kwargs)
     # features
-    if not self.dataset_inst.has_tag("has_top"):
-        events = set_ak_column(events, "gen_top", False)
-
     events = self[features](events, **kwargs)
-    # apply kinematic fit
-    events = self[kinFitMatch](events, **kwargs)
     # category ids
     events = self[category_ids](events, **kwargs)
 
     # deterministic seeds
     events = self[deterministic_seeds](events, **kwargs)
-
+    
     # mc-only weights
     if self.dataset_inst.is_mc:
         # normalization weights
@@ -352,7 +356,6 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
         # muon weights
         # events = self[muon_weights](events, **kwargs)
-
     return events
 
 
@@ -408,7 +411,6 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         )
         # muon weights
         # events = self[muon_weights](events, **kwargs)
-
     return events
 
 
