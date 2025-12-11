@@ -167,10 +167,10 @@ def jet_selection(
         b1, b2 = ak.unzip(ak.unzip(bestcomb)[0])
         j1, j2, j3, j4 = ak.unzip(ak.unzip(bestcomb)[1])
 
-        b1cor = correctcomb.b[:,0]
-        q1cor = correctcomb.w_children[:, 0,0]
+        b1cor = correctcomb.b[:, 0]
+        q1cor = correctcomb.w_children[:, 0, 0]
         q2cor = correctcomb.w_children[:, 0, 1]
-        b2cor = correctcomb.b[:,1]
+        b2cor = correctcomb.b[:, 1]
         q3cor = correctcomb.w_children[:, 1, 0]
         q4cor = correctcomb.w_children[:, 1, 1]
         drmax = 0.4
@@ -284,7 +284,7 @@ def jet_selection_init(self: Selector) -> None:
     self.shifts |= {
         shift_inst.name
         for shift_inst in self.config_inst.shifts
-        if shift_inst.has_tag(("jec", "jer","tune","hdamp", "trig"  ))
+        if shift_inst.has_tag(("jec", "jer", "tune", "hdamp", "trig"))
     }
     # NOTE: the none will not be overwritten later when doing this...
     # self.jet_trigger = None

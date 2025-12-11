@@ -158,7 +158,7 @@ def trig_all_weights(self: HistProducer, events: ak.Array, **kwargs) -> ak.Array
                 dataset_inst.x.event_weights["pdf_weight"] = get_shifts_from_sources(config, "pdf")
     """
     weight = ak.Array(np.ones(len(events)))
-    #from IPython import embed; embed()
+    # from IPython import embed; embed()
     # build the full event weight
     if self.dataset_inst.is_mc and len(events):
         # multiply weights from global config `event_weights` aux entry

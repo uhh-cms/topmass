@@ -166,7 +166,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 )
 def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     from alljets.scripts.default import combinationtype
-    
+
     events = self[attach_coffea_behavior](events, **kwargs)
     # features
     if not self.dataset_inst.has_tag("has_top"):
@@ -174,7 +174,7 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     EF = -99999.0
     kinFit_jetmask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
-    kinFit_eventmask = ak.sum(kinFit_jetmask, axis = 1) >= 6
+    kinFit_eventmask = ak.sum(kinFit_jetmask, axis=1) >= 6
 
     events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
 
@@ -192,20 +192,31 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             },
         }
         events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
-        gen_top = attach_coffea_behavior_fn(events.gen_top, collections={
-    "b": {
-        "type_name": "GenParticle", "check_attr": "metric_table", "skip_fields": "*Idx*G",
-    },
-    "t": {
-        "type_name": "GenParticle", "check_attr": "metric_table", "skip_fields": "*Idx*G",
-    },
-    "w": {
-        "type_name": "GenParticle", "check_attr": "metric_table", "skip_fields": "*Idx*G",
-    },
-    "w_children": {
-        "type_name": "GenParticle", "check_attr": "metric_table", "skip_fields": "*Idx*G",
-    },
-})
+        gen_top = attach_coffea_behavior_fn(
+            events.gen_top,
+            collections={
+                "b": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+                "t": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+                "w": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+                "w_children": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+            },
+        )
         fitcomb = combinationtype(
             events.FitJet.reco[kinFit_eventmask][:, 0],
             events.FitJet.reco[kinFit_eventmask][:, 1],
@@ -240,10 +251,10 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     W2 = events.FitJet[:, 4].add(events.FitJet[:, 5])
     Top1 = events.FitJet[:, 0].add(W1)
     Top2 = events.FitJet[:, 1].add(W2)
-    RecoW1 = events.FitJet.reco[:,2].add(events.FitJet.reco[:,3])
-    RecoW2 = events.FitJet.reco[:,4].add(events.FitJet.reco[:,5])
-    RecoTop1 = events.FitJet.reco[:,0].add(RecoW1)
-    RecoTop2 = events.FitJet.reco[:,1].add(RecoW2)
+    RecoW1 = events.FitJet.reco[:, 2].add(events.FitJet.reco[:, 3])
+    RecoW2 = events.FitJet.reco[:, 4].add(events.FitJet.reco[:, 5])
+    RecoTop1 = events.FitJet.reco[:, 0].add(RecoW1)
+    RecoTop2 = events.FitJet.reco[:, 1].add(RecoW2)
     events = set_ak_column(events, "FitRbb", B1.delta_r(B2))
     events = set_ak_column(events, "RecoW1", RecoW1)
     events = set_ak_column(events, "RecoW2", RecoW2)
@@ -322,7 +333,7 @@ def cutflow_features(
         muon_weights,
         deterministic_seeds,
         kinFitMatch,
-        #gen_top_lookup,
+        # gen_top_lookup,
         attach_coffea_behavior,
     },
     produces={
@@ -332,11 +343,11 @@ def cutflow_features(
         muon_weights,
         deterministic_seeds,
         kinFitMatch,
-        #gen_top_lookup,
-        #"gen_top",
+        # gen_top_lookup,
+        # "gen_top",
         attach_coffea_behavior,
     },
-    require_producers={"kinFitMatch"}
+    require_producers={"kinFitMatch"},
 )
 def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # attach coffea behavior
@@ -348,7 +359,7 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # deterministic seeds
     events = self[deterministic_seeds](events, **kwargs)
-    
+
     # mc-only weights
     if self.dataset_inst.is_mc:
         # normalization weights

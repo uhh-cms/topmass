@@ -241,15 +241,17 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"Jet 6 $p_{T}$",
     )
     add_variable(
-            cfg,
-            name="jet6_pt_5",
-            expression="Jet.pt[:,5]",
-            null_value=EMPTY_FLOAT,
-            binning=(40, 0.0, 100.0), # [0, 10, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 45, 48, 52, 60, 70, 80, 100, 200],
-            aux = {"overflow": False, "underflow": False},
-            unit="GeV",
-            x_title=r"Jet 6 $p_{T}$",
-        )
+        cfg,
+        name="jet6_pt_5",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        # Previous binning: [0, 10, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40]
+        # [42, 45, 48, 52, 60, 70, 80, 100, 200]
+        binning=(40, 0.0, 100.0),
+        aux={"overflow": False, "underflow": False},
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
     add_variable(
         cfg,
         name="jet6_pt_6",
@@ -788,7 +790,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="",
         x_title=r"$P_{gof}$ from kinfit",
     )
-
 
     def build_w1jet(events, which=None):
         events = attach_coffea_behavior(

@@ -4,10 +4,10 @@ def dr(j1, j2):
 
 def combinationtype(b1, b2, j1, j2, j3, j4, correctcomb):
     import awkward as ak
-    b1cor = correctcomb.b[:,0]
-    q1cor = correctcomb.w_children[:, 0,0]
+    b1cor = correctcomb.b[:, 0]
+    q1cor = correctcomb.w_children[:, 0, 0]
     q2cor = correctcomb.w_children[:, 0, 1]
-    b2cor = correctcomb.b[:,1]
+    b2cor = correctcomb.b[:, 1]
     q3cor = correctcomb.w_children[:, 1, 0]
     q4cor = correctcomb.w_children[:, 1, 1]
     drmax = 0.4

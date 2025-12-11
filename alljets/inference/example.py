@@ -4,13 +4,11 @@
 Example inference model.
 """
 
-from columnflow.inference import (ParameterTransformation, ParameterType,
-                                  inference_model, InferenceModel)
+from columnflow.inference import ParameterType, inference_model, InferenceModel
 
 
 @inference_model
-def example(self: InferenceModel)-> None:
-
+def example(self: InferenceModel) -> None:
     #
     # categories
     #
@@ -19,9 +17,9 @@ def example(self: InferenceModel)-> None:
         "fit_conv_big_top_mass",
         config_data={
             config_inst.name: self.category_config_spec(
-            category="fit_conv_big",
-            variable="fit_Top1_mass",
-            data_datasets=["data_jetht*"],
+                category="fit_conv_big",
+                variable="fit_Top1_mass",
+                data_datasets=["data_jetht*"],
             )
             for config_inst in self.config_insts
         },
@@ -31,9 +29,9 @@ def example(self: InferenceModel)-> None:
         "fit_conv_big_reco_W1",
         config_data={
             config_inst.name: self.category_config_spec(
-            category="fit_conv_big",
-            variable="reco_W1_mass",
-            data_datasets=["data_jetht*"],
+                category="fit_conv_big",
+                variable="reco_W1_mass",
+                data_datasets=["data_jetht*"],
             )
             for config_inst in self.config_insts
         },
@@ -43,13 +41,14 @@ def example(self: InferenceModel)-> None:
         "fit_conv_big_reco_W2",
         config_data={
             config_inst.name: self.category_config_spec(
-            category="fit_conv_big",
-            variable="reco_W2_mass",
-            data_datasets=["data_jetht*"],
+                category="fit_conv_big",
+                variable="reco_W2_mass",
+                data_datasets=["data_jetht*"],
             )
             for config_inst in self.config_insts
         },
     )
+
     #
     # processes
     #
@@ -58,15 +57,18 @@ def example(self: InferenceModel)-> None:
         "TT",
         config_data={
             config_inst.name: self.process_config_spec(
-            process="tt",
-            mc_datasets=["tt_fh_powheg",
-                         "tt_sl_powheg",
-                         "tt_dl_powheg"],
+                process="tt",
+                mc_datasets=[
+                    "tt_fh_powheg",
+                    "tt_sl_powheg",
+                    "tt_dl_powheg",
+                ],
             )
-        for config_inst in self.config_insts
+            for config_inst in self.config_insts
         },
-        is_signal = True,
+        is_signal=True,
     )
+
     #
     # parameters
     #
@@ -93,11 +95,12 @@ def example(self: InferenceModel)-> None:
         config_data={
             config_inst.name: self.parameter_config_spec(
                 shift_source="jec_Total",
-                )
-        for config_inst in self.config_insts
+            )
+            for config_inst in self.config_insts
         },
     )
- # Hdamp
+
+    # Hdamp
     self.add_parameter(
         "hdamp",
         process=["TT"],
@@ -105,11 +108,12 @@ def example(self: InferenceModel)-> None:
         config_data={
             config_inst.name: self.parameter_config_spec(
                 shift_source="hdamp",
-                )
-        for config_inst in self.config_insts
+            )
+            for config_inst in self.config_insts
         },
     )
-    # pile-up weights 
+
+    # pile-up weights
     self.add_parameter(
         "pu_weight",
         process=["TT"],
@@ -117,10 +121,11 @@ def example(self: InferenceModel)-> None:
         config_data={
             config_inst.name: self.parameter_config_spec(
                 shift_source="pu_weight_minbias_xs",
-                )
-        for config_inst in self.config_insts
+            )
+            for config_inst in self.config_insts
         },
     )
+
     # pdf shift
     self.add_parameter(
         "pdf",
@@ -129,10 +134,11 @@ def example(self: InferenceModel)-> None:
         config_data={
             config_inst.name: self.parameter_config_spec(
                 shift_source="pdf",
-                )
-        for config_inst in self.config_insts
+            )
+            for config_inst in self.config_insts
         },
     )
+
     # trigger
     self.add_parameter(
         "trigger",
@@ -141,10 +147,11 @@ def example(self: InferenceModel)-> None:
         config_data={
             config_inst.name: self.parameter_config_spec(
                 shift_source="trig",
-                )
-        for config_inst in self.config_insts
+            )
+            for config_inst in self.config_insts
         },
     )
+
     # tune shift
     self.add_parameter(
         "tune",
@@ -153,10 +160,11 @@ def example(self: InferenceModel)-> None:
         config_data={
             config_inst.name: self.parameter_config_spec(
                 shift_source="tune",
-                )
-        for config_inst in self.config_insts
+            )
+            for config_inst in self.config_insts
         },
     )
+
     self.add_parameter(
         "mtop",
         process=["TT"],
@@ -164,10 +172,11 @@ def example(self: InferenceModel)-> None:
         config_data={
             config_inst.name: self.parameter_config_spec(
                 shift_source="mtop",
-                )
-        for config_inst in self.config_insts
+            )
+            for config_inst in self.config_insts
         },
     )
+
     # murmuf
     self.add_parameter(
         "murmuf",
@@ -176,10 +185,11 @@ def example(self: InferenceModel)-> None:
         config_data={
             config_inst.name: self.parameter_config_spec(
                 shift_source="murmuf",
-                )
-        for config_inst in self.config_insts
+            )
+            for config_inst in self.config_insts
         },
     )
+
     # # a custom asymmetric uncertainty that is converted from rate to shape
     # self.add_parameter(
     #     "QCDscale_ttbar",

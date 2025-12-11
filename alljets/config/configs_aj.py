@@ -7,20 +7,17 @@ Configuration of the ttbar analysis.
 from __future__ import annotations
 
 import functools
-import itertools
 import os
-import re
 
 import law
 import order as od
 import yaml
-from columnflow.columnar_util import ColumnCollection, skip_column
+from columnflow.columnar_util import ColumnCollection
 from columnflow.config_util import (add_shift_aliases,
                                     get_root_processes_from_campaign,
                                     get_shifts_from_sources,
                                     verify_config_processes)
-from columnflow.tasks.external import ExternalFile as Ext
-from columnflow.util import DotDict, dev_sandbox
+from columnflow.util import DotDict
 from scinum import Number
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
@@ -357,7 +354,7 @@ def add_config(
             #     "fontsize": 16,
             # },
         },
-}
+    }
     # plotting overwrites
     # from hbt.config.styles import setup_plot_styles
 
@@ -497,10 +494,10 @@ def add_config(
                             "CorrelationGroupFlavor",
                             "CorrelationGroupUncorrelated",
                         ],
-                    )
+                    ),
                 ),
             },
-        }
+        },
     )
 
     # JER
@@ -511,17 +508,17 @@ def add_config(
                 "version": jer_version,
                 "jet_type": jet_type,
             },
-        }
+        },
     )
 
     # updated jet id
     from columnflow.production.cms.jet import JetIdConfig
 
     cfg.x.jet_id = JetIdConfig(
-        corrections={"AK4PUPPI_Tight": 2, "AK4PUPPI_TightLeptonVeto": 3}
+        corrections={"AK4PUPPI_Tight": 2, "AK4PUPPI_TightLeptonVeto": 3},
     )
     cfg.x.fatjet_id = JetIdConfig(
-        corrections={"AK8PUPPI_Tight": 2, "AK8PUPPI_TightLeptonVeto": 3}
+        corrections={"AK8PUPPI_Tight": 2, "AK8PUPPI_TightLeptonVeto": 3},
     )
 
     # trigger sf corrector
@@ -607,9 +604,9 @@ def add_config(
     # tune shifts are covered by dedicated, varied datasets, so tag the shift as "disjoint_from_nominal"
     # (this is currently used to decide whether ML evaluations are done on the full shifted dataset)
     cfg.add_shift(name="tune_up", id=1, type="shape",
-                  tags={"disjoint_from_nominal","tune"})
+                  tags={"disjoint_from_nominal", "tune"})
     cfg.add_shift(name="tune_down", id=2, type="shape",
-                  tags={"disjoint_from_nominal","tune"})
+                  tags={"disjoint_from_nominal", "tune"})
     add_shift_aliases(cfg, "tune", {"tune": "tune_{direction}"})
 
     cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal", "hdamp"})
@@ -623,43 +620,43 @@ def add_config(
     with open(os.path.join(thisdir, "jec_sources.yaml"), "r") as f:
         all_jec_sources = yaml.load(f, yaml.Loader)["names"]
     for jec_source in cfg.x.jec.Jet.uncertainty_sources:
-            idx = all_jec_sources.index(jec_source)
-            cfg.add_shift(
-                name=f"jec_{jec_source}_up",
-                id=5000 + 2 * idx,
-                type="shape",
-                tags={"jec"},
-                aux={"jec_source": jec_source},
-            )
-            cfg.add_shift(
-                name=f"jec_{jec_source}_down",
-                id=5001 + 2 * idx,
-                type="shape",
-                tags={"jec"},
-                aux={"jec_source": jec_source},
-            )
+        idx = all_jec_sources.index(jec_source)
+        cfg.add_shift(
+            name=f"jec_{jec_source}_up",
+            id=5000 + 2 * idx,
+            type="shape",
+            tags={"jec"},
+            aux={"jec_source": jec_source},
+        )
+        cfg.add_shift(
+            name=f"jec_{jec_source}_down",
+            id=5001 + 2 * idx,
+            type="shape",
+            tags={"jec"},
+            aux={"jec_source": jec_source},
+        )
+        add_shift_aliases(
+            cfg,
+            f"jec_{jec_source}",
+            {
+                "Jet.pt": "Jet.pt_{name}",
+                "Jet.mass": "Jet.mass_{name}",
+                "MET.pt": "MET.pt_{name}",
+                "MET.phi": "MET.phi_{name}",
+            },
+        )
+        # TODO: check the JEC de/correlation across years and the interplay with btag weights
+        if ("" if jec_source == "Total" else jec_source) in cfg.x.btag_sf_jec_sources:
             add_shift_aliases(
                 cfg,
                 f"jec_{jec_source}",
                 {
-                    "Jet.pt": "Jet.pt_{name}",
-                    "Jet.mass": "Jet.mass_{name}",
-                    "MET.pt": "MET.pt_{name}",
-                    "MET.phi": "MET.phi_{name}",
+                    "normalized_btag_deepjet_weight": "normalized_btag_deepjet_weight_{name}",
+                    "normalized_njet_btag_deepjet_weight": "normalized_njet_btag_deepjet_weight_{name}",
+                    "normalized_btag_pnet_weight": "normalized_btag_pnet_weight_{name}",
+                    "normalized_njet_btag_pnet_weight": "normalized_njet_btag_pnet_weight_{name}",
                 },
             )
-            # TODO: check the JEC de/correlation across years and the interplay with btag weights
-            if ("" if jec_source == "Total" else jec_source) in cfg.x.btag_sf_jec_sources:
-                add_shift_aliases(
-                    cfg,
-                    f"jec_{jec_source}",
-                    {
-                        "normalized_btag_deepjet_weight": "normalized_btag_deepjet_weight_{name}",
-                        "normalized_njet_btag_deepjet_weight": "normalized_njet_btag_deepjet_weight_{name}",
-                        "normalized_btag_pnet_weight": "normalized_btag_pnet_weight_{name}",
-                        "normalized_njet_btag_pnet_weight": "normalized_njet_btag_pnet_weight_{name}",
-                    },
-                )
     # cfg.add_shift(name="jec_up", id=20, type="shape", tags="jec")
     # cfg.add_shift(name="jec_down", id=21, type="shape", tags="jec")
     # add_shift_aliases(
@@ -691,8 +688,8 @@ def add_config(
     )
 
     # Pdf shifts
-    cfg.add_shift(name="pdf_up", id=130, type="shape",tags="pdf")
-    cfg.add_shift(name="pdf_down", id=131, type="shape",tags="pdf")
+    cfg.add_shift(name="pdf_up", id=130, type="shape", tags="pdf")
+    cfg.add_shift(name="pdf_down", id=131, type="shape", tags="pdf")
     add_shift_aliases(
         cfg,
         "pdf",
@@ -725,7 +722,6 @@ def add_config(
     )
     # Top mass sample shifts
 
-
     ################################################################################################
     # external files
     ################################################################################################
@@ -743,9 +739,10 @@ def add_config(
 
     # common files
     # (versions in the end are for hashing in cases where file contents changed but paths did not)
+    # lumi files
     add_external(
-          # lumi files
-        "lumi", {
+        "lumi",
+        {
             "golden": (
                 "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collision"
                 "s17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_"
@@ -772,7 +769,7 @@ def add_config(
     )
     # jet energy correction
     add_external(
-        "jet_jerc", (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1")
+        "jet_jerc", (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
     )
     # btag scale factor
     add_external(
@@ -828,7 +825,11 @@ def add_config(
                 "Mt2",
                 "chi2",
                 "deltaRb",
-                "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,PFHT380_SixPFJet32,IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}",
+                (
+                    "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
+                    "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,PFHT380_SixPFJet32,"
+                    "IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}"
+                ),
                 # columns added during selection
                 "deterministic_seed",
                 "process_id",
@@ -866,9 +867,9 @@ def add_config(
         },
     )
 
- ################################################################################################
- # weights
- ################################################################################################
+    ################################################################################################
+    # weights
+    ################################################################################################
 
     # configurations for all possible event weight columns as keys in an OrderedDict,
     # mapped to shift instances they depend on
@@ -880,19 +881,19 @@ def add_config(
             "normalization_weight": [],
             # "btag_weight": [],
             # "trig_weight": [],
-             "trig_weight": get_shifts("trig"),
+            "trig_weight": get_shifts("trig"),
             # "muon_weight": get_shifts("mu"),
             "pdf_weight": get_shifts("pdf"),
             "murmuf_weight": get_shifts("murmuf"),
-            "pu_weight": get_shifts("pu_weight_minbias_xs")
+            "pu_weight": get_shifts("pu_weight_minbias_xs"),
         },
     )
     # define per-dataset event weights
     cfg.x.shift_groups = {}
 
-################################################################################################
+    ################################################################################################
     # external configs: channels, categories, met filters, triggers, variables
-################################################################################################
+    ################################################################################################
     cfg.x.met_name = "MET"
     cfg.x.raw_met_name = "RawMET"
 
@@ -917,7 +918,6 @@ def add_config(
     # channels
     cfg.add_channel(name="mutau", id=1, label=r"$\mu\tau_{h}$")
 
-	
     # add categories
     from alljets.config.categories import add_categories
 
