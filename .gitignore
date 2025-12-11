@@ -37,3 +37,4 @@ data
 topmass_alljets.code-workspace
 .__afs*
 sandboxes/
+**/.ipynb_checkpoints/**
