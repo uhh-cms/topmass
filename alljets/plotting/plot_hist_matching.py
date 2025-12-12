@@ -50,9 +50,26 @@ def plot_hist_matching(
     **kwargs,
 ) -> plt.Figure:
     """
-    TODO.
+    Plot matching types for data and MC, including QCD and data.
 
+    This function visualizes the matching status of events (QCD, correct, wrong, unmatched, data)
+    using cumulative stacking. The color scheme is based on previous analyses, e.g.
+    https://arxiv.org/pdf/2302.01967v2.
+
+    law run cf.PlotVariables1D --version v1 --configs 2017_v9_limited \
+    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg \
+    --variables reco_Top1_mass-fit_combination_type \
+    --cf.CalibrateEvents-{workflow=htcondor,htcondor-memory=12GB} \
+    --cf.SelectEvents-{workflow=htcondor,htcondor-memory=8GB} \
+    --cf.ReduceEvents-{workflow=htcondor,htcondor-memory=8GB} \
+    --cf.ProduceColumns-{workflow=htcondor,htcondor-memory=8GB,max-runtime=4h} \
+    --categories incl --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching
+
+    Example command to run the plot function. The matching information is stored in
+    'fit_combination_type' column. Here, a 2D histogram is created with the
+    information of the matching type on an additional axis.
     """
+    # Identify indices for each process in the histogram keys
     keys = hists.keys()
     for i in range(len(list(keys))):
         if list(keys)[i] == "tt":
@@ -66,73 +83,71 @@ def plot_hist_matching(
         else:
             data_index = i
 
+    # Use the first variable instance for plotting
     variable_inst = variable_insts[0]
+
+    # Apply variable and density settings to histograms
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
     # hists = apply_process_settings(hists, process_settings)
     hists = apply_density(hists, density)
-    plot_config = OrderedDict()
-    # for updating labels of individual selector steps
 
+    # Prepare the plot configuration dictionary
+    plot_config = OrderedDict()
+
+    # Extract base histograms for each matching type
+    qcd_hist = hists[0][list(hists[0].keys())[qcd_index]][0, :, sum]
+    correct_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 3]
+    wrong_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 2]
+    unmatched_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
+
+    # Build cumulative stacks for plotting
+    stack_qcd = qcd_hist
+    stack_correct = qcd_hist + correct_hist
+    stack_wrong = stack_correct + wrong_hist
+    stack_unmatched = stack_wrong + unmatched_hist
+
+    # Add each matching type to the plot config with appropriate color and stacking order
     plot_config["hist_qcd"] = {
         "method": "draw_hist",
-        "ratio_method": "draw_stat_error_bands",
-        "hist": (
-            hists[0][list(hists[0].keys())[qcd_index]][0, :, sum] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 2] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
-        ),
+        "hist": stack_qcd,
         "kwargs": {
-            "color": "#5790fc",
+            "color": "#ffff00",
             "histtype": "fill",
             "label": label,
-        },
-        "ratio_kwargs": {
-            "norm": (
-                hists[0][list(hists[0].keys())[qcd_index]][0, :, sum] +
-                hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
-                hists[0][list(hists[0].keys())[tt_index]][0, :, 2] +
-                hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
-            ).values(),
+            "zorder": 0,
         },
     }
-
-    plot_config["hist_wrong"] = {
-        "method": "draw_hist",
-        "hist": (
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 2] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
-        ),
-        "kwargs": {
-            "color": "#f08181",
-            "histtype": "fill",
-            "label": f"{list(hists[0].keys())[tt_index].name}, wrong",
-        },
-    }
-
-    plot_config["hist_unmatched"] = {
-        "method": "draw_hist",
-        "hist": (
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
-        ),
-        "kwargs": {
-            "color": "#a33333",
-            "histtype": "fill",
-            "label": f"{list(hists[0].keys())[tt_index].name}, unmatched",
-        },
-    }
-
     plot_config["hist_correct"] = {
         "method": "draw_hist",
-        "hist": hists[0][list(hists[0].keys())[tt_index]][0, :, 3],
+        "hist": stack_correct,
         "kwargs": {
-            "color": "#380000",
+            "color": "#cc0000",
             "histtype": "fill",
             "label": f"{list(hists[0].keys())[tt_index].name}, correct",
+            "zorder": 1,
         },
     }
+    plot_config["hist_wrong"] = {
+        "method": "draw_hist",
+        "hist": stack_wrong,
+        "kwargs": {
+            "color": "#ff6666",
+            "histtype": "fill",
+            "label": f"{list(hists[0].keys())[tt_index].name}, wrong",
+            "zorder": 2,
+        },
+    }
+    plot_config["hist_unmatched"] = {
+        "method": "draw_hist",
+        "hist": stack_unmatched,
+        "kwargs": {
+            "color": "#ffcccc",
+            "histtype": "fill",
+            "label": f"{list(hists[0].keys())[tt_index].name}, unmatched",
+            "zorder": 3,
+        },
+    }
+    # Add data points with error bars
     plot_config["hist_data"] = {
         "method": "draw_errorbars",
         "ratio_method": "draw_errorbars",
@@ -141,7 +156,6 @@ def plot_hist_matching(
             "label": f"{list(hists[0].keys())[data_index].name}",
         },
         "ratio_kwargs": {
-            # "linestyle": "none",
             "norm": (
                 hists[0][list(hists[0].keys())[qcd_index]][0, :, 1] +
                 hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
@@ -150,7 +164,7 @@ def plot_hist_matching(
             ).values(),
         },
     }
-
+    # Add statistical uncertainty band for the total prediction
     plot_config["hist_total_uncert"] = {
         "method": "draw_stat_error_bands",
         "hist": (
@@ -161,13 +175,11 @@ def plot_hist_matching(
         ),
     }
 
-    # setup style config
+    # Prepare and merge style configuration
     default_style_config = prepare_style_config(
         config_inst, category_inst, variable_inst, density, shape_norm, yscale,
     )
-    # plot-function specific changes
-    # default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
-    # default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
+    # Set legend and font sizes for clarity
     default_style_config["legend_cfg"]["ncol"] = 1
     default_style_config["legend_cfg"]["title_fontsize"] = 24
     default_style_config["legend_cfg"]["fontsize"] = 20
@@ -176,6 +188,7 @@ def plot_hist_matching(
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
+    # Draw the plot using the aj_plot_all utility
     return aj_plot_all(plot_config, style_config, **kwargs)
 
 
@@ -193,37 +206,54 @@ def plot_hist_matching_MC(
     **kwargs,
 ) -> plt.Figure:
     """
-    Matching for MC only
+    This function visualizes the matching status of MC events (correct, wrong, unmatched)
+    using cumulative stacking. The color scheme is based on previous analyses, e.g.
+    https://arxiv.org/pdf/2302.01967v2.
 
     law run cf.PlotVariables1D --version v1 --configs 2017_v9_limited \
-        --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg \
-        --variables reco_Top1_mass-fit_combination_type \
-        --cf.CalibrateEvents-{workflow=htcondor,htcondor-memory=12GB} \
-        --cf.SelectEvents-{workflow=htcondor,htcondor-memory=8GB} \
-        --cf.ReduceEvents-{workflow=htcondor,htcondor-memory=8GB} \
-        --cf.ProduceColumns-{workflow=htcondor,htcondor-memory=8GB,max-runtime=4h} \
-        --categories incl --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching_MC
+    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg \
+    --variables reco_Top1_mass-fit_combination_type \
+    --cf.CalibrateEvents-{workflow=htcondor,htcondor-memory=12GB} \
+    --cf.SelectEvents-{workflow=htcondor,htcondor-memory=8GB} \
+    --cf.ReduceEvents-{workflow=htcondor,htcondor-memory=8GB} \
+    --cf.ProduceColumns-{workflow=htcondor,htcondor-memory=8GB,max-runtime=4h} \
+    --categories incl --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching_MC
 
     Example command to run the plot function. The matching information is stored in
     'fit_combination_type' column. Here, a 2D histogram is created with the
     information of the matching type on an additional axis.
-
     """
+
+    # Find the index for the ttbar process in the histogram keys
     keys = hists.keys()
     for i in range(len(list(keys))):
         if list(keys)[i] == "tt":
             tt_index = i
 
+    # Use the first variable instance for plotting
     variable_inst = variable_insts[0]
+
+    # Apply variable and density settings to histograms
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
-    # hists = apply_process_settings(hists, process_settings)
     hists = apply_density(hists, density)
+
+    # Prepare the plot configuration dictionary
     plot_config = OrderedDict()
-    # for updating labels of individual selector steps
-    # --- correct ---
+
+    # Extract base histograms for each matching type
+    correct_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 3]
+    wrong_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 2]
+    unmatched_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
+
+    # Build cumulative stacks for plotting
+    stack_correct = correct_hist
+    stack_wrong = stack_correct + wrong_hist
+    stack_unmatched = stack_wrong + unmatched_hist
+
+    # Add each matching type to the plot config with appropriate color and stacking order
     plot_config["hist_correct"] = {
         "method": "draw_hist",
-        "hist": hists[0][list(hists[0].keys())[tt_index]][0, :, 3],  # correct
+        "hist": stack_correct,
         "kwargs": {
             "color": "#cc0000",
             "histtype": "fill",
@@ -231,14 +261,9 @@ def plot_hist_matching_MC(
             "zorder": 3,
         },
     }
-
-    # --- wrong ---
     plot_config["hist_wrong"] = {
         "method": "draw_hist",
-        "hist": (
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 2]
-        ),
+        "hist": stack_wrong,
         "kwargs": {
             "color": "#ff6666",
             "histtype": "fill",
@@ -246,15 +271,9 @@ def plot_hist_matching_MC(
             "zorder": 2,
         },
     }
-
-    # --- unmatched ---
     plot_config["hist_unmatched"] = {
         "method": "draw_hist",
-        "hist": (
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 2] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
-        ),
+        "hist": stack_unmatched,
         "kwargs": {
             "color": "#ffcccc",
             "histtype": "fill",
@@ -262,23 +281,17 @@ def plot_hist_matching_MC(
             "zorder": 1,
         },
     }
-
+    # Add statistical uncertainty band for the total MC prediction
     plot_config["hist_total_uncert"] = {
         "method": "draw_stat_error_bands",
-        "hist": (
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 2] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
-        ),
+        "hist": stack_unmatched,
     }
 
-    # setup style config
+    # Prepare and merge style configuration
     default_style_config = prepare_style_config(
         config_inst, category_inst, variable_inst, density, shape_norm, yscale,
     )
-    # plot-function specific changes
-    # default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
-    # default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
+    # Set legend and font sizes for clarity
     default_style_config["legend_cfg"]["ncol"] = 1
     default_style_config["legend_cfg"]["title_fontsize"] = 24
     default_style_config["legend_cfg"]["fontsize"] = 20
@@ -286,6 +299,7 @@ def plot_hist_matching_MC(
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
+    # Draw the plot using the aj_plot_all utility
     return aj_plot_all(plot_config, style_config, **kwargs)
 
 
