@@ -1,6 +1,11 @@
 # coding: utf-8
 """
-Jet selection methods.
+Jet selection and reconstruction methods for top quark mass analysis.
+
+This module defines the main jet selection logic, including trigger selection,
+jet kinematic cuts, b-tagging, combinatorics for top/W reconstruction, and
+event categorization for signal and background. It is designed for use with
+columnar data (awkward arrays) in the context of the columnflow framework.
 """
 
 from columnflow.selection import Selector, SelectionResult, selector
@@ -28,56 +33,83 @@ def jet_selection(
     events: ak.Array,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
+    """
+    Perform jet selection and event categorization for top mass analysis.
+
+    This function applies a series of kinematic and trigger-based selections
+    to jets in each event, identifies b-tagged and light jets, and reconstructs
+    top quark and W boson candidates using combinatorics. It also handles
+    background estimation by pseudo-reconstruction. The function returns
+    the modified events array with new columns and a SelectionResult object
+    containing selection masks and object indices.
+
+    Args:
+        self (Selector): The selector instance.
+        events (ak.Array): The awkward array of event data.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        tuple[ak.Array, SelectionResult]: The updated events and selection results.
+    """
     # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
-    EF = -99999.0  # define EMPTY_FLOAT
-    ht1_sel = (ak.sum(events.Jet.pt, axis=1) >= 1)
-    jet_mask0 = (abs(events.Jet.eta) < 2.6)
-    jet_mask = (jet_mask0 & (events.Jet.pt >= 32.0))
-    ht_sel = (ak.sum(events.Jet.pt[jet_mask], axis=1) >= 450)
+
+    # Define a placeholder for empty float values
+    EF = -99999.0
+
+    # Step 1: Basic event and jet selection
+    ht1_sel = (ak.sum(events.Jet.pt, axis=1) >= 1)              # At least one jet with pt
+    jet_mask0 = (abs(events.Jet.eta) < 2.6)                     # Jets within eta acceptance
+    jet_mask = (jet_mask0 & (events.Jet.pt >= 32.0))            # Jets passing pt and eta
+    ht_sel = (ak.sum(events.Jet.pt[jet_mask], axis=1) >= 450)   # HT > 450 GeV
+
+    # Step 2: Tight selection for leading jets, pT > 40 GeV and |eta| < 2.4, require at least 6 jets
     jet_mask2 = ((abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 40.0))
     jet_sel = ak.sum(jet_mask2, axis=1) >= 6
+
+    # Step 3: Identify veto jets (not passing main selection)
     veto_jet = ~jet_mask
+
+    # Step 4: Identify b-tagged and light jets
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     light_jet = (jet_mask2) & (events.Jet.btagDeepFlavB < wp_tight)
-
-    # b-tagged jets (tight wp)
     bjet_mask = (jet_mask2) & (events.Jet.btagDeepFlavB >= wp_tight)
 
+    # Step 5: Event selection based on b-jet and light jet multiplicity
     bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2))
     sixjets_sel = (bjet_sel & (ak.sum(light_jet, axis=1) >= 4))
 
-    # B-Jet Rejection for bkg estimation
+    # Step 6: Background estimation (b-jet veto)
     wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
     loose_bjet_mask = (events.Jet.btagDeepFlavB >= wp_loose)
     bjet_rej = (ak.sum(((jet_mask2) & loose_bjet_mask), axis=1) == 0)
     sel_bjet_2or0 = ak.any([bjet_sel, bjet_rej], axis=0)
 
-    # Trigger selection step is skipped for QCD MC, which has no Trigger columns
+    # Step 7: Trigger selection (skip for QCD MC)
     if not self.dataset_inst.name.startswith("qcd"):
         ones = ak.ones_like(jet_sel)
-    # trigger
         jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
         alt_jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.alt_jet_trigger]
         jet_base_trigger_sel = ones if not self.jet_base_trigger else events.HLT[self.jet_base_trigger]
     else:
-
         jet_trigger_sel = [True] * len(events)
         alt_jet_trigger_sel = [True] * len(events)
         jet_base_trigger_sel = [True] * len(events)
     signal_or_bkg_trigger = ak.any([jet_trigger_sel, alt_jet_trigger_sel], axis=0)
 
-    # Preparation for reconstruction
+    # Step 8: Prepare for combinatorial reconstruction
+    # Reference values and resolutions for W and top mass
     mwref = 80.36
     mwsig = 12  # Jette: 11.01
     mtsig = 15  # Jette: 27.07
     mu_tt = 0  # Jette: 2.07
     mu_w = 0  # Jette: 0.88
 
+    # Helper functions for mass and deltaR calculations
     m = lambda j1, j2: (j1.add(j2)).mass
     m3 = lambda j1, j2, j3: (j1.add(j2.add(j3))).mass
     dr = lambda j1, j2: j1.delta_r(j2)
 
-    # Build jet combinations
+    # Step 9: Build jet combinations for signal and background
     bjet_after_jet_mask = (events.Jet[jet_mask2].btagDeepFlavB >= wp_tight)
     ljet_after_jet_mask = (events.Jet[jet_mask2].btagDeepFlavB < wp_tight)
     leading_six_sel = ((ak.num((events.Jet.pt[jet_mask2][:, :6])[bjet_after_jet_mask[:, :6]], axis=1) == 2) &
@@ -108,21 +140,33 @@ def jet_selection(
     rej_bjets = ak.combinations(rej_jets[:, :2], 2, axis=1)
     rej_ljets = ak.combinations(rej_jets[:, 2:], 4, axis=1)
 
-    # Building combination light jet mass functions
-
+    # Step 10: Helper functions for permutations and combinations
     def lpermutations(ljets):
+        """
+        Generate permutations of four light jets for W reconstruction.
+        """
         j1, j2, j3, j4 = ljets
         return ak.concatenate([ak.zip([j1, j2, j3, j4]), ak.zip([j1, j3, j2, j4]), ak.zip([j1, j4, j2, j3])], axis=1)
 
     def bpermutations(bjets):
+        """
+        Generate permutations of two b-jets for top reconstruction.
+        """
         j1, j2 = bjets
         return ak.concatenate([ak.zip([j1, j2]), ak.zip([j2, j1])], axis=1)
 
     def sixjetcombinations(bjets, ljets):
+        """
+        Combine b-jet and light-jet permutations into six-jet combinations.
+        """
         return ak.cartesian([bjets, ljets], axis=1)
 
-    # Top quark mass reconstruction
+    # Step 11: Top quark mass reconstruction
     def mt(sixjets):
+        """
+        Calculate reconstructed masses and chi2 for all six-jet combinations.
+        Returns best combination per event.
+        """
         b1, b2 = ak.unzip(ak.unzip(sixjets)[0])
         j1, j2, j3, j4 = ak.unzip(ak.unzip(sixjets)[1])
         mt1 = ak.where((b1.pt > b2.pt), m3(b1, j1, j2), m3(b2, j3, j4))
@@ -163,7 +207,12 @@ def jet_selection(
     events = set_ak_column(events, "deltaRb", mt_result_filled[4])
     events = set_ak_column(events, "chi2", mt_result_filled[5])
 
+    # Step 12: Combination type matching (for MC truth)
     def combinationtype(bestcomb, correctcomb):
+        """
+        Determine if the selected jet combination matches the MC truth.
+        Returns a type code (1: matched, 0: not matched, -1: not applicable).
+        """
         b1, b2 = ak.unzip(ak.unzip(bestcomb)[0])
         j1, j2, j3, j4 = ak.unzip(ak.unzip(bestcomb)[1])
 
@@ -235,9 +284,10 @@ def jet_selection(
     mt_sel = (events.Mt1 < 150)
     mt_sel2 = (events.Mt1 < 175)
     mt_sel3 = (events.Mt1 < 125)
-    # build and return selection results
-    # "objects" maps source columns to new columns and selections to be applied on the old columns
-    # to create them, e.g. {"Jet": {"MyCustomJetCollection": indices_applied_to_Jet}}
+
+    # Step 13: Build and return selection results
+    # The SelectionResult object contains masks for each selection step,
+    # indices for jet collections, and auxiliary variables.
     return events, SelectionResult(
         steps={
             "All": ht1_sel,
@@ -279,6 +329,9 @@ def jet_selection(
 
 @jet_selection.init
 def jet_selection_init(self: Selector) -> None:
+    """
+    Initialization for jet selection: set up triggers and pt thresholds based on year.
+    """
     year = self.config_inst.campaign.x.year
     # register shifts
     self.shifts |= {

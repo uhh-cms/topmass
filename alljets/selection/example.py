@@ -1,7 +1,26 @@
 # coding: utf-8
 
 """
-Exemplary selection methods.
+Example selection methods for the top mass analysis.
+
+This module demonstrates how to build event selection pipelines using the
+columnflow framework. It defines several selectors, each encapsulating a
+sequence of selection steps and object definitions for physics analyses.
+
+The core concept is the `Selector` class, which represents a configurable
+selection pipeline. Each selector function is decorated with `@selector`,
+which registers its dependencies and outputs. Selectors can be composed,
+allowing modular and reusable analysis code.
+
+Selectors in this file:
+- muon_selection: Selects events with muons passing basic kinematic cuts.
+- example: Full event selection pipeline for analysis, including muon, jet,
+  and event-level selections, as well as weight and process assignments.
+- example_trig_weight: Like `example`, but also applies trigger weights.
+- trigger_eff: Computes trigger efficiency using trigger objects.
+
+Each selector returns a tuple of (events, SelectionResult), where
+SelectionResult contains selection masks and object indices for downstream use.
 """
 
 from collections import defaultdict
@@ -27,11 +46,6 @@ np = maybe_import("numpy")
 ak = maybe_import("awkward")
 coffea = maybe_import("coffea")
 
-#
-# other unexposed selectors
-# (not selectable from the command line but used by other, exposed selectors)
-#
-
 
 @selector(
     uses={"Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass"},
@@ -41,7 +55,19 @@ def muon_selection(
     events: ak.Array,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
-    # example muon selection: exactly one muon
+    """
+    Selects muons passing basic kinematic cuts.
+
+    This selector applies a simple muon selection: at least one muon with
+    pt >= 20 GeV and |eta| < 2.1. It returns a mask for selected muons and
+    a step mask for events passing the selection.
+
+    Returns:
+        events: The unchanged events array.
+        SelectionResult: Contains the muon selection mask and step.
+    """
+
+    # example muon selection: at least one muon with pt and eta cuts
     muon_mask = (events.Muon.pt >= 20.0) & (abs(events.Muon.eta) < 2.1)
     muon_sel = ak.sum(muon_mask, axis=1) >= 0
 
@@ -58,12 +84,6 @@ def muon_selection(
             },
         },
     )
-
-
-#
-# exposed selectors
-# (those that can be invoked from the command line)
-#
 
 
 @selector(
@@ -105,20 +125,41 @@ def example(
     stats: defaultdict,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
+    """
+    Full event selection pipeline for top mass analysis.
+
+    This selector applies the following steps:
+    - Ensures proper awkward-array (coffea) behavior.
+    - Optionally reconstructs generator-level top quarks.
+    - Ensures trigger columns are present.
+    - Applies muon and jet selections.
+    - Combines selection steps into a final event mask.
+    - Assigns process IDs and MC weights.
+    - Applies PDF, scale, pileup, and btag weights for MC.
+    - Adds cutflow features and increments statistics.
+
+    Returns:
+        events: The events array with new columns added.
+        SelectionResult: Contains selection masks and object indices.
+        
+    Alternative name for this selector could be `baseline_selection`.
+    """
+
     # ensure coffea behavior
     events = self[attach_coffea_behavior](events, **kwargs)
 
     # prepare the selection results that are updated at every step
     results = SelectionResult()
 
-    # Produce gen_top_decay
+    # Produce gen_top_decay if available
     if self.dataset_inst.has_tag("has_top"):
         events = self[gen_top_lookup](events, **kwargs)
     else:
+        # If not available, fill with False
         events = set_ak_column(events, "gen_top", False)
         events = set_ak_column(events, "GenPart.eta", False)
 
-    # ensure trigger columns
+    # ensure trigger columns exist
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(
             events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
@@ -135,14 +176,13 @@ def example(
     events, jet_results = self[jet_selection](events, **kwargs)
     results += jet_results
 
-    # kinFit selection
-
     # combined event selection after all steps
     results.event = (
         results.steps.jet &
         results.steps.Trigger &
         results.steps.BTag &
-        results.steps.HT  # & results.steps.FitChi2 & results.steps.Chi2 &
+        results.steps.HT
+        # & results.steps.FitChi2 & results.steps.Chi2 &
         # results.steps.SixJets
     )
     # results.steps.BaseTrigger
@@ -150,29 +190,21 @@ def example(
     # create process ids
     events = self[process_ids](events, **kwargs)
 
-    # add the mc weight
+    # add the mc weight and other weights for MC datasets
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
-
-        # create process ids
-        events = self[process_ids](events, **kwargs)
-        # pdf weights
-        events = self[pdf_weights](events, **kwargs)
-
-        # renormalization/factorization scale weights
-        events = self[murmuf_weights](events, **kwargs)
-
-        # pileup weights
-        events = self[pu_weight](events, **kwargs)
-
-        # btag weights
+        events = self[process_ids](events, **kwargs)     # create process ids
+        events = self[pdf_weights](events, **kwargs)     # pdf weights
+        events = self[murmuf_weights](events, **kwargs)  # renormalization/factorization scale weights
+        events = self[pu_weight](events, **kwargs)       # pileup weights
+        # btag weights: only for jets passing pt/eta cuts
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)
 
-    # increment stats
+    # increment stats for bookkeeping and monitoring
     weight_map = {
         "num_events": Ellipsis,
         "num_events_selected": results.event,
@@ -181,7 +213,6 @@ def example(
     if self.dataset_inst.is_mc:
         weight_map = {
             **weight_map,
-            # mc weight for all events
             "sum_mc_weight": (events.mc_weight, Ellipsis),
             "sum_mc_weight_selected": (events.mc_weight, results.event),
         }
@@ -250,20 +281,34 @@ def example_trig_weight(
     stats: defaultdict,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
+    """
+    Event selection pipeline with trigger weights.
+
+    This selector is similar to `example`, but also applies trigger weights
+    for MC events. It ensures all relevant columns exist, applies muon and
+    jet selections, and computes weights for MC, including trigger weights.
+
+    Returns:
+        events: The events array with new columns added.
+        SelectionResult: Contains selection masks and object indices.
+        
+    Alternative name for this selector could be `baseline_selection_with_trig_weights`.
+    """
+
     # ensure coffea behavior
     events = self[attach_coffea_behavior](events, **kwargs)
 
     # prepare the selection results that are updated at every step
     results = SelectionResult()
 
-    # Produce gen_top_decay
+    # Produce gen_top_decay if available
     if self.dataset_inst.has_tag("has_top"):
         events = self[gen_top_lookup](events, **kwargs)
     else:
         events = set_ak_column(events, "gen_top", False)
         events = set_ak_column(events, "GenPart.eta", False)
 
-    # ensure trigger columns
+    # ensure trigger columns exist
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(
             events, "HLT.PFHT38y0_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
@@ -292,23 +337,13 @@ def example_trig_weight(
     # create process ids
     events = self[process_ids](events, **kwargs)
 
-    # add the mc weight
+    # add the mc weight and other weights for MC datasets
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
-
-        # create process ids
         events = self[process_ids](events, **kwargs)
-
-        # pdf weights
         events = self[pdf_weights](events, **kwargs)
-
-        # renormalization/factorization scale weights
         events = self[murmuf_weights](events, **kwargs)
-
-        # pileup weights
         events = self[pu_weight](events, **kwargs)
-
-        # btag weights
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
 
@@ -317,6 +352,7 @@ def example_trig_weight(
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)
+
     # increment stats
     weight_map = {
         "num_events": Ellipsis,
@@ -406,6 +442,19 @@ def trigger_eff(
     stats: defaultdict,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
+    """
+    Computes trigger efficiency using trigger objects.
+
+    This selector calculates the HT of trigger objects, ensures trigger columns,
+    applies jet selection, and builds a combined event selection mask. It is
+    intended for studies of trigger efficiency.
+
+    Returns:
+        events: The events array with new columns added.
+        SelectionResult: Contains selection masks and object indices.
+        
+    Alternative name for this selector could be `trigger_efficiency`.
+    """
     # ensure coffea behavior
     events = self[attach_coffea_behavior](events, **kwargs)
 
@@ -419,6 +468,7 @@ def trigger_eff(
         events = set_ak_column(events, "gen_top", False)
         events = set_ak_column(events, "GenPart.eta", False)
 
+    # Calculate HT from trigger objects (jets with pt >= 32 GeV, |eta| <= 2.6, id == 1)
     trig_ht = ak.sum(
         events.TrigObj.pt[
             (events.TrigObj.pt >= 32) &
@@ -455,6 +505,7 @@ def trigger_eff(
     # create process ids
     events = self[process_ids](events, **kwargs)
 
+    # Set default trigger weight to 1 (for data or MC without trigger weights)
     events = set_ak_column(
         events,
         "trig_weight",
@@ -462,7 +513,7 @@ def trigger_eff(
         value_type=np.float32,
     )
 
-    # add the mc weight
+    # add the mc weight and other weights for MC datasets
     if self.dataset_inst.is_mc:
         # events = self[mc_weight](events, **kwargs)
         events = set_ak_column(
@@ -471,24 +522,16 @@ def trigger_eff(
             np.ones(len(events)),
             value_type=np.float32,
         )
-
-        # pdf weights
         events = self[pdf_weights](events, **kwargs)
-
-        # renormalization/factorization scale weights
         events = self[murmuf_weights](events, **kwargs)
-
-        # pileup weights
         events = self[pu_weight](events, **kwargs)
-
-        # btag weights
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)
 
-    # increment stats
+    # increment stats for bookkeeping and monitoring
     weight_map = {
         "num_events": Ellipsis,
         "num_events_selected": results.event,
