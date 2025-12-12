@@ -141,7 +141,7 @@ def example(
     Returns:
         events: The events array with new columns added.
         SelectionResult: Contains selection masks and object indices.
-        
+
     Alternative name for this selector could be `baseline_selection`.
     """
 
@@ -291,7 +291,7 @@ def example_trig_weight(
     Returns:
         events: The events array with new columns added.
         SelectionResult: Contains selection masks and object indices.
-        
+
     Alternative name for this selector could be `baseline_selection_with_trig_weights`.
     """
 
@@ -452,7 +452,7 @@ def trigger_eff(
     Returns:
         events: The events array with new columns added.
         SelectionResult: Contains selection masks and object indices.
-        
+
     Alternative name for this selector could be `trigger_efficiency`.
     """
     # ensure coffea behavior
