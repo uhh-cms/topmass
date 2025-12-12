@@ -2,6 +2,24 @@
 
 """
 Column production methods related to higher-level features.
+
+This module contains producers that compute derived event-level and
+object-level columns from nanoAOD-like inputs (Awkward Arrays). Each
+producer is decorated with `@producer` to declare its inputs
+(`uses`) and outputs (`produces`) which the framework uses to build
+dependency graphs and validate execution order.
+
+How `@producer` works (brief):
+- Decorate a function with `@producer(...)` to register the function
+    as a column producer. The decorator accepts metadata such as
+    `uses`, `produces`, `channel`, and `require_producers`.
+- The decorated function should have the signature
+    `(self: Producer, events: ak.Array, **kwargs) -> ak.Array` and return
+    the input `events` array with new or updated columns (typically
+    added with `set_ak_column`).
+- Optionally provide an `.init` function on the producer to dynamically
+    add `uses` entries based on runtime configuration, and derive
+    specialized variants with `.derive`.
 """
 
 
@@ -78,6 +96,15 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    Compute event-level features and simple jet summaries.
+
+    Produces: `ht`, `ht_old`, `n_jet`, `n_bjet`, `maxbtag`, `secmaxbtag`,
+    `deltaMt` and forwards several Jet/Bjet/LightJet fields.
+    """
+
+    # Prepare coffea-like behavior for selected jet collections so that
+    # subsequent vector operations behave like physics objects.
     jetcollections = {
         "Bjet": {
             "type_name": "Jet",
@@ -165,10 +192,20 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     },
 )
 def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    Run kinFit, attach fit collections and compute related derived fields.
+
+    This producer calls the `kinFit` producer (declared in `uses`),
+    prepares `FitJet`/`FitJet.reco` collections, computes reconstructed
+    W/top four-vectors and `FitRbb`. When `gen_top` information is
+    available it also computes a `fitCombinationType` matching.
+    """
+
     from alljets.scripts.default import combinationtype
 
     events = self[attach_coffea_behavior](events, **kwargs)
-    # features
+
+    # Ensure gen_top column exists for datasets without top truth
     if not self.dataset_inst.has_tag("has_top"):
         events = set_ak_column(events, "gen_top", False)
 
@@ -297,10 +334,19 @@ def cutflow_features(
     object_masks: dict[str, dict[str, ak.Array]],
     **kwargs,
 ) -> ak.Array:
+    """
+    Produce simple cutflow-related columns used for selections.
+
+    Adds columns such as `cutflow.jet6_pt`, `cutflow.ht`, `cutflow.jet1_pt`,
+    `cutflow.n_jet`, and `cutflow.n_bjet`. If running on MC, this also
+    invokes `mc_weight` to ensure weights are available.
+    """
+
+    # Ensure MC weights are present for MC datasets
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
 
-    # apply object masks and create new collections
+    # apply object masks and create new collections (placeholder)
     # reduced_events = create_collections_from_masks(events, object_masks)
 
     # add cutflow columns
@@ -350,23 +396,37 @@ def cutflow_features(
     require_producers={"kinFitMatch"},
 )
 def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-    # attach coffea behavior
+    """
+    Top-level example production pipeline.
+
+    Orchestrates a typical production sequence: attaches coffea
+    behaviour, computes features, assigns category ids, sets
+    deterministic seeds and — for MC — applies normalization (and
+    optionally muon) weights.
+
+    Alternative name (suggested): "baseline_production / default".
+    """
+
+    # Attach coffea-style behaviour for collections
     events = self[attach_coffea_behavior](events, **kwargs)
-    # features
+
+    # Compute derived features and summaries
     events = self[features](events, **kwargs)
-    # category ids
+
+    # Compute category ids used by later stages
     events = self[category_ids](events, **kwargs)
 
-    # deterministic seeds
+    # Deterministic seeds (for e.g. reproducible pseudo-randoms)
     events = self[deterministic_seeds](events, **kwargs)
 
-    # mc-only weights
+    # MC-only weights
     if self.dataset_inst.is_mc:
-        # normalization weights
+        # normalization weights (luminosity, xsec, pileup, ...)
         events = self[normalization_weights](events, **kwargs)
 
-        # muon weights
+        # muon weights (commented out here; enable if available)
         # events = self[muon_weights](events, **kwargs)
+
     return events
 
 
@@ -389,24 +449,35 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     },
 )
 def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-    # features
+    """
+    Variant pipeline used when normalization shouldn't be applied.
+
+    Runs `features`, fake-populates a few kinfit-related columns so that
+    downstream code (e.g. trigger-weight creation) can run without a
+    full kinfit, and sets `normalization_weight`/`mc_weight` to ones for
+    MC.
+
+    Alternative name (suggested): "no_normalization".
+    """
+
+    # Ensure gen_top exists for datasets without truth
     if not self.dataset_inst.has_tag("has_top"):
         events = set_ak_column(events, "gen_top", False)
+
+    # Compute usual features
     events = self[features](events, **kwargs)
 
-    # fake kinfit for trig weights creation
+    # Provide fake kinfit outputs used by other tools
     events = set_ak_column(events, "FitChi2", 0)
     events = set_ak_column(events, "FitPgof", 1)
     events = set_ak_column(events, "fitCombinationType", 2)
-    # category ids
-    events = self[category_ids](events, **kwargs)
 
-    # deterministic seeds
+    # Category assignment and deterministic seeds
+    events = self[category_ids](events, **kwargs)
     events = self[deterministic_seeds](events, **kwargs)
 
-    # mc-only weights
+    # MC: set normalization and mc weights to 1 (placeholder)
     if self.dataset_inst.is_mc:
-        # normalization weights
         events = self[normalization_weights](events, **kwargs)
         events = set_ak_column(
             events,
@@ -420,8 +491,9 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             np.ones(len(events)),
             value_type=np.float32,
         )
-        # muon weights
+        # muon weights are optional
         # events = self[muon_weights](events, **kwargs)
+
     return events
 
 
@@ -431,9 +503,17 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 )
 def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
-    Produces column where each bin corresponds to a certain trigger
+    Produce trigger bit matrices for configured triggers.
+
+    - `trig_bits`: vector per event marking which triggers fired (indexed
+        by id).
+    - `trig_bits_orth`: orthogonalized bits relative to the channel
+        reference trigger (used for orthogonal trigger studies).
+
+    Alternative name (suggested): "trigger_bits_production".
     """
 
+    # Start with empty singleton columns to concatenate trigger entries
     arr = ak.singletons(np.zeros(len(events)))
     arr_orth = ak.singletons(np.zeros(len(events)))
 
