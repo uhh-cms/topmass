@@ -141,7 +141,7 @@ def add_categories(cfg: od.Config) -> None:
     )
 
     # ========================================================================
-    # Truth-level matching categories (MC validation only)
+    # Truth-level matching categories
     # ========================================================================
 
     add_category(
