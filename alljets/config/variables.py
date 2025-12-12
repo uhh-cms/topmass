@@ -2,19 +2,57 @@
 
 """
 Definition of variables.
+
+This module defines all observable variables used in the analysis. Variables are used for:
+- Histogramming: Creating distributions of physics quantities
+- Plotting: Visualizing data and MC comparisons
+- Analysis cuts: Defining selection criteria
+
+Each variable includes:
+- name: Unique identifier for the variable
+- expression: How to compute/extract the variable from events (can be a column name or callable)
+- binning: Histogram binning specification (can be tuple or list)
+- x_title: Axis label for plots (supports LaTeX via raw strings)
+- unit: Physical unit (e.g., "GeV")
+- null_value: Default value for missing/invalid entries (typically EMPTY_FLOAT)
+
+The add_variable helper function provides sensible defaults for overflow/underflow handling.
 """
 from functools import partial
 
 import order as od
 from columnflow.columnar_util import (
     EMPTY_FLOAT,
-    attach_coffea_behavior,
-    default_coffea_collections,
+)
+from .jet_builder import (
+    build_b1jet,
+    build_b2jet,
+    build_top1jet,
+    build_top1recojet,
+    build_w1jet,
+    build_w1recojet,
+    build_w2recojet,
 )
 
 
 def add_variables(cfg: od.Config) -> None:
-    # Adds all variables to config
+    """
+    Register all analysis variables to the configuration.
+
+    This function adds variables for:
+    - Basic event info (run, lumi, event number)
+    - Jet kinematics (pt, eta, phi for individual jets and collections)
+    - B-jet properties and b-tagging scores
+    - Kinematic fit results (W masses, top masses, chi2)
+    - Weights (MC, btag, pileup, trigger, PDF, scale)
+    - Cutflow variables for monitoring selections
+
+    Args:
+        cfg: The analysis configuration object to add variables to
+    """
+    ###############################################################################
+    #                            Basic Event Information                          #
+    ###############################################################################
     add_variable(
         cfg,
         name="event",
@@ -38,6 +76,32 @@ def add_variables(cfg: od.Config) -> None:
         x_title="Luminosity block",
         discrete_x=True,
     )
+    add_variable(
+        cfg,
+        name="nPV",
+        expression="PV.npvs",
+        null_value=EMPTY_FLOAT,
+        binning=(60, -0.5, 59.5),
+        x_title="Number of primary Vertices",
+    )
+    add_variable(
+        cfg,
+        name="nPVGood",
+        expression="PV.npvsGood",
+        null_value=EMPTY_FLOAT,
+        binning=(30, 0, 60),
+        x_title="Number of good primary Vertices",
+    )
+    add_variable(
+        cfg,
+        name="trig_bits",
+        expression="trig_bits",
+        binning=(3, -0.5, 2.5),
+        x_title=r"trig bits",
+    )
+    ###############################################################################
+    #                            Jet Kinematics                                   #
+    ###############################################################################
     add_variable(
         cfg,
         name="n_jet",
@@ -245,8 +309,6 @@ def add_variables(cfg: od.Config) -> None:
         name="jet6_pt_5",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        # Previous binning: [0, 10, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40]
-        # [42, 45, 48, 52, 60, 70, 80, 100, 200]
         binning=(40, 0.0, 100.0),
         aux={"overflow": False, "underflow": False},
         unit="GeV",
@@ -295,6 +357,9 @@ def add_variables(cfg: od.Config) -> None:
         binning=(40, -3.2, 3.2),
         x_title=r"Jet 6 $\phi$",
     )
+    ###############################################################################
+    #                            HT                                               #
+    ###############################################################################
     add_variable(
         cfg,
         name="ht",
@@ -359,108 +424,9 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title="$H_T$",
     )
-    add_variable(
-        cfg,
-        name="nPV",
-        expression="PV.npvs",
-        null_value=EMPTY_FLOAT,
-        binning=(60, -0.5, 59.5),
-        x_title="Number of primary Vertices",
-    )
-    add_variable(
-        cfg,
-        name="MW1",
-        expression="MW1",
-        null_value=EMPTY_FLOAT,
-        binning=(100, 40, 140),
-        unit="GeV",
-        x_title=r"$M_{W1}$",
-    )
-    add_variable(
-        cfg,
-        name="MW2",
-        expression="MW2",
-        null_value=EMPTY_FLOAT,
-        binning=(100, 40, 140),
-        unit="GeV",
-        x_title=r"$M_{W2}$",
-    )
-    add_variable(
-        cfg,
-        name="Mt1",
-        expression="Mt1",
-        null_value=EMPTY_FLOAT,
-        binning=(100, 0, 500),
-        unit="GeV",
-        x_title=r"$M_{t1}$",
-    )
-    add_variable(
-        cfg,
-        name="Mt1_1",
-        expression="Mt1",
-        null_value=EMPTY_FLOAT,
-        binning=(50, 100, 400),
-        unit="GeV",
-        x_title=r"$M_{t1}$",
-    )
-    add_variable(
-        cfg,
-        name="Mt2",
-        expression="Mt2",
-        null_value=EMPTY_FLOAT,
-        binning=(100, 0, 500),
-        unit="GeV",
-        x_title=r"$M_{t2}$",
-    )
-    add_variable(
-        cfg,
-        name="deltaMt",
-        expression="deltaMt",
-        null_value=EMPTY_FLOAT,
-        binning=(100, -40, 60),
-        unit="GeV",
-        x_title=r"$M_{t1} - M_{t2}$",
-    )
-    add_variable(
-        cfg,
-        name="chi2",
-        expression="chi2",
-        null_value=EMPTY_FLOAT,
-        binning=(100, 0, 200),
-        x_title=r"$\chi^2$",
-    )
-    add_variable(
-        cfg,
-        name="chi2_0",
-        expression="chi2",
-        null_value=EMPTY_FLOAT,
-        binning=(100, 0, 10),
-        x_title=r"$\chi^2$",
-    )
-    add_variable(
-        cfg,
-        name="deltaR",
-        expression="deltaR",
-        null_value=EMPTY_FLOAT,
-        binning=(300, -0.005, 2.995),
-        x_title=r"min $\Delta R$ of light jets",
-    )
-    add_variable(
-        cfg,
-        name="deltaRb",
-        expression="deltaRb",
-        null_value=EMPTY_FLOAT,
-        binning=(70, 0, 7),
-        x_title=r"min $\Delta R$ of b-jets",
-    )
-    add_variable(
-        cfg,
-        name="nPVGood",
-        expression="PV.npvsGood",
-        null_value=EMPTY_FLOAT,
-        binning=(30, 0, 60),
-        x_title="Number of good primary Vertices",
-    )
+    ###############################################################################
+    #                           B-Jet Kinematics & Tagging                        #
+    ###############################################################################
     add_variable(
         cfg,
         name="n_bjet",
@@ -648,6 +614,95 @@ def add_variables(cfg: od.Config) -> None:
         binning=(40, 0, 1),
         x_title=r"Jet 6 bTag",
     )
+    ###############################################################################
+    #                     Selection / Matching Features                           #
+    ###############################################################################
+    add_variable(
+        cfg,
+        name="MW1",
+        expression="MW1",
+        null_value=EMPTY_FLOAT,
+        binning=(100, 40, 140),
+        unit="GeV",
+        x_title=r"$M_{W1}$",
+    )
+    add_variable(
+        cfg,
+        name="MW2",
+        expression="MW2",
+        null_value=EMPTY_FLOAT,
+        binning=(100, 40, 140),
+        unit="GeV",
+        x_title=r"$M_{W2}$",
+    )
+    add_variable(
+        cfg,
+        name="Mt1",
+        expression="Mt1",
+        null_value=EMPTY_FLOAT,
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"$M_{t1}$",
+    )
+    add_variable(
+        cfg,
+        name="Mt1_1",
+        expression="Mt1",
+        null_value=EMPTY_FLOAT,
+        binning=(50, 100, 400),
+        unit="GeV",
+        x_title=r"$M_{t1}$",
+    )
+    add_variable(
+        cfg,
+        name="Mt2",
+        expression="Mt2",
+        null_value=EMPTY_FLOAT,
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"$M_{t2}$",
+    )
+    add_variable(
+        cfg,
+        name="deltaMt",
+        expression="deltaMt",
+        null_value=EMPTY_FLOAT,
+        binning=(100, -40, 60),
+        unit="GeV",
+        x_title=r"$M_{t1} - M_{t2}$",
+    )
+    add_variable(
+        cfg,
+        name="chi2",
+        expression="chi2",
+        null_value=EMPTY_FLOAT,
+        binning=(100, 0, 200),
+        x_title=r"$\chi^2$",
+    )
+    add_variable(
+        cfg,
+        name="chi2_0",
+        expression="chi2",
+        null_value=EMPTY_FLOAT,
+        binning=(100, 0, 10),
+        x_title=r"$\chi^2$",
+    )
+    add_variable(
+        cfg,
+        name="deltaR",
+        expression="deltaR",
+        null_value=EMPTY_FLOAT,
+        binning=(300, -0.005, 2.995),
+        x_title=r"min $\Delta R$ of light jets",
+    )
+    add_variable(
+        cfg,
+        name="deltaRb",
+        expression="deltaRb",
+        null_value=EMPTY_FLOAT,
+        binning=(70, 0, 7),
+        x_title=r"min $\Delta R$ of b-jets",
+    )
     cfg.add_variable(
         name="reco_combination_type",
         expression="reco_combination_type",
@@ -663,7 +718,9 @@ def add_variables(cfg: od.Config) -> None:
         binning=(30, 0, 3),
         x_title=r"$R_{2b4q}$",
     )
-    # weights
+    ###############################################################################
+    #                                Weights                                      #
+    ###############################################################################
     add_variable(
         cfg,
         name="mc_weight",
@@ -711,7 +768,9 @@ def add_variables(cfg: od.Config) -> None:
         binning=(20, 0.7, 1.1),
         x_title="trigger weight",
     )
-    # cutflow variables
+    ###############################################################################
+    #                            Cutflow Features                                 #
+    ###############################################################################
     add_variable(
         cfg,
         name="cf_jet1_pt",
@@ -767,13 +826,9 @@ def add_variables(cfg: od.Config) -> None:
         binning=(4, -1.5, 2.5),
         x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
     )
-    add_variable(
-        cfg,
-        name="trig_bits",
-        expression="trig_bits",
-        binning=(3, -0.5, 2.5),
-        x_title=r"trig bits",
-    )
+    ###############################################################################
+    #                            Features from kinematic fit                      #
+    ###############################################################################
     add_variable(
         cfg,
         name="fitchi2",
@@ -791,29 +846,7 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$P_{gof}$ from kinfit",
     )
 
-    def build_w1jet(events, which=None):
-        events = attach_coffea_behavior(
-            events, {"FitW1": default_coffea_collections["Jet"]},
-        )
-        W1jets = events.FitW1
-        if which is None:
-            return W1jets * 1
-        if which == "mass":
-            return W1jets.mass
-        if which == "pt":
-            return W1jets.pt
-        if which == "eta":
-            return W1jets.eta
-        if which == "abs_eta":
-            return abs(W1jets.eta)
-        if which == "phi":
-            return W1jets.phi
-        if which == "energy":
-            return W1jets.energy
-        raise ValueError(f"Unknown which: {which}")
-
     build_w1jet.inputs = ["FitW1.{x,y,z,t}"]
-
     add_variable(
         cfg,
         name="fit_W1_mass",
@@ -823,27 +856,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{W}^{fit}$",
     )
-
-    def build_w1recojet(events, which=None):
-        events = attach_coffea_behavior(
-            events, {"RecoW1": default_coffea_collections["Jet"]},
-        )
-        W1recojets = events.RecoW1
-        if which is None:
-            return W1recojets * 1
-        if which == "mass":
-            return W1recojets.mass
-        if which == "pt":
-            return W1recojets.pt
-        if which == "eta":
-            return W1recojets.eta
-        if which == "abs_eta":
-            return abs(W1recojets.eta)
-        if which == "phi":
-            return W1recojets.phi
-        if which == "energy":
-            return W1recojets.energy
-        raise ValueError(f"Unknown which: {which}")
 
     build_w1recojet.inputs = ["RecoW1.{x,y,z,t}"]
 
@@ -856,28 +868,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{W_{1}}^{reco}$",
     )
-
-    def build_w2recojet(events, which=None):
-        events = attach_coffea_behavior(
-            events, {"RecoW2": default_coffea_collections["Jet"]},
-        )
-        W2recojets = events.RecoW2
-        if which is None:
-            return W2recojets * 1
-        if which == "mass":
-            return W2recojets.mass
-        if which == "pt":
-            return W2recojets.pt
-        if which == "eta":
-            return W2recojets.eta
-        if which == "abs_eta":
-            return abs(W2recojets.eta)
-        if which == "phi":
-            return W2recojets.phi
-        if which == "energy":
-            return W2recojets.energy
-        raise ValueError(f"Unknown which: {which}")
-
     build_w2recojet.inputs = ["RecoW2.{x,y,z,t}"]
 
     add_variable(
@@ -889,26 +879,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{W_{2}}^{reco}$",
     )
-    def build_top1recojet(events, which=None):
-        events = attach_coffea_behavior(
-            events, {"RecoTop1": default_coffea_collections["Jet"]},
-        )
-        Top1recojets = events.RecoTop1
-        if which is None:
-            return Top1recojets * 1
-        if which == "mass":
-            return Top1recojets.mass
-        if which == "pt":
-            return Top1recojets.pt
-        if which == "eta":
-            return Top1recojets.eta
-        if which == "abs_eta":
-            return abs(Top1recojets.eta)
-        if which == "phi":
-            return Top1recojets.phi
-        if which == "energy":
-            return Top1recojets.energy
-        raise ValueError(f"Unknown which: {which}")
 
     build_top1recojet.inputs = ["RecoTop1.{x,y,z,t}"]
 
@@ -921,27 +891,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{t}^{reco}$",
     )
-    def build_top1jet(events, which=None):
-        events = attach_coffea_behavior(
-            events, {"FitTop1": default_coffea_collections["Jet"]},
-        )
-        Top1jets = events.FitTop1
-        if which is None:
-            return Top1jets * 1
-        if which == "mass":
-            return Top1jets.mass
-        if which == "pt":
-            return Top1jets.pt
-        if which == "eta":
-            return Top1jets.eta
-        if which == "abs_eta":
-            return abs(Top1jets.eta)
-        if which == "phi":
-            return Top1jets.phi
-        if which == "energy":
-            return Top1jets.energy
-        raise ValueError(f"Unknown which: {which}")
-
     build_top1jet.inputs = ["FitTop1.{x,y,z,t}"]
 
     add_variable(
@@ -971,27 +920,6 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
     )
 
-    def build_b1jet(events, which=None):
-        events = attach_coffea_behavior(
-            events, {"FitB1": default_coffea_collections["Jet"]},
-        )
-        B1jets = events.FitB1
-        if which is None:
-            return B1jets * 1
-        if which == "mass":
-            return B1jets.mass
-        if which == "pt":
-            return B1jets.pt
-        if which == "eta":
-            return B1jets.eta
-        if which == "abs_eta":
-            return abs(B1jets.eta)
-        if which == "phi":
-            return B1jets.phi
-        if which == "energy":
-            return B1jets.energy
-        raise ValueError(f"Unknown which: {which}")
-
     build_b1jet.inputs = ["FitB1.{pt,eta,phi,mass}"]
     add_variable(
         cfg,
@@ -1002,27 +930,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"fitted B1 mass",
     )
-
-    def build_b2jet(events, which=None):
-        events = attach_coffea_behavior(
-            events, {"FitB2": default_coffea_collections["Jet"]},
-        )
-        B2jets = events.FitB2
-        if which is None:
-            return B2jets * 1
-        if which == "mass":
-            return B2jets.mass
-        if which == "pt":
-            return B2jets.pt
-        if which == "eta":
-            return B2jets.eta
-        if which == "abs_eta":
-            return abs(B2jets.eta)
-        if which == "phi":
-            return B2jets.phi
-        if which == "energy":
-            return B2jets.energy
-        raise ValueError(f"Unknown which: {which}")
 
     build_b2jet.inputs = ["FitB2.{x,y,z,t}"]
 
