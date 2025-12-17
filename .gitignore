@@ -36,3 +36,4 @@ data
 .setups
 topmass_alljets.code-workspace
 .__afs*
+sandboxes/

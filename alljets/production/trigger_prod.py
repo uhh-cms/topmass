@@ -30,9 +30,11 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     for channel in self.channel:
         ref_trig = self.config_inst.x.ref_trigger[channel]
         for trigger in self.config_inst.x.trigger[channel]:
-            trig_passed = ak.singletons(ak.nan_to_none(ak.where(events.HLT[trigger], id, np.float64(np.nan))))
+            trig_passed = ak.singletons(ak.nan_to_none(
+                ak.where(events.HLT[trigger], id, np.float64(np.nan))))
             trig_passed_orth = ak.singletons(
-                ak.nan_to_none(ak.where((events.HLT[ref_trig] & events.HLT[trigger]), id, np.float64(np.nan))),
+                ak.nan_to_none(ak.where(
+                    (events.HLT[ref_trig] & events.HLT[trigger]), id, np.float64(np.nan))),
             )
             arr = ak.concatenate([arr, trig_passed], axis=1)
             arr_orth = ak.concatenate([arr_orth, trig_passed_orth], axis=1)
@@ -64,4 +66,5 @@ def trigger_prod_init(self: Producer) -> None:
 
 
 # producers for single channels
-tt_fh_trigger_prod = trigger_prod.derive("tt_fh_trigger_prod", cls_dict={"channel": ["tt_fh"]})
+tt_fh_trigger_prod = trigger_prod.derive(
+    "tt_fh_trigger_prod", cls_dict={"channel": ["tt_fh"]})

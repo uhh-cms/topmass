@@ -4,48 +4,69 @@
 Example inference model.
 """
 
-from columnflow.inference import inference_model, ParameterType, ParameterTransformation
+from columnflow.inference import (ParameterTransformation, ParameterType,
+                                  inference_model, InferenceModel)
 
 
 @inference_model
-def example(self):
+def example(self: InferenceModel) -> None:
 
     #
     # categories
     #
 
     self.add_category(
-        "cat1",
-        config_category="incl",
-        config_variable="jet1_pt",
-        config_data_datasets=["data_mu_b"],
-        mc_stats=True,
-    )
-    self.add_category(
-        "cat2",
-        config_category="2j",
-        config_variable="jet1_eta",
-        # fake data from TT
-        data_from_processes=["TT"],
-        mc_stats=True,
+        "fit_conv_big_top_mass",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="fit_conv_big",
+                variable="fit_Top1_mass",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
     )
 
+    self.add_category(
+        "fit_conv_big_reco_W1",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="fit_conv_big",
+                variable="reco_W1_mass",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+    )
+
+    self.add_category(
+        "fit_conv_big_reco_W2",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="fit_conv_big",
+                variable="reco_W2_mass",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+    )
     #
     # processes
     #
 
     self.add_process(
-        "ST",
-        config_process="st",
-        config_mc_datasets=["st_tchannel_t_powheg"],
-    )
-    self.add_process(
         "TT",
+        config_data={
+            config_inst.name: self.process_config_spec(
+                process="tt",
+                mc_datasets=["tt_fh_powheg",
+                             "tt_sl_powheg",
+                             "tt_dl_powheg"],
+            )
+            for config_inst in self.config_insts
+        },
         is_signal=True,
-        config_process="tt",
-        config_mc_datasets=["tt_sl_powheg"],
     )
-
     #
     # parameters
     #
@@ -54,48 +75,119 @@ def example(self):
     self.add_parameter_group("experiment")
     self.add_parameter_group("theory")
 
-    # lumi
-    lumi = self.config_inst.x.luminosity
-    for unc_name in lumi.uncertainties:
-        self.add_parameter(
-            unc_name,
-            type=ParameterType.rate_gauss,
-            effect=lumi.get(names=unc_name, direction=("down", "up"), factor=True),
-            transformations=[ParameterTransformation.symmetrize],
-        )
-
-    # tune uncertainty
-    self.add_parameter(
-        "tune",
-        process="TT",
-        type=ParameterType.shape,
-        config_shift_source="tune",
-    )
-
-    # muon weight uncertainty
-    self.add_parameter(
-        "mu",
-        process=["ST", "TT"],
-        type=ParameterType.shape,
-        config_shift_source="mu",
-    )
+    # # lumi
+    # lumi = self.config_inst.x.luminosity
+    # for unc_name in lumi.uncertainties:
+    #     self.add_parameter(
+    #         unc_name,
+    #         type=ParameterType.rate_gauss,
+    #         effect=lumi.get(names=unc_name, direction=("down", "up"), factor=True),
+    #         transformations=[ParameterTransformation.symmetrize],
+    #     )
 
     # jet energy correction uncertainty
     self.add_parameter(
         "jec",
-        process=["ST", "TT"],
+        process=["TT"],
         type=ParameterType.shape,
-        config_shift_source="jec",
+        config_data={
+            config_inst.name: self.parameter_config_spec(
+                shift_source="jec_Total",
+            )
+            for config_inst in self.config_insts
+        },
     )
-
-    # a custom asymmetric uncertainty that is converted from rate to shape
+ # Hdamp
     self.add_parameter(
-        "QCDscale_ttbar",
-        process="TT",
+        "hdamp",
+        process=["TT"],
         type=ParameterType.shape,
-        transformations=[ParameterTransformation.effect_from_rate],
-        effect=(0.5, 1.1),
+        config_data={
+            config_inst.name: self.parameter_config_spec(
+                shift_source="hdamp",
+            )
+            for config_inst in self.config_insts
+        },
     )
+    # pile-up weights
+    self.add_parameter(
+        "pu_weight",
+        process=["TT"],
+        type=ParameterType.shape,
+        config_data={
+            config_inst.name: self.parameter_config_spec(
+                shift_source="pu_weight_minbias_xs",
+            )
+            for config_inst in self.config_insts
+        },
+    )
+    # pdf shift
+    self.add_parameter(
+        "pdf",
+        process=["TT"],
+        type=ParameterType.shape,
+        config_data={
+            config_inst.name: self.parameter_config_spec(
+                shift_source="pdf",
+            )
+            for config_inst in self.config_insts
+        },
+    )
+    # trigger
+    self.add_parameter(
+        "trigger",
+        process=["TT"],
+        type=ParameterType.shape,
+        config_data={
+            config_inst.name: self.parameter_config_spec(
+                shift_source="trig",
+            )
+            for config_inst in self.config_insts
+        },
+    )
+    # tune shift
+    self.add_parameter(
+        "tune",
+        process=["TT"],
+        type=ParameterType.shape,
+        config_data={
+            config_inst.name: self.parameter_config_spec(
+                shift_source="tune",
+            )
+            for config_inst in self.config_insts
+        },
+    )
+    self.add_parameter(
+        "mtop",
+        process=["TT"],
+        type=ParameterType.shape,
+        config_data={
+            config_inst.name: self.parameter_config_spec(
+                shift_source="mtop",
+            )
+            for config_inst in self.config_insts
+        },
+    )
+    # murmuf
+    self.add_parameter(
+        "murmuf",
+        process=["TT"],
+        type=ParameterType.shape,
+        config_data={
+            config_inst.name: self.parameter_config_spec(
+                shift_source="murmuf",
+            )
+            for config_inst in self.config_insts
+        },
+    )
+    # # a custom asymmetric uncertainty that is converted from rate to shape
+    # self.add_parameter(
+    #     "QCDscale_ttbar",
+    #     process="TT_FH",
+    #     type=ParameterType.shape,
+    #     transformations=[ParameterTransformation.effect_from_rate],
+    #     effect=(0.5, 1.1),
+    # )
 
 
 @inference_model
@@ -109,4 +201,5 @@ def example_no_shapes(self):
 
     for category_name, process_name, parameter in self.iter_parameters():
         if parameter.type.is_shape or any(trafo.from_shape for trafo in parameter.transformations):
-            self.remove_parameter(parameter.name, process=process_name, category=category_name)
+            self.remove_parameter(
+                parameter.name, process=process_name, category=category_name)
