@@ -266,7 +266,7 @@ def jet_selection(
             "n5Chi2": chi2_sel3,
             "BTag_alt": bjet_sel_alt,
             "jet6": jet6_existance,
-            "chi2Rbb": Rbb_sel,
+            "Rbb": Rbb_sel,
         },
         objects={
             "Jet": {

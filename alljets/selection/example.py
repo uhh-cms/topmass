@@ -142,7 +142,8 @@ def example(
         results.steps.jet &
         results.steps.Trigger &
         results.steps.BTag &
-        results.steps.HT  # &   results.steps.FitChi2 & results.steps.Chi2 &
+        results.steps.HT &
+        results.steps.Rbb# &   results.steps.FitChi2 & results.steps.Chi2 &
         # results.steps.SixJets
     )
     # results.steps.BaseTrigger
