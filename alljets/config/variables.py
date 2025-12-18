@@ -1349,29 +1349,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"fitted Top mass",
     )
-
-    def build_top2jet(events, which=None):
-        events = attach_coffea_behavior(
-            events, {"FitTop2": default_coffea_collections["Jet"]},
-        )
-        Top2jets = events.FitTop2
-        if which is None:
-            return Top2jets * 1
-        if which == "mass":
-            return Top2jets.mass
-        if which == "pt":
-            return Top2jets.pt
-        if which == "eta":
-            return Top2jets.eta
-        if which == "abs_eta":
-            return abs(Top2jets.eta)
-        if which == "phi":
-            return Top2jets.phi
-        if which == "energy":
-            return Top2jets.energy
-        raise ValueError(f"Unknown which: {which}")
-
-    build_top2jet.inputs = ["FitTop2.{x,y,z,t}"]
     add_variable(
         cfg,
         name="fit_combination_type",
@@ -1387,17 +1364,6 @@ def add_variables(cfg: od.Config) -> None:
         binning=(3, -0.5, 2.5),
         x_title=r"0: unmatched, 1: wrong, 2: correct",
     )
-
-    add_variable(
-        cfg,
-        name="fit_Top2_mass",
-        expression=partial(build_top2jet, which="mass"),
-        aux={"inputs": build_top2jet.inputs},
-        binning=(100, 0, 500),
-        unit="GeV",
-        x_title=r"$m_{\text{t}}^{\text{fit}}$",
-    )
-
     build_b1jet.inputs = ["FitB1.{pt,eta,phi,mass}"]
     add_variable(
         cfg,

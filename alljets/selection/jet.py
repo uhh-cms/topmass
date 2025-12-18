@@ -322,11 +322,9 @@ def jet_selection(
             "jet": jet_sel,
             "BTag": bjet_sel,
             "BTag20": sel_bjet_2or0,
-            "BTag_no_jet6cut": bjet_sel0,
             "SixJets": sixjets_sel,
             "Chi2": chi2_sel,
             "n5Chi2": chi2_sel3,
-            "jet6": jet6_existance,
             "Rbb": Rbb_sel,
         },
         objects={

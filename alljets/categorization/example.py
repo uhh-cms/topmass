@@ -183,7 +183,6 @@ def cat_0btj_bkg(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
                     ) == 0))
 
 
-
 # ============================================================================
 # Truth-level matching categorizers
 # ============================================================================
