@@ -42,7 +42,8 @@ def jet_selection(
     light_jet = (jet_mask2) & (events.Jet.btagDeepFlavB < wp_tight)
 
     # B-Tag cut without jet energy limit
-    bjet_mask0 = (abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 32.0) & (events.Jet.btagDeepFlavB >= wp_tight)
+    bjet_mask0 = (abs(events.Jet.eta) < 2.4) & (events.Jet.pt >=
+                                                32.0) & (events.Jet.btagDeepFlavB >= wp_tight)
     bjet_sel0 = ((ak.sum(bjet_mask0[:, :6], axis=1) == 2))
 
     # b-tagged jets (tight wp)
@@ -50,9 +51,9 @@ def jet_selection(
 
     bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2))
     sixjets_sel = (bjet_sel & (ak.sum(light_jet, axis=1) >= 4))
-    #TOM: bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2) &
-    #TOM:             (ak.sum(jet_mask2[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1))
-    #TOM:             )
+    # TOM: bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2) &
+    # TOM:             (ak.sum(jet_mask2[:, :2], axis=1) == ak.sum(bjet_mask[:, :2], axis=1))
+    # TOM:             )
 
     # B-Jet Rejection for bkg estimation
     wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
@@ -67,12 +68,14 @@ def jet_selection(
     # trigger
         jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
         alt_jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.alt_jet_trigger]
-        jet_base_trigger_sel = ones if not self.jet_base_trigger else events.HLT[self.jet_base_trigger]
+        jet_base_trigger_sel = ones if not self.jet_base_trigger else events.HLT[
+            self.jet_base_trigger]
     else:
         jet_trigger_sel = [True] * len(events)
         alt_jet_trigger_sel = [True] * len(events)
         jet_base_trigger_sel = [True] * len(events)
-    signal_or_bkg_trigger = ak.any([jet_trigger_sel, alt_jet_trigger_sel], axis=0)
+    signal_or_bkg_trigger = ak.any(
+        [jet_trigger_sel, alt_jet_trigger_sel], axis=0)
 
     # Preparation for reconstruction
     mwref = 80.36
@@ -81,9 +84,9 @@ def jet_selection(
     mu_tt = 2.07  # not Jette: 0
     mu_w = 0.88  # not Jette: 0
 
-    m = lambda j1, j2: (j1.add(j2)).mass
-    m3 = lambda j1, j2, j3: (j1.add(j2.add(j3))).mass
-    dr = lambda j1, j2: j1.delta_r(j2)
+    def m(j1, j2): return (j1.add(j2)).mass
+    def m3(j1, j2, j3): return (j1.add(j2.add(j3))).mass
+    def dr(j1, j2): return j1.delta_r(j2)
 
     # Build jet combinations
     bjet_after_jet_mask = (events.Jet[jet_mask2].btagDeepFlavB >= wp_tight)
@@ -94,15 +97,20 @@ def jet_selection(
     leading_six_or_bkg = ak.any([leading_six_sel, alt_jet_trigger_sel])
     # ljets = ak.combinations((events.Jet[light_jet])[sixjets_sel], 4, axis=1)
     # bjets = ak.combinations((events.Jet[bjet_mask])[sixjets_sel], 2, axis=1)
-    ljets = ak.combinations((events.Jet[(~bjet_mask) & jet_mask2][:, :])[sixjets_sel], 4, axis=1)
-    bjets = ak.combinations((events.Jet[bjet_mask][:, :2])[sixjets_sel], 2, axis=1)
+    ljets = ak.combinations((events.Jet[(~bjet_mask) & jet_mask2][:, :])[
+                            sixjets_sel], 4, axis=1)
+    bjets = ak.combinations((events.Jet[bjet_mask][:, :2])[
+                            sixjets_sel], 2, axis=1)
 
     # Pseudo recontruction for background
-    rej_jets = ((events.Jet[~loose_bjet_mask])[bjet_rej & alt_jet_trigger_sel & jet_sel & ht_sel])
-    rej_jets = rej_jets[ak.argsort((rej_jets.pt), axis=1, ascending=False)][:, :6]
+    rej_jets = ((events.Jet[~loose_bjet_mask])[
+                bjet_rej & alt_jet_trigger_sel & jet_sel & ht_sel])
+    rej_jets = rej_jets[ak.argsort(
+        (rej_jets.pt), axis=1, ascending=False)][:, :6]
 
     rng = np.random.default_rng()
-    rng_index = rng.permuted(np.full((len(rej_jets), 6), [0, 1, 2, 3, 4, 5]), axis=1)
+    rng_index = rng.permuted(
+        np.full((len(rej_jets), 6), [0, 1, 2, 3, 4, 5]), axis=1)
 
     rej_jets = rej_jets[ak.Array(rng_index).to_list()]
     # rej_bjets = ak.combinations((rej_jets[ak.argsort(
@@ -150,16 +158,21 @@ def jet_selection(
         else:
             return [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]], [[EF]]
 
-    mt_result = mt(sixjetcombinations(bpermutations(ak.unzip(bjets)), lpermutations(ak.unzip(ljets))))
-    mt_bkg_result = mt(sixjetcombinations(bpermutations(ak.unzip(rej_bjets)), lpermutations(ak.unzip(rej_ljets))))
+    mt_result = mt(sixjetcombinations(bpermutations(
+        ak.unzip(bjets)), lpermutations(ak.unzip(ljets))))
+    mt_bkg_result = mt(sixjetcombinations(bpermutations(
+        ak.unzip(rej_bjets)), lpermutations(ak.unzip(rej_ljets))))
     chi2_cut = 50
     mt_result_filled = np.full((6, ak.num(events, axis=0)), EF)
     for i in range(6):
         (mt_result_filled[i])[sixjets_sel] = ak.flatten(mt_result[i])
-        (mt_result_filled[i])[bjet_rej & alt_jet_trigger_sel & jet_sel & ht_sel] = ak.flatten(mt_bkg_result[i])
+        (mt_result_filled[i])[bjet_rej & alt_jet_trigger_sel &
+                              jet_sel & ht_sel] = ak.flatten(mt_bkg_result[i])
 
-    chi2_sel = ak.Array((mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
-    chi2_sel3 = ak.Array((mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
+    chi2_sel = ak.Array(
+        (mt_result_filled[5] < chi2_cut) & (mt_result_filled[5] > -1))
+    chi2_sel3 = ak.Array(
+        (mt_result_filled[5] < 5) & (mt_result_filled[5] > -1))
     Rbb_sel = ak.Array(mt_result_filled[4] > 2)
 
     events = set_ak_column(events, "Mt1", mt_result_filled[0])
@@ -173,19 +186,23 @@ def jet_selection(
         b1, b2 = ak.unzip(ak.unzip(bestcomb)[0])
         j1, j2, j3, j4 = ak.unzip(ak.unzip(bestcomb)[1])
 
-        b1cor = correctcomb.b[:,0]
-        q1cor = correctcomb.w_children[:, 0,0]
+        b1cor = correctcomb.b[:, 0]
+        q1cor = correctcomb.w_children[:, 0, 0]
         q2cor = correctcomb.w_children[:, 0, 1]
-        b2cor = correctcomb.b[:,1]
+        b2cor = correctcomb.b[:, 1]
         q3cor = correctcomb.w_children[:, 1, 0]
         q4cor = correctcomb.w_children[:, 1, 1]
         drmax = 0.4
-        drb11, drb22, drq11 = (dr(b1, b1cor) < drmax), (dr(b2, b2cor) < drmax), (dr(j1, q1cor) < drmax)
-        drq22, drq33, drq44 = (dr(j2, q2cor) < drmax), (dr(j3, q3cor) < drmax), (dr(j4, q4cor) < drmax)
+        drb11, drb22, drq11 = (dr(b1, b1cor) < drmax), (dr(
+            b2, b2cor) < drmax), (dr(j1, q1cor) < drmax)
+        drq22, drq33, drq44 = (dr(j2, q2cor) < drmax), (dr(
+            j3, q3cor) < drmax), (dr(j4, q4cor) < drmax)
         drq21, drq12 = (dr(j2, q1cor) < drmax), (dr(j1, q2cor) < drmax)
         drq43, drq34 = (dr(j4, q3cor) < drmax), (dr(j3, q4cor) < drmax)
-        drb21, drb12, drq31 = (dr(b2, b1cor) < drmax), (dr(b1, b2cor) < drmax), (dr(j3, q1cor) < drmax)
-        drq42, drq13, drq24 = (dr(j4, q2cor) < drmax), (dr(j1, q3cor) < drmax), (dr(j2, q4cor) < drmax)
+        drb21, drb12, drq31 = (dr(b2, b1cor) < drmax), (dr(
+            b1, b2cor) < drmax), (dr(j3, q1cor) < drmax)
+        drq42, drq13, drq24 = (dr(j4, q2cor) < drmax), (dr(
+            j1, q3cor) < drmax), (dr(j2, q4cor) < drmax)
         drq41, drq32 = (dr(j4, q1cor) < drmax), (dr(j3, q2cor) < drmax)
         drq23, drq14 = (dr(j2, q3cor) < drmax), (dr(j1, q4cor) < drmax)
         # b1b2: 1234 2134 1243 2143, b2b1: 3412 4312 3421 4321
@@ -211,7 +228,8 @@ def jet_selection(
 
     if self.dataset_inst.has_tag("has_top"):
         type = np.full((1, ak.num(events, axis=0)), -1)
-        type_unfilled = combinationtype((mt_result[7])[mt_result[6]], events.gen_top[sixjets_sel])
+        type_unfilled = combinationtype(
+            (mt_result[7])[mt_result[6]], events.gen_top[sixjets_sel])
         type[0][sixjets_sel] = type_unfilled
         type = ak.flatten(type)
     else:
@@ -221,7 +239,8 @@ def jet_selection(
     if (len(ak.unzip(mt_result[6][:])) > 1):
         if ((len(ak.unzip(ak.unzip(mt_result[6][:])[0])) > 1) & (len(ak.unzip(ak.unzip(mt_result[6][:])[1])) > 3)):
             R2b4q = (
-                ak.unzip(ak.unzip(mt_result[6][:])[0])[0].pt + ak.unzip(ak.unzip(mt_result[6][:])[0])[1].pt
+                ak.unzip(ak.unzip(mt_result[6][:])[0])[
+                    0].pt + ak.unzip(ak.unzip(mt_result[6][:])[0])[1].pt
             ) / (
                 ak.unzip(ak.unzip(mt_result[6][:])[1])[0].pt +
                 ak.unzip(ak.unzip(mt_result[6][:])[1])[1].pt +
@@ -291,7 +310,7 @@ def jet_selection_init(self: Selector) -> None:
     self.shifts |= {
         shift_inst.name
         for shift_inst in self.config_inst.shifts
-        if shift_inst.has_tag(("jec", "jer","tune","hdamp", "trig"  ))
+        if shift_inst.has_tag(("jec", "jer", "tune", "hdamp", "trig"))
     }
     # NOTE: the none will not be overwritten later when doing this...
     # self.jet_trigger = None

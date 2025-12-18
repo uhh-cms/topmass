@@ -35,7 +35,6 @@ def kinFit(
     import pyKinFit
     sel_events = events[eventmask]
     sel_Jets = sel_events.Jet[sel_jet_mask[eventmask]]
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
 
     # sorted_indices = ak.argsort(sel_Jets.btagDeepFlavB, ascending=False)
     # wp_tight = self.config_inst.x.btag_working_points.deepjet.tight

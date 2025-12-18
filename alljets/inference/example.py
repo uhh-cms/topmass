@@ -4,8 +4,8 @@
 Example inference model.
 """
 
-from columnflow.inference import (ParameterTransformation, ParameterType,
-                                  inference_model, InferenceModel)
+from columnflow.inference import (InferenceModel, ParameterTransformation,
+                                  ParameterType, inference_model)
 
 
 @inference_model

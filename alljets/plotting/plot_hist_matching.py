@@ -9,14 +9,12 @@ from __future__ import annotations
 from collections import OrderedDict
 
 import law
-
+from columnflow.plotting.plot_util import (apply_density,
+                                           apply_variable_settings,
+                                           prepare_style_config)
 from columnflow.util import maybe_import
+
 from alljets.plotting.aj_plot_all import aj_plot_all
-from columnflow.plotting.plot_util import (
-    prepare_style_config,
-    apply_variable_settings,
-    apply_density,
-)
 
 hist = maybe_import("hist")
 np = maybe_import("numpy")
