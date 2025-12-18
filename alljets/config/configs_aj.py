@@ -12,11 +12,11 @@ import os
 import law
 import order as od
 import yaml
+from columnflow.columnar_util import ColumnCollection
 from columnflow.config_util import (add_shift_aliases,
                                     get_root_processes_from_campaign,
                                     get_shifts_from_sources,
-                                    verify_config_processes,
-                                    ColumnCollection)
+                                    verify_config_processes)
 from columnflow.util import DotDict
 from scinum import Number
 
