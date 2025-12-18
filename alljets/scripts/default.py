@@ -59,6 +59,7 @@ def combinationtype(b1, b2, j1, j2, j3, j4, correctcomb):
         axis=0,
     )
 
+    # 0 = unmatched, 1 = wrongly matched and 2 = correctly matched
     type = matched * 1 + ak.any(drlist, axis=0)
     return type
 

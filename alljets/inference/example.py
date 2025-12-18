@@ -4,7 +4,7 @@
 Example inference model.
 """
 
-from columnflow.inference import ParameterType, inference_model, InferenceModel
+from columnflow.inference import InferenceModel, ParameterType, inference_model
 
 
 @inference_model
@@ -58,11 +58,9 @@ def example(self: InferenceModel) -> None:
         config_data={
             config_inst.name: self.process_config_spec(
                 process="tt",
-                mc_datasets=[
-                    "tt_fh_powheg",
-                    "tt_sl_powheg",
-                    "tt_dl_powheg",
-                ],
+                mc_datasets=["tt_fh_powheg",
+                             "tt_sl_powheg",
+                             "tt_dl_powheg"],
             )
             for config_inst in self.config_insts
         },
@@ -99,8 +97,7 @@ def example(self: InferenceModel) -> None:
             for config_inst in self.config_insts
         },
     )
-
-    # Hdamp
+# Hdamp
     self.add_parameter(
         "hdamp",
         process=["TT"],
@@ -112,7 +109,6 @@ def example(self: InferenceModel) -> None:
             for config_inst in self.config_insts
         },
     )
-
     # pile-up weights
     self.add_parameter(
         "pu_weight",
@@ -211,4 +207,5 @@ def example_no_shapes(self):
 
     for category_name, process_name, parameter in self.iter_parameters():
         if parameter.type.is_shape or any(trafo.from_shape for trafo in parameter.transformations):
-            self.remove_parameter(parameter.name, process=process_name, category=category_name)
+            self.remove_parameter(
+                parameter.name, process=process_name, category=category_name)

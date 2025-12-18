@@ -16,7 +16,6 @@ column loading optimization.
 from columnflow.categorization import Categorizer, categorizer
 from columnflow.util import maybe_import
 
-
 ak = maybe_import("awkward")
 
 
@@ -154,13 +153,17 @@ def cat_2btj_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
     chi2cut = self.config_inst.x.fitchi2cut
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
-    return events, (events.HLT[signal_trigger] & (events.FitChi2 <= chi2cut) & (ak.sum(
-        (events.Jet.pt >= 40.0) &
-        (abs(events.Jet.eta) < 2.4) &
-        (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2))
+    return events, (events.HLT[signal_trigger] &
+                    # (events.FitRbb > 2.0) &
+                    (events.FitChi2 <= chi2cut) &
+                    (ak.sum(
+                        (events.Jet.pt >= 40.0) &
+                        (abs(events.Jet.eta) < 2.4) &
+                        (events.Jet.btagDeepFlavB >= wp_tight), axis=1,
+                    ) >= 2))
 
 
-@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*"})
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitChi2"})
 def cat_0btj_bkg(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Background region: 0 b-tagged jets + background trigger + good fit quality.
@@ -170,10 +173,15 @@ def cat_0btj_bkg(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
     wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
     # wp_loose = 0.01
     bkg_trigger = self.config_inst.x.bkg_trigger["tt_fh"][0]
-    return events, (events.HLT[bkg_trigger] & (events.FitChi2 <= chi2cut) & (ak.sum(
-        (events.Jet.pt >= 40.0) &
-        (abs(events.Jet.eta) < 2.4) &
-        (events.Jet.btagDeepFlavB >= wp_loose), axis=1) == 0))
+    return events, (events.HLT[bkg_trigger] &
+                    # (events.FitRbb > 2.0) &
+                    (events.FitChi2 <= chi2cut) &
+                    (ak.sum(
+                        (events.Jet.pt >= 40.0) &
+                        (abs(events.Jet.eta) < 2.4) &
+                        (events.Jet.btagDeepFlavB >= wp_loose), axis=1,
+                    ) == 0))
+
 
 
 # ============================================================================
@@ -196,3 +204,18 @@ def cat_fit_unmatched(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak
     For MC validation: kinematic fit selected wrong jet combination or no match found.
     """
     return events, (events.fitCombinationType != 2)
+
+# @categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "deltaRb", "chi2"})
+# def cat_reco_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+#     # two or more b-jets
+#     chi2cut = self.config_inst.x.fitchi2cut
+#     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+#     signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+#     return events, (events.HLT[signal_trigger] &
+#                     (events.deltaRb > 2.0) &
+#                     (events.chi2 <= chi2cut) &
+#                     (ak.sum(
+#                         (events.Jet.pt >= 40.0) &
+#                         (abs(events.Jet.eta) < 2.4) &
+#                         (events.Jet.btagDeepFlavB >= wp_tight), axis=1,
+#                     ) >= 2))

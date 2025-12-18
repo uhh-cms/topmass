@@ -609,11 +609,15 @@ def add_config(
                   tags={"disjoint_from_nominal", "tune"})
     add_shift_aliases(cfg, "tune", {"tune": "tune_{direction}"})
 
-    cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal", "hdamp"})
-    cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal", "hdamp"})
+    cfg.add_shift(name="hdamp_up", id=3, type="shape",
+                  tags={"disjoint_from_nominal", "hdamp"})
+    cfg.add_shift(name="hdamp_down", id=4, type="shape",
+                  tags={"disjoint_from_nominal", "hdamp"})
 
-    cfg.add_shift(name="mtop_up", id=5, type="shape", tags={"disjoint_from_nominal", "mtop"})
-    cfg.add_shift(name="mtop_down", id=6, type="shape", tags={"disjoint_from_nominal", "mtop"})
+    cfg.add_shift(name="mtop_up", id=5, type="shape",
+                  tags={"disjoint_from_nominal", "mtop"})
+    cfg.add_shift(name="mtop_down", id=6, type="shape",
+                  tags={"disjoint_from_nominal", "mtop"})
     # fake jet energy correction shift, with aliases flaged as "selection_dependent", i.e. the aliases
     # affect columns that might change the output of the event selection
     # load jec sources
@@ -711,8 +715,10 @@ def add_config(
     )
 
     # Pile-up shifts
-    cfg.add_shift(name="pu_weight_minbias_xs_up", id=150, type="shape", tags="pu_weight")
-    cfg.add_shift(name="pu_weight_minbias_xs_down", id=151, type="shape", tags="pu_weight")
+    cfg.add_shift(name="pu_weight_minbias_xs_up",
+                  id=150, type="shape", tags="pu_weight")
+    cfg.add_shift(name="pu_weight_minbias_xs_down",
+                  id=151, type="shape", tags="pu_weight")
     add_shift_aliases(
         cfg,
         "pu_weight_minbias_xs",

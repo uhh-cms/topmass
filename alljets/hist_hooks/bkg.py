@@ -73,7 +73,7 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
         category_names = set()
         for proc, h in hists.items():
             # validate axes
-            assert len(h.axes) == 3
+            assert ((len(h.axes) == 3) or (len(h.axes) == 4))
             assert h.axes[CAT_AXIS].name == "category"
             assert h.axes[SHIFT_AXIS].name == "shift"
             # get the category axis

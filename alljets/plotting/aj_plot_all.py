@@ -21,7 +21,7 @@ from columnflow.plotting.plot_util import (
     calculate_stat_error,
 )
 from columnflow.plotting.plot_all import (
-    draw_stat_error_bands, draw_syst_error_bands, draw_stack, draw_hist, draw_profile, draw_errorbars,
+    draw_stat_error_bands, draw_syst_error_bands, draw_hist, draw_profile, draw_errorbars, draw_stack,
 )
 import law.logger
 
@@ -31,6 +31,51 @@ np = maybe_import("numpy")
 mpl = maybe_import("matplotlib")
 plt = maybe_import("matplotlib.pyplot")
 mplhep = maybe_import("mplhep")
+
+
+def draw_error_bands(
+    ax: plt.Axes,
+    h: hist.Hist,
+    norm: float | np.ndarray | list = 1.0,
+    **kwargs,
+) -> None:
+    # Assume 1D histogram
+    assert len(h.axes) == 1
+
+    centers = h.axes[0].centers
+    edges = h.axes[0].edges
+    widths = edges[1:] - edges[:-1]
+
+    # Base bar arguments
+    bar_kwargs = {
+        "x": centers,
+        "width": widths,
+        "linewidth": 0.0,
+        "color": "none",
+        "edgecolor": "black",
+        "hatch": "///",
+        "alpha": 1.0,
+    }
+
+    # Merge external kwargs
+    bar_kwargs.update(kwargs)
+
+    # Enforce scalar linewidth just in case
+    if "linewidth" in bar_kwargs:
+        bar_kwargs["linewidth"] = float(np.atleast_1d(bar_kwargs["linewidth"])[0])
+
+    ax.bar(**bar_kwargs)
+
+
+def draw_hist_twin(
+    ax: plt.Axes,
+    h: hist.Hist,
+    norm: float | Sequence | np.ndarray = 1.0,
+    **kwargs,
+) -> None:
+    ax2 = ax.twinx()
+    draw_hist(ax2, h, norm, **kwargs)
+    ax2.set_ylabel(r"Entries")
 
 
 def binom_int(num, den, confint=0.68):
@@ -50,7 +95,6 @@ def draw_efficiency(
 
     # Extract histogram data
     values = h.values()
-    bins = h.axes[0].edges
 
     efficiency = np.nan_to_num(values / norm)
     efficiency = np.where(efficiency > 1, 1, efficiency)  # beware negative event weights
@@ -72,16 +116,68 @@ def draw_efficiency(
     errors = errors.T
 
     defaults = {
-        "x": (bins[:-1] + bins[1:]) / 2,
+        "x": h.axes[0].centers,
         "y": efficiency,
         "yerr": errors,
         "color": "k",
         "marker": "o",
         "elinewidth": 1,
     }
+
     defaults.update(kwargs)
     ax.errorbar(**defaults)
 
+    ax.set_xlabel("Bin")
+    ax.set_ylabel("Counts")
+    ax.set_ylim(0, 1)
+    ax.legend()
+
+
+def draw_efficiency_x(
+    ax: plt.Axes,
+    h: hist.Hist,
+    norm: float | Sequence | np.ndarray = 1.0,
+    **kwargs,
+) -> None:
+    values = h.values() / norm
+    values = np.nan_to_num(values, nan=0)
+
+    band_low, band_high = binom_int(h.values(), norm)
+    yerror_low = np.asarray(values - band_low)
+    yerror_high = np.asarray(band_high - values)
+    yerror_low[yerror_low == 1] = 0
+    yerror_high[yerror_high == 1] = 0
+
+    # removing large errors in empty bins
+
+    # stacking y errors
+    yerrors = np.concatenate((yerror_low.reshape(yerror_low.shape[0], 1),
+                             yerror_high.reshape(yerror_high.shape[0], 1)), axis=1)
+    yerrors = yerrors.T
+
+    defaults = {
+        "x": h.axes[0].centers,
+        "y": values,
+        "yerr": yerrors,
+        "color": "k",
+        "marker": "o",
+        "elinewidth": 1,
+    }
+    defaults.update(kwargs)
+
+    # calculate x error
+    xerror_low = h.axes[0].edges
+    xerror_low = xerror_low[:(len(xerror_low) - 1)]
+    x_filled = np.where(defaults["x"] == 0, h.axes[0].centers, defaults["x"])
+    xerror_low = x_filled - xerror_low
+    xerror_high = h.axes[0].edges[1:] - x_filled
+    xerrors = np.concatenate((xerror_low.reshape(xerror_low.shape[0], 1),
+                             xerror_high.reshape(xerror_high.shape[0], 1)), axis=1)
+    xerrors = xerrors.T
+
+    defaults.update({"xerr": xerrors})
+
+    ax.errorbar(**defaults)
     ax.set_xlabel("Bin")
     ax.set_ylabel("Counts")
     ax.set_ylim(0, 1)
@@ -302,7 +398,7 @@ def aj_plot_all(
         for func in [
             draw_stat_error_bands, draw_syst_error_bands, draw_stack, draw_hist, draw_profile,
             draw_errorbars, draw_efficiency, draw_efficiency_with_fit, draw_ratio_of_fit, draw_ratio_hist_fit,
-            draw_errorbars_with_fit,
+            draw_errorbars_with_fit, draw_efficiency_x, draw_hist_twin, draw_error_bands,
         ]
     }
 

@@ -9,8 +9,11 @@ from __future__ import annotations
 from collections import OrderedDict
 
 import law
-
+from columnflow.plotting.plot_util import (apply_density,
+                                           apply_variable_settings,
+                                           prepare_style_config)
 from columnflow.util import maybe_import
+
 from alljets.plotting.aj_plot_all import aj_plot_all
 from columnflow.plotting.plot_util import (
     prepare_style_config,
@@ -71,6 +74,7 @@ def plot_hist_matching(
     """
     # Identify indices for each process in the histogram keys
     keys = hists.keys()
+    print(keys)
     for i in range(len(list(keys))):
         if list(keys)[i] == "tt":
             tt_index = i
@@ -372,6 +376,7 @@ def plot_hist_chi2cuts(
             "label": "Number of events",
         },
     }
+
     # setup style config
     default_style_config = prepare_style_config(
         config_inst, category_inst, variable_inst, density, shape_norm, yscale,

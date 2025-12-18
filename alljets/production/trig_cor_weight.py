@@ -7,10 +7,10 @@ Trigger related event weights.
 from __future__ import annotations
 
 import law
+from columnflow.columnar_util import set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
 from law.util import InsertableDict
-from columnflow.columnar_util import set_ak_column
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -51,12 +51,15 @@ def trig_weights(
     if self.dataset_inst.has_tag("has_top"):
         jet6_pt = ak.where(
             ak.num(events.Jet[(abs(events.Jet.eta) < 2.6)], axis=1) > 5,
-            ak.sort(events.Jet[(abs(events.Jet.eta) < 2.6)].pt[:], ascending=False, axis=1),
+            ak.sort(events.Jet[(abs(events.Jet.eta) < 2.6)
+                               ].pt[:], ascending=False, axis=1),
             np.zeros((len(events), 6)),
         )[:, 5]
-        ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) & (abs(events.Jet.eta) < 2.6)], axis=1)
+        ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) &
+                                  (abs(events.Jet.eta) < 2.6)], axis=1)
         if self.config_inst.x.trigger_sf_variable.startswith("jet6_pt"):
-            weight = self.trig_sf_corrector(jet6_pt)
+            weight = ak.where(jet6_pt == 0, np.zeros(
+                (len(events))), self.trig_sf_corrector(jet6_pt))
         if self.config_inst.x.trigger_sf_variable.startswith("ht"):
             weight = self.trig_sf_corrector(ht)
 
@@ -82,7 +85,7 @@ def trig_weights_requires(self: Producer, task: law.Task, reqs: dict) -> None:
     # reqs["external_files"] = BundleExternalFiles.req(self.task)
     from alljets.tasks.ProduceTriggerWeights import ProduceTriggerWeight
     reqs["external_files"] = ProduceTriggerWeight(
-        version=task.version,
+        version=task.version,  # "withbtagalt",  # task.version,
         datasets="tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,data*",
         configs=task.config,
         selector="trigger_eff",
@@ -111,7 +114,8 @@ def trig_weights_setup(
     #     self.get_trig_file(bundle.files).load(formatter="gzip").decode("utf-8"),
     # )
     correction_set = correctionlib.CorrectionSet.from_string(
-        inputs["external_files"]["collection"].targets[0]["weights"][0].load(formatter="gzip").decode("utf-8"),
+        inputs["external_files"]["collection"].targets[0]["weights"][0].load(
+            formatter="gzip").decode("utf-8"),
     )
     # Add distinction for year and working point later. For now only one
     # corrector_name, self.year, self.wp = self.get_trig_config()

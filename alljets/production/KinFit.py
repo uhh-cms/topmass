@@ -131,11 +131,14 @@ def kinFit(
 
     # Convert fitter outputs (Python lists) to awkward arrays and merge
     fitPt_ak = ak.Array(fitPt)
-    fitPt_full = insert_at_index(fitPt_ak[:, :6], sorted_jets_top6.pt, eventmask)
+    fitPt_full = insert_at_index(
+        fitPt_ak[:, :6], sorted_jets_top6.pt, eventmask)
     fitEta_ak = ak.Array(fitEta)
-    fitEta_full = insert_at_index(fitEta_ak[:, :6], sorted_jets_top6.eta, eventmask)
+    fitEta_full = insert_at_index(
+        fitEta_ak[:, :6], sorted_jets_top6.eta, eventmask)
     fitPhi_ak = ak.Array(fitPhi)
-    fitPhi_full = insert_at_index(fitPhi_ak[:, :6], sorted_jets_top6.phi, eventmask)
+    fitPhi_full = insert_at_index(
+        fitPhi_ak[:, :6], sorted_jets_top6.phi, eventmask)
     fitMass_ak = ak.Array(fitMass)
     fitMass_full = insert_at_index(fitMass_ak[:, :6], sorted_jets_top6.mass, eventmask)
 
