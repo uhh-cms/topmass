@@ -61,7 +61,6 @@ def jet_selection(
     bjet_rej = (ak.sum(((jet_mask2) & loose_bjet_mask), axis=1) == 0)
     sel_bjet_2or0 = ak.any([bjet_sel, bjet_rej], axis=0)
 
-    sel_bjet_alt_2or0 = ak.any([bjet_sel_alt, bjet_rej], axis=0)
 
     # Trigger selection step is skipped for QCD MC, which has no Trigger columns
     if not self.dataset_inst.name.startswith("qcd"):
