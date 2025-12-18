@@ -60,6 +60,7 @@ def jet_selection(
     loose_bjet_mask = (events.Jet.btagDeepFlavB >= wp_loose)
     bjet_rej = (ak.sum(((jet_mask2) & loose_bjet_mask), axis=1) == 0)
     sel_bjet_2or0 = ak.any([bjet_sel, bjet_rej], axis=0)
+
     sel_bjet_alt_2or0 = ak.any([bjet_sel_alt, bjet_rej], axis=0)
 
     # Trigger selection step is skipped for QCD MC, which has no Trigger columns
@@ -86,8 +87,10 @@ def jet_selection(
 
     def m(j1, j2):
         return (j1.add(j2)).mass
+
     def m3(j1, j2, j3):
         return (j1.add(j2.add(j3))).mass
+
     def dr(j1, j2):
         return j1.delta_r(j2)
 
