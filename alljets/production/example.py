@@ -373,6 +373,61 @@ def cutflow_features(
 
 @producer(
     uses={
+        attach_coffea_behavior,
+        "gen_top",
+        "FitJet",
+    },
+    produces={
+        "gen_top",
+        attach_coffea_behavior,
+        "jet_matching_mask",
+    },
+)
+def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array:
+
+    from alljets.scripts.default import ambiguous_matching
+
+    # attach coffea behavior
+    events = self[attach_coffea_behavior](events, **kwargs)
+
+    # attach coffea behavior gen_top
+    gen_top = attach_coffea_behavior_fn(
+            events.gen_top,
+            collections={
+                "b": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+                "t": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+                "w": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+                "w_children": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+            },
+        )
+
+    # ambiguous matching
+    events = set_ak_column(
+        events,
+        "jet_matching_mask",
+        ambiguous_matching(events.Jet, gen_top, 0.4)
+    )
+    return events
+
+
+@producer(
+    uses={
         features,
         category_ids,
         normalization_weights,
@@ -381,6 +436,7 @@ def cutflow_features(
         kinFitMatch,
         # gen_top_lookup,
         attach_coffea_behavior,
+        analyze_jet_overlap,
     },
     produces={
         features,
@@ -392,6 +448,7 @@ def cutflow_features(
         # gen_top_lookup,
         # "gen_top",
         attach_coffea_behavior,
+        analyze_jet_overlap,
     },
     require_producers={"kinFitMatch"},
 )
@@ -412,6 +469,9 @@ def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # Compute derived features and summaries
     events = self[features](events, **kwargs)
+
+    # Compute features for studying overlapping jets and boosted tops
+    events = self[analyze_jet_overlap](events, **kwargs)
 
     # Compute category ids used by later stages
     events = self[category_ids](events, **kwargs)

@@ -75,3 +75,34 @@ def insert_at_index(to_insert, where, indices_to_replace):
     original = where[~mask]
     combined = ak.concatenate((original, cut_replaced), axis=1)
     return combined
+
+
+def ambiguous_matching(jets, gen_top, dr):
+    """
+    For each event, this function checks whether reconstructed jets lie within
+    a distance delta R < dr of each generator-level parton originating from a
+    tt decay.
+
+    It returns an ak.Array with the following fields:
+    - ``b1``: matching mask for the b quark from the t decay
+    - ``b2``: matching mask for the b quark from the anti-t decay
+    - ``q1``: matching mask for the first quark from the t decay
+    - ``q2``: matching mask for the second quark from the t decay
+    - ``q3``: matching mask for the first quark from the t decay
+    - ``q4``: matching mask for the second quark from the anti-t decay
+    """
+    from columnflow.util import maybe_import
+    ak = maybe_import("awkward")
+
+    matches = ak.zip(
+        {
+            "b1": gen_top.b[:, 0].delta_r(jets) < dr,
+            "b2": gen_top.b[:, 1].delta_r(jets) < dr,
+            "q1": gen_top.w_children[:, 0, 0].delta_r(jets) < dr,
+            "q3": gen_top.w_children[:, 1, 0].delta_r(jets) < dr,
+            "q2": gen_top.w_children[:, 0, 1].delta_r(jets) < dr,
+            "q4": gen_top.w_children[:, 1, 1].delta_r(jets) < dr,
+        }
+    )
+
+    return matches
