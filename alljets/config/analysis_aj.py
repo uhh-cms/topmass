@@ -12,7 +12,6 @@ import law
 import order as od
 from alljets.config.configs_aj import add_config
 from columnflow.util import DotDict, maybe_import
-from scinum import Number
 from typing import Optional
 
 
@@ -73,7 +72,7 @@ def add_lazy_config(
     def create_factory(
         config_id: int,
         config_name_postfix: str = "",
-        limit_dataset_files: Optional[int] = None
+        limit_dataset_files: Optional[int] = None,
     ):
         def factory(configs: od.UniqueObjectIndex):
             # import the campaign
@@ -97,7 +96,7 @@ def add_lazy_config(
     if add_limited:
         analysis_aj.configs.add_lazy_factory(
             f"{config_name}_limited", create_factory(
-                config_id + 200, "_limited", 2)
+                config_id + 200, "_limited", 2),
         )
 
 

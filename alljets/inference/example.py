@@ -4,8 +4,7 @@
 Example inference model.
 """
 
-from columnflow.inference import (InferenceModel, ParameterTransformation,
-                                  ParameterType, inference_model)
+from columnflow.inference import InferenceModel, ParameterType, inference_model
 
 
 @inference_model
@@ -97,7 +96,7 @@ def example(self: InferenceModel) -> None:
             for config_inst in self.config_insts
         },
     )
- # Hdamp
+# Hdamp
     self.add_parameter(
         "hdamp",
         process=["TT"],

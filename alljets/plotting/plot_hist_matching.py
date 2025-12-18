@@ -49,9 +49,8 @@ def plot_hist_matching(
 ) -> plt.Figure:
     """
     TODO.
-    
+
     """
-    n_processes = len(list(hists.keys()))
     keys = hists.keys()
     print(keys)
     for i in range(len(list(keys))):

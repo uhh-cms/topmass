@@ -583,8 +583,8 @@ def njets(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(
         events,
         "n_jet_in_event",
-        ak.num(events.Jet[(abs(events.Jet.eta) < 2.4)
-               & (events.Jet.pt > 40)].pt, axis=1),
+        ak.num(events.Jet[(abs(events.Jet.eta) < 2.4) &
+        (events.Jet.pt > 40)].pt, axis=1),
         value_type=np.int32,
     )
     events = set_ak_column(

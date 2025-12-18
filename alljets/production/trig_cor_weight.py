@@ -55,8 +55,8 @@ def trig_weights(
                                ].pt[:], ascending=False, axis=1),
             np.zeros((len(events), 6)),
         )[:, 5]
-        ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32)
-                    & (abs(events.Jet.eta) < 2.6)], axis=1)
+        ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) &
+                                  (abs(events.Jet.eta) < 2.6)], axis=1)
         if self.config_inst.x.trigger_sf_variable.startswith("jet6_pt"):
             weight = ak.where(jet6_pt == 0, np.zeros(
                 (len(events))), self.trig_sf_corrector(jet6_pt))
@@ -64,8 +64,8 @@ def trig_weights(
             weight = self.trig_sf_corrector(ht)
 
         weight_up = weight + abs(1 - weight)
-        weight_down = ak.where((weight - abs(1 - weight))
-                               > 0, (weight - abs(1 - weight)), 0)
+        weight_down = ak.where((weight - abs(1 - weight)) > 0,
+                               (weight - abs(1 - weight)), 0)
         # store it
         events = set_ak_column(events, "trig_weight",
                                weight, value_type=np.float32)

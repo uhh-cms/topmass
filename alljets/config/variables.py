@@ -1389,7 +1389,6 @@ def add_variables(cfg: od.Config) -> None:
     build_b2jet.inputs = ["FitB2.{x,y,z,t}"]
 
 
-
 # helper to add a variable to the config with some defaults
 def add_variable(config: od.Config, *args, **kwargs) -> od.Variable:
     kwargs.setdefault("null_value", EMPTY_FLOAT)

@@ -84,9 +84,12 @@ def jet_selection(
     mu_tt = 2.07  # not Jette: 0
     mu_w = 0.88  # not Jette: 0
 
-    def m(j1, j2): return (j1.add(j2)).mass
-    def m3(j1, j2, j3): return (j1.add(j2.add(j3))).mass
-    def dr(j1, j2): return j1.delta_r(j2)
+    def m(j1, j2):
+        return (j1.add(j2)).mass
+    def m3(j1, j2, j3):
+        return (j1.add(j2.add(j3))).mass
+    def dr(j1, j2):
+        return j1.delta_r(j2)
 
     # Build jet combinations
     bjet_after_jet_mask = (events.Jet[jet_mask2].btagDeepFlavB >= wp_tight)
@@ -283,7 +286,6 @@ def jet_selection(
             "SixJets": sixjets_sel,
             "Chi2": chi2_sel,
             "n5Chi2": chi2_sel3,
-            "BTag_alt": bjet_sel_alt,
             "jet6": jet6_existance,
             "Rbb": Rbb_sel,
         },
