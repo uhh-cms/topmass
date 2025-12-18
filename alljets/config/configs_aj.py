@@ -15,7 +15,8 @@ import yaml
 from columnflow.config_util import (add_shift_aliases,
                                     get_root_processes_from_campaign,
                                     get_shifts_from_sources,
-                                    verify_config_processes)
+                                    verify_config_processes,
+                                    ColumnCollection)
 from columnflow.util import DotDict
 from scinum import Number
 
