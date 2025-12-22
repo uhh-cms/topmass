@@ -139,24 +139,6 @@ def add_categories(cfg: od.Config) -> None:
         label=">2 b-tagged jets & signal trigger",
         tags={"2btj"},
     )
-    # add_category(
-    #     cfg,
-    #     name="fit_conv_leq_rbb",
-    #     selection="cat_fit_conv_leq_rbb",
-    #     label=r"below $\chi^2$ cut and above $\Delta R_{\text{b}}$ cut",
-    # )
-    # add_category(
-    #     cfg,
-    #     name="fit_rbb",
-    #     selection="cat_rbb",
-    #     label=r"above $\Delta R_{\text{b}}$ cut",
-    # )
-    # add_category(
-    #     cfg,
-    #     name="reco_sig",
-    #     selection="cat_reco_sig",
-    #     label=r"below $\chi^2$ cut and above $\Delta R_{\text{b}}$ cut",
-    # )
 
     # ========================================================================
     # Truth-level matching categories

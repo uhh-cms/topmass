@@ -154,7 +154,6 @@ def cat_2btj_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
     return events, (events.HLT[signal_trigger] &
-                    # (events.FitRbb > 2.0) &
                     (events.FitChi2 <= chi2cut) &
                     (ak.sum(
                         (events.Jet.pt >= 40.0) &
@@ -171,10 +170,8 @@ def cat_0btj_bkg(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
     """
     chi2cut = self.config_inst.x.fitchi2cut
     wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
-    # wp_loose = 0.01
     bkg_trigger = self.config_inst.x.bkg_trigger["tt_fh"][0]
     return events, (events.HLT[bkg_trigger] &
-                    # (events.FitRbb > 2.0) &
                     (events.FitChi2 <= chi2cut) &
                     (ak.sum(
                         (events.Jet.pt >= 40.0) &
