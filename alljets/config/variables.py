@@ -270,74 +270,11 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="jet6_pt_1",
-        expression="Jet.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=[32, 60, 1000],
-        unit="GeV",
-        x_title=r"Jet 6 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="jet6_pt_2",
-        expression="Jet.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=[32, 40, 60, float("inf")],
-        unit="GeV",
-        x_title=r"Jet 6 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="jet6_pt_3",
-        expression="Jet.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=[32, 40, 60, 1000],
-        unit="GeV",
-        x_title=r"Jet 6 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="jet6_pt_4",
-        expression="Jet.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=[0, 10, 20, 26, 32, 38, 44, 50, 60, 80, 100],
-        unit="GeV",
-        x_title=r"Jet 6 $p_{T}$",
-    )
-    add_variable(
-        cfg,
         name="jet6_pt_5",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 100.0),
         aux={"overflow": False, "underflow": False},
-        unit="GeV",
-        x_title=r"Jet 6 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="jet6_pt_6",
-        expression="Jet.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=[0, 10, 20, 23, 26, 29, 32, 36, 40, 44, 50, 60, 100],
-        unit="GeV",
-        x_title=r"Jet 6 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="jet6_pt_7",
-        expression="Jet.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=[0, 10, 20, 23, 26, 29, 32, 36, 40, 44, 50, 60, 150],
-        unit="GeV",
-        x_title=r"Jet 6 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="jet6_ptdummy",
-        expression="Jet.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=[0, 9999],
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )
@@ -373,46 +310,6 @@ def add_variables(cfg: od.Config) -> None:
         name="ht_old",
         expression="ht_old",
         binning=(20, 0, 2000.0),
-        unit="GeV",
-        x_title="$H_T$",
-    )
-    add_variable(
-        cfg,
-        name="ht3",
-        expression="ht",
-        binning=[380, 600, 1000, float("inf")],
-        unit="GeV",
-        x_title="$H_T$",
-    )
-    add_variable(
-        cfg,
-        name="ht2",
-        expression="ht",
-        binning=[380, 600, 9999],
-        unit="GeV",
-        x_title="$H_T$",
-    )
-    add_variable(
-        cfg,
-        name="ht7",
-        expression="ht",
-        binning=[0, 200, 300, 340, 380, 415, 450, 500, 700, 1000, 1500],
-        unit="GeV",
-        x_title="$H_T$",
-    )
-    add_variable(
-        cfg,
-        name="ht6",
-        expression="ht",
-        binning=[0, 200, 300, 340, 380, 420, 500, 700, 1000, 1500],
-        unit="GeV",
-        x_title="$H_T$",
-    )
-    add_variable(
-        cfg,
-        name="ht_dummy",
-        expression="ht",
-        binning=[380, 99999],
         unit="GeV",
         x_title="$H_T$",
     )
