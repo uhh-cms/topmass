@@ -9,9 +9,7 @@ from __future__ import annotations
 from collections import OrderedDict
 
 import law
-from columnflow.plotting.plot_util import (apply_density,
-                                           apply_variable_settings,
-                                           prepare_style_config)
+from columnflow.plotting.plot_util import (apply_density, apply_variable_settings, prepare_style_config)
 from columnflow.util import maybe_import
 from alljets.plotting.aj_plot_all import aj_plot_all
 
@@ -24,14 +22,6 @@ mplhep = maybe_import("mplhep")
 od = maybe_import("order")
 
 logger = law.logger.get_logger(__name__)
-
-"""
-law run cf.PlotVariables1D --version v1
---processes tt --variables jet6_pt-trig_bits
---datasets tt_fh_powheg --selector trigger_sel
---producers example,trigger_prod
---plot-function alljets.plotting.trigger_eff_plot.plot_efficiencies
-"""
 
 
 def plot_hist_matching(
@@ -55,12 +45,8 @@ def plot_hist_matching(
     https://arxiv.org/pdf/2302.01967v2.
 
     law run cf.PlotVariables1D --version v1 --configs 2017_v9_limited \
-    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg \
-    --variables reco_Top1_mass-fit_combination_type \
-    --cf.CalibrateEvents-{workflow=htcondor,htcondor-memory=12GB} \
-    --cf.SelectEvents-{workflow=htcondor,htcondor-memory=8GB} \
-    --cf.ReduceEvents-{workflow=htcondor,htcondor-memory=8GB} \
-    --cf.ProduceColumns-{workflow=htcondor,htcondor-memory=8GB,max-runtime=4h} \
+    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg, data, qcd* \
+    --variables reco_Top1_mass-fit_combination_type, processes tt,data,qcd (qcd_est) \
     --categories incl --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching
 
     Example command to run the plot function. The matching information is stored in
@@ -69,7 +55,6 @@ def plot_hist_matching(
     """
     # Identify indices for each process in the histogram keys
     keys = hists.keys()
-    print(keys)
     for i in range(len(list(keys))):
         if list(keys)[i] == "tt":
             tt_index = i
@@ -212,10 +197,6 @@ def plot_hist_matching_MC(
     law run cf.PlotVariables1D --version v1 --configs 2017_v9_limited \
     --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg \
     --variables reco_Top1_mass-fit_combination_type \
-    --cf.CalibrateEvents-{workflow=htcondor,htcondor-memory=12GB} \
-    --cf.SelectEvents-{workflow=htcondor,htcondor-memory=8GB} \
-    --cf.ReduceEvents-{workflow=htcondor,htcondor-memory=8GB} \
-    --cf.ProduceColumns-{workflow=htcondor,htcondor-memory=8GB,max-runtime=4h} \
     --categories incl --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching_MC
 
     Example command to run the plot function. The matching information is stored in
