@@ -311,7 +311,7 @@ def example_trig_weight(
     # ensure trigger columns exist
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(
-            events, "HLT.PFHT38y0_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
