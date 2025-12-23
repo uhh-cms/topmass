@@ -116,11 +116,22 @@ def add_categories(cfg: od.Config) -> None:
     )
     add_category(
         cfg,
+        name="fit_conv_leq_rbb",
+        selection="cat_fit_conv_leq_rbb",
+        label=r"below $\chi^2$ cut and above $\Delta R_{\text{b}}$ cut",
+    )
+    add_category(
+        cfg,
         name="fit_Pgof_02",
         selection="cat_fit_Pgof_02",  # Pgof > 0.2 (very good quality)
         label="kinfit $P_{gof} > 0.2$ ",
     )
-
+    add_category(
+        cfg,
+        name="fit_rbb",
+        selection="cat_rbb",
+        label=r"above $\Delta R_{\text{b}}$ cut",
+    )
     # ========================================================================
     # Signal and background regions
     # ========================================================================
@@ -158,7 +169,12 @@ def add_categories(cfg: od.Config) -> None:
         label="wrong or umatched events",
         tags={"matched"},
     )
-
+    # add_category(
+    #     cfg,
+    #     name="reco_sig",
+    #     selection="cat_reco_sig",
+    #     label=r"below $\chi^2$ cut and above $\Delta R_{\text{b}}$ cut",
+    # )
     # Uncomment to define orthogonal or overlapping category sets:
     #
     # main_categories = {
