@@ -139,6 +139,7 @@ def cat_fit_conv(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
     """Select events where kinematic fit converged (FitChi2 < 10000)."""
     return events, (events.FitChi2 < 10000)
 
+
 @categorizer(uses={"FitChi2", "FitRbb"})
 def cat_fit_conv_leq_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     # kinematic fit has converged and is below chi2 cut (bad events)
@@ -154,6 +155,7 @@ def cat_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak
 # ============================================================================
 # Signal and background region categorizers
 # ============================================================================
+
 
 @categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*"})
 def cat_2btj_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
