@@ -139,17 +139,17 @@ def cat_fit_conv(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
     """Select events where kinematic fit converged (FitChi2 < 10000)."""
     return events, (events.FitChi2 < 10000)
 
-# @categorizer(uses={"FitChi2", "FitRbb"})
-# def cat_fit_conv_leq_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
-#     # kinematic fit has converged and is below chi2 cut (bad events)
-#     chi2cut = self.config_inst.x.fitchi2cut
-#     return events, (events.FitChi2 < 10000) & (events.FitChi2 <= chi2cut) & (events.FitRbb > 2.0)
+@categorizer(uses={"FitChi2", "FitRbb"})
+def cat_fit_conv_leq_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    # kinematic fit has converged and is below chi2 cut (bad events)
+    chi2cut = self.config_inst.x.fitchi2cut
+    return events, (events.FitChi2 < 10000) & (events.FitChi2 <= chi2cut) & (events.FitRbb > 2.0)
 
 
-# @categorizer(uses={"FitChi2", "FitRbb"})
-# def cat_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
-#     # kinematic fit has converged and is below chi2 cut (bad events)
-#     return events, (events.FitRbb > 2.0)
+@categorizer(uses={"FitChi2", "FitRbb"})
+def cat_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    # kinematic fit has converged and is below chi2 cut (bad events)
+    return events, (events.FitRbb > 2.0)
 
 # ============================================================================
 # Signal and background region categorizers
