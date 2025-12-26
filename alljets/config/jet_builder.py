@@ -98,6 +98,29 @@ def build_top1recojet(events, which=None):
     raise ValueError(f"Unknown which: {which}")
 
 
+def build_top2recojet(events, which=None):
+    """Access reconstructed Top2 jets or a selected component."""
+    events = attach_coffea_behavior(
+        events, {"RecoTop2": default_coffea_collections["Jet"]},
+    )
+    Top2recojets = events.RecoTop2
+    if which is None:
+        return Top2recojets * 1
+    if which == "mass":
+        return Top2recojets.mass
+    if which == "pt":
+        return Top2recojets.pt
+    if which == "eta":
+        return Top2recojets.eta
+    if which == "abs_eta":
+        return abs(Top2recojets.eta)
+    if which == "phi":
+        return Top2recojets.phi
+    if which == "energy":
+        return Top2recojets.energy
+    raise ValueError(f"Unknown which: {which}")
+
+
 def build_top1jet(events, which=None):
     """Access fitted Top1 jets or a selected component."""
     events = attach_coffea_behavior(

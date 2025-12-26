@@ -29,6 +29,7 @@ from .jet_builder import (
     build_b2jet,
     build_top1jet,
     build_top1recojet,
+    build_top2recojet,
     build_w1jet,
     build_w1recojet,
     build_w2recojet,
@@ -110,30 +111,30 @@ def add_variables(cfg: od.Config) -> None:
         x_title="Number of jets",
         discrete_x=True,
     )
-    add_variable(
-        cfg,
-        name="jets_pt",
-        expression="Jet.pt",
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_{T}$ of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_eta",
-        expression="Jet.eta",
-        binning=(30, -3.0, 3.0),
-        unit="GeV",
-        x_title=r"$\eta$ of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_phi",
-        expression="Jet.phi",
-        binning=(40, -3.2, 3.2),
-        unit="GeV",
-        x_title=r"$\phi$ of all jets",
-    )
+    # add_variable(
+    #     cfg,
+    #     name="jets_pt",
+    #     expression="Jet.pt",
+    #     binning=(40, 0.0, 400.0),
+    #     unit="GeV",
+    #     x_title=r"$p_{T}$ of all jets",
+    # )
+    # add_variable(
+    #     cfg,
+    #     name="jets_eta",
+    #     expression="Jet.eta",
+    #     binning=(30, -3.0, 3.0),
+    #     unit="GeV",
+    #     x_title=r"$\eta$ of all jets",
+    # )
+    # add_variable(
+    #     cfg,
+    #     name="jets_phi",
+    #     expression="Jet.phi",
+    #     binning=(40, -3.2, 3.2),
+    #     unit="GeV",
+    #     x_title=r"$\phi$ of all jets",
+    # )
     add_variable(
         cfg,
         name="jet1_pt",
@@ -755,7 +756,6 @@ def add_variables(cfg: od.Config) -> None:
     )
 
     build_w1recojet.inputs = ["RecoW1.{x,y,z,t}"]
-
     add_variable(
         cfg,
         name="reco_W1_mass",
@@ -766,7 +766,6 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$m_{W_{1}}^{reco}$",
     )
     build_w2recojet.inputs = ["RecoW2.{x,y,z,t}"]
-
     add_variable(
         cfg,
         name="reco_W2_mass",
@@ -778,7 +777,6 @@ def add_variables(cfg: od.Config) -> None:
     )
 
     build_top1recojet.inputs = ["RecoTop1.{x,y,z,t}"]
-
     add_variable(
         cfg,
         name="reco_Top1_mass",
@@ -786,10 +784,20 @@ def add_variables(cfg: od.Config) -> None:
         aux={"inputs": build_top1recojet.inputs},
         binning=(100, 0, 500),
         unit="GeV",
-        x_title=r"$m_{t}^{reco}$",
+        x_title=r"$m_{t_{1}}^{reco}$",
     )
-    build_top1jet.inputs = ["FitTop1.{x,y,z,t}"]
+    build_top2recojet.inputs = ["RecoTop2.{x,y,z,t}"]
+    add_variable(
+        cfg,
+        name="reco_Top2_mass",
+        expression=partial(build_top2recojet, which="mass"),
+        aux={"inputs": build_top2recojet.inputs},
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"$m_{t_{2}}^{reco}$",
+    )
 
+    build_top1jet.inputs = ["FitTop1.{x,y,z,t}"]
     add_variable(
         cfg,
         name="fit_Top1_mass",
