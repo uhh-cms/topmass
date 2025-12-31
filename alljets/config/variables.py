@@ -841,10 +841,10 @@ def add_variables(cfg: od.Config) -> None:
     add_variable(
         cfg,
         name="fit_deltaRbb",
-        expression="fitRbb",
+        expression="FitRbb",
         null_value=EMPTY_FLOAT,
         binning=(59, 0, 5.8),
-        x_title="pu weight",
+        x_title=r"$\Delta R_{b}$ ",
     )
 
 
