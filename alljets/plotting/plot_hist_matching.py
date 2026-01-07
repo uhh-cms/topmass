@@ -45,14 +45,15 @@ def plot_hist_matching(
     https://arxiv.org/pdf/2302.01967v2.
 
     Example command to run the plot function using the QCD MC samples
-    
+
     law run cf.PlotVariables1D --version v1 --configs 2017_v9\
     --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*','qcd*' \
     --variables reco_Top1_mass-fit_combination_type, --processes tt,data,qcd \
     --categories incl --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching
 
-    To plot the data driven QCD estimation, use the 'qcd_est' process instead of 'qcd' in the command above AND use --hist-hook qcd
-    
+    To plot the data driven QCD estimation:
+    Use the 'qcd_est' process instead of 'qcd' in the command above AND use --hist-hook qcd
+
     law run cf.PlotVariables1D --version v1 --configs 2017_v9 --datasets tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,'data*'\
     --variables reco_Top1_mass-fit_combination_type --processes tt,qcd_est,data --categories sig \
     --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching --hist-hook qcd
@@ -62,7 +63,7 @@ def plot_hist_matching(
     for i in range(len(list(keys))):
         if list(keys)[i] == "tt":
             tt_index = i
-            tt_label = r'$t\bar{t}$'
+            tt_label = r"$t\bar{t}$"
         elif ((list(keys)[i] == "qcd")):
             qcd_index = i
             label = "QCD multijet"
@@ -93,7 +94,7 @@ def plot_hist_matching(
     stack_correct = correct_hist
     stack_wrong = stack_correct + wrong_hist
     stack_unmatched = stack_wrong + unmatched_hist
-    stack_qcd = stack_unmatched + qcd_hist 
+    stack_qcd = stack_unmatched + qcd_hist
 
     # Add each matching type to the plot config with appropriate color and stacking order
     plot_config["hist_correct"] = {
@@ -104,7 +105,7 @@ def plot_hist_matching(
             "histtype": "fill",
             "label": f"{tt_label} correct",
             "edgecolor": "black",
-            "linewidth": 1, 
+            "linewidth": 1,
             "zorder": 4,
         },
     }
@@ -116,7 +117,7 @@ def plot_hist_matching(
             "histtype": "fill",
             "label": f"{tt_label} wrong",
             "edgecolor": "black",
-            "linewidth": 1, 
+            "linewidth": 1,
             "zorder": 3,
         },
     }
@@ -128,7 +129,7 @@ def plot_hist_matching(
             "histtype": "fill",
             "label": f"{tt_label} unmatched",
             "edgecolor": "black",
-            "linewidth": 1, 
+            "linewidth": 1,
             "zorder": 2,
         },
     }
@@ -141,7 +142,7 @@ def plot_hist_matching(
             "histtype": "fill",
             "label": label,
             "edgecolor": "black",
-            "linewidth": 1, 
+            "linewidth": 1,
             "zorder": 1,
         },
         "ratio_kwargs": {
@@ -182,7 +183,7 @@ def plot_hist_matching(
     default_style_config["legend_cfg"]["title_fontsize"] = 24
     default_style_config["legend_cfg"]["fontsize"] = 20
     default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
-    kwargs["skip_ratio"] = False # False
+    kwargs["skip_ratio"] = False
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
@@ -223,7 +224,7 @@ def plot_hist_matching_MC(
     for i in range(len(list(keys))):
         if list(keys)[i] == "tt":
             tt_index = i
-            tt_label = r'$t\bar{t}$'
+            tt_label = r"$t\bar{t}$"
 
     # Use the first variable instance for plotting
     variable_inst = variable_insts[0]
@@ -254,7 +255,7 @@ def plot_hist_matching_MC(
             "histtype": "fill",
             "label": f"{tt_label} correct",
             "edgecolor": "black",
-            "linewidth": 1, 
+            "linewidth": 1,
             "zorder": 3,
         },
     }
