@@ -165,6 +165,7 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
     def qcd_estimation(
         task: law.Task,
         hists: dict[od.Config, dict[od.Process, Any]],
+        **kwargs,
     ) -> dict[od.Config, dict[od.Process, Any]]:
         return {
             config_inst: qcd_estimation_per_config(task, config_inst, hists[config_inst])
