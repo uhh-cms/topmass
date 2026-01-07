@@ -471,6 +471,7 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "FitChi2", 0)
     events = set_ak_column(events, "FitPgof", 1)
     events = set_ak_column(events, "fitCombinationType", 2)
+    events = set_ak_column(events, "FitRbb", 2.5)
 
     # Category assignment and deterministic seeds
     events = self[category_ids](events, **kwargs)
