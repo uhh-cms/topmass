@@ -39,15 +39,32 @@ def trig_weights(
     **kwargs,
 ) -> ak.Array:
     """
-    Creates trigger weights using the correctionlib. Requires an external file in the config under
-    ``trig_sf``:
+    Apply trigger correction weights to events.
 
-    .. code-block:: python
+    This producer evaluates a trigger correction weight using a correctionlib
+    CorrectionSet provided via the external file ``trig_sf`` and stores it as
+    event-level columns:
+    - ``trig_weight``
+    - ``trig_weight_up``
+    - ``trig_weight_down``
 
-        cfg.x.external_files = DotDict.wrap({
-            "trig_sf": "/afs/desy.de/user/d/davidsto/public/mirrors/trigger_correction_HT350_CSV.json.gz",  # noqa
-        })
+    The weight is evaluated as a function of the configured trigger scale-factor
+    variable (e.g. jet6_pt or ht).
+
+    Uncertainty treatment:
+    ----------------------
+    The current implementation applies a conservative ±100% variation around the
+    nominal weight:
+    - trig_weight_up   = weight + |1 − weight|
+    - trig_weight_down = max(weight − |1 − weight|, 0)
+
+    To use a smaller relative uncertainty (e.g. ±50%), multiply the variation term
+    by a factor, for example:
+    variation = 0.5 * |1 − weight|.
+
+    For datasets without top quarks, all trigger weights are set to unity.
     """
+
     if self.dataset_inst.has_tag("has_top"):
         jet6_pt = ak.where(
             ak.num(events.Jet[(abs(events.Jet.eta) < 2.6)], axis=1) > 5,

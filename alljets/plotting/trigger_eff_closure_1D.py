@@ -30,14 +30,6 @@ od = maybe_import("order")
 
 logger = law.logger.get_logger(__name__)
 
-"""
-law run cf.PlotVariables1D --version v1
---processes tt --variables jet6_pt-trig_bits
---datasets tt_fh_powheg --selector trigger_sel
---producers example,trigger_prod
---plot-function alljets.plotting.trigger_eff_plot.plot_efficiencies
-"""
-
 
 def convert_weightedmean_to_weight(h_mean: hist.Hist, include_flow: bool = True) -> hist.Hist:
     if not isinstance(h_mean._storage_type(), hist.storage.WeightedMean):
@@ -146,8 +138,26 @@ def plot_efficiencies(
     **kwargs,
 ) -> plt.Figure:
     """
-    TODO.
+    Plot 1D trigger efficiency curves as a function of a single variable.
+
+    This plot function relies on a specific setup
+    - the hist_producer trig_all_weights
+    - the corresponding producers no_norm and trigger_prod
+
+    These are needed to ensure the correct histogram structure for the
+    efficiency and ratio calculation.
+
+    Example:
+    ---------
+    law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
+    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*' \
+    --selector-steps All,BaseTrigger,BTag,HT --selector trigger_eff
+    --producers no_norm,trigger_prod \
+    --variables jet6_pt_5-trig_bits --hist-producer trig_all_weights \
+    --processes data,tt --categories incl \
+    --plot-function alljets.plotting.trigger_eff_closure_1D.plot_efficiencies --general-settings "bin_sel=1"
     """
+
     hist_list = list(hists.values())
     if isinstance(hist_list[0]._storage_type(), hist.storage.WeightedMean):
         hist_list_mean = hist_list.copy()
@@ -283,8 +293,34 @@ def plot_efficiencies_with_uncert(
     **kwargs,
 ) -> plt.Figure:
     """
-    TODO.
+    Plot 1D trigger efficiency curves including trigger systematic uncertainties.
+
+    This plot function computes and displays trigger efficiencies as a function
+    of a single variable, together with their ratio and an uncertainty band
+    derived from trigger up/down shifts.
+
+    Important requirements:
+    - Histograms must be produced with the hist_producer (e.g. trig_all_weights
+    - The corresponding producers must be used: no_norm and trigger_prod
+    - Trigger shift sources trig_up/trig_down must be available
+    - The selector must be the default selector e.g. example_trig_weight, not trigger_eff
+
+    This plot is intended to be run with shifted histograms.
+
+    Example:
+    ---------
+    law run cf.PlotShiftedVariables1D --version v1 --configs 2017_v9 \
+    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*' \
+    --producers no_norm,trigger_prod \
+    --variables jet6_pt_5-trig_bits \
+    --hist-producer trig_all_weights \
+    --processes data,tt \
+    --categories incl \
+    --plot-function alljets.plotting.trigger_eff_closure_1D.plot_efficiencies_with_uncert \
+    --general-settings "bin_sel=1" \
+    --shift-sources trig
     """
+
     keys = list(hists.keys())
     variable_inst = variable_insts[0]
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
@@ -583,8 +619,17 @@ def produce_trig_weight(
     **kwargs,
 ) -> plt.Figure:
     """
-    TODO.
+    Produce trigger efficiency curves and derive a trigger correction weight.
+
+    This function is used by the ProduceTriggerWeight task to compute a 1D trigger
+    efficiency curve as a function of a single variable for tt̄ MC and data.
+    The efficiencies are fitted, and a trigger correction weight is derived from
+    the ratio of the data and MC fits and stored as a correctionlib object.
+
+    The function returns the efficiency plot together with the corresponding
+    correctionlib CorrectionSet.
     """
+
     hist_list = list(hists.values())
     if isinstance(hist_list[0]._storage_type(), hist.storage.WeightedMean):
         hist_list_mean = hist_list.copy()
