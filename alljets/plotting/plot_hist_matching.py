@@ -44,26 +44,31 @@ def plot_hist_matching(
     using cumulative stacking. The color scheme is based on previous analyses, e.g.
     https://arxiv.org/pdf/2302.01967v2.
 
-    law run cf.PlotVariables1D --version v1 --configs 2017_v9_limited \
-    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg, data, qcd* \
-    --variables reco_Top1_mass-fit_combination_type, processes tt,data,qcd (qcd_est) \
+    Example command to run the plot function using the QCD MC samples
+    
+    law run cf.PlotVariables1D --version v1 --configs 2017_v9\
+    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*','qcd*' \
+    --variables reco_Top1_mass-fit_combination_type, --processes tt,data,qcd \
     --categories incl --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching
 
-    Example command to run the plot function. The matching information is stored in
-    'fit_combination_type' column. Here, a 2D histogram is created with the
-    information of the matching type on an additional axis.
+    To plot the data driven QCD estimation, use the 'qcd_est' process instead of 'qcd' in the command above AND use --hist-hook qcd
+    
+    law run cf.PlotVariables1D --version v1 --configs 2017_v9 --datasets tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,'data*'\
+    --variables reco_Top1_mass-fit_combination_type --processes tt,qcd_est,data --categories sig \
+    --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching --hist-hook qcd
     """
     # Identify indices for each process in the histogram keys
     keys = hists.keys()
     for i in range(len(list(keys))):
         if list(keys)[i] == "tt":
             tt_index = i
+            tt_label = r'$t\bar{t}$'
         elif ((list(keys)[i] == "qcd")):
             qcd_index = i
-            label = "QCD"
+            label = "QCD multijet"
         elif ((list(keys)[i] == "qcd_est")):
             qcd_index = i
-            label = "Bkg. estimation"
+            label = " QCD Bkg. estimation"
         else:
             data_index = i
 
@@ -85,30 +90,22 @@ def plot_hist_matching(
     unmatched_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
 
     # Build cumulative stacks for plotting
-    stack_qcd = qcd_hist
-    stack_correct = qcd_hist + correct_hist
+    stack_correct = correct_hist
     stack_wrong = stack_correct + wrong_hist
     stack_unmatched = stack_wrong + unmatched_hist
+    stack_qcd = stack_unmatched + qcd_hist 
 
     # Add each matching type to the plot config with appropriate color and stacking order
-    plot_config["hist_qcd"] = {
-        "method": "draw_hist",
-        "hist": stack_qcd,
-        "kwargs": {
-            "color": "#ffff00",
-            "histtype": "fill",
-            "label": label,
-            "zorder": 0,
-        },
-    }
     plot_config["hist_correct"] = {
         "method": "draw_hist",
         "hist": stack_correct,
         "kwargs": {
             "color": "#cc0000",
             "histtype": "fill",
-            "label": f"{list(hists[0].keys())[tt_index].name}, correct",
-            "zorder": 1,
+            "label": f"{tt_label} correct",
+            "edgecolor": "black",
+            "linewidth": 1, 
+            "zorder": 4,
         },
     }
     plot_config["hist_wrong"] = {
@@ -117,8 +114,10 @@ def plot_hist_matching(
         "kwargs": {
             "color": "#ff6666",
             "histtype": "fill",
-            "label": f"{list(hists[0].keys())[tt_index].name}, wrong",
-            "zorder": 2,
+            "label": f"{tt_label} wrong",
+            "edgecolor": "black",
+            "linewidth": 1, 
+            "zorder": 3,
         },
     }
     plot_config["hist_unmatched"] = {
@@ -127,8 +126,35 @@ def plot_hist_matching(
         "kwargs": {
             "color": "#ffcccc",
             "histtype": "fill",
-            "label": f"{list(hists[0].keys())[tt_index].name}, unmatched",
-            "zorder": 3,
+            "label": f"{tt_label} unmatched",
+            "edgecolor": "black",
+            "linewidth": 1, 
+            "zorder": 2,
+        },
+    }
+    plot_config["hist_qcd"] = {
+        "method": "draw_hist",
+        "ratio_method": "draw_stat_error_bands",
+        "hist": stack_qcd,
+        "kwargs": {
+            "color": "#ffff00",
+            "histtype": "fill",
+            "label": label,
+            "edgecolor": "black",
+            "linewidth": 1, 
+            "zorder": 1,
+        },
+        "ratio_kwargs": {
+            "norm": (qcd_hist + correct_hist + wrong_hist + unmatched_hist).values(),
+        },
+    }
+    # Add statistical uncertainty band for the total prediction
+    plot_config["hist_total_uncert"] = {
+        "method": "draw_stat_error_bands",
+        "hist": (qcd_hist + correct_hist + wrong_hist + unmatched_hist),
+        "kwargs": {
+            "label": "MC stat. unc.",
+            "zorder": 5,
         },
     }
     # Add data points with error bars
@@ -138,25 +164,13 @@ def plot_hist_matching(
         "hist": hists[0][list(hists[0].keys())[data_index]][0, :, sum],
         "kwargs": {
             "label": f"{list(hists[0].keys())[data_index].name}",
+            "zorder": 6,
         },
         "ratio_kwargs": {
             "norm": (
                 hists[0][list(hists[0].keys())[qcd_index]][0, :, 1] +
-                hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
-                hists[0][list(hists[0].keys())[tt_index]][0, :, 2] +
-                hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
-            ).values(),
+                correct_hist + wrong_hist + unmatched_hist).values(),
         },
-    }
-    # Add statistical uncertainty band for the total prediction
-    plot_config["hist_total_uncert"] = {
-        "method": "draw_stat_error_bands",
-        "hist": (
-            hists[0][list(hists[0].keys())[qcd_index]][0, :, sum] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 3] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 2] +
-            hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
-        ),
     }
 
     # Prepare and merge style configuration
@@ -168,7 +182,7 @@ def plot_hist_matching(
     default_style_config["legend_cfg"]["title_fontsize"] = 24
     default_style_config["legend_cfg"]["fontsize"] = 20
     default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
-    kwargs["skip_ratio"] = False
+    kwargs["skip_ratio"] = False # False
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
@@ -194,7 +208,7 @@ def plot_hist_matching_MC(
     using cumulative stacking. The color scheme is based on previous analyses, e.g.
     https://arxiv.org/pdf/2302.01967v2.
 
-    law run cf.PlotVariables1D --version v1 --configs 2017_v9_limited \
+    law run cf.PlotVariables1D --version v1 --configs 2017_v9\
     --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg \
     --variables reco_Top1_mass-fit_combination_type \
     --categories incl --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching_MC
@@ -209,6 +223,7 @@ def plot_hist_matching_MC(
     for i in range(len(list(keys))):
         if list(keys)[i] == "tt":
             tt_index = i
+            tt_label = r'$t\bar{t}$'
 
     # Use the first variable instance for plotting
     variable_inst = variable_insts[0]
@@ -237,7 +252,9 @@ def plot_hist_matching_MC(
         "kwargs": {
             "color": "#cc0000",
             "histtype": "fill",
-            "label": f"{list(hists[0].keys())[tt_index].name}, correct",
+            "label": f"{tt_label} correct",
+            "edgecolor": "black",
+            "linewidth": 1, 
             "zorder": 3,
         },
     }
@@ -247,7 +264,9 @@ def plot_hist_matching_MC(
         "kwargs": {
             "color": "#ff6666",
             "histtype": "fill",
-            "label": f"{list(hists[0].keys())[tt_index].name}, wrong",
+            "label": f"{tt_label} wrong",
+            "edgecolor": "black",
+            "linewidth": 1,
             "zorder": 2,
         },
     }
@@ -257,7 +276,9 @@ def plot_hist_matching_MC(
         "kwargs": {
             "color": "#ffcccc",
             "histtype": "fill",
-            "label": f"{list(hists[0].keys())[tt_index].name}, unmatched",
+            "label": f"{tt_label} unmatched",
+            "edgecolor": "black",
+            "linewidth": 1,
             "zorder": 1,
         },
     }
