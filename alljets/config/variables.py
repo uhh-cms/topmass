@@ -308,6 +308,16 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
+        name="ht7",
+        expression="ht",
+        binning=[250, 300, 350, 400, 450, 500,
+                 550, 600, 700, 800, 1000, 1250, 1500],
+        aux={"overflow": False, "underflow": False},
+        unit="GeV",
+        x_title="$H_T$",
+    )
+    add_variable(
+        cfg,
         name="ht_old",
         expression="ht_old",
         binning=(20, 0, 2000.0),
