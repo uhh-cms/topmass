@@ -119,7 +119,7 @@ def muon_selection(
     },
     exposed=True,
 )
-def example(
+def default(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
@@ -142,7 +142,6 @@ def example(
         events: The events array with new columns added.
         SelectionResult: Contains selection masks and object indices.
 
-    Alternative name for this selector could be `baseline_selection`.
     """
 
     # ensure coffea behavior
@@ -275,7 +274,7 @@ def example(
     },
     exposed=True,
 )
-def example_trig_weight(
+def default_trig_weight(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
@@ -292,7 +291,6 @@ def example_trig_weight(
         events: The events array with new columns added.
         SelectionResult: Contains selection masks and object indices.
 
-    Alternative name for this selector could be `baseline_selection_with_trig_weights`.
     """
 
     # ensure coffea behavior

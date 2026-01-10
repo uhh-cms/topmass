@@ -228,7 +228,7 @@ def add_config(
 
     # default objects
     cfg.x.default_calibrator = "default"
-    cfg.x.default_selector = "example_trig_weight"
+    cfg.x.default_selector = "default_trig_weight"
     cfg.x.default_reducer = "cf_default"
     cfg.x.default_producer = ["default", "kinFitMatch"]
     cfg.x.default_ml_model = None
