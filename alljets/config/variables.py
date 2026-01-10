@@ -271,7 +271,7 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="jet6_pt_5",
+        name="jet6_pt_trigger",
         expression="Jet.pt[:,5]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 100.0),
@@ -308,7 +308,7 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="ht7",
+        name="ht_trigger",
         expression="ht",
         binning=[250, 300, 350, 400, 450, 500,
                  550, 600, 700, 800, 1000, 1250, 1500],

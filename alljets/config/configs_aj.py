@@ -317,7 +317,7 @@ def add_config(
         "ht7": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
         "trig_eff_ht2": ["All", "BaseTrigger", "BTag", "jet"],
         "trig_eff_pt": ["All", "BaseTrigger", "BTag", "HT"],
-        "jet6_pt_5": ["All", "BaseTrigger", "BTag", "HT"],
+        "jet6_pt_trigger": ["All", "BaseTrigger", "BTag", "HT"],
         "trig_eff_bjet": ["All", "BaseTrigger", "jet", "HT"],
         "trig_eff_ht_pt": ["All", "BaseTrigger", "BTag"],
     }
@@ -594,7 +594,7 @@ def add_config(
     ################################################################################################
     cfg.x.fitchi2cut = 10
     cfg.x.fitpgofcut = 0.1
-    cfg.x.trigger_sf_variable = "jet6_pt_5"
+    cfg.x.trigger_sf_variable = "jet6_pt_trigger"
 
     ################################################################################################
     # shifts

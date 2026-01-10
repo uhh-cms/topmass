@@ -153,9 +153,13 @@ def plot_efficiencies(
     --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*' \
     --selector-steps All,BaseTrigger,BTag,HT --selector trigger_eff
     --producers no_norm,trigger_prod \
-    --variables jet6_pt_5-trig_bits --hist-producer trig_all_weights \
+    --variables jet6_pt_trigger-trig_bits --hist-producer trig_all_weights \
     --processes data,tt --categories incl \
     --plot-function alljets.plotting.trigger_eff_closure_1D.plot_efficiencies --general-settings "bin_sel=1"
+    
+    For the ht_trigger variable, replace --variables and --selector-steps accordingly:
+    --variables ht_trigger-trig_bits \
+    --selector-steps All,BaseTrigger,SixJets,BTag,jet
     """
 
     hist_list = list(hists.values())
@@ -300,25 +304,29 @@ def plot_efficiencies_with_uncert(
     derived from trigger up/down shifts.
 
     Important requirements:
-    - Histograms must be produced with the hist_producer (e.g. trig_all_weights
+    - Histograms must be produced with the hist_producer trig_all_weights
     - The corresponding producers must be used: no_norm and trigger_prod
     - Trigger shift sources trig_up/trig_down must be available
-    - The selector must be the default selector e.g. example_trig_weight, not trigger_eff
+    - The selector must be the default selector e.g. default_trig_weight, not trigger_eff
 
     This plot is intended to be run with shifted histograms.
 
-    Example:
+    Example command using the jet6_pt_trigger variable:
     ---------
     law run cf.PlotShiftedVariables1D --version v1 --configs 2017_v9 \
     --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*' \
     --producers no_norm,trigger_prod \
-    --variables jet6_pt_5-trig_bits \
+    --variables jet6_pt_trigger-trig_bits \
     --hist-producer trig_all_weights \
     --processes data,tt \
     --categories incl \
     --plot-function alljets.plotting.trigger_eff_closure_1D.plot_efficiencies_with_uncert \
     --general-settings "bin_sel=1" \
     --shift-sources trig
+    
+    For the ht_trigger variable, replace --variables and --selector-steps accordingly:
+    --variables ht_trigger-trig_bits \
+    --selector-steps All,BaseTrigger,SixJets,BTag,jet
     """
 
     keys = list(hists.keys())
