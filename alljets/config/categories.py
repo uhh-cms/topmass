@@ -6,11 +6,11 @@ Definition of categories for the top mass analysis.
 This module defines event categories used to classify events based on:
 
 Each category defined here must have a corresponding categorizer function
-in alljets/categorization/example.py that implements the selection logic.
+in alljets/categorization/default.py that implements the selection logic.
 
 Structure of add_category:
     - name: Internal identifier used in code
-    - selection: Name of the categorizer function in categorization/example.py
+    - selection: Name of the categorizer function in categorization/default.py
     - label: Human-readable label for plots (can include LaTeX formatting)
     - tags (optional): Set of tags for grouping related categories
 """
