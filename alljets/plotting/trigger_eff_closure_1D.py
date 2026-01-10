@@ -156,7 +156,7 @@ def plot_efficiencies(
     --variables jet6_pt_trigger-trig_bits --hist-producer trig_all_weights \
     --processes data,tt --categories incl \
     --plot-function alljets.plotting.trigger_eff_closure_1D.plot_efficiencies --general-settings "bin_sel=1"
-    
+
     For the ht_trigger variable, replace --variables and --selector-steps accordingly:
     --variables ht_trigger-trig_bits \
     --selector-steps All,BaseTrigger,SixJets,BTag,jet
@@ -323,7 +323,7 @@ def plot_efficiencies_with_uncert(
     --plot-function alljets.plotting.trigger_eff_closure_1D.plot_efficiencies_with_uncert \
     --general-settings "bin_sel=1" \
     --shift-sources trig
-    
+
     For the ht_trigger variable, replace --variables and --selector-steps accordingly:
     --variables ht_trigger-trig_bits \
     --selector-steps All,BaseTrigger,SixJets,BTag,jet
