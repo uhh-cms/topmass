@@ -395,16 +395,15 @@ def cutflow_features(
     },
     require_producers={"kinFitMatch"},
 )
-def example(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
-    Top-level example production pipeline.
+    Top-level default production pipeline.
 
     Orchestrates a typical production sequence: attaches coffea
     behaviour, computes features, assigns category ids, sets
     deterministic seeds and — for MC — applies normalization (and
     optionally muon) weights.
-
-    Alternative name (suggested): "baseline_production / default".
+    
     """
 
     # Attach coffea-style behaviour for collections

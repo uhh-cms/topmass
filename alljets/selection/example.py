@@ -38,7 +38,7 @@ from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.selection.stats import increment_stats
 from columnflow.util import maybe_import
 
-from alljets.production.example import cutflow_features
+from alljets.production.default import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights
 from alljets.selection.jet import jet_selection
 

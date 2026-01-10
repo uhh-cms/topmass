@@ -230,7 +230,7 @@ def add_config(
     cfg.x.default_calibrator = "default"
     cfg.x.default_selector = "example_trig_weight"
     cfg.x.default_reducer = "cf_default"
-    cfg.x.default_producer = ["example", "kinFitMatch"]
+    cfg.x.default_producer = ["default", "kinFitMatch"]
     cfg.x.default_ml_model = None
     cfg.x.default_inference_model = "default_no_shifts"
     cfg.x.default_categories = ("incl",)
