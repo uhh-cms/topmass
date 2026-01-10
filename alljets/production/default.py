@@ -403,7 +403,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     behaviour, computes features, assigns category ids, sets
     deterministic seeds and — for MC — applies normalization (and
     optionally muon) weights.
-    
+
     """
 
     # Attach coffea-style behaviour for collections
@@ -456,7 +456,6 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     full kinfit, and sets `normalization_weight`/`mc_weight` to ones for
     MC.
 
-    Alternative name (suggested): "no_normalization".
     """
 
     # Ensure gen_top exists for datasets without truth
@@ -510,7 +509,6 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     - `trig_bits_orth`: orthogonalized bits relative to the channel
         reference trigger (used for orthogonal trigger studies).
 
-    Alternative name (suggested): "trigger_bits_production".
     """
 
     # Start with empty singleton columns to concatenate trigger entries
