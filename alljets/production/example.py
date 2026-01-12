@@ -182,7 +182,13 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "FitW2.*",
         "FitTop1.*",
         "FitTop2.*",
-        # "FitRbb",
+        "FitB1.*",
+        "FitB2.*",
+        "RecoW1.*",
+        "RecoW2.*",
+        "RecoTop1.*",
+        "RecoTop2.*",
+        "FitRbb",
         # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
     },
 )
@@ -250,18 +256,29 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         }
         events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
 
+    from alljets.scripts.default import dr
     B1 = events.FitJet[:, 0]
     B2 = events.FitJet[:, 1]
+    fitRbb = dr(B1,B2)
     W1 = events.FitJet[:, 2].add(events.FitJet[:, 3])
     W2 = events.FitJet[:, 4].add(events.FitJet[:, 5])
+    recoW1 = events.FitJet.reco[:, 2].add(events.FitJet.reco[:, 3])
+    recoW2 = events.FitJet.reco[:, 4].add(events.FitJet.reco[:, 5])
     Top1 = events.FitJet[:, 0].add(W1)
     Top2 = events.FitJet[:, 1].add(W2)
+    recoTop1 = events.FitJet.reco[:, 0].add(recoW1)
+    recoTop2 = events.FitJet.reco[:, 1].add(recoW2)
     events = set_ak_column(events, "FitB1", B1)
     events = set_ak_column(events, "FitB2", B2)
+    events = set_ak_column(events, "FitRbb", fitRbb)
     events = set_ak_column(events, "FitW1", W1)
     events = set_ak_column(events, "FitW2", W2)
+    events = set_ak_column(events, "RecoW1", recoW1)
+    events = set_ak_column(events, "RecoW2", recoW2)
     events = set_ak_column(events, "FitTop1", Top1)
     events = set_ak_column(events, "FitTop2", Top2)
+    events = set_ak_column(events, "RecoTop1", recoTop1)
+    events = set_ak_column(events, "RecoTop2", recoTop2)
 
     return events
 

@@ -1309,6 +1309,16 @@ def add_variables(cfg: od.Config) -> None:
     build_top2jet.inputs = ["FitTop2.{x,y,z,t}"]
     add_variable(
         cfg,
+        name="fit_Top2_mass",
+        expression=partial(build_top2jet, which="mass"),
+        aux={"inputs": build_top2jet.inputs},
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"$m_{\text{t}}^{\text{fit}}$",
+    )
+
+    add_variable(
+        cfg,
         name="fit_combination_type",
         expression="fitCombinationType",
         null_value=EMPTY_FLOAT,
@@ -1321,16 +1331,6 @@ def add_variables(cfg: od.Config) -> None:
         null_value=EMPTY_FLOAT,
         binning=(3, -0.5, 2.5),
         x_title=r"0: unmatched, 1: wrong, 2: correct",
-    )
-
-    add_variable(
-        cfg,
-        name="fit_Top2_mass",
-        expression=partial(build_top2jet, which="mass"),
-        aux={"inputs": build_top2jet.inputs},
-        binning=(100, 0, 500),
-        unit="GeV",
-        x_title=r"$m_{\text{t}}^{\text{fit}}$",
     )
 
     def build_b1jet(events, which=None):
@@ -1354,7 +1354,7 @@ def add_variables(cfg: od.Config) -> None:
             return B1jets.energy
         raise ValueError(f"Unknown which: {which}")
 
-    build_b1jet.inputs = ["FitB1.{pt,eta,phi,mass}"]
+    build_b1jet.inputs = ["FitB1.{x,y,z,t}"]
     add_variable(
         cfg,
         name="fit_B1_mass_",
@@ -1388,8 +1388,89 @@ def add_variables(cfg: od.Config) -> None:
 
     build_b2jet.inputs = ["FitB2.{x,y,z,t}"]
 
+    def build_w1jet(events, which=None):
+        events = attach_coffea_behavior(
+            events, {"RecoW1": default_coffea_collections["Jet"]},
+        )
+        W1jets = events.RecoW1
+        if which is None:
+            return W1jets * 1
+        if which == "mass":
+            return W1jets.mass
+        if which == "pt":
+            return W1jets.pt
+        if which == "eta":
+            return W1jets.eta
+        if which == "abs_eta":
+            return abs(W1jets.eta)
+        if which == "phi":
+            return W1jets.phi
+        if which == "energy":
+            return W1jets.energy
+        raise ValueError(f"Unknown which: {which}")
+
+    build_w1jet.inputs = ["RecoW1.{x,y,z,t}"]
+
+    def build_w2jet(events, which=None):
+        events = attach_coffea_behavior(
+            events, {"RecoW2": default_coffea_collections["Jet"]},
+        )
+        W2jets = events.RecoW2
+        if which is None:
+            return W2jets * 1
+        if which == "mass":
+            return W2jets.mass
+        if which == "pt":
+            return W2jets.pt
+        if which == "eta":
+            return W2jets.eta
+        if which == "abs_eta":
+            return abs(W2jets.eta)
+        if which == "phi":
+            return W2jets.phi
+        if which == "energy":
+            return W2jets.energy
+        raise ValueError(f"Unknown which: {which}")
+
+    build_w2jet.inputs = ["RecoW2.{x,y,z,t}"]
+
+    def build_avg_w_mass(events):
+        W1_mass = build_w1jet(events, which="mass")
+        W2_mass = build_w2jet(events, which="mass")
+        return (W1_mass + W2_mass)/2
+    build_avg_w_mass.inputs = (build_w1jet.inputs + build_w2jet.inputs)
+    add_variable(
+        cfg,
+        name="reco_W_mass_avg",
+        expression=partial(build_avg_w_mass),
+        aux={"inputs": build_avg_w_mass.inputs},
+        binning=(40, 50, 120),
+        unit="GeV",
+        x_title=r"average W mass",
+    )
+
+    def build_reco_R_bq(events):
+        events = attach_coffea_behavior(
+            events, {"FitJet.reco": default_coffea_collections["Jet"]},
+        )
+
+        reco = events.FitJet.reco
+        return (reco[:, 0].pt + reco[:, 1].pt)/(reco[:, 2].pt + reco[:, 3].pt + reco[:, 4].pt + reco[:, 5].pt)
+
+    build_reco_R_bq.inputs = ["FitJet.reco.{pt,eta,phi,mass}"]
+    add_variable(
+        cfg,
+        name="reco_R_bq",
+        expression=build_reco_R_bq,
+        aux={"inputs": build_reco_R_bq.inputs},
+        binning=(50, 0, 5),
+        unit="",
+        x_title=r"R_{bq}",
+    )
 
 # helper to add a variable to the config with some defaults
+
+
 def add_variable(config: od.Config, *args, **kwargs) -> od.Variable:
     kwargs.setdefault("null_value", EMPTY_FLOAT)
 

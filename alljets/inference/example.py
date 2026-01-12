@@ -18,7 +18,7 @@ def example(self: InferenceModel) -> None:
         "fit_conv_big_top_mass",
         config_data={
             config_inst.name: self.category_config_spec(
-                category="fit_conv_big",
+                category="fit_conv_big_rbb",
                 variable="fit_Top1_mass",
                 data_datasets=["data_jetht*"],
             )
@@ -27,11 +27,11 @@ def example(self: InferenceModel) -> None:
     )
 
     self.add_category(
-        "fit_conv_big_reco_W1",
+        "fit_conv_big_reco_W_avg",
         config_data={
             config_inst.name: self.category_config_spec(
-                category="fit_conv_big",
-                variable="reco_W1_mass",
+                category="fit_conv_big_rbb",
+                variable="reco_W_mass_avg",
                 data_datasets=["data_jetht*"],
             )
             for config_inst in self.config_insts
@@ -39,11 +39,11 @@ def example(self: InferenceModel) -> None:
     )
 
     self.add_category(
-        "fit_conv_big_reco_W2",
+        "fit_conv_big_reco_R_bq",
         config_data={
             config_inst.name: self.category_config_spec(
-                category="fit_conv_big",
-                variable="reco_W2_mass",
+                category="fit_conv_big_rbb",
+                variable="reco_R_bq",
                 data_datasets=["data_jetht*"],
             )
             for config_inst in self.config_insts

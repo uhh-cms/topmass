@@ -64,7 +64,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="fit_conv_leq",
         selection="cat_fit_conv_leq",
-        label=r"below $\chi^2$ cut",
+        label=r"$P_{gof} < 0.1$",
     )
     add_category(
         cfg,
@@ -86,12 +86,12 @@ def add_categories(cfg: od.Config) -> None:
         label=">2 b-tagged jets & signal trigger",
         tags={"2btj"},
     )
-    # add_category(
-    #     cfg,
-    #     name="fit_conv_leq_rbb",
-    #     selection="cat_fit_conv_leq_rbb",
-    #     label=r"below $\chi^2$ cut and above $\Delta R_{\text{b}}$ cut",
-    # )
+    add_category(
+        cfg,
+        name="fit_conv_big_rbb",
+        selection="cat_fit_conv_big_rbb",
+        label=r"$P_{gof} > 0.1$ and above $\Delta R_{\text{b}}$ cut",
+    )
     # add_category(
     #     cfg,
     #     name="fit_rbb",
