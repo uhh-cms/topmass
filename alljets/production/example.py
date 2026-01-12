@@ -188,6 +188,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "RecoTop2.*",
         gen_top_lookup,
         "gen_top",
+        "FitJet.reco.*",
         # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
     },
 )
@@ -375,47 +376,89 @@ def cutflow_features(
     uses={
         attach_coffea_behavior,
         "gen_top",
-        "FitJet",
+        "FitJet.*"
     },
     produces={
         "gen_top",
         attach_coffea_behavior,
         "jet_matching_mask",
+        "nMatches",
+        "n_matchedJets",
+        "multiple_matching_jet",
+        "multiple_matching_parton",
+        "no_matching_parton",
+        "nMatchedJets_6jets",
+        "ratio_gen_jet_pt_Fit_q1",
+        "ratio_gen_jet_pt_Reco_q1",
+        "ratio_gen_jet_pt_Fit_q2",
+        "ratio_gen_jet_pt_Reco_q2",
+        "ratio_gen_jet_pt_Fit_q3",
+        "ratio_gen_jet_pt_Reco_q3",
+        "ratio_gen_jet_pt_Fit_q4",
+        "ratio_gen_jet_pt_Reco_q4",
+        "ratio_gen_jet_pt_b1",
+        "ratio_gen_jet_pt_b2",
+        "ratio_reco_fit_pt_b1",
+        "ratio_reco_fit_pt_b2",
+        "ratio_reco_fit_pt_q1",
+        "ratio_reco_fit_pt_q2",
+        "ratio_reco_fit_pt_q3",
+        "ratio_reco_fit_pt_q4",
+        "n_deltaR06_reco_q1",
     },
 )
 def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array:
 
     from alljets.scripts.default import ambiguous_matching
 
-    # attach coffea behavior
-    events = self[attach_coffea_behavior](events, **kwargs)
+    # attach coffea behavior FitJet
+    jetcollections = {
+        "FitJet": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+        },
+    }
+    events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
 
     # attach coffea behavior gen_top
     gen_top = attach_coffea_behavior_fn(
-            events.gen_top,
-            collections={
-                "b": {
-                    "type_name": "GenParticle",
-                    "check_attr": "metric_table",
-                    "skip_fields": "*Idx*G",
-                },
-                "t": {
-                    "type_name": "GenParticle",
-                    "check_attr": "metric_table",
-                    "skip_fields": "*Idx*G",
-                },
-                "w": {
-                    "type_name": "GenParticle",
-                    "check_attr": "metric_table",
-                    "skip_fields": "*Idx*G",
-                },
-                "w_children": {
-                    "type_name": "GenParticle",
-                    "check_attr": "metric_table",
-                    "skip_fields": "*Idx*G",
-                },
+        events.gen_top,
+        collections={
+            "b": {
+                "type_name": "GenParticle",
+                "check_attr": "metric_table",
+                "skip_fields": "*Idx*G",
             },
-        )
+            "t": {
+                "type_name": "GenParticle",
+                "check_attr": "metric_table",
+                "skip_fields": "*Idx*G",
+            },
+            "w": {
+                "type_name": "GenParticle",
+                "check_attr": "metric_table",
+                "skip_fields": "*Idx*G",
+            },
+            "w_children": {
+                "type_name": "GenParticle",
+                "check_attr": "metric_table",
+                "skip_fields": "*Idx*G",
+            },
+        },
+    )
+
+    # attach coffea behavior FitJet.reco
+    reco_jet = attach_coffea_behavior_fn(
+        events.FitJet,
+        collections={
+            "reco": {
+                "type_name": "Jet",
+                "check_attr": "metric_table",
+                "skip_fields": "*Idx*G",
+            },
+        },
+    )
 
     # ambiguous matching
     events = set_ak_column(
@@ -423,6 +466,152 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
         "jet_matching_mask",
         ambiguous_matching(events.Jet, gen_top, 0.4)
     )
+
+    # List to work with ak.all and ak.any
+    mask_list = ak.to_packed(ak.concatenate([
+        events.jet_matching_mask.b1[:, None],
+        events.jet_matching_mask.b2[:, None],
+        events.jet_matching_mask.q1[:, None],
+        events.jet_matching_mask.q2[:, None],
+        events.jet_matching_mask.q3[:, None],
+        events.jet_matching_mask.q4[:, None],
+    ], axis=1)
+    )
+
+    # Calculate number of matched jets
+    events = set_ak_column(events, "n_matchedJets", ak.sum(ak.any(mask_list, axis=1), axis=1))
+
+    # Calculate number of matches
+    events = set_ak_column(events, "nMatches", ak.sum(ak.sum(mask_list, axis=1), axis=1))
+
+    # Calculate the number of jets with multiple matches
+    events = set_ak_column(events, "multiple_matching_jet", ak.sum(ak.sum(mask_list, axis=1) > 1, axis=1))
+
+    # Calculate the number of multiple matched partons
+    events = set_ak_column(events, "multiple_matching_parton", ak.sum(ak.sum(mask_list, axis=2) > 1, axis=1))
+
+    # Calculate number of unmatched partons
+    events = set_ak_column(events, "no_matching_parton", ak.sum(ak.sum(mask_list, axis=2) < 1, axis=1))
+
+    # Calculate the number of matched jets used by kinFit
+    events = set_ak_column(events, "nMatchedJets_6jets", ak.sum(events.Jet[
+        ak.any(mask_list, axis=1)].pt >= events.Jet[:, 5].pt, axis=1))
+
+    # Calculate ratio of GenParticel pt to GenJet pt
+    # q1 Fit
+    dr_q1_w1_children1 = gen_top.w_children[:, 0, 0].delta_r(reco_jet.reco[:, 2])
+    dr_q1_w2_children1 = gen_top.w_children[:, 1, 0].delta_r(reco_jet.reco[:, 2])
+    mask_ratio_q1 = dr_q1_w1_children1 <= dr_q1_w2_children1
+    events = set_ak_column(events, "ratio_gen_jet_pt_Fit_q1", ak.where(
+        mask_ratio_q1,
+        events.FitJet[:, 2].pt / gen_top.w_children[:, 0, 0].pt,
+        events.FitJet[:, 2].pt / gen_top.w_children[:, 1, 0].pt
+    ))
+    # q1 Reco
+    mask_ratio_q1 = dr_q1_w1_children1 <= dr_q1_w2_children1
+    events = set_ak_column(events, "ratio_gen_jet_pt_Reco_q1", ak.where(
+        mask_ratio_q1,
+        reco_jet.reco[:, 2].pt / gen_top.w_children[:, 0, 0].pt,
+        reco_jet.reco[:, 2].pt / gen_top.w_children[:, 1, 0].pt
+    ))
+
+    # q2 Fit
+    dr_q2_w1_children2 = gen_top.w_children[:, 0, 1].delta_r(reco_jet.reco[:, 3])
+    dr_q2_w2_children2 = gen_top.w_children[:, 1, 1].delta_r(reco_jet.reco[:, 3])
+    mask_ratio_q2 = dr_q2_w1_children2 <= dr_q2_w2_children2
+    events = set_ak_column(events, "ratio_gen_jet_pt_Fit_q2", ak.where(
+        mask_ratio_q2,
+        events.FitJet[:, 3].pt / gen_top.w_children[:, 0, 1].pt,
+        events.FitJet[:, 3].pt / gen_top.w_children[:, 1, 1].pt
+    ))
+    # q2 Reco
+    events = set_ak_column(events, "ratio_gen_jet_pt_Reco_q2", ak.where(
+        mask_ratio_q2,
+        reco_jet.reco[:, 3].pt / gen_top.w_children[:, 0, 1].pt,
+        reco_jet.reco[:, 3].pt / gen_top.w_children[:, 1, 1].pt
+    ))
+
+    # q3 Fit
+    dr_q3_w1_children1 = gen_top.w_children[:, 0, 0].delta_r(reco_jet.reco[:, 4])
+    dr_q3_w2_children1 = gen_top.w_children[:, 1, 0].delta_r(reco_jet.reco[:, 4])
+    mask_ratio_q3 = dr_q3_w1_children1 <= dr_q3_w2_children1
+    events = set_ak_column(events, "ratio_gen_jet_pt_Fit_q3", ak.where(
+        mask_ratio_q3,
+        events.FitJet[:, 4].pt / gen_top.w_children[:, 0, 0].pt,
+        events.FitJet[:, 4].pt / gen_top.w_children[:, 1, 0].pt
+    ))
+    # q3 Reco
+    events = set_ak_column(events, "ratio_gen_jet_pt_Reco_q3", ak.where(
+        mask_ratio_q3,
+        reco_jet.reco[:, 4].pt / gen_top.w_children[:, 0, 0].pt,
+        reco_jet.reco[:, 4].pt / gen_top.w_children[:, 1, 0].pt
+    ))
+
+    # q4 Fit
+    dr_q4_w1_children2 = gen_top.w_children[:, 0, 1].delta_r(reco_jet.reco[:, 5])
+    dr_q4_w2_children2 = gen_top.w_children[:, 1, 1].delta_r(reco_jet.reco[:, 5])
+    mask_ratio_q4 = dr_q4_w1_children2 <= dr_q4_w2_children2
+    events = set_ak_column(events, "ratio_gen_jet_pt_Fit_q4", ak.where(
+        mask_ratio_q4,
+        events.FitJet[:, 5].pt / gen_top.w_children[:, 0, 1].pt,
+        events.FitJet[:, 5].pt / gen_top.w_children[:, 1, 1].pt
+    ))
+    # q4 Reco
+    events = set_ak_column(events, "ratio_gen_jet_pt_Reco_q4", ak.where(
+        mask_ratio_q4,
+        reco_jet.reco[:, 5].pt / gen_top.w_children[:, 0, 1].pt,
+        reco_jet.reco[:, 5].pt / gen_top.w_children[:, 1, 1].pt
+    ))
+
+    # b1
+    dr_B1_b1 = gen_top.b[:, 0].delta_r(events.FitJet[:, 0])
+    dr_B1_b2 = gen_top.b[:, 1].delta_r(events.FitJet[:, 0])
+    mask_ratio_b1 = dr_B1_b1 <= dr_B1_b2
+    events = set_ak_column(events, "ratio_gen_jet_pt_b1", ak.where(
+        mask_ratio_b1,
+        events.FitJet[:, 0].pt / gen_top.b[:, 0].pt,
+        events.FitJet[:, 0].pt / gen_top.b[:, 1].pt
+    ))
+
+    # b2
+    dr_B2_b1 = gen_top.b[:, 0].delta_r(events.FitJet[:, 1])
+    dr_B2_b2 = gen_top.b[:, 1].delta_r(events.FitJet[:, 1])
+    mask_ratio_b2 = dr_B2_b1 <= dr_B2_b2
+    events = set_ak_column(events, "ratio_gen_jet_pt_b2", ak.where(
+        mask_ratio_b2,
+        events.FitJet[:, 1].pt / gen_top.b[:, 0].pt,
+        events.FitJet[:, 1].pt / gen_top.b[:, 1].pt
+    ))
+
+    # Calculate jet / reco
+    events = set_ak_column(events, "ratio_reco_fit_pt_b1", events.FitJet[:, 0].pt / reco_jet.reco[:, 0].pt)
+    events = set_ak_column(events, "ratio_reco_fit_pt_b2", events.FitJet[:, 1].pt / reco_jet.reco[:, 1].pt)
+    events = set_ak_column(events, "ratio_reco_fit_pt_q1", events.FitJet[:, 2].pt / reco_jet.reco[:, 2].pt)
+    events = set_ak_column(events, "ratio_reco_fit_pt_q2", events.FitJet[:, 3].pt / reco_jet.reco[:, 3].pt)
+    events = set_ak_column(events, "ratio_reco_fit_pt_q3", events.FitJet[:, 4].pt / reco_jet.reco[:, 4].pt)
+    events = set_ak_column(events, "ratio_reco_fit_pt_q4", events.FitJet[:, 5].pt / reco_jet.reco[:, 5].pt)
+
+    # Calculate delta Rs
+    top_family = [
+        ak.to_packed(ak.concatenate([gen_top.b[:, 0, None][:, None],
+                                     gen_top.b[:, 1, None][:, None]], axis=1)),
+        gen_top.w_children[:, :, 0, None],
+        gen_top.w_children[:, :, 1, None],
+    ]
+    top_family = ak.to_packed(ak.concatenate(top_family, axis=2))
+    part1, part2 = ak.unzip(ak.combinations(top_family, 2, axis=2))
+    dR_3jets = part1.delta_r(part2)
+    # Delta R_min and Delta R_max
+    events = set_ak_column(events, "dRmin_gen_t1", ak.min(ak.flatten(dR_3jets, axis=2), axis=1))
+    events = set_ak_column(events, "dRmax_gen_t1", ak.max(ak.flatten(dR_3jets, axis=2), axis=1))
+    # Delta R
+    events = set_ak_column(events, "n_deltaR06_reco_q1", ak.sum(reco_jet.reco[:, 0].delta_r(events.Jet) < 0.6, axis=1))
+
+    # Calculate M_qb
+    M_b1q1 = (reco_jet[:, 0] + reco_jet[:, 2]).mass
+    M_b1q2 = (reco_jet[:, 0] + reco_jet[:, 3]).mass
+    M_b2q3 = (reco_jet[:, 1] + reco_jet[:, 4]).mass
+    M_b2q3 = (reco_jet[:, 1] + reco_jet[:, 5]).mass
     return events
 
 

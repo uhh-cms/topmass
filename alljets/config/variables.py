@@ -941,6 +941,143 @@ def add_variables(cfg: od.Config) -> None:
         binning=(59, 0, 5.8),
         x_title="pu weight",
     )
+    ###############################################################################
+    #                            Features for analyze jet overlapping             #
+    ###############################################################################
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_Reco_q1",
+        expression="ratio_gen_jet_pt_Reco_q1",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of q1",
+    )
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_Fit_q1",
+        expression="ratio_gen_jet_pt_Fit_q1",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of q1",
+    )
+
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_Reco_q2",
+        expression="ratio_gen_jet_pt_Reco_q2",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of q2",
+    )
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_Fit_q2",
+        expression="ratio_gen_jet_pt_Fit_q2",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of q2",
+    )
+
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_Reco_q3",
+        expression="ratio_gen_jet_pt_Reco_q3",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of q3",
+    )
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_Fit_q3",
+        expression="ratio_gen_jet_pt_Fit_q3",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of q3",
+    )
+
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_Reco_q4",
+        expression="ratio_gen_jet_pt_Reco_q4",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of q4",
+    )
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_Fit_q4",
+        expression="ratio_gen_jet_pt_Fit_q4",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of q4",
+    )
+
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_b1",
+        expression="ratio_gen_jet_pt_b1",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of b1",
+    )
+    add_variable(
+        cfg,
+        name="ratio_gen_jet_pt_b2",
+        expression="ratio_gen_jet_pt_b2",
+        binning=(40, -1, 3),
+        unit="",
+        x_title=r"$p_T^{jet}/p_T^{gen}$ with the $p_T$ of b2",
+    )
+
+    add_variable(
+        cfg,
+        name="ratio_reco_fit_pt_b1",
+        expression="ratio_reco_fit_pt_b1",
+        binning=(50, -0.1, 3),
+        unit="",
+        x_title=r"$p_T^{fit}/p_T^{reco}$ with the $p_T$ of b1",
+    )
+    add_variable(
+        cfg,
+        name="ratio_reco_fit_pt_b2",
+        expression="ratio_reco_fit_pt_b2",
+        binning=(50, -0.1, 2),
+        unit="",
+        x_title=r"$p_T^{fit}/p_T^{reco}$ with the $p_T$ of b2",
+    )
+    add_variable(
+        cfg,
+        name="ratio_reco_fit_pt_q1",
+        expression="ratio_reco_fit_pt_q1",
+        binning=(50, -0.1, 2),
+        unit="",
+        x_title=r"$p_T^{fit}/p_T^{reco}$ with the $p_T$ of q1",
+    )
+    add_variable(
+        cfg,
+        name="ratio_reco_fit_pt_q2",
+        expression="ratio_reco_fit_pt_q2",
+        binning=(50, -0.1, 2),
+        unit="",
+        x_title=r"$p_T^{fit}/p_T^{reco}$ with the $p_T$ of q2",
+    )
+    add_variable(
+        cfg,
+        name="ratio_reco_fit_pt_q3",
+        expression="ratio_reco_fit_pt_q3",
+        binning=(50, -0.1, 2),
+        unit="",
+        x_title=r"$p_T^{fit}/p_T^{reco}$ with the $p_T$ of q3",
+    )
+    add_variable(
+        cfg,
+        name="ratio_reco_fit_pt_q4",
+        expression="ratio_reco_fit_pt_q4",
+        binning=(50, -0.1, 2),
+        unit="",
+        x_title=r"$p_T^{fit}/p_T^{reco}$ with the $p_T$ of q4",
+    )
+
 
 
 # helper to add a variable to the config with some defaults
