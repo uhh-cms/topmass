@@ -102,7 +102,7 @@ def ambiguous_matching(jets, gen_top, dr):
             "q3": gen_top.w_children[:, 1, 0].delta_r(jets) < dr,
             "q2": gen_top.w_children[:, 0, 1].delta_r(jets) < dr,
             "q4": gen_top.w_children[:, 1, 1].delta_r(jets) < dr,
-        }
+        },
     )
 
     return matches

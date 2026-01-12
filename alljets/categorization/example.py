@@ -217,7 +217,7 @@ def gen_eta21_pt60(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Ar
 
 
 @categorizer(uses={"gen_top.*",
-                   "fitCombinationType"
+                   "fitCombinationType",
                    })
 def gen_eta21_pt60_corr(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     pt_cut = 60
@@ -313,6 +313,7 @@ def gen_cut_deltaRmin06_q1(self: Categorizer, events: ak.Array, **kwargs) -> tup
     matching = events.fitCombinationType == 2
     dR = events.n_deltaR06_reco_q1 >= 2
     return events, ak.all([eta, pt, matching, dR], axis=0)
+
 
 @categorizer(uses={"gen_top.*",
                    "fitCombinationType",

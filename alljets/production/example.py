@@ -376,7 +376,7 @@ def cutflow_features(
     uses={
         attach_coffea_behavior,
         "gen_top",
-        "FitJet.*"
+        "FitJet.*",
     },
     produces={
         "gen_top",
@@ -407,8 +407,7 @@ def cutflow_features(
         "n_deltaR06_reco_q1",
     },
 )
-def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array:
-
+def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     from alljets.scripts.default import ambiguous_matching
 
     # attach coffea behavior FitJet
@@ -464,7 +463,7 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
     events = set_ak_column(
         events,
         "jet_matching_mask",
-        ambiguous_matching(events.Jet, gen_top, 0.4)
+        ambiguous_matching(events.Jet, gen_top, 0.4),
     )
 
     # List to work with ak.all and ak.any
@@ -475,7 +474,7 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
         events.jet_matching_mask.q2[:, None],
         events.jet_matching_mask.q3[:, None],
         events.jet_matching_mask.q4[:, None],
-    ], axis=1)
+    ], axis=1),
     )
 
     # Calculate number of matched jets
@@ -505,14 +504,14 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
     events = set_ak_column(events, "ratio_gen_jet_pt_Fit_q1", ak.where(
         mask_ratio_q1,
         events.FitJet[:, 2].pt / gen_top.w_children[:, 0, 0].pt,
-        events.FitJet[:, 2].pt / gen_top.w_children[:, 1, 0].pt
+        events.FitJet[:, 2].pt / gen_top.w_children[:, 1, 0].pt,
     ))
     # q1 Reco
     mask_ratio_q1 = dr_q1_w1_children1 <= dr_q1_w2_children1
     events = set_ak_column(events, "ratio_gen_jet_pt_Reco_q1", ak.where(
         mask_ratio_q1,
         reco_jet.reco[:, 2].pt / gen_top.w_children[:, 0, 0].pt,
-        reco_jet.reco[:, 2].pt / gen_top.w_children[:, 1, 0].pt
+        reco_jet.reco[:, 2].pt / gen_top.w_children[:, 1, 0].pt,
     ))
 
     # q2 Fit
@@ -522,13 +521,13 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
     events = set_ak_column(events, "ratio_gen_jet_pt_Fit_q2", ak.where(
         mask_ratio_q2,
         events.FitJet[:, 3].pt / gen_top.w_children[:, 0, 1].pt,
-        events.FitJet[:, 3].pt / gen_top.w_children[:, 1, 1].pt
+        events.FitJet[:, 3].pt / gen_top.w_children[:, 1, 1].pt,
     ))
     # q2 Reco
     events = set_ak_column(events, "ratio_gen_jet_pt_Reco_q2", ak.where(
         mask_ratio_q2,
         reco_jet.reco[:, 3].pt / gen_top.w_children[:, 0, 1].pt,
-        reco_jet.reco[:, 3].pt / gen_top.w_children[:, 1, 1].pt
+        reco_jet.reco[:, 3].pt / gen_top.w_children[:, 1, 1].pt,
     ))
 
     # q3 Fit
@@ -538,13 +537,13 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
     events = set_ak_column(events, "ratio_gen_jet_pt_Fit_q3", ak.where(
         mask_ratio_q3,
         events.FitJet[:, 4].pt / gen_top.w_children[:, 0, 0].pt,
-        events.FitJet[:, 4].pt / gen_top.w_children[:, 1, 0].pt
+        events.FitJet[:, 4].pt / gen_top.w_children[:, 1, 0].pt,
     ))
     # q3 Reco
     events = set_ak_column(events, "ratio_gen_jet_pt_Reco_q3", ak.where(
         mask_ratio_q3,
         reco_jet.reco[:, 4].pt / gen_top.w_children[:, 0, 0].pt,
-        reco_jet.reco[:, 4].pt / gen_top.w_children[:, 1, 0].pt
+        reco_jet.reco[:, 4].pt / gen_top.w_children[:, 1, 0].pt,
     ))
 
     # q4 Fit
@@ -554,13 +553,13 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
     events = set_ak_column(events, "ratio_gen_jet_pt_Fit_q4", ak.where(
         mask_ratio_q4,
         events.FitJet[:, 5].pt / gen_top.w_children[:, 0, 1].pt,
-        events.FitJet[:, 5].pt / gen_top.w_children[:, 1, 1].pt
+        events.FitJet[:, 5].pt / gen_top.w_children[:, 1, 1].pt,
     ))
     # q4 Reco
     events = set_ak_column(events, "ratio_gen_jet_pt_Reco_q4", ak.where(
         mask_ratio_q4,
         reco_jet.reco[:, 5].pt / gen_top.w_children[:, 0, 1].pt,
-        reco_jet.reco[:, 5].pt / gen_top.w_children[:, 1, 1].pt
+        reco_jet.reco[:, 5].pt / gen_top.w_children[:, 1, 1].pt,
     ))
 
     # b1
@@ -570,7 +569,7 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
     events = set_ak_column(events, "ratio_gen_jet_pt_b1", ak.where(
         mask_ratio_b1,
         events.FitJet[:, 0].pt / gen_top.b[:, 0].pt,
-        events.FitJet[:, 0].pt / gen_top.b[:, 1].pt
+        events.FitJet[:, 0].pt / gen_top.b[:, 1].pt,
     ))
 
     # b2
@@ -580,7 +579,7 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
     events = set_ak_column(events, "ratio_gen_jet_pt_b2", ak.where(
         mask_ratio_b2,
         events.FitJet[:, 1].pt / gen_top.b[:, 0].pt,
-        events.FitJet[:, 1].pt / gen_top.b[:, 1].pt
+        events.FitJet[:, 1].pt / gen_top.b[:, 1].pt,
     ))
 
     # Calculate jet / reco
@@ -606,12 +605,6 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs,) -> ak.Array
     events = set_ak_column(events, "dRmax_gen_t1", ak.max(ak.flatten(dR_3jets, axis=2), axis=1))
     # Delta R
     events = set_ak_column(events, "n_deltaR06_reco_q1", ak.sum(reco_jet.reco[:, 0].delta_r(events.Jet) < 0.6, axis=1))
-
-    # Calculate M_qb
-    M_b1q1 = (reco_jet[:, 0] + reco_jet[:, 2]).mass
-    M_b1q2 = (reco_jet[:, 0] + reco_jet[:, 3]).mass
-    M_b2q3 = (reco_jet[:, 1] + reco_jet[:, 4]).mass
-    M_b2q3 = (reco_jet[:, 1] + reco_jet[:, 5]).mass
     return events
 
 

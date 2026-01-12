@@ -38,6 +38,7 @@ law run cf.PlotVariables1D --version v1
 # CMS-colors
 color_list = ["#5790fc", "#f89c20", "#e42536", "#964a8b"]
 
+
 def hist_2D(
     hists: OrderedDict,
     config_inst: od.Config,
