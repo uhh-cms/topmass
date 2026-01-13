@@ -1437,7 +1437,7 @@ def add_variables(cfg: od.Config) -> None:
     def build_avg_w_mass(events):
         W1_mass = build_w1jet(events, which="mass")
         W2_mass = build_w2jet(events, which="mass")
-        return (W1_mass + W2_mass)/2
+        return (W1_mass + W2_mass) / 2
     build_avg_w_mass.inputs = (build_w1jet.inputs + build_w2jet.inputs)
     add_variable(
         cfg,
@@ -1455,7 +1455,7 @@ def add_variables(cfg: od.Config) -> None:
         )
 
         reco = events.FitJet.reco
-        return (reco[:, 0].pt + reco[:, 1].pt)/(reco[:, 2].pt + reco[:, 3].pt + reco[:, 4].pt + reco[:, 5].pt)
+        return (reco[:, 0].pt + reco[:, 1].pt) / (reco[:, 2].pt + reco[:, 3].pt + reco[:, 4].pt + reco[:, 5].pt)
 
     build_reco_R_bq.inputs = ["FitJet.reco.{pt,eta,phi,mass}"]
     add_variable(

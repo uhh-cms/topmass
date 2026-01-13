@@ -79,7 +79,7 @@ def cat_fit_conv_big(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.
     return events, (events.FitChi2 < 10000) & (events.FitPgof > pgofcut)
 
 
-@categorizer(uses={"FitPgof", "FitRbb"})
+@categorizer(uses={"FitPgof", "FitRbb", "FitChi2"})
 def cat_fit_conv_big_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     # kinematic fit has converged and is below chi2 cut (bad events)
     pgofcut = self.config_inst.x.fitpgofcut

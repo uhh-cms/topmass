@@ -259,7 +259,7 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     from alljets.scripts.default import dr
     B1 = events.FitJet[:, 0]
     B2 = events.FitJet[:, 1]
-    fitRbb = dr(B1,B2)
+    fitRbb = dr(B1, B2)
     W1 = events.FitJet[:, 2].add(events.FitJet[:, 3])
     W2 = events.FitJet[:, 4].add(events.FitJet[:, 5])
     recoW1 = events.FitJet.reco[:, 2].add(events.FitJet.reco[:, 3])
@@ -601,7 +601,7 @@ def njets(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events,
         "n_jet_in_event",
         ak.num(events.Jet[(abs(events.Jet.eta) < 2.4) &
-        (events.Jet.pt > 40)].pt, axis=1),
+                          (events.Jet.pt > 40)].pt, axis=1),
         value_type=np.int32,
     )
     events = set_ak_column(
