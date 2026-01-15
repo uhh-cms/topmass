@@ -120,7 +120,7 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
         # shape TODO: this scaling factor only works, if over/underflow bins are present
         tt_hist = hists[config_inst.get_process("tt", default=None)]
         for i in range(len(tt_hist.axes["category"])):
-            if tt_hist.axes["category"][i] == "2btj_sig":
+            if tt_hist.axes["category"][i] == "sig":
                 tt_index = i
 
         for cat_index in range(cat_axis.size):

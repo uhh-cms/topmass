@@ -69,7 +69,7 @@ def plot_hist_matching(
             label = "QCD multijet"
         elif ((list(keys)[i] == "qcd_est")):
             qcd_index = i
-            label = " QCD Bkg. estimation"
+            label = " Multijet est."
         else:
             data_index = i
 
@@ -138,7 +138,7 @@ def plot_hist_matching(
         "ratio_method": "draw_stat_error_bands",
         "hist": stack_qcd,
         "kwargs": {
-            "color": "#ffff00",
+            "color": "#ffff00" if "est." not in label else "#4da6ff",
             "histtype": "fill",
             "label": label,
             "edgecolor": "black",
