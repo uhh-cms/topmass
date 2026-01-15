@@ -847,6 +847,7 @@ def add_config(
                 "trig_ht",
                 "gen_top",
                 "gen_top.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
+                "GenJet",
                 ColumnCollection.ALL_FROM_SELECTOR,
             },
             "cf.MergeSelectionMasks": {

@@ -1078,6 +1078,105 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$p_T^{fit}/p_T^{reco}$ with the $p_T$ of q4",
     )
 
+    # Benchmarks
+    add_variable(
+        cfg,
+        name="deltaR_gen_Jet_b1",
+        expression="deltaR_gen_Jet_b1",
+        binning=(100, 0, 0.4),
+        unit="",
+        x_title=r"$\Delta R$ between the GenParticle and the Jet (b1)",
+    )
+    add_variable(
+        cfg,
+        name="deltaR_gen_Jet_b2",
+        expression="deltaR_gen_Jet_b2",
+        binning=(100, 0, 0.4),
+        unit="",
+        x_title=r"$\Delta R$ between the GenParticle and the Jet (b2)",
+    )
+    add_variable(
+        cfg,
+        name="deltaR_gen_Jet_q1",
+        expression="deltaR_gen_Jet_q1",
+        binning=(100, 0, 0.4),
+        unit="",
+        x_title=r"$\Delta R$ between the GenParticle and the Jet (q1)",
+    )
+    add_variable(
+        cfg,
+        name="deltaR_gen_Jet_q2",
+        expression="deltaR_gen_Jet_q2",
+        binning=(100, 0, 0.4),
+        unit="",
+        x_title=r"$\Delta R$ between the GenParticle and the Jet (q2)",
+    )
+    add_variable(
+        cfg,
+        name="deltaR_gen_Jet_q3",
+        expression="deltaR_gen_Jet_q3",
+        binning=(100, 0, 0.4),
+        unit="",
+        x_title=r"$\Delta R$ between the GenParticle and the Jet (q3)",
+    )
+    add_variable(
+        cfg,
+        name="deltaR_gen_Jet_q4",
+        expression="deltaR_gen_Jet_q4",
+        binning=(100, 0, 0.4),
+        unit="",
+        x_title=r"$\Delta R$ between the GenParticle and the Jet (q4)",
+    )
+
+    add_variable(
+        cfg,
+        name="ptDiff_gen_Jet_b1",
+        expression="ptDiff_gen_Jet_b1",
+        binning=(100, 0, 1),
+        unit="",
+        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (b1)",
+    )
+    add_variable(
+        cfg,
+        name="ptDiff_gen_Jet_b2",
+        expression="ptDiff_gen_Jet_b2",
+        binning=(100, 0, 1),
+        unit="",
+        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (b2)",
+    )
+    add_variable(
+        cfg,
+        name="ptDiff_gen_Jet_q1",
+        expression="ptDiff_gen_Jet_q1",
+        binning=(100, 0, 1),
+        unit="",
+        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (q1)",
+    )
+    add_variable(
+        cfg,
+        name="ptDiff_gen_Jet_q2",
+        expression="ptDiff_gen_Jet_q2",
+        binning=(100, 0, 1),
+        unit="",
+        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (q2)",
+    )
+    add_variable(
+        cfg,
+        name="ptDiff_gen_Jet_q3",
+        expression="ptDiff_gen_Jet_q3",
+        binning=(100, 0, 1),
+        unit="",
+        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (q3)",
+    )
+    add_variable(
+        cfg,
+        name="ptDiff_gen_Jet_q4",
+        expression="ptDiff_gen_Jet_q4",
+        binning=(100, 0, 1),
+        unit="",
+        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (q4)",
+    )
+
 
 # helper to add a variable to the config with some defaults
 def add_variable(config: od.Config, *args, **kwargs) -> od.Variable:

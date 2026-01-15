@@ -177,6 +177,12 @@ def add_categories(cfg: od.Config) -> None:
     )
     add_category(
         cfg,
+        name="gen_eta21_pt60_deltaRmin08_t1",
+        selection="gen_eta21_pt60_deltaRmin08_t1",
+        label="GenParticle eta2.1+pt60 Cut + dRmin_t1 < 0.8",
+    )
+    add_category(
+        cfg,
         name="gen_cut_deltaRmin08_t1",
         selection="gen_cut_deltaRmin08_t1",
         label="gen cut + corr + dRmin < 0.8",
@@ -185,7 +191,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="gen_cut_deltaRmin06_t1",
         selection="gen_cut_deltaRmin06_t1",
-        label="gen cut + corr + dRmin < 0.8",
+        label="gen cut + corr + dRmin < 0.6",
     )
     add_category(
         cfg,
@@ -197,13 +203,19 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="gen_cut_deltaRmin06_q1",
         selection="gen_cut_deltaRmin06_q1",
-        label="gen cut + corr + dR < 0.8",
+        label="gen cut + corr + dR < 0.6",
     )
     add_category(
         cfg,
         name="gen_cut_deltaR06_q1_without_matching",
         selection="gen_cut_deltaR06_q1_without_matching",
-        label="gen cut + dR < 0.8",
+        label="gen cut + dR < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaR0406_q1_without_matching",
+        selection="gen_cut_deltaR0406_q1_without_matching",
+        label="gen cut + 0.4 < dR < 0.6",
     )
 
     # Uncomment to define orthogonal or overlapping category sets:

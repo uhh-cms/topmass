@@ -405,6 +405,19 @@ def cutflow_features(
         "ratio_reco_fit_pt_q3",
         "ratio_reco_fit_pt_q4",
         "n_deltaR06_reco_q1",
+        "n_deltaR04_06_reco_q1",
+        "deltaR_gen_Jet_b1",
+        "deltaR_gen_Jet_b2",
+        "deltaR_gen_Jet_q1",
+        "deltaR_gen_Jet_q2",
+        "deltaR_gen_Jet_q3",
+        "deltaR_gen_Jet_q4",
+        "ptDiff_gen_Jet_b1",
+        "ptDiff_gen_Jet_b2",
+        "ptDiff_gen_Jet_q1",
+        "ptDiff_gen_Jet_q2",
+        "ptDiff_gen_Jet_q3",
+        "ptDiff_gen_Jet_q4",
     },
 )
 def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -605,6 +618,48 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "dRmax_gen_t1", ak.max(ak.flatten(dR_3jets, axis=2), axis=1))
     # Delta R
     events = set_ak_column(events, "n_deltaR06_reco_q1", ak.sum(reco_jet.reco[:, 0].delta_r(events.Jet) < 0.6, axis=1))
+    events = set_ak_column(events, "n_deltaR04_06_reco_q1", ak.sum(ak.all([reco_jet.reco[:, 0].delta_r(events.Jet) < 0.6,
+                                                                        reco_jet.reco[:, 0].delta_r(events.Jet) > 0.4],
+                                                                        axis=0), axis=1))
+
+    # Benchmarks?
+    b1 = events.Jet[events.jet_matching_mask.b1]
+    b2 = events.Jet[events.jet_matching_mask.b2]
+    q1 = events.Jet[events.jet_matching_mask.q1]
+    q2 = events.Jet[events.jet_matching_mask.q2]
+    q3 = events.Jet[events.jet_matching_mask.q3]
+    q4 = events.Jet[events.jet_matching_mask.q4]
+
+    # Angular Distance jet gen
+    deltaR_gen_Jet_b1 = ak.min(b1.delta_r(gen_top.b[:, 0]), axis=1)
+    deltaR_gen_Jet_b2 = ak.min(b2.delta_r(gen_top.b[:, 1]), axis=1)
+    deltaR_gen_Jet_q1 = ak.min(q1.delta_r(gen_top.w_children[:, 0, 0]), axis=1)
+    deltaR_gen_Jet_q2 = ak.min(q2.delta_r(gen_top.w_children[:, 0, 1]), axis=1)
+    deltaR_gen_Jet_q3 = ak.min(q3.delta_r(gen_top.w_children[:, 1, 0]), axis=1)
+    deltaR_gen_Jet_q4 = ak.min(q4.delta_r(gen_top.w_children[:, 1, 1]), axis=1)
+
+    events = set_ak_column(events, "deltaR_gen_Jet_b1", deltaR_gen_Jet_b1)
+    events = set_ak_column(events, "deltaR_gen_Jet_b2", deltaR_gen_Jet_b2)
+    events = set_ak_column(events, "deltaR_gen_Jet_q1", deltaR_gen_Jet_q1)
+    events = set_ak_column(events, "deltaR_gen_Jet_q2", deltaR_gen_Jet_q2)
+    events = set_ak_column(events, "deltaR_gen_Jet_q3", deltaR_gen_Jet_q3)
+    events = set_ak_column(events, "deltaR_gen_Jet_q4", deltaR_gen_Jet_q4)
+
+    # pt ratio
+    ptDiff_gen_Jet_b1 = ak.min(b1.pt - gen_top.b[:, 0].pt, axis=1)
+    ptDiff_gen_Jet_b2 = ak.min(b2.pt - gen_top.b[:, 1].pt, axis=1)
+    ptDiff_gen_Jet_q1 = ak.min(q1.pt - gen_top.w_children[:, 0, 0].pt, axis=1)
+    ptDiff_gen_Jet_q2 = ak.min(q2.pt - gen_top.w_children[:, 0, 1].pt, axis=1)
+    ptDiff_gen_Jet_q3 = ak.min(q3.pt - gen_top.w_children[:, 1, 0].pt, axis=1)
+    ptDiff_gen_Jet_q4 = ak.min(q4.pt - gen_top.w_children[:, 1, 1].pt, axis=1)
+
+    events = set_ak_column(events, "ptDiff_gen_Jet_b1", ptDiff_gen_Jet_b1)
+    events = set_ak_column(events, "ptDiff_gen_Jet_b2", ptDiff_gen_Jet_b2)
+    events = set_ak_column(events, "ptDiff_gen_Jet_q1", ptDiff_gen_Jet_q1)
+    events = set_ak_column(events, "ptDiff_gen_Jet_q2", ptDiff_gen_Jet_q2)
+    events = set_ak_column(events, "ptDiff_gen_Jet_q3", ptDiff_gen_Jet_q3)
+    events = set_ak_column(events, "ptDiff_gen_Jet_q4", ptDiff_gen_Jet_q4)
+
     return events
 
 
