@@ -147,7 +147,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="sig",
         selection="cat_2btj_sig",  # >= 2 b-tags + signal trigger + fit quality
-        label=">2 b-tagged jets & signal trigger",
+        label="Signal Region",
         tags={"2btj"},
     )
 

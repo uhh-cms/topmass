@@ -157,40 +157,42 @@ def cat_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak
 # ============================================================================
 
 
-@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*"})
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb"})
 def cat_2btj_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Signal region: >= 2 b-tagged jets + signal trigger + good fit quality.
     Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
     """
-    chi2cut = self.config_inst.x.fitchi2cut
+    pgofcut = self.config_inst.x.fitpgofcut
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
     return events, (events.HLT[signal_trigger] &
-                    (events.FitChi2 <= chi2cut) &
+                    (events.FitPgof > pgofcut) &
                     (ak.sum(
                         (events.Jet.pt >= 40.0) &
                         (abs(events.Jet.eta) < 2.4) &
                         (events.Jet.btagDeepFlavB >= wp_tight), axis=1,
-                    ) >= 2))
+                    ) >= 2) &
+                    (events.FitRbb > 2.0))
 
 
-@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitChi2"})
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitChi2", "FitRbb"})
 def cat_0btj_bkg(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Background region: 0 b-tagged jets + background trigger + good fit quality.
     Requires: background trigger fired, FitChi2 <= config threshold, 0 b-tags (loose WP veto).
     """
-    chi2cut = self.config_inst.x.fitchi2cut
+    pgofcut = self.config_inst.x.fitpgofcut
     wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
     bkg_trigger = self.config_inst.x.bkg_trigger["tt_fh"][0]
     return events, (events.HLT[bkg_trigger] &
-                    (events.FitChi2 <= chi2cut) &
+                    (events.FitPgof > pgofcut) &
                     (ak.sum(
                         (events.Jet.pt >= 40.0) &
                         (abs(events.Jet.eta) < 2.4) &
                         (events.Jet.btagDeepFlavB >= wp_loose), axis=1,
-                    ) == 0))
+                    ) == 0) &
+                    (events.FitRbb > 2.0))
 
 
 # ============================================================================
