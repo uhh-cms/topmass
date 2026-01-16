@@ -1130,51 +1130,51 @@ def add_variables(cfg: od.Config) -> None:
 
     add_variable(
         cfg,
-        name="ptDiff_gen_Jet_b1",
-        expression="ptDiff_gen_Jet_b1",
-        binning=(100, 0, 1),
+        name="ptRatio_gen_Jet_b1",
+        expression="ptRatio_gen_Jet_b1",
+        binning=(100, -1, 2),
         unit="",
-        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (b1)",
+        x_title=r"Ratio between the GenParticle $p_T$ and the Jet $p_T$ (b1)",
     )
     add_variable(
         cfg,
-        name="ptDiff_gen_Jet_b2",
-        expression="ptDiff_gen_Jet_b2",
-        binning=(100, 0, 1),
+        name="ptRatio_gen_Jet_b2",
+        expression="ptRatio_gen_Jet_b2",
+        binning=(100, -1, 2),
         unit="",
         x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (b2)",
     )
     add_variable(
         cfg,
-        name="ptDiff_gen_Jet_q1",
-        expression="ptDiff_gen_Jet_q1",
-        binning=(100, 0, 1),
+        name="ptRatio_gen_Jet_q1",
+        expression="ptRatio_gen_Jet_q1",
+        binning=(100, -1, 2),
         unit="",
-        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (q1)",
+        x_title=r"Ratio between the GenParticle $p_T$ and the Jet $p_T$ (q1)",
     )
     add_variable(
         cfg,
-        name="ptDiff_gen_Jet_q2",
-        expression="ptDiff_gen_Jet_q2",
-        binning=(100, 0, 1),
+        name="ptRatio_gen_Jet_q2",
+        expression="ptRatio_gen_Jet_q2",
+        binning=(100, -1, 2),
         unit="",
-        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (q2)",
+        x_title=r"Ratio between the GenParticle $p_T$ and the Jet $p_T$ (q2)",
     )
     add_variable(
         cfg,
-        name="ptDiff_gen_Jet_q3",
-        expression="ptDiff_gen_Jet_q3",
-        binning=(100, 0, 1),
+        name="ptRatio_gen_Jet_q3",
+        expression="ptRatio_gen_Jet_q3",
+        binning=(100, -1, 2),
         unit="",
-        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (q3)",
+        x_title=r"Ratio between the GenParticle $p_T$ and the Jet $p_T$ (q3)",
     )
     add_variable(
         cfg,
-        name="ptDiff_gen_Jet_q4",
-        expression="ptDiff_gen_Jet_q4",
-        binning=(100, 0, 1),
+        name="ptRatio_gen_Jet_q4",
+        expression="ptRatio_gen_Jet_q4",
+        binning=(100, -1, 2),
         unit="",
-        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (q4)",
+        x_title=r"Ratio between the GenParticle $p_T$ and the Jet $p_T$ (q4)",
     )
 
 

@@ -412,12 +412,12 @@ def cutflow_features(
         "deltaR_gen_Jet_q2",
         "deltaR_gen_Jet_q3",
         "deltaR_gen_Jet_q4",
-        "ptDiff_gen_Jet_b1",
-        "ptDiff_gen_Jet_b2",
-        "ptDiff_gen_Jet_q1",
-        "ptDiff_gen_Jet_q2",
-        "ptDiff_gen_Jet_q3",
-        "ptDiff_gen_Jet_q4",
+        "ptRatio_gen_Jet_b1",
+        "ptRatio_gen_Jet_b2",
+        "ptRatio_gen_Jet_q1",
+        "ptRatio_gen_Jet_q2",
+        "ptRatio_gen_Jet_q3",
+        "ptRatio_gen_Jet_q4",
     },
 )
 def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -646,20 +646,39 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "deltaR_gen_Jet_q4", deltaR_gen_Jet_q4)
 
     # pt ratio
-    ptDiff_gen_Jet_b1 = ak.min(b1.pt - gen_top.b[:, 0].pt, axis=1)
-    ptDiff_gen_Jet_b2 = ak.min(b2.pt - gen_top.b[:, 1].pt, axis=1)
-    ptDiff_gen_Jet_q1 = ak.min(q1.pt - gen_top.w_children[:, 0, 0].pt, axis=1)
-    ptDiff_gen_Jet_q2 = ak.min(q2.pt - gen_top.w_children[:, 0, 1].pt, axis=1)
-    ptDiff_gen_Jet_q3 = ak.min(q3.pt - gen_top.w_children[:, 1, 0].pt, axis=1)
-    ptDiff_gen_Jet_q4 = ak.min(q4.pt - gen_top.w_children[:, 1, 1].pt, axis=1)
+    def closest_value_to_one(data):
+        dist = abs(data - 1)
+        idx = ak.argmin(dist, axis=1)
+        row_idx = ak.local_index(data)
+        closest_value = ak.to_packed(data[row_idx == idx])
+        return ak.flatten(closest_value)
 
-    events = set_ak_column(events, "ptDiff_gen_Jet_b1", ptDiff_gen_Jet_b1)
-    events = set_ak_column(events, "ptDiff_gen_Jet_b2", ptDiff_gen_Jet_b2)
-    events = set_ak_column(events, "ptDiff_gen_Jet_q1", ptDiff_gen_Jet_q1)
-    events = set_ak_column(events, "ptDiff_gen_Jet_q2", ptDiff_gen_Jet_q2)
-    events = set_ak_column(events, "ptDiff_gen_Jet_q3", ptDiff_gen_Jet_q3)
-    events = set_ak_column(events, "ptDiff_gen_Jet_q4", ptDiff_gen_Jet_q4)
+    fillArray = ak.Array([[-1]] * len(b1))
 
+    data_b1 = ak.where(ak.num(b1) == 0, fillArray, b1.pt / gen_top.b[:, 0].pt)
+    ptRatio_gen_Jet_b1 = closest_value_to_one(data_b1)
+
+    data_b2 = ak.where(ak.num(b2) == 0, fillArray, b2.pt / gen_top.b[:, 1].pt)
+    ptRatio_gen_Jet_b2 = closest_value_to_one(data_b2)
+
+    data_q1 = ak.where(ak.num(q1) == 0, fillArray, q1.pt / gen_top.w_children[:, 0, 0].pt)
+    ptRatio_gen_Jet_q1 = closest_value_to_one(data_q1)
+
+    data_q2 = ak.where(ak.num(q2) == 0, fillArray, q2.pt / gen_top.w_children[:, 0, 1].pt)
+    ptRatio_gen_Jet_q2 = closest_value_to_one(data_q2)
+
+    data_q3 = ak.where(ak.num(q3) == 0, fillArray, q3.pt / gen_top.w_children[:, 1, 0].pt)
+    ptRatio_gen_Jet_q3 = closest_value_to_one(data_q3)
+
+    data_q4 = ak.where(ak.num(q4) == 0, fillArray, q4.pt / gen_top.w_children[:, 1, 1].pt)
+    ptRatio_gen_Jet_q4 = closest_value_to_one(data_q4)
+
+    events = set_ak_column(events, "ptRatio_gen_Jet_b1", ptRatio_gen_Jet_b1)
+    events = set_ak_column(events, "ptRatio_gen_Jet_b2", ptRatio_gen_Jet_b2)
+    events = set_ak_column(events, "ptRatio_gen_Jet_q1", ptRatio_gen_Jet_q1)
+    events = set_ak_column(events, "ptRatio_gen_Jet_q2", ptRatio_gen_Jet_q2)
+    events = set_ak_column(events, "ptRatio_gen_Jet_q3", ptRatio_gen_Jet_q3)
+    events = set_ak_column(events, "ptRatio_gen_Jet_q4", ptRatio_gen_Jet_q4)
     return events
 
 
