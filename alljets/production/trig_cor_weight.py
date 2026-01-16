@@ -80,8 +80,8 @@ def trig_weights(
         if self.config_inst.x.trigger_sf_variable.startswith("ht"):
             weight = self.trig_sf_corrector(ht)
 
-        weight_up = weight + abs(1 - weight)
-        weight_down = ak.where((weight - abs(1 - weight)) > 0, (weight - abs(1 - weight)), 0)
+        weight_up = weight + abs(1 - weight) * 0.5
+        weight_down = ak.where((weight - abs(1 - weight) * 0.5) > 0, (weight - abs(1 - weight) * 0.5), 0)
         # store it
         events = set_ak_column(events, "trig_weight", weight, value_type=np.float32)
         events = set_ak_column(events, "trig_weight_up", weight_up, value_type=np.float32)
