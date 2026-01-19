@@ -33,6 +33,7 @@ from .jet_builder import (
     build_w1jet,
     build_w1recojet,
     build_w2recojet,
+    build_ttbar,
 )
 
 
@@ -476,6 +477,14 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
+        name="secmaxbtag_type",
+        expression="secmaxbtag",
+        null_value=EMPTY_FLOAT,
+        binning=[0, 0.7476, 1],
+        x_title=r"Second highest b tag score",
+    )
+    add_variable(
+        cfg,
         name="jet1_btag",
         expression="Jet.btagDeepFlavB[:,0]",
         null_value=EMPTY_FLOAT,
@@ -805,6 +814,17 @@ def add_variables(cfg: od.Config) -> None:
         binning=(100, 0, 500),
         unit="GeV",
         x_title=r"$m_{t_{2}}^{reco}$",
+    )
+
+    build_ttbar.inputs = ["RecoTop1.{x,y,z,t}", "RecoTop2.{x,y,z,t}"]
+    add_variable(
+        cfg,
+        name="reco_ttbar_mass",
+        expression=partial(build_ttbar, which="mass"),
+        aux={"inputs": build_ttbar.inputs},
+        binning=(100, 0, 2000),
+        unit="GeV",
+        x_title=r"$m_{t\bar{t}}^{reco}$",
     )
 
     build_top1jet.inputs = ["FitTop1.{x,y,z,t}"]

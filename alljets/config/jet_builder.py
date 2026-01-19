@@ -188,3 +188,34 @@ def build_b2jet(events, which=None):
     if which == "energy":
         return B2jets.energy
     raise ValueError(f"Unknown which: {which}")
+
+
+def build_ttbar(events, which=None):
+    """Build ttbar system from RecoTop1 and RecoTop2."""
+    events = attach_coffea_behavior(
+        events,
+        {
+            "RecoTop1": default_coffea_collections["Jet"],
+            "RecoTop2": default_coffea_collections["Jet"],
+        },
+    )
+
+    top1 = events.RecoTop1
+    top2 = events.RecoTop2
+
+    ttbar = top1 + top2
+
+    if which is None:
+        return ttbar * 1
+    if which == "mass":
+        return ttbar.mass
+    if which == "pt":
+        return ttbar.pt
+    if which == "eta":
+        return ttbar.eta
+    if which == "phi":
+        return ttbar.phi
+    if which == "energy":
+        return ttbar.energy
+
+    raise ValueError(f"Unknown which: {which}")
