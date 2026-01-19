@@ -98,7 +98,7 @@ def add_variables(cfg: od.Config) -> None:
         cfg,
         name="trig_bits",
         expression="trig_bits",
-        binning=(3, -0.5, 2.5),
+        binning=(4, -0.5, 3.5),
         x_title=r"trig bits",
     )
     ###############################################################################
@@ -834,6 +834,15 @@ def add_variables(cfg: od.Config) -> None:
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
         binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"$m_{t}^{fit}$",
+    )
+    add_variable(
+        cfg,
+        name="fit_Top1_mass_coarse",
+        expression=partial(build_top1jet, which="mass"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=(15, 100, 550),
         unit="GeV",
         x_title=r"$m_{t}^{fit}$",
     )
