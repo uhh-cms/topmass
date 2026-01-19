@@ -546,7 +546,30 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             arr = ak.concatenate([arr, trig_passed], axis=1)
             arr_orth = ak.concatenate([arr_orth, trig_passed_orth], axis=1)
             id += 1
-
+        bkg_trig = self.config_inst.x.bkg_trigger[channel]
+        trig_passed_bkg = ak.singletons(
+            ak.flatten(
+                ak.nan_to_none(
+                    ak.unzip(ak.where(events.HLT[bkg_trig], id, np.float64(np.nan))),
+                ),
+            ),
+        )
+        trig_passed_bkg_orth = ak.flatten(
+            ak.singletons(
+                ak.nan_to_none(
+                    ak.where(
+                        ak.singletons(ak.flatten(ak.unzip(events.HLT[ref_trig]))) &
+                        ak.singletons(ak.flatten(ak.unzip(events.HLT[bkg_trig]))),
+                        id,
+                        np.float64(np.nan),
+                    ),
+                ),
+            ),
+            axis=1,
+        )
+        arr = ak.concatenate([arr, trig_passed_bkg], axis=1)
+        arr_orth = ak.concatenate([arr_orth, trig_passed_bkg_orth], axis=1)
+        id += 1
     """ for channel, trig_cols in self.config_inst.x.trigger.items():
         for trig_col in trig_cols:
             trig_passed = ak.singletons(ak.nan_to_none(
@@ -561,7 +584,6 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     events = set_ak_column(events, "trig_bits", arr)
     events = set_ak_column(events, "trig_bits_orth", arr_orth)
-
     return events
 
 
@@ -572,7 +594,7 @@ def trigger_prod_init(self: Producer) -> None:
         for trigger in self.config_inst.x.trigger[channel]:
             self.uses.add(f"HLT.{trigger}")
         self.uses.add(f"HLT{self.config_inst.x.ref_trigger[channel]}")
-
+        self.uses.add(f"HLT{self.config_inst.x.bkg_trigger[channel]}")
 
 # producers for single channels
 tt_fh_trigger_prod = trigger_prod.derive(
