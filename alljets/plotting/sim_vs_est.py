@@ -27,16 +27,8 @@ od = maybe_import("order")
 
 logger = law.logger.get_logger(__name__)
 
-"""
-law run cf.PlotVariables1D --version v1
---processes tt --variables jet6_pt-trig_bits
---datasets tt_fh_powheg --selector trigger_sel
---producers example,trigger_prod
---plot-function alljets.plotting.trigger_eff_plot.plot_efficiencies
-"""
 
-
-def plot_hist(
+def qcd_mc_vs_est(
     hists: OrderedDict,
     config_inst: od.Config,
     category_inst: od.Category,
@@ -50,7 +42,19 @@ def plot_hist(
     **kwargs,
 ) -> plt.Figure:
     """
-    TODO.
+    Plot function to compare QCD estimation vs. simulation
+
+    Example usage:
+
+    law run cf.PlotVariables1D --version v1 \
+    --configs 2017_v9 \
+    --datasets tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,'data*','qcd*' \
+    --variables fit_Top1_mass_coarse \
+    --selector-steps All,SignalOrBkgTrigger,BTag20,jet,HT \
+    --processes tt,data,qcd,qcd_est
+    --categories sig \
+    --plot-function alljets.plotting.sim_vs_est.qcd_mc_vs_est \
+    --hist-hook qcd
 
     """
     keys = hists.keys()
@@ -66,14 +70,14 @@ def plot_hist(
     hists = apply_density(hists, density)
     plot_config = OrderedDict()
     # for updating labels of individual selector steps
-
     plot_config["hist_mc"] = {
         "method": "draw_hist",
         "hist": hists[0][list(keys)[qcd_index]][0, :],
         "kwargs": {
             "histtype": "fill",
             "norm": hists[0][list(keys)[qcd_index]][0, sum].value,
-            "label": f"{list(hists[0].keys())[qcd_index].name}",
+            "label": "QCD multijet",
+            "color": "#ffff00",
         },
         "ratio_method": "draw_stat_error_bands",
         "ratio_kwargs": {
@@ -122,7 +126,7 @@ def plot_hist(
     return aj_plot_all(plot_config, style_config, **kwargs)
 
 
-def plot_hist02(
+def qcd_sig_vs_bkg_sel(
     hists: OrderedDict,
     config_inst: od.Config,
     category_inst: od.Category,
@@ -136,7 +140,17 @@ def plot_hist02(
     **kwargs,
 ) -> plt.Figure:
     """
-    TODO.
+    Plot function to compare the QCQ Multijet MC in the signal vs. background selection
+
+    Example usage:
+    law run cf.PlotVariables1D --version v1 \
+    --configs 2017_v9 --datasets '*qcd*' \
+    --selector-steps All,SignalOrBkgTrigger,BTag20,jet,HT \
+    --producers default,kinFitMatch,trigger_prod \
+    --variables fit_Top1_mass_coarse-secmaxbtag_type-trig_bits \
+    --processes qcd \
+    --categories fit_conv_leq_rbb \
+    --plot-function alljets.plotting.sim_vs_est.qcd_sig_vs_bkg_sel \
     """
 
     keys = hists.keys()
