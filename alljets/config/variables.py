@@ -839,6 +839,14 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
+        name="fitchi2_0_10k",
+        expression="FitChi2",
+        binning=(100, 0, 10000),
+        unit="",
+        x_title=r"$\chi^{2}$ from kinfit",
+    )
+    add_variable(
+        cfg,
         name="fitPgof",
         expression="FitPgof",
         binning=(100, 0, 1),
