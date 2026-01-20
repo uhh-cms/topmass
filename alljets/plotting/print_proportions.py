@@ -71,13 +71,14 @@ def print_proportions(
     print("Ratio Corr: ", hists_base.project(1)[3].value / sum(hists_base.project(1).values()))
     print("Ratio Unmatched: ", hists_base.project(1)[1].value / sum(hists_base.project(1).values()))
     print("Ratio failed: ", hists_base.project(2)[99].value / sum(hists_base.project(2).values()))
+    print("Sum Weigths:", sum(hists_base.project(2).values()))
     print("#" * 50 + "#")
     with open("proprotions/proprotions_" + category_inst.name + ".txt", "w", encoding="utf-8") as f:
         print("#" * 25 + category_inst.name + "#" * 25, file=f)
         print("Ratio Corr: ", hists_base.project(1)[3].value / sum(hists_base.project(1).values()), file=f)
         print("Ratio Unmatched: ", hists_base.project(1)[1].value / sum(hists_base.project(1).values()), file=f)
         print("Ratio failed: ", hists_base.project(2)[99].value / sum(hists_base.project(2).values()), file=f)
-        print("#" * 50, file=f)
+        print("Sum Weigths:", sum(hists_base.project(2).values()), file=f)
 
     # Add each hist to the plot config
     plot_config["hist2"] = {
