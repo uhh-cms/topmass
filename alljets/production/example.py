@@ -622,7 +622,6 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                                                                         reco_jet.reco[:, 0].delta_r(events.Jet) > 0.4],
                                                                         axis=0), axis=1))
 
-    # Benchmarks?
     b1 = events.Jet[events.jet_matching_mask.b1]
     b2 = events.Jet[events.jet_matching_mask.b2]
     q1 = events.Jet[events.jet_matching_mask.q1]

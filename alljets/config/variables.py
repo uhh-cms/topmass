@@ -1150,7 +1150,7 @@ def add_variables(cfg: od.Config) -> None:
         expression="ptRatio_gen_Jet_b2",
         binning=(100, -1, 2),
         unit="",
-        x_title=r"Diff between the GenParticle $p_T$ and the Jet $p_T$ (b2)",
+        x_title=r"Ratio between the GenParticle $p_T$ and the Jet $p_T$ (b2)",
     )
     add_variable(
         cfg,
