@@ -1184,6 +1184,35 @@ def add_variables(cfg: od.Config) -> None:
         unit="",
         x_title=r"Ratio between the GenParticle $p_T$ and the Jet $p_T$ (q4)",
     )
+    add_variable(
+        cfg,
+        name="gen_top1_pt",
+        expression="gen_top.t[:,0].pt",
+        binning=(40, 0.0, 700.0),
+        unit="GeV",
+        x_title=r"p_{T,t}^{gen}",
+    )
+    cfg.add_variable(
+        name="gen_top1_min_deltaR_4bins",
+        expression="dRmin_gen_t1",
+        binning=[0, 0.4, 0.8, 1, 20],
+        unit="",
+        x_title=r"$\Delta R_{\text{min},t}$",
+    )
+    cfg.add_variable(
+        name="gamma_q1q2_q1",
+        expression="gamma_q1q2_q1",
+        binning=(200, -1.0, 1.0),
+        unit="",
+        x_title=r"$\gamma_q1$",
+    )
+    cfg.add_variable(
+        name="gamma_q1q2_q2",
+        expression="gamma_q1q2_q2",
+        binning=(200, 0, 2.0),
+        unit="",
+        x_title=r"$\gamma_q2$",
+    )
 
 
 # helper to add a variable to the config with some defaults

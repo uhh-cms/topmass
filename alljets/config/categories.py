@@ -247,6 +247,18 @@ def add_categories(cfg: od.Config) -> None:
         selection="gen_eta21_pt60_deltaRmin08_inf_t1",
         label="gen cut + 0.8 < dRmin",
     )
+    add_category(
+        cfg,
+        name="deltaRmin08_t1",
+        selection="deltaRmin08_t1",
+        label="0.8 < dRmin",
+    )
+    add_category(
+        cfg,
+        name="gen_eta21_pt60_deltaRmin04_t1",
+        selection="gen_eta21_pt60_deltaRmin04_t1",
+        label="dRmin < 0.4",
+    )
 
     # Uncomment to define orthogonal or overlapping category sets:
     #
