@@ -848,10 +848,10 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="fit_Top1_mass_130_500",
+        name="fit_Top1_mass_percentile",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
-        binning=(100, 130, 500),
+        binning=[99.9, 161, 167, 172, 178, 186, 224, 293, 1.38e+03],
         unit="GeV",
         x_title=r"$m_{t}^{fit}$",
     )

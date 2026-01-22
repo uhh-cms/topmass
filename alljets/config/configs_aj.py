@@ -589,7 +589,7 @@ def add_config(
     ################################################################################################
     # dataset / process specific methods
     ################################################################################################
-    cfg.x.fitchi2cut = 10
+    cfg.x.fitchi2cut = 6.3
     cfg.x.fitpgofcut = 0.1
     cfg.x.trigger_sf_variable = "jet6_pt_trigger"
 
@@ -876,7 +876,7 @@ def add_config(
     cfg.x.event_weights = DotDict(
         {
             "normalization_weight": [],
-            # "btag_weight": [],
+            "btag_weight": [],
             # "trig_weight": [],
             "trig_weight": get_shifts("trig"),
             # "muon_weight": get_shifts("mu"),
