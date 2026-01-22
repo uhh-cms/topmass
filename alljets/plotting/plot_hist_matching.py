@@ -227,7 +227,7 @@ def plot_hist_matching_MC(
             tt_label = r"$t\bar{t}$"
 
     divide_by_width = bool(kwargs.get("divide_by_width", False))
-    
+
     # Use the first variable instance for plotting
     variable_inst = variable_insts[0]
 
@@ -245,13 +245,13 @@ def plot_hist_matching_MC(
     unmatched_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 1]
 
     if divide_by_width:
-        bin_edges = hists[0][list(hists[0].keys())[tt_index]].axes[1].edges 
-        bin_widths = np.diff(bin_edges) 
+        bin_edges = hists[0][list(hists[0].keys())[tt_index]].axes[1].edges
+        bin_widths = np.diff(bin_edges)
 
         correct_hist = correct_hist / bin_widths
         wrong_hist = wrong_hist / bin_widths
         unmatched_hist = unmatched_hist / bin_widths
-    
+
     # Build cumulative stacks for plotting
     stack_correct = correct_hist
     stack_wrong = stack_correct + wrong_hist
