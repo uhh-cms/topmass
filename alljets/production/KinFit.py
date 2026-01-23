@@ -34,6 +34,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "FitJet.eta",
         "FitJet.phi",
         "FitJet.mass",
+        "FitJet.reco.*",
         "FitChi2",
         "FitPgof",
     },

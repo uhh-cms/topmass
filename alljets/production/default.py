@@ -186,6 +186,8 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "RecoW2.*",
         "RecoTop1.*",
         "RecoTop2.*",
+        "fitTopMass",
+        "recoTopMass",
         gen_top_lookup,
         "gen_top",
         # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
@@ -304,6 +306,11 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "FitTop1", Top1)
     events = set_ak_column(events, "FitTop2", Top2)
 
+    mtfit_mass = Top1.mass
+    mtreco_mass = RecoTop1.mass
+    events = set_ak_column(events, "fitTopMass", mtfit_mass)
+    events = set_ak_column(events, "recoTopMass", mtreco_mass)
+
     return events
 
 
@@ -405,7 +412,6 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     optionally muon) weights.
 
     """
-
     # Attach coffea-style behaviour for collections
     events = self[attach_coffea_behavior](events, **kwargs)
 
