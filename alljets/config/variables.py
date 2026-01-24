@@ -1200,18 +1200,63 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$\Delta R_{\text{min},t}$",
     )
     cfg.add_variable(
-        name="gamma_q1q2_q1",
-        expression="gamma_q1q2_q1",
-        binning=(200, -1.0, 1.0),
+        name="lambda_q1q2_q1",
+        expression="lambda_q1q2_q1",
+        binning=(200, -1, 2),
         unit="",
-        x_title=r"$\gamma_q1$",
+        x_title=r"$\lambda_{q1}$",
     )
     cfg.add_variable(
-        name="gamma_q1q2_q2",
-        expression="gamma_q1q2_q2",
-        binning=(200, 0, 2.0),
+        name="lambda_q1q2_q2",
+        expression="lambda_q1q2_q2",
+        binning=(200, -1, 2),
         unit="",
-        x_title=r"$\gamma_q2$",
+        x_title=r"$\lambda_{q2}$",
+    )
+
+    cfg.add_variable(
+        name="lambda_q1q2_FitJetq1",
+        expression="lambda_q1q2_FitJetq1",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{q1}^{fit}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_FitJetq2",
+        expression="lambda_q1q2_FitJetq2",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{q2}^{fit}$",
+    )
+
+    cfg.add_variable(
+        name="lambda_q1q2_recoJetq2",
+        expression="lambda_q1q2_recoJetq2",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{q2}^{reco}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_recoJetq1",
+        expression="lambda_q1q2_recoJetq1",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{q1}^{reco}$",
+    )
+
+    cfg.add_variable(
+        name="lambda_ptSorted_q1q2_q1",
+        expression="lambda_ptSorted_q1q2_q1",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{q1}$",
+    )
+    cfg.add_variable(
+        name="lambda_ptSorted_q1q2_q2",
+        expression="lambda_ptSorted_q1q2_q2",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{q1}$",
     )
 
 
