@@ -219,3 +219,16 @@ def build_ttbar(events, which=None):
         return ttbar.energy
 
     raise ValueError(f"Unknown which: {which}")
+
+
+def build_avg_w_mass(events):
+    W1_mass = build_w1recojet(events, which="mass")
+    W2_mass = build_w2recojet(events, which="mass")
+    return (W1_mass + W2_mass) / 2
+
+
+def build_reco_R_bq(events):
+    events = attach_coffea_behavior(events, {"FitJet.reco": default_coffea_collections["Jet"]})
+
+    reco = events.FitJet.reco
+    return (reco[:, 0].pt + reco[:, 1].pt) / (reco[:, 2].pt + reco[:, 3].pt + reco[:, 4].pt + reco[:, 5].pt)

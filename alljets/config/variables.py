@@ -34,6 +34,8 @@ from .jet_builder import (
     build_w1recojet,
     build_w2recojet,
     build_ttbar,
+    build_avg_w_mass,
+    build_reco_R_bq,
 )
 
 
@@ -112,30 +114,6 @@ def add_variables(cfg: od.Config) -> None:
         x_title="Number of jets",
         discrete_x=True,
     )
-    # add_variable(
-    #     cfg,
-    #     name="jets_pt",
-    #     expression="Jet.pt",
-    #     binning=(40, 0.0, 400.0),
-    #     unit="GeV",
-    #     x_title=r"$p_{T}$ of all jets",
-    # )
-    # add_variable(
-    #     cfg,
-    #     name="jets_eta",
-    #     expression="Jet.eta",
-    #     binning=(30, -3.0, 3.0),
-    #     unit="GeV",
-    #     x_title=r"$\eta$ of all jets",
-    # )
-    # add_variable(
-    #     cfg,
-    #     name="jets_phi",
-    #     expression="Jet.phi",
-    #     binning=(40, -3.2, 3.2),
-    #     unit="GeV",
-    #     x_title=r"$\phi$ of all jets",
-    # )
     add_variable(
         cfg,
         name="jet1_pt",
@@ -762,25 +740,21 @@ def add_variables(cfg: od.Config) -> None:
         unit="",
         x_title=r"$P_{gof}$ from kinfit",
     )
-
-    build_w1jet.inputs = ["FitW1.{x,y,z,t}"]
     add_variable(
         cfg,
-        name="fit_W1_mass",
-        expression=partial(build_w1jet, which="mass"),
-        aux={"inputs": build_w1jet.inputs},
-        binning=(100, 0, 500),
-        unit="GeV",
-        x_title=r"$m_{W}^{fit}$",
+        name="fit_combination_type",
+        expression="fitCombinationType",
+        null_value=EMPTY_FLOAT,
+        binning=(4, -1.5, 2.5),
+        x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
     )
-
     build_w1recojet.inputs = ["RecoW1.{x,y,z,t}"]
     add_variable(
         cfg,
         name="reco_W1_mass",
         expression=partial(build_w1recojet, which="mass"),
         aux={"inputs": build_w1recojet.inputs},
-        binning=(100, 0, 500),
+        binning=(100, 0, 200),
         unit="GeV",
         x_title=r"$m_{W_{1}}^{reco}$",
     )
@@ -794,7 +768,35 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{W_{2}}^{reco}$",
     )
-
+    build_avg_w_mass.inputs = (build_w1recojet.inputs + build_w2recojet.inputs)
+    add_variable(
+        cfg,
+        name="reco_W_mass_avg",
+        expression=partial(build_avg_w_mass),
+        aux={"inputs": build_avg_w_mass.inputs},
+        binning=(100, 0, 200),
+        unit="GeV",
+        x_title=r"$m_{W_{avg}}^{reco}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_W_mass_avg_percentile",
+        expression=partial(build_avg_w_mass),
+        aux={"inputs": build_avg_w_mass.inputs},
+        binning=[65.5, 76.3, 79.5, 82, 84.3, 86.6, 89.1, 92.3, 107],
+        unit="GeV",
+        x_title=r"average W mass",
+    )
+    build_w1jet.inputs = ["FitW1.{x,y,z,t}"]
+    add_variable(
+        cfg,
+        name="fit_W1_mass",
+        expression=partial(build_w1jet, which="mass"),
+        aux={"inputs": build_w1jet.inputs},
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"$m_{W}^{fit}$",
+    )
     build_top1recojet.inputs = ["RecoTop1.{x,y,z,t}"]
     add_variable(
         cfg,
@@ -815,7 +817,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{t_{2}}^{reco}$",
     )
-
     build_ttbar.inputs = ["RecoTop1.{x,y,z,t}", "RecoTop2.{x,y,z,t}"]
     add_variable(
         cfg,
@@ -826,7 +827,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{t\bar{t}}^{reco}$",
     )
-
     build_top1jet.inputs = ["FitTop1.{x,y,z,t}"]
     add_variable(
         cfg,
@@ -839,15 +839,6 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="fit_Top1_mass_coarse",
-        expression=partial(build_top1jet, which="mass"),
-        aux={"inputs": build_top1jet.inputs},
-        binning=(15, 100, 550),
-        unit="GeV",
-        x_title=r"$m_{t}^{fit}$",
-    )
-    add_variable(
-        cfg,
         name="fit_Top1_mass_percentile",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
@@ -855,15 +846,33 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{t}^{fit}$",
     )
+    build_reco_R_bq.inputs = ["FitJet.reco.{pt,eta,phi,mass}"]
     add_variable(
         cfg,
-        name="fit_combination_type",
-        expression="fitCombinationType",
-        null_value=EMPTY_FLOAT,
-        binning=(4, -1.5, 2.5),
-        x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
+        name="reco_R_bq",
+        expression=build_reco_R_bq,
+        aux={"inputs": build_reco_R_bq.inputs},
+        binning=(50, 0, 10),
+        unit="",
+        x_title=r"R_{bq}",
     )
-
+    add_variable(
+        cfg,
+        name="reco_R_bq_percentile",
+        expression=build_reco_R_bq,
+        aux={"inputs": build_reco_R_bq.inputs},
+        binning=[0.0884, 0.333, 0.42, 0.501, 0.589, 0.69, 0.821, 1.03, 8.17],
+        unit="",
+        x_title=r"R_{bq}",
+    )
+    add_variable(
+        cfg,
+        name="fit_deltaRbb",
+        expression="FitRbb",
+        null_value=EMPTY_FLOAT,
+        binning=(59, 0, 5.8),
+        x_title=r"$\Delta R_{b}$ ",
+    )
     build_b1jet.inputs = ["FitB1.{pt,eta,phi,mass}"]
     add_variable(
         cfg,
@@ -874,19 +883,183 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"fitted B1 mass",
     )
-
     build_b2jet.inputs = ["FitB2.{x,y,z,t}"]
-
+    ###############################################################################
+    #                            Feautures with coarse binning                    #
+    #                                 for validation plots                        #
+    ###############################################################################
     add_variable(
         cfg,
-        name="fit_deltaRbb",
+        name="fit_Top1_mass_coarse",
+        expression=partial(build_top1jet, which="mass"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=(15, 100, 550),
+        unit="GeV",
+        x_title=r"$m_{t}^{fit}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_Top1_mass_coarse",
+        expression=partial(build_top1recojet, which="mass"),
+        aux={"inputs": build_top1recojet.inputs},
+        binning=(15, 100, 550),
+        unit="GeV",
+        x_title=r"$m_{t_{1}}^{reco}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_Top2_mass_coarse_coarse",
+        expression=partial(build_top2recojet, which="mass"),
+        aux={"inputs": build_top2recojet.inputs},
+        binning=(15, 100, 550),
+        unit="GeV",
+        x_title=r"$m_{t_{2}}^{reco}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_W1_mass_coarse",
+        expression=partial(build_w1recojet, which="mass"),
+        aux={"inputs": build_w1recojet.inputs},
+        binning=(15, 60, 120),
+        unit="GeV",
+        x_title=r"$m_{W_{1}}^{reco}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_W2_mass_coarse",
+        expression=partial(build_w2recojet, which="mass"),
+        aux={"inputs": build_w2recojet.inputs},
+        binning=(15, 60, 120),
+        unit="GeV",
+        x_title=r"$m_{W_{2}}^{reco}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_W_mass_avg_coarse",
+        expression=partial(build_avg_w_mass),
+        aux={"inputs": build_avg_w_mass.inputs},
+        binning=(15, 60, 120),
+        unit="GeV",
+        x_title=r"$m_{W_{avg}}^{reco}$",
+    )
+    add_variable(
+        cfg,
+        name="fit_deltaRbb_coarse",
         expression="FitRbb",
         null_value=EMPTY_FLOAT,
-        binning=(59, 0, 5.8),
+        binning=(16, 2, 5.2),
         x_title=r"$\Delta R_{b}$ ",
     )
-
-
+    add_variable(
+        cfg,
+        name="ht_coarse",
+        expression="ht",
+        binning=(32, 400.0, 2000.0),
+        unit="GeV",
+        x_title="$H_T$",
+    )
+    add_variable(
+        cfg,
+        name="jet1_pt_coarse",
+        expression="Jet.pt[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(15,50, 500.0),
+        unit="GeV",
+        x_title=r"Jet 1 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="jet1_eta_coarse",
+        expression="Jet.eta[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(18, -2.7, 2.7),
+        x_title=r"Jet 1 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="jet2_pt_coarse",
+        expression="Jet.pt[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 40.0, 340.0),
+        unit="GeV",
+        x_title=r"Jet 2 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="jet2_eta_coarse",
+        expression="Jet.eta[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(18, -2.7, 2.7),
+        x_title=r"Jet 2 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="jet3_pt_coarse",
+        expression="Jet.pt[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 40.0, 190.0),
+        unit="GeV",
+        x_title=r"Jet 3 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="jet3_eta_coarse",
+        expression="Jet.eta[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(18, -2.7, 2.7),
+        x_title=r"Jet 3 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="jet4_pt_coarse",
+        expression="Jet.pt[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 40.0, 140.0),
+        unit="GeV",
+        x_title=r"Jet 4 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="jet4_eta_coarse",
+        expression="Jet.eta[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(18, -2.7, 2.7),
+        x_title=r"Jet 4 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="jet5_pt_coarse",
+        expression="Jet.pt[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 35.0, 115.0),
+        unit="GeV",
+        x_title=r"Jet 5 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="jet5_eta_coarse",
+        expression="Jet.eta[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(18, -2.7, 2.7),
+        x_title=r"Jet 5 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="jet6_pt_coarse",
+        expression="Jet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(17, 37.5, 80.0),
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="jet6_eta_coarse",
+        expression="Jet.eta[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(18, -2.7, 2.7),
+        x_title=r"Jet 6 $\eta$",
+    )
 # helper to add a variable to the config with some defaults
 def add_variable(config: od.Config, *args, **kwargs) -> od.Variable:
     kwargs.setdefault("null_value", EMPTY_FLOAT)
