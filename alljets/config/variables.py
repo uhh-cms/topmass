@@ -963,7 +963,7 @@ def add_variables(cfg: od.Config) -> None:
         name="jet1_pt_coarse",
         expression="Jet.pt[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(15,50, 500.0),
+        binning=(15, 50, 500.0),
         unit="GeV",
         x_title=r"Jet 1 $p_{T}$",
     )
@@ -1060,6 +1060,8 @@ def add_variables(cfg: od.Config) -> None:
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 6 $\eta$",
     )
+
+
 # helper to add a variable to the config with some defaults
 def add_variable(config: od.Config, *args, **kwargs) -> od.Variable:
     kwargs.setdefault("null_value", EMPTY_FLOAT)
