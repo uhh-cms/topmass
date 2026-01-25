@@ -150,7 +150,20 @@ def add_categories(cfg: od.Config) -> None:
         label="Signal Region",
         tags={"2btj"},
     )
-
+    add_category(
+        cfg,
+        name="sig_blind_fit",
+        selection="cat_2btj_sig_blind_fit",  # >= 2 b-tags + signal trigger + fit quality
+        label="Signal Region",
+        tags={"2btj"},
+    )
+    add_category(
+        cfg,
+        name="sig_blind_reco",
+        selection="cat_2btj_sig_blind_reco",  # >= 2 b-tags + signal trigger + fit quality
+        label="Signal Region",
+        tags={"2btj"},
+    )
     # ========================================================================
     # Truth-level matching categories
     # ========================================================================
