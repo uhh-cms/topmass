@@ -191,6 +191,7 @@ def qcd_sig_vs_bkg_sel(
             "histtype": "fill",
             "norm": hists[0][list(keys)[qcd_index]][0, sum, 1, 1].value,
             "label": "Sig. sel.",
+            "color": "#ffff00",
         },
         "ratio_method": "draw_stat_error_bands",
         "ratio_kwargs": {
