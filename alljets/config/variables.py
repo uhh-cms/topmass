@@ -1256,7 +1256,7 @@ def add_variables(cfg: od.Config) -> None:
         expression="lambda_ptSorted_q1q2_q2",
         binning=(200, -1, 2),
         unit="",
-        x_title=r"$\lambda_{q1}$",
+        x_title=r"$\lambda_{q2}$",
     )
 
 

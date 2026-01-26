@@ -435,7 +435,8 @@ def cutflow_features(
         "deltaR_fitJet_q1q2",
         "lambda_ptSorted_q1q2_q1",
         "lambda_ptSorted_q1q2_q2",
-        "deltaR_ptSorted_q1q2",
+        "deltaR_recoJet_q1q2",
+        "deltaR_gen_q1q2",
     },
 )
 def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -694,6 +695,9 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Angular Distance recoJet to recoJet
     events = set_ak_column(events, "deltaR_recoJet_q1q2", reco_jet.reco[:, 2].delta_r(reco_jet.reco[:, 3]))
 
+    # Angular Distance GenParton to GenParton
+    events = set_ak_column(events, "deltaR_gen_q1q2", gen_top.w_children[:, 0, 0].delta_r(gen_top.w_children[:, 0, 1]))
+
     # pt ratio
     def closest_value_to_one(data):
         dist = abs(data - 1)
@@ -767,16 +771,14 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "lambda_q1q2_FitJetq2", lambda_q1q2_FitJetq2)
 
     # axis projection sorted by pt
-    gen_ptSorted_q1 = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 1].pt,
-                               gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1])
-    gen_ptSorted_q2 = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 1].pt,
-                               gen_top.w_children[:, 0, 1], gen_top.w_children[:, 0, 0])
-    lambda_ptSorted_q1q2_q1 = axis_projection(gen_ptSorted_q1, gen_ptSorted_q2, q1)
-    lambda_ptSorted_q1q2_q2 = axis_projection(gen_ptSorted_q1, gen_ptSorted_q2, q2)
+    q1_ptSorted = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 0].pt, q1, q2)
+    q2_ptSorted = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 0].pt, q2, q1)
+
+    lambda_ptSorted_q1q2_q1 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], q1_ptSorted)
+    lambda_ptSorted_q1q2_q2 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], q2_ptSorted)
+
     events = set_ak_column(events, "lambda_ptSorted_q1q2_q1", ak.fill_none(ak.min(lambda_ptSorted_q1q2_q1, axis=1), -10))
     events = set_ak_column(events, "lambda_ptSorted_q1q2_q2", ak.fill_none(ak.min(lambda_ptSorted_q1q2_q2, axis=1), -10))
-    # delta R
-    events = set_ak_column(events, "deltaR_ptSorted_q1q2", gen_ptSorted_q1.delta_r(gen_ptSorted_q2))
 
     return events
 

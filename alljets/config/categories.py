@@ -159,9 +159,13 @@ def add_categories(cfg: od.Config) -> None:
         tags={"matched"},
     )
 
-    # ========================================================================
-    # Cuts on gen-level
-    # ========================================================================
+# ============================================================================
+# analyze jet overlap
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# GenParticles Cuts
+# ----------------------------------------------------------------------------
 
     add_category(
         cfg,
@@ -175,89 +179,118 @@ def add_categories(cfg: od.Config) -> None:
         selection="gen_eta21_pt60_corr",
         label="GenParticle eta2.1+pt60 Cut + corr",
     )
+
+# ----------------------------------------------------------------------------
+# Delta Rmin Cuts t1
+# ----------------------------------------------------------------------------
+
     add_category(
         cfg,
-        name="gen_eta21_pt60_deltaRmin08_t1",
-        selection="gen_eta21_pt60_deltaRmin08_t1",
-        label="GenParticle eta2.1+pt60 Cut + dRmin_t1 < 0.8",
+        name="deltaRmin08_t1",
+        selection="deltaRmin08_t1",
+        label="dRmin_t1 < 0.8",
     )
     add_category(
         cfg,
         name="gen_cut_deltaRmin08_t1",
         selection="gen_cut_deltaRmin08_t1",
-        label="gen cut + corr + dRmin < 0.8",
+        label="gen cut + dRmin < 0.8",
     )
     add_category(
         cfg,
         name="gen_cut_deltaRmin06_t1",
         selection="gen_cut_deltaRmin06_t1",
-        label="gen cut + corr + dRmin < 0.6",
-    )
-    add_category(
-        cfg,
-        name="gen_cut_deltaRmin06_t1_false",
-        selection="gen_cut_deltaRmin06_t1_false",
-        label="gen cut + corr and false + dRmin < 0.8",
-    )
-    add_category(
-        cfg,
-        name="gen_cut_deltaRmin06_q1",
-        selection="gen_cut_deltaRmin06_q1",
-        label="gen cut + corr + dR < 0.6",
-    )
-    add_category(
-        cfg,
-        name="gen_cut_deltaR06_q1_without_matching",
-        selection="gen_cut_deltaR06_q1_without_matching",
-        label="gen cut + dR < 0.6",
-    )
-    add_category(
-        cfg,
-        name="gen_cut_deltaR0406_q1_without_matching",
-        selection="gen_cut_deltaR0406_q1_without_matching",
-        label="gen cut + 0.4 < dR < 0.6",
-    )
-    add_category(
-        cfg,
-        name="gen_eta21_pt60_deltaRmin06_t1",
-        selection="gen_eta21_pt60_deltaRmin06_t1",
         label="gen cut + dRmin < 0.6",
     )
     add_category(
         cfg,
-        name="gen_eta21_pt60_deltaRmin05_t1",
-        selection="gen_eta21_pt60_deltaRmin05_t1",
+        name="gen_cut_deltaRmin05_t1",
+        selection="gen_cut_deltaRmin05_t1",
         label="gen cut + dRmin < 0.5",
     )
     add_category(
         cfg,
-        name="gen_eta21_pt60_deltaRmin06_08_t1",
-        selection="gen_eta21_pt60_deltaRmin06_08_t1",
+        name="gen_cut_deltaRmin04_t1",
+        selection="gen_cut_deltaRmin04_t1",
+        label="gen cut + dRmin < 0.4",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRmin06_08_t1",
+        selection="gen_cut_deltaRmin06_08_t1",
         label="gen cut + 0.6 < dRmin < 0.8",
     )
     add_category(
         cfg,
-        name="gen_eta21_pt60_deltaRmin04_06_t1",
-        selection="gen_eta21_pt60_deltaRmin04_06_t1",
+        name="gen_cut_deltaRmin04_06_t1",
+        selection="gen_cut_deltaRmin04_06_t1",
         label="gen cut + 0.4 < dRmin < 0.6",
     )
     add_category(
         cfg,
-        name="gen_eta21_pt60_deltaRmin08_inf_t1",
-        selection="gen_eta21_pt60_deltaRmin08_inf_t1",
+        name="gen_cut_deltaRmin08_inf_t1",
+        selection="gen_cut_deltaRmin08_inf_t1",
         label="gen cut + 0.8 < dRmin",
     )
     add_category(
         cfg,
-        name="deltaRmin08_t1",
-        selection="deltaRmin08_t1",
-        label="0.8 < dRmin",
+        name="gen_cut_corr_deltaRmin08_t1",
+        selection="gen_cut_deltaRmin08_inf_t1",
+        label="gen cut + corr + dRmin < 0.8",
     )
     add_category(
         cfg,
-        name="gen_eta21_pt60_deltaRmin04_t1",
-        selection="gen_eta21_pt60_deltaRmin04_t1",
-        label="dRmin < 0.4",
+        name="gen_cut_corr_deltaRmin06_t1",
+        selection="gen_cut_corr_deltaRmin06_t1",
+        label="gen cut + corr + dRmin < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_wrong_deltaRmin06_t1",
+        selection="gen_cut_wrong_deltaRmin06_t1",
+        label="gen cut + wrong + dRmin < 0.6",
+    )
+# ----------------------------------------------------------------------------
+# Delta R Jet to all other Jets
+# ----------------------------------------------------------------------------
+    add_category(
+        cfg,
+        name="gen_cut_corr_deltaR06_q1",
+        selection="gen_cut_corr_deltaR06_q1",
+        label="gen cut + corr + dR < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaR06_q1",
+        selection="gen_cut_deltaR06_q1",
+        label="gen cut + dR < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaR04_06_q1",
+        selection="gen_cut_deltaR04_06_q1",
+        label="gen cut + 0.4 < dR < 0.6",
+    )
+# ----------------------------------------------------------------------------
+# Angular Distance recoJet to recoJet
+# ----------------------------------------------------------------------------
+    add_category(
+        cfg,
+        name="gen_cut_deltaRrecoJet08_q1q2",
+        selection="gen_cut_deltaRrecoJet08_q1q2",
+        label="gen cut + dR < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRrecoJet06_q1q2",
+        selection="gen_cut_deltaRrecoJet06_q1q2",
+        label="gen cut + dR < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRrecoJet04_q1q2",
+        selection="gen_cut_deltaRrecoJet04_q1q2",
+        label="gen cut + dR < 0.4",
     )
 
     # Uncomment to define orthogonal or overlapping category sets:
