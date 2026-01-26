@@ -83,7 +83,7 @@ def plot_hist_matching(
 
     # Prepare the plot configuration dictionary
     plot_config = OrderedDict()
-
+    #from IPython import embed; embed()
     # Extract base histograms for each matching type
     qcd_hist = hists[0][list(hists[0].keys())[qcd_index]][0, :, sum]
     correct_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 3]
@@ -158,11 +158,39 @@ def plot_hist_matching(
             "zorder": 5,
         },
     }
+    HIDE_DATA_MARKERS = {
+    "fit_Top1_mass":  (140, 195),
+    "reco_Top1_mass": (140, 210),
+    "reco_Top2_mass": (140, 210),
+                        }
+    
+    data_hist = hists[0][list(hists[0].keys())[data_index]][0, :, sum]
+
+    hide_range = HIDE_DATA_MARKERS.get(variable_inst.name)
+
+    if hide_range is not None:
+        low, high = hide_range
+
+        # Bin edges & centers
+        edges = data_hist.axes[0].edges
+        centers = 0.5 * (edges[:-1] + edges[1:])
+
+        # Mask bins inside the hide window
+        mask = (centers >= low) & (centers <= high)
+
+        # Copy to avoid modifying original histogram
+        data_hist = data_hist.copy()
+
+        # Zero values & variances → markers disappear
+        data_hist.values()[mask] = 0.0
+        data_hist.variances()[mask] = 0.0
+
+
     # Add data points with error bars
     plot_config["hist_data"] = {
         "method": "draw_errorbars",
         "ratio_method": "draw_errorbars",
-        "hist": hists[0][list(hists[0].keys())[data_index]][0, :, sum],
+        "hist": data_hist,
         "kwargs": {
             "label": f"{list(hists[0].keys())[data_index].name}",
             "zorder": 6,
