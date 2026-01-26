@@ -854,7 +854,7 @@ def add_variables(cfg: od.Config) -> None:
         aux={"inputs": build_reco_R_bq.inputs},
         binning=(50, 0, 10),
         unit="",
-        x_title=r"R_{bq}",
+        x_title=r"$R_{bq}$",
     )
     add_variable(
         cfg,
@@ -863,7 +863,7 @@ def add_variables(cfg: od.Config) -> None:
         aux={"inputs": build_reco_R_bq.inputs},
         binning=[0.0884, 0.333, 0.42, 0.501, 0.589, 0.69, 0.821, 1.03, 8.17],
         unit="",
-        x_title=r"R_{bq}",
+        x_title=r"$R_{bq}$",
     )
     add_variable(
         cfg,
