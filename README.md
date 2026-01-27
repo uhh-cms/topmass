@@ -134,8 +134,32 @@ law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
     --producers default,kinFitMatch
     --variables fit_Top1_mass-fit_combination_type \
     --processes tt,qcd,data \
-    --categories incl \
+    --categories sig \
     --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching
+```
+Before applying the background estimation, we need to verify its performance using the QCD multijet MC simulation. This ensures that the background selection and the signal selection, result in distributions of the same shape for multijet events, which do originate from $t\bar{t}$ events. These validation plots, for example for the ``` variable fit_Top1_mass``` via
+
+```
+law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
+    --datasets '*qcd*' \
+    --selector-steps All,SignalOrBkgTrigger,BTag20,jet,HT \
+    --producers default,kinFitMatch,trigger_prod \
+    --variables fit_Top1_mass-secmaxbtag_type-trig_bits \
+    --processes qcd \
+    --categories fit_conv_leq_rbb \
+    --plot-function alljets.plotting.sim_vs_est.qcd_sig_vs_bkg_sel
+```
+After this, we can then compare the distributions of our variables for the QCD MC and the data-driven background estimation in our signal region via the command
+
+```
+law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
+    --datasets tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,'data*','qcd*' \
+    --variables fit_Top1_mass \
+    --selector-steps All,SignalOrBkgTrigger,BTag20,jet,HT \
+    --processes tt,data,qcd,qcd_est
+    --categories sig \
+    --plot-function alljets.plotting.sim_vs_est.qcd_mc_vs_est \
+    --hist-hook qcd
 ```
 
 To derive a background estimation, we need to isolate that background from the signal. For this, we use a different group of ```selector-steps``` and need to invoke the ```--hist-hook qcd``` parameter, which is defined [here](https://github.com/uhh-cms/topmass/blob/dev_Lennert/alljets/hist_hooks/bkg.py). Then, we can obtain the same plot above using the data-driven QCD background estimation instead the MC, via
