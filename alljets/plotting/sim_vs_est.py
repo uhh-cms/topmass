@@ -17,6 +17,7 @@ from columnflow.plotting.plot_util import (
     apply_variable_settings,
     apply_density,
 )
+from modules.columnflow.columnflow.plotting.plot_util import get_cms_label
 
 hist = maybe_import("hist")
 np = maybe_import("numpy")
@@ -219,6 +220,7 @@ def qcd_sig_vs_bkg_sel(
     default_style_config["legend_cfg"]["fontsize"] = 20
     default_style_config["rax_cfg"]["ylim"] = (0.5, 2.0)
     default_style_config["rax_cfg"]["ylabel"] = "Bkg. sel./Sig. sel."
+    default_style_config["cms_label_cfg"]["llabel"] = get_cms_label(None, "simpw")["llabel"]
     kwargs["skip_ratio"] = False
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)

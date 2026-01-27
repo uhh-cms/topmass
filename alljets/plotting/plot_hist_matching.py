@@ -12,6 +12,7 @@ import law
 from columnflow.plotting.plot_util import (apply_density, apply_variable_settings, prepare_style_config)
 from columnflow.util import maybe_import
 from alljets.plotting.aj_plot_all import aj_plot_all
+from modules.columnflow.columnflow.plotting.plot_util import get_cms_label
 
 
 hist = maybe_import("hist")
@@ -83,7 +84,7 @@ def plot_hist_matching(
 
     # Prepare the plot configuration dictionary
     plot_config = OrderedDict()
-    #from IPython import embed; embed()
+
     # Extract base histograms for each matching type
     qcd_hist = hists[0][list(hists[0].keys())[qcd_index]][0, :, sum]
     correct_hist = hists[0][list(hists[0].keys())[tt_index]][0, :, 3]
@@ -159,11 +160,11 @@ def plot_hist_matching(
         },
     }
     HIDE_DATA_MARKERS = {
-    "fit_Top1_mass":  (140, 195),
-    "reco_Top1_mass": (140, 210),
-    "reco_Top2_mass": (140, 210),
-                        }
-    
+        "fit_Top1_mass": (140, 195),
+        "reco_Top1_mass": (140, 210),
+        "reco_Top2_mass": (140, 210),
+    }
+
     data_hist = hists[0][list(hists[0].keys())[data_index]][0, :, sum]
 
     hide_range = HIDE_DATA_MARKERS.get(variable_inst.name)
@@ -184,7 +185,6 @@ def plot_hist_matching(
         # Zero values & variances → markers disappear
         data_hist.values()[mask] = 0.0
         data_hist.variances()[mask] = 0.0
-
 
     # Add data points with error bars
     plot_config["hist_data"] = {
@@ -336,6 +336,7 @@ def plot_hist_matching_MC(
     default_style_config["legend_cfg"]["ncol"] = 1
     default_style_config["legend_cfg"]["title_fontsize"] = 24
     default_style_config["legend_cfg"]["fontsize"] = 20
+    default_style_config["cms_label_cfg"]["llabel"] = get_cms_label(None, "simpw")["llabel"]
     kwargs["skip_ratio"] = True
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
