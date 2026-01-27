@@ -562,7 +562,7 @@ def gen_cut_deltaRrecoJet04_q1q2(self: Categorizer, events: ak.Array, **kwargs) 
         ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
         ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
     ], axis=0)
-    dR = events.deltaR_recoJet_q1q2 < 0.6
+    dR = events.deltaR_recoJet_q1q2 < 0.4
     return events, ak.all([eta, pt, dR], axis=0)
 
 
@@ -627,5 +627,260 @@ def gen_cut_deltaRgen04_q1q2(self: Categorizer, events: ak.Array, **kwargs) -> t
         ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
         ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
     ], axis=0)
-    dR = events.deltaR_gen_q1q2 < 0.6
+    dR = events.deltaR_gen_q1q2 < 0.4
     return events, ak.all([eta, pt, dR], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   })
+def gen_cut_deltaRgen08_inf_q1q2(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = (0.8 < events.deltaR_gen_q1q2)
+    return events, ak.all([eta, pt, dR], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   })
+def gen_cut_deltaRgen06_08_q1q2(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = (0.6 < events.deltaR_gen_q1q2) & (events.deltaR_gen_q1q2 < 0.8)
+    return events, ak.all([eta, pt, dR], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   })
+def gen_cut_deltaRgen04_06_q1q2(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = (0.4 < events.deltaR_gen_q1q2) & (events.deltaR_gen_q1q2 < 0.6)
+    return events, ak.all([eta, pt, dR], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   })
+def gen_cut_deltaRgen08_q1q2_corr(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = events.deltaR_gen_q1q2 < 0.8
+    matching = events.fitCombinationType == 2
+    return events, ak.all([eta, pt, dR, matching], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   })
+def gen_cut_deltaRgen06_q1q2_corr(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = events.deltaR_gen_q1q2 < 0.6
+    matching = events.fitCombinationType == 2
+    return events, ak.all([eta, pt, dR, matching], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   })
+def gen_cut_deltaRgen04_q1q2_corr(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = events.deltaR_gen_q1q2 < 0.4
+    matching = events.fitCombinationType == 2
+    return events, ak.all([eta, pt, dR, matching], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   })
+def gen_cut_deltaRgen08_inf_q1q2_corr(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = (0.8 < events.deltaR_gen_q1q2)
+    matching = events.fitCombinationType == 2
+    return events, ak.all([eta, pt, dR, matching], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   })
+def gen_cut_deltaRgen06_08_q1q2_corr(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = (0.6 < events.deltaR_gen_q1q2) & (events.deltaR_gen_q1q2 < 0.8)
+    matching = events.fitCombinationType == 2
+    return events, ak.all([eta, pt, dR, matching], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   })
+def gen_cut_deltaRgen04_06_q1q2_corr(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = (0.4 < events.deltaR_gen_q1q2) & (events.deltaR_gen_q1q2 < 0.6)
+    matching = events.fitCombinationType == 2
+    return events, ak.all([eta, pt, dR, matching], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   "FitPgof",
+                   })
+def gen_cut_deltaRgen08_q1q2_corr_pgof(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = events.deltaR_gen_q1q2 < 0.8
+    matching = events.fitCombinationType == 2
+    pgof = events.FitPgof > 0.1
+    return events, ak.all([eta, pt, dR, matching, pgof], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   "FitPgof",
+                   })
+def gen_cut_deltaRgen06_q1q2_corr_pgof(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = events.deltaR_gen_q1q2 < 0.6
+    matching = events.fitCombinationType == 2
+    pgof = events.FitPgof > 0.1
+    return events, ak.all([eta, pt, dR, matching, pgof], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "fitCombinationType",
+                   "dRmin_gen_t1",
+                   "deltaR_gen_q1q2",
+                   "FitPgof",
+                   })
+def gen_cut_deltaRgen04_q1q2_corr_pgof(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    dR = events.deltaR_gen_q1q2 < 0.4
+    matching = events.fitCombinationType == 2
+    pgof = events.FitPgof > 0.1
+    return events, ak.all([eta, pt, dR, matching, pgof], axis=0)

@@ -771,8 +771,8 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "lambda_q1q2_FitJetq2", lambda_q1q2_FitJetq2)
 
     # axis projection sorted by pt
-    q1_ptSorted = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 0].pt, q1, q2)
-    q2_ptSorted = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 0].pt, q2, q1)
+    q1_ptSorted = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 1].pt, q1, q2)
+    q2_ptSorted = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 1].pt, q2, q1)
 
     lambda_ptSorted_q1q2_q1 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], q1_ptSorted)
     lambda_ptSorted_q1q2_q2 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], q2_ptSorted)

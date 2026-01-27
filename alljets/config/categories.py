@@ -278,19 +278,116 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="gen_cut_deltaRrecoJet08_q1q2",
         selection="gen_cut_deltaRrecoJet08_q1q2",
-        label="gen cut + dR < 0.8",
+        label=r"gen cut + $dR^{reco}_{q1q2}$ < 0.8",
     )
     add_category(
         cfg,
         name="gen_cut_deltaRrecoJet06_q1q2",
         selection="gen_cut_deltaRrecoJet06_q1q2",
-        label="gen cut + dR < 0.6",
+        label=r"gen cut + $dR^{reco}_{q1q2}$ < 0.6",
     )
     add_category(
         cfg,
         name="gen_cut_deltaRrecoJet04_q1q2",
         selection="gen_cut_deltaRrecoJet04_q1q2",
-        label="gen cut + dR < 0.4",
+        label=r"gen cut + $dR^{reco}_{q1q2}$ < 0.4",
+    )
+# ----------------------------------------------------------------------------
+# Angular Distance GenParton to GenParton
+# ----------------------------------------------------------------------------
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_q1q2",
+        selection="gen_cut_deltaRgen08_q1q2",
+        label=r"gen cut + $dR^{gen}_{q1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_q1q2",
+        selection="gen_cut_deltaRgen06_q1q2",
+        label=r"gen cut + $dR^{gen}_{q1q2}$ < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_q1q2",
+        selection="gen_cut_deltaRgen04_q1q2",
+        label=r"gen cut + $dR^{gen}_{q1q2}$ < 0.4",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_q1q2_corr",
+        selection="gen_cut_deltaRgen08_q1q2_corr",
+        label=r"gen cut + corr + $dR^{gen}_{q1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_q1q2_corr",
+        selection="gen_cut_deltaRgen06_q1q2_corr",
+        label=r"gen cut + corr + $dR^{gen}_{q1q2}$ < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_q1q2_corr",
+        selection="gen_cut_deltaRgen04_q1q2_corr",
+        label=r"gen cut + corr + $dR^{gen}_{q1q2}$ < 0.4",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_inf_q1q2",
+        selection="gen_cut_deltaRgen08_inf_q1q2",
+        label=r"gen cut + $dR^{gen}_{q1q2}$ > 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_08_q1q2",
+        selection="gen_cut_deltaRgen06_08_q1q2",
+        label=r"gen cut + 0.6 < $dR^{gen}_{q1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_06_q1q2",
+        selection="gen_cut_deltaRgen04_06_q1q2",
+        label=r"gen cut + 0.4 < $dR^{gen}_{q1q2}$ < 0.6",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_inf_q1q2_corr",
+        selection="gen_cut_deltaRgen04_06_q1q2_corr",
+        label=r"gen cut + corr + $dR^{gen}_{q1q2}$ > 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_08_q1q2_corr",
+        selection="gen_cut_deltaRgen06_08_q1q2_corr",
+        label=r"gen cut + corr + 0.6 < $dR^{gen}_{q1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_06_q1q2_corr",
+        selection="gen_cut_deltaRgen04_06_q1q2_corr",
+        label=r"gen cut + corr + 0.4 < $dR^{gen}_{q1q2}$ < 0.6",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_q1q2_corr_pgof",
+        selection="gen_cut_deltaRgen08_q1q2_corr_pgof",
+        label=r"gen cut + corr + $dR^{gen}_{q1q2}$ < 0.8 + pgof",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_q1q2_corr_pgof",
+        selection="gen_cut_deltaRgen06_q1q2_corr_pgof",
+        label=r"gen cut + corr + $dR^{gen}_{q1q2}$ < 0.6 + pgof",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_q1q2_corr_pgof",
+        selection="gen_cut_deltaRgen04_q1q2_corr_pgof",
+        label=r"gen cut + corr + $dR^{gen}_{q1q2}$ < 0.4 + pgof",
     )
 
     # Uncomment to define orthogonal or overlapping category sets:

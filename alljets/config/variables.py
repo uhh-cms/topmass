@@ -1199,6 +1199,7 @@ def add_variables(cfg: od.Config) -> None:
         unit="",
         x_title=r"$\Delta R_{\text{min},t}$",
     )
+    # orthogonal axis projection
     cfg.add_variable(
         name="lambda_q1q2_q1",
         expression="lambda_q1q2_q1",
