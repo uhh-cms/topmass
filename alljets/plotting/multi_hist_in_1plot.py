@@ -74,7 +74,7 @@ def hist_2D(
         "kwargs": {
             "color": color_list[0],
             "histtype": "step",
-            "label": hists_base.project(1).axes[0].label[-2:],
+            "label": hists_base.project(1).axes[0].label,
         },
     }
 
@@ -84,7 +84,7 @@ def hist_2D(
         "kwargs": {
             "color": color_list[1],
             "histtype": "step",
-            "label": hists_base.project(2).axes[0].label[-2:],
+            "label": hists_base.project(2).axes[0].label,
         },
     }
 
@@ -95,10 +95,10 @@ def hist_2D(
     # Set legend and font sizes for clarity
     default_style_config["legend_cfg"]["ncol"] = 1
     default_style_config["legend_cfg"]["title_fontsize"] = 24
-    default_style_config["rax_cfg"]["xlabel"] = "$p_T^{jet}/p_T^{gen}$"
+    default_style_config["rax_cfg"]["xlabel"] = r"$ \lambda$"
     default_style_config["legend_cfg"]["fontsize"] = 20
     default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
-    kwargs["skip_ratio"] = False
+    kwargs["skip_ratio"] = True
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 

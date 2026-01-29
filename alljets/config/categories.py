@@ -390,6 +390,16 @@ def add_categories(cfg: od.Config) -> None:
         label=r"gen cut + corr + $dR^{gen}_{q1q2}$ < 0.4 + pgof",
     )
 
+# ----------------------------------------------------------------------------
+# Multiple matching Jets
+# ----------------------------------------------------------------------------
+    add_category(
+        cfg,
+        name="gen_cut_mergingJets_q1q2",
+        selection="gen_cut_mergingJets_q1q2",
+        label=r"gen cut + multiple matching jet q1q2",
+    )
+
     # Uncomment to define orthogonal or overlapping category sets:
     #
     # main_categories = {
