@@ -377,6 +377,10 @@ def cutflow_features(
         attach_coffea_behavior,
         "gen_top",
         "FitJet.*",
+        "FitW1",
+        "FitW2",
+        "RecoW1",
+        "RecoW2",
     },
     produces={
         "gen_top",
@@ -438,6 +442,17 @@ def cutflow_features(
         "deltaR_recoJet_q1q2",
         "deltaR_gen_q1q2",
         "multiple_matching_jet_q1q2",
+        "no_matching_parton_reco_q1q2",
+        "no_matching_parton_q1q2",
+        "no_matching_parton_reco_q1",
+        "no_matching_parton_reco_q2",
+        "matching_once_q1q2",
+        "lambda_q1q2_FitW1",
+        "lambda_q1q2_FitW2",
+        "lambda_q1q2_RecoW1",
+        "lambda_q1q2_RecoW2",
+        "lambda_q1q2_genW1",
+        "lambda_q1q2_genW2",
     },
 )
 def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -446,6 +461,26 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # attach coffea behavior FitJet
     jetcollections = {
         "FitJet": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+        },
+        "FitW1": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+        },
+        "FitW2": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+        },
+        "RecoW1": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+        },
+        "RecoW2": {
             "type_name": "Jet",
             "check_attr": "metric_table",
             "skip_fields": "*Idx*G",
@@ -529,8 +564,29 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "nMatchedJets_6jets", ak.sum(events.Jet[
         ak.any(mask_list, axis=1)].pt >= events.Jet[:, 5].pt, axis=1))
 
+    # Check whether q1 and q2 are matched to the same jet
     events = set_ak_column(events, "multiple_matching_jet_q1q2", ak.any(
         ak.sum([events.jet_matching_mask.q2, events.jet_matching_mask.q1], axis=0) > 1, axis=1))
+
+    events = set_ak_column(events, "matching_once_q1q2", ak.all([
+        ak.sum(events.jet_matching_mask.q2, axis=1) == 1,
+        ak.sum(events.jet_matching_mask.q1, axis=1) == 1], axis=0))
+
+    # Check if q1 or q2 are unmatched
+    events = set_ak_column(events, "no_matching_parton_q1q2",
+                           ak.any([ak.sum(events.jet_matching_mask.q2, axis=1) == 0,
+                                   ak.sum(events.jet_matching_mask.q1, axis=1) == 0], axis=0))
+
+    # Check if q1 or q2 have a matched in recoJets
+    events = set_ak_column(events, "no_matching_parton_reco_q1q2",
+                           ak.any([ak.sum(reco_jet.reco.delta_r(gen_top.w_children[:, 0, 0]) < 0.4, axis=1) == 0,
+                                   ak.sum(reco_jet.reco.delta_r(gen_top.w_children[:, 0, 1]) < 0.4,
+                                          axis=1) > 0], axis=0))
+    events = set_ak_column(events, "no_matching_parton_reco_q1",
+                           ak.sum(reco_jet.reco.delta_r(gen_top.w_children[:, 0, 0]) < 0.4, axis=1) == 0)
+    events = set_ak_column(events, "no_matching_parton_reco_q2",
+                           ak.sum(reco_jet.reco.delta_r(gen_top.w_children[:, 0, 1]) < 0.4, axis=1) == 0)
+
     # Calculate ratio of GenParticel pt to GenJet pt
     # q1 Fit
     dr_q1_w1_children1 = gen_top.w_children[:, 0, 0].delta_r(reco_jet.reco[:, 2])
@@ -782,6 +838,22 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     events = set_ak_column(events, "lambda_ptSorted_q1q2_q1", ak.fill_none(ak.min(lambda_ptSorted_q1q2_q1, axis=1), -10))
     events = set_ak_column(events, "lambda_ptSorted_q1q2_q2", ak.fill_none(ak.min(lambda_ptSorted_q1q2_q2, axis=1), -10))
+
+    # axis projection W-Boson
+    lambda_q1q2_FitW1 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], events.FitW1)
+    lambda_q1q2_FitW2 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], events.FitW2)
+    events = set_ak_column(events, "lambda_q1q2_FitW1", lambda_q1q2_FitW1)
+    events = set_ak_column(events, "lambda_q1q2_FitW2", lambda_q1q2_FitW2)
+
+    lambda_q1q2_RecoW1 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], events.RecoW1)
+    lambda_q1q2_RecoW2 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], events.RecoW2)
+    events = set_ak_column(events, "lambda_q1q2_RecoW1", lambda_q1q2_RecoW1)
+    events = set_ak_column(events, "lambda_q1q2_RecoW2", lambda_q1q2_RecoW2)
+
+    lambda_q1q2_genW1 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], gen_top.w[:, 0])
+    lambda_q1q2_genW2 = axis_projection(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], gen_top.w[:, 1])
+    events = set_ak_column(events, "lambda_q1q2_genW1", lambda_q1q2_genW1)
+    events = set_ak_column(events, "lambda_q1q2_genW2", lambda_q1q2_genW2)
 
     return events
 

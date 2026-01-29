@@ -1260,6 +1260,51 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$\lambda_{q2}$",
     )
 
+    cfg.add_variable(
+        name="lambda_q1q2_FitW1",
+        expression="lambda_q1q2_FitW1",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{FitW1}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_FitW2",
+        expression="lambda_q1q2_FitW2",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{FitW2}$",
+    )
+
+    cfg.add_variable(
+        name="lambda_q1q2_RecoW1",
+        expression="lambda_q1q2_RecoW1",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{RecoW1}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_RecoW2",
+        expression="lambda_q1q2_RecoW2",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{RecoW2}$",
+    )
+
+    cfg.add_variable(
+        name="lambda_q1q2_genW1",
+        expression="lambda_q1q2_genW1",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{GenW1}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_genW2",
+        expression="lambda_q1q2_genW2",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{GenW2}$",
+    )
+
 
 # helper to add a variable to the config with some defaults
 def add_variable(config: od.Config, *args, **kwargs) -> od.Variable:

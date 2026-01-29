@@ -399,6 +399,18 @@ def add_categories(cfg: od.Config) -> None:
         selection="gen_cut_mergingJets_q1q2",
         label=r"gen cut + multiple matching jet q1q2",
     )
+    add_category(
+        cfg,
+        name="gen_cut_unmatched_q1q2",
+        selection="gen_cut_unmatched_q1q2",
+        label=r"gen cut + unmatched q1q2",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_unmatched_reco_q1q2",
+        selection="gen_cut_unmatched_reco_q1q2",
+        label=r"gen cut + unmatched (fit) q1q2 ",
+    )
 
     # Uncomment to define orthogonal or overlapping category sets:
     #

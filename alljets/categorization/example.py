@@ -887,7 +887,7 @@ def gen_cut_deltaRgen04_q1q2_corr_pgof(self: Categorizer, events: ak.Array, **kw
 
 
 # ----------------------------------------------------------------------------
-# Multiple matching Jets
+# Multiple matching Jets and unmatched Jets
 # ----------------------------------------------------------------------------
 
 @categorizer(uses={"gen_top.*",
@@ -905,4 +905,59 @@ def gen_cut_mergingJets_q1q2(self: Categorizer, events: ak.Array, **kwargs) -> t
         ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
     ], axis=0)
     merging = events.multiple_matching_jet_q1q2
+    return events, ak.all([eta, pt, merging], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "multiple_matching_jet_q1q2",
+                   "matching_once_q1q2",
+                   })
+def gen_cut_mergingJets_once_q1q2(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    merging = events.matching_once_q1q2 & events.multiple_matching_jet_q1q2
+    return events, ak.all([eta, pt, merging], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "no_matching_parton_q1q2",
+                   })
+def gen_cut_unmatched_q1q2(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    merging = events.no_matching_parton_q1q2
+    return events, ak.all([eta, pt, merging], axis=0)
+
+
+@categorizer(uses={"gen_top.*",
+                   "no_matching_parton_reco_q1q2",
+                   })
+def gen_cut_unmatched_reco_q1q2(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    merging = events.no_matching_parton_reco_q1q2
     return events, ak.all([eta, pt, merging], axis=0)
