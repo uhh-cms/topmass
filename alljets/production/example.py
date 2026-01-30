@@ -453,6 +453,7 @@ def cutflow_features(
         "lambda_q1q2_RecoW2",
         "lambda_q1q2_genW1",
         "lambda_q1q2_genW2",
+        "match_boosted_q1q2",
     },
 )
 def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -855,6 +856,10 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "lambda_q1q2_genW1", lambda_q1q2_genW1)
     events = set_ak_column(events, "lambda_q1q2_genW2", lambda_q1q2_genW2)
 
+    # matching with boosted Jets
+    match_q1 = ak.any(gen_top.w_children[:, 0, 0].delta_r(reco_jet.reco[:, 2:4]) < 0.4, axis=1)
+    match_q2 = ak.any(gen_top.w_children[:, 0, 1].delta_r(reco_jet.reco[:, 2:4]) < 0.4, axis=1)
+    events = set_ak_column(events, "match_boosted_q1q2", ak.all([match_q1, match_q2], axis=0))
     return events
 
 

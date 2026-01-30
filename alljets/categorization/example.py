@@ -238,6 +238,24 @@ def gen_eta21_pt60_corr(self: Categorizer, events: ak.Array, **kwargs) -> tuple[
     return events, ak.all([eta, pt, matching], axis=0)
 
 
+@categorizer(uses={"gen_top.*",
+                   "match_boosted_q1q2",
+                   })
+def gen_eta21_pt60_corrB(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    pt_cut = 60
+    eta = ak.all([
+        ak.all(abs(events.gen_top.b.eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 0].eta) < 2.1, axis=1),
+        ak.all(abs(events.gen_top.w_children[:, :, 1].eta) < 2.1, axis=1)], axis=0)
+    pt = ak.all([
+        ak.all(events.gen_top.b.pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 0].pt > pt_cut, axis=1),
+        ak.all(events.gen_top.w_children[:, :, 1].pt > pt_cut, axis=1),
+    ], axis=0)
+    matching = events.match_boosted_q1q2
+    return events, ak.all([eta, pt, matching], axis=0)
+
+
 # ----------------------------------------------------------------------------
 # Delta Rmin Cuts t1
 # ----------------------------------------------------------------------------

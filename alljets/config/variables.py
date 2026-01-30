@@ -1263,14 +1263,21 @@ def add_variables(cfg: od.Config) -> None:
     cfg.add_variable(
         name="lambda_q1q2_FitW1",
         expression="lambda_q1q2_FitW1",
-        binning=(200, -1, 2),
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{FitW1}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_FitW1_m10_10",
+        expression="lambda_q1q2_FitW1",
+        binning=(50, -10, 10),
         unit="",
         x_title=r"$\lambda_{FitW1}$",
     )
     cfg.add_variable(
         name="lambda_q1q2_FitW2",
         expression="lambda_q1q2_FitW2",
-        binning=(200, -1, 2),
+        binning=(50, -1, 2),
         unit="",
         x_title=r"$\lambda_{FitW2}$",
     )
@@ -1278,14 +1285,21 @@ def add_variables(cfg: od.Config) -> None:
     cfg.add_variable(
         name="lambda_q1q2_RecoW1",
         expression="lambda_q1q2_RecoW1",
-        binning=(200, -1, 2),
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{RecoW1}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_RecoW1_m10_10",
+        expression="lambda_q1q2_RecoW1",
+        binning=(50, -10, 10),
         unit="",
         x_title=r"$\lambda_{RecoW1}$",
     )
     cfg.add_variable(
         name="lambda_q1q2_RecoW2",
         expression="lambda_q1q2_RecoW2",
-        binning=(200, -1, 2),
+        binning=(50, -1, 2),
         unit="",
         x_title=r"$\lambda_{RecoW2}$",
     )
@@ -1293,14 +1307,21 @@ def add_variables(cfg: od.Config) -> None:
     cfg.add_variable(
         name="lambda_q1q2_genW1",
         expression="lambda_q1q2_genW1",
-        binning=(200, -1, 2),
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{GenW1}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_genW1_m10_10",
+        expression="lambda_q1q2_genW1",
+        binning=(50, -10, 10),
         unit="",
         x_title=r"$\lambda_{GenW1}$",
     )
     cfg.add_variable(
         name="lambda_q1q2_genW2",
         expression="lambda_q1q2_genW2",
-        binning=(200, -1, 2),
+        binning=(50, -1, 2),
         unit="",
         x_title=r"$\lambda_{GenW2}$",
     )

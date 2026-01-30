@@ -401,6 +401,12 @@ def add_categories(cfg: od.Config) -> None:
     )
     add_category(
         cfg,
+        name="gen_cut_mergingJets_once_q1q2",
+        selection="gen_cut_mergingJets_once_q1q2",
+        label=r"gen cut + multiple matching jet (q1q2)",
+    )
+    add_category(
+        cfg,
         name="gen_cut_unmatched_q1q2",
         selection="gen_cut_unmatched_q1q2",
         label=r"gen cut + unmatched q1q2",
