@@ -176,62 +176,6 @@ def cat_2btj_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
                     (events.FitRbb > 2.0))
 
 
-@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb", "fitTopMass"})
-def cat_2btj_sig_blind_fit(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
-    """
-    Signal region: >= 2 b-tagged jets + signal trigger + good fit quality.
-    Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
-    """
-
-    pgofcut = self.config_inst.x.fitpgofcut
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
-
-    mask = (
-        events.HLT[signal_trigger] &
-        (events.FitPgof > pgofcut) &
-        (ak.sum((events.Jet.pt >= 40.0) &
-                (abs(events.Jet.eta) < 2.4) &
-                (events.Jet.btagDeepFlavB >= wp_tight),
-                axis=1,
-                ) >= 2) &
-        (events.FitRbb > 2.0)
-    )
-
-    if not self.dataset_inst.is_mc:
-        mask = mask & ak.any([events.fitTopMass < 140.0, events.fitTopMass > 195.0], axis=0)
-
-    return events, mask
-
-
-@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb", "recoTopMass"})
-def cat_2btj_sig_blind_reco(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
-    """
-    Signal region: >= 2 b-tagged jets + signal trigger + good fit quality.
-    Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
-    """
-
-    pgofcut = self.config_inst.x.fitpgofcut
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
-
-    mask = (
-        events.HLT[signal_trigger] &
-        (events.FitPgof > pgofcut) &
-        (ak.sum((events.Jet.pt >= 40.0) &
-                (abs(events.Jet.eta) < 2.4) &
-                (events.Jet.btagDeepFlavB >= wp_tight),
-                axis=1,
-                ) >= 2) &
-        (events.FitRbb > 2.0)
-    )
-
-    if not self.dataset_inst.is_mc:
-        mask = mask & ak.any([events.recoTopMass < 140.0, events.recoTopMass > 210.0], axis=0)
-
-    return events, mask
-
-
 @categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitChi2", "FitRbb"})
 def cat_0btj_bkg(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
