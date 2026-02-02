@@ -183,7 +183,7 @@ def plot_hist_matching(
         data_hist = data_hist.copy()
 
         # Zero values & variances → markers disappear
-        data_hist.values()[mask] = 0.0
+        data_hist.values()[mask] = -999.0
         data_hist.variances()[mask] = 0.0
 
     # Add data points with error bars
