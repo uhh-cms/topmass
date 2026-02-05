@@ -1358,7 +1358,7 @@ def add_variables(cfg: od.Config) -> None:
     cfg.add_variable(
         name="ratio_deviation_b1",
         expression="ratio_deviation_b1",
-        binning=(100, 0, 400),
+        binning=(100, 0, 600),
         unit="",
         x_title=r"%",
     )

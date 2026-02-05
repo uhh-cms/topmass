@@ -908,7 +908,7 @@ def gen_cut_deltaRgen04_q1q2_corr_pgof(self: Categorizer, events: ak.Array, **kw
                    "fitCombinationType",
                    "dRmin_gen_t1",
                    "deltaR_gen_q1q2",
-                   "match_boosted_q1q2"
+                   "match_boosted_q1q2",
                    })
 def gen_cut_deltaRgen08_q1q2_corrB(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     pt_cut = 60
@@ -930,7 +930,7 @@ def gen_cut_deltaRgen08_q1q2_corrB(self: Categorizer, events: ak.Array, **kwargs
                    "fitCombinationType",
                    "dRmin_gen_t1",
                    "deltaR_gen_q1q2",
-                   "match_boosted_q1q2"
+                   "match_boosted_q1q2",
                    })
 def gen_cut_deltaRgen06_q1q2_corrB(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     pt_cut = 60
@@ -952,7 +952,7 @@ def gen_cut_deltaRgen06_q1q2_corrB(self: Categorizer, events: ak.Array, **kwargs
                    "fitCombinationType",
                    "dRmin_gen_t1",
                    "deltaR_gen_q1q2",
-                   "match_boosted_q1q2"
+                   "match_boosted_q1q2",
                    })
 def gen_cut_deltaRgen04_q1q2_corrB(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     pt_cut = 60
