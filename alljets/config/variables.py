@@ -1060,6 +1060,158 @@ def add_variables(cfg: od.Config) -> None:
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 6 $\eta$",
     )
+############################################################
+#              Observables for b tagging efficiency        #
+############################################################
+    add_variable(
+        cfg,
+        name="hadronFlav",
+        expression="Jet.hadronFlavour",
+        binning=(7, -0.5, 6.5),
+        x_title="Hadron flavour",
+        discrete_x=True,
+    )
+    # True flavour bjets
+    add_variable(
+        cfg,
+        name="n_bflav_jet",
+        expression="jets_b_num",
+        binning=(7, -0.5, 6.5),
+        x_title="Number of true b flavoured jets",
+        discrete_x=True,
+    )
+    add_variable(
+        cfg,
+        name="bflav_jet_pt",
+        expression="jets_b.pt",
+        binning=[20, 30, 50, 70, 100, 140, 200, 300, 600, 1000],
+        x_title=r"True b flavoured jet $p_{T}$",
+        unit="GeV",
+    )
+    add_variable(
+        cfg,
+        name="bflav_jet_eta",
+        expression="jets_b.eta",
+        binning=[0., 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 3.0],
+        x_title=r"True b flavoured jet $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="n_btag_bflav_jet",
+        expression="bjets_b_num",
+        binning=(7, -0.5, 6.5),
+        x_title="Number of true b flavoured b-tagged jets",
+        discrete_x=True,
+    )
+    add_variable(
+        cfg,
+        name="bflav_bjet_pt",
+        expression="bjets_b.pt",
+        binning=[20, 30, 50, 70, 100, 140, 200, 300, 600, 1000],
+        x_title=r"True b flavoured b-tagged jet $p_{T}$",
+        unit="GeV",
+    )
+    add_variable(
+        cfg,
+        name="bflav_bjet_eta",
+        expression="bjets_b.eta",
+        binning=[0., 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 3.0],
+        x_title=r"True b flavoured b-tagged jet $\eta$",
+    )
+    # True flavour cjets
+    add_variable(
+        cfg,
+        name="n_cflav_jet",
+        expression="jets_c_num",
+        binning=(7, -0.5, 6.5),
+        x_title="Number of true c flavoured jets",
+        discrete_x=True,
+    )
+    add_variable(
+        cfg,
+        name="cflav_jet_pt",
+        expression="jets_c.pt",
+        binning=[20, 30, 50, 70, 100, 140, 200, 300, 600, 1000],
+        x_title=r"True c flavoured jet $p_{T}$",
+        unit="GeV",
+    )
+    add_variable(
+        cfg,
+        name="cflav_jet_eta",
+        expression="jets_c.eta",
+        binning=[0., 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 3.0],
+        x_title=r"True c flavoured jet $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="n_btag_cflav_jet",
+        expression="bjets_c_num",
+        binning=(7, -0.5, 6.5),
+        x_title="Number of true c flavoured b-tagged jets",
+        discrete_x=True,
+    )
+    add_variable(
+        cfg,
+        name="cflav_bjet_pt",
+        expression="bjets_c.pt",
+        binning=[20, 30, 50, 70, 100, 140, 200, 300, 600, 1000],
+        x_title=r"True c flavoured b-tagged jet $p_{T}$",
+        unit="GeV",
+    )
+    add_variable(
+        cfg,
+        name="cflav_bjet_eta",
+        expression="bjets_c.eta",
+        binning=[0., 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 3.0],
+        x_title=r"True c flavoured b-tagged jet $\eta$",
+    )
+    # True flavour light jets
+    add_variable(
+        cfg,
+        name="n_light_jet",
+        expression="jets_light_num",
+        binning=(7, -0.5, 6.5),
+        x_title="Number of true light flavoured jets",
+        discrete_x=True,
+    )
+    add_variable(
+        cfg,
+        name="lightflav_jet_pt",
+        expression="jets_light.pt",
+        binning=[20, 30, 50, 70, 100, 140, 200, 300, 600, 1000],
+        x_title=r"True light flavoured jet $p_{T}$",
+        unit="GeV",
+    )
+    add_variable(
+        cfg,
+        name="lightflav_jet_eta",
+        expression="jets_light.eta",
+        binning=[0., 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 3.0],
+        x_title=r"True light flavoured jet $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="n_btag_light_jet",
+        expression="bjets_light_num",
+        binning=(7, -0.5, 6.5),
+        x_title="Number of true light flavoured b-tagged jets",
+        discrete_x=True,
+    )
+    add_variable(
+        cfg,
+        name="lightflav_bjet_pt",
+        expression="bjets_light.pt",
+        binning=[20, 30, 50, 70, 100, 140, 200, 300, 600, 1000],
+        x_title=r"True light flavoured b-tagged jet $p_{T}$",
+        unit="GeV",
+    )
+    add_variable(
+        cfg,
+        name="lightflav_bjet_eta",
+        expression="bjets_light.eta",
+        binning=[0., 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 3.0],
+        x_title=r"True light flavoured b-tagged jet $\eta$",
+    )
 
 
 # helper to add a variable to the config with some defaults

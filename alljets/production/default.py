@@ -609,6 +609,106 @@ tt_fh_trigger_prod = trigger_prod.derive(
     cls_dict={"channel": ["tt_fh"]},
 )
 
+
+@producer(
+    uses={
+        features,
+        category_ids,
+        normalization_weights,
+        muon_weights,
+        deterministic_seeds,
+        attach_coffea_behavior,
+        "gen_top",
+        "Jet.hadronFlavour",
+    },
+    produces={
+        features,
+        category_ids,
+        normalization_weights,
+        muon_weights,
+        deterministic_seeds,
+        attach_coffea_behavior,
+        "gen_top",
+        "jets_light.*",
+        "jets_light_num",
+        "bjets_light.*",
+        "bjets_light_num",
+        "jets_c.*",
+        "jets_c_num",
+        "bjets_c.*",
+        "bjets_c_num",
+        "jets_b.*",
+        "jets_b_num",
+        "bjets_b.*",
+        "bjets_b_num",
+        "Jet.hadronFlavour",
+    },
+)
+def btag_eff(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    Producer for the b-tagging efficiency in simulation using pre-selection.
+    """
+    # Attach coffea-style behaviour for collections
+    events = self[attach_coffea_behavior](events, **kwargs)
+
+    # Compute derived features and summaries
+    events = self[features](events, **kwargs)
+
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+
+    # Mask for requirements of our pre-selection jets
+    mask = (events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4)
+    mask_b = mask & (events.Jet.btagDeepFlavB >= wp_tight)
+
+    # Obtain the jets passing the pre-selections
+    jets_pass = events.Jet[mask]
+    bjets_pass = events.Jet[mask_b]
+
+    # Collect the jets passing the selection per flavour
+    # light: hadronFlavour == 0, c: hadronFlavour == 4, b: hadronFlavour == 5
+    # https://indico.cern.ch/event/1096988/contributions/4615134/attachments/2346047/4000529/Nov21_btaggingSFjsons.pdf
+    jets_light = jets_pass[jets_pass.hadronFlavour == 0]
+    jets_c = jets_pass[jets_pass.hadronFlavour == 4]
+    jets_b = jets_pass[jets_pass.hadronFlavour == 5]
+
+    events = set_ak_column(events, "jets_light", ak.zip({"pt": jets_light.pt, "eta": abs(jets_light.eta)}))
+    events = set_ak_column(events, "jets_light_num", ak.num(jets_light.pt, axis=1), value_type=np.int32)
+    events = set_ak_column(events, "jets_c", ak.zip({"pt": jets_c.pt, "eta": abs(jets_c.eta)}))
+    events = set_ak_column(events, "jets_c_num", ak.num(jets_c.pt, axis=1), value_type=np.int32)
+    events = set_ak_column(events, "jets_b", ak.zip({"pt": jets_b.pt, "eta": abs(jets_b.eta)}))
+    events = set_ak_column(events, "jets_b_num", ak.num(jets_b.pt, axis=1), value_type=np.int32)
+
+    # Collect the b-tagged jets passing the selection per flavour
+    bjets_light = bjets_pass[bjets_pass.hadronFlavour == 0]
+    bjets_c = bjets_pass[bjets_pass.hadronFlavour == 4]
+    bjets_b = bjets_pass[bjets_pass.hadronFlavour == 5]
+
+    events = set_ak_column(events, "bjets_light", ak.zip({"pt": bjets_light.pt, "eta": abs(bjets_light.eta)}))
+    events = set_ak_column(events, "bjets_light_num", ak.num(bjets_light.pt, axis=1), value_type=np.int32)
+    events = set_ak_column(events, "bjets_c", ak.zip({"pt": bjets_c.pt, "eta": abs(bjets_c.eta)}))
+    events = set_ak_column(events, "bjets_c_num", ak.num(bjets_c.pt, axis=1), value_type=np.int32)
+    events = set_ak_column(events, "bjets_b", ak.zip({"pt": bjets_b.pt, "eta": abs(bjets_b.eta)}))
+    events = set_ak_column(events, "bjets_b_num", ak.num(bjets_b.pt, axis=1), value_type=np.int32)
+
+    # Provide fake kinfit outputs used by other tools
+    events = set_ak_column(events, "FitChi2", 0)
+    events = set_ak_column(events, "FitPgof", 1)
+    events = set_ak_column(events, "fitCombinationType", 2)
+    events = set_ak_column(events, "FitRbb", 2.5)
+
+    # Compute category ids used by later stages
+    events = self[category_ids](events, **kwargs)
+
+    # Deterministic seeds (for e.g. reproducible pseudo-randoms)
+    events = self[deterministic_seeds](events, **kwargs)
+
+    # MC-only weights
+    if self.dataset_inst.is_mc:
+        # normalization weights (luminosity, xsec, pileup, ...)
+        events = self[normalization_weights](events, **kwargs)
+
+    return events
+
 # Trigger categories
 #
 # @producer(
