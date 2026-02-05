@@ -179,6 +179,12 @@ def add_categories(cfg: od.Config) -> None:
         selection="gen_eta21_pt60_corr",
         label="GenParticle eta2.1+pt60 Cut + corr",
     )
+    add_category(
+        cfg,
+        name="gen_eta21_pt60_corrB",
+        selection="gen_eta21_pt60_corrB",
+        label="GenParticle eta2.1+pt60 Cut + corr (B)",
+    )
 
 # ----------------------------------------------------------------------------
 # Delta Rmin Cuts t1
@@ -388,6 +394,65 @@ def add_categories(cfg: od.Config) -> None:
         name="gen_cut_deltaRgen04_q1q2_corr_pgof",
         selection="gen_cut_deltaRgen04_q1q2_corr_pgof",
         label=r"gen cut + corr + $dR^{gen}_{q1q2}$ < 0.4 + pgof",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_q1q2_corrB",
+        selection="gen_cut_deltaRgen08_q1q2_corrB",
+        label=r"gen cut + corr (B) + $dR^{gen}_{q1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_q1q2_corrB",
+        selection="gen_cut_deltaRgen06_q1q2_corrB",
+        label=r"gen cut + corr (B) + $dR^{gen}_{q1q2}$ < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_q1q2_corrB",
+        selection="gen_cut_deltaRgen04_q1q2_corrB",
+        label=r"gen cut + corr (B) + $dR^{gen}_{q1q2}$ < 0.4",
+    )
+# ----------------------------------------------------------------------------
+# Delta R_min  b-Parton to q1q2
+# ----------------------------------------------------------------------------
+    add_category(
+        cfg,
+        name="gen_cut_deltaRminbq1q2_08_q1q2",
+        selection="gen_cut_deltaRminbq1q2_08_q1q2",
+        label=r"gen cut +  $dR^{gen}_{min,bq1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRminbq1q2_06_q1q2",
+        selection="gen_cut_deltaRminbq1q2_06_q1q2",
+        label=r"gen cut +  $dR^{gen}_{min,bq1q2}$ < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRminbq1q2_04_q1q2",
+        selection="gen_cut_deltaRminbq1q2_04_q1q2",
+        label=r"gen cut +  $dR^{gen}_{min,bq1q2}$ < 0.4",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRminbq1q2_08_q1q2_corrB",
+        selection="gen_cut_deltaRminbq1q2_08_q1q2_corrB",
+        label=r"gen cut + corr (B) +  $dR^{gen}_{min,bq1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRminbq1q2_06_q1q2_corrB",
+        selection="gen_cut_deltaRminbq1q2_06_q1q2_corrB",
+        label=r"gen cut + corr (B) +  $dR^{gen}_{min,bq1q2}$ < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRminbq1q2_04_q1q2_corrB",
+        selection="gen_cut_deltaRminbq1q2_04_q1q2_corrB",
+        label=r"gen cut + corr (B) +  $dR^{gen}_{min,bq1q2}$ < 0.4",
     )
 
 # ----------------------------------------------------------------------------

@@ -1326,6 +1326,43 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$\lambda_{GenW2}$",
     )
 
+    cfg.add_variable(
+        name="lambda_b_FitJet_b",
+        expression="lambda_b_FitJet_b",
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\lambda^{b1q1q2}_{FitJet_b1}$",
+    )
+    cfg.add_variable(
+        name="lambda_b_RecoJet_b",
+        expression="lambda_b_RecoJet_b",
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\lambda^{b1q1q2}_{RecoJet_b1}$",
+    )
+
+    cfg.add_variable(
+        name="deviation_gen_FitJet_pt_b1",
+        expression="deviation_gen_FitJet_pt_b1",
+        binning=(50, 0, 5),
+        unit="",
+        x_title=r"$| \frac{p_T^{FitJet,b1}}{p_T^{Gen,b1}} - 1|$",
+    )
+    cfg.add_variable(
+        name="deviation_gen_RecoJet_pt_b1",
+        expression="deviation_gen_RecoJet_pt_b1",
+        binning=(50, 0, 5),
+        unit="",
+        x_title=r"$ | \frac{p_T^{RecoJet,b1}}{p_T^{Gen,b1}} - 1 |$",
+    )
+    cfg.add_variable(
+        name="ratio_deviation_b1",
+        expression="ratio_deviation_b1",
+        binning=(100, 0, 400),
+        unit="",
+        x_title=r"%",
+    )
+
 
 # helper to add a variable to the config with some defaults
 def add_variable(config: od.Config, *args, **kwargs) -> od.Variable:
