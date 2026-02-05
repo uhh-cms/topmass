@@ -11,7 +11,7 @@ from collections import OrderedDict
 import law
 
 from columnflow.util import maybe_import
-from alljets.plotting.aj_plot_all import aj_plot_all
+from modules.columnflow.columnflow.plotting.plot_all import plot_all
 from columnflow.plotting.plot_util import (
     prepare_style_config,
     apply_variable_settings,
@@ -124,7 +124,7 @@ def qcd_mc_vs_est(
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
-    return aj_plot_all(plot_config, style_config, **kwargs)
+    return plot_all(plot_config, style_config, **kwargs)
 
 
 def qcd_sig_vs_bkg_sel(
@@ -225,4 +225,4 @@ def qcd_sig_vs_bkg_sel(
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
-    return aj_plot_all(plot_config, style_config, **kwargs)
+    return plot_all(plot_config, style_config, **kwargs)

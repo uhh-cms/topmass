@@ -13,6 +13,7 @@ from columnflow.plotting.plot_util import (apply_density, apply_variable_setting
 from columnflow.util import maybe_import
 from alljets.plotting.aj_plot_all import aj_plot_all
 from modules.columnflow.columnflow.plotting.plot_util import get_cms_label
+from modules.columnflow.columnflow.plotting.plot_all import plot_all
 
 
 hist = maybe_import("hist")
@@ -216,7 +217,7 @@ def plot_hist_matching(
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
     # Draw the plot using the aj_plot_all utility
-    return aj_plot_all(plot_config, style_config, **kwargs)
+    return plot_all(plot_config, style_config, **kwargs)
 
 
 def plot_hist_matching_MC(
@@ -342,7 +343,7 @@ def plot_hist_matching_MC(
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
     # Draw the plot using the aj_plot_all utility
-    return aj_plot_all(plot_config, style_config, **kwargs)
+    return plot_all(plot_config, style_config, **kwargs)
 
 
 def plot_hist_chi2cuts(
