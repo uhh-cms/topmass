@@ -28,10 +28,9 @@ od = maybe_import("order")
 logger = law.logger.get_logger(__name__)
 
 """
-law run cf.PlotVariables1D --version v1
+law run cf.PlotVariables1D --version v1 --configs 2017_v9
 --processes tt --variables fit_combination_type-fitchi2_0_10k
---datasets tt_fh_powheg --selector trigger_sel
---producers example,trigger_prod
+--datasets tt_fh_powheg
 --plot-function alljets.plotting.print_proportions.print_proportions
 """
 

@@ -461,8 +461,23 @@ def cutflow_features(
         "lambda_b_RecoJet_b",
         # "lambda_b_Jet_b1",
         "ratio_deviation_b1",
+        "diff_deviation_b1",
         "kappa_RecoW1",
         "kappa_FitW1",
+        "deviation*",
+        "lambda_q1q2_recoJetq1_c",
+        "lambda_q1q2_recoJetq2_c",
+        "lambda_q1q2_FitJetq1_c",
+        "lambda_q1q2_FitJetq2_c",
+        "lambda_q1q2_FitW1_c",
+        "lambda_q1q2_FitW2_c",
+        "lambda_q1q2_RecoW1_c",
+        "lambda_q1q2_RecoW2_c",
+        "lambda_q1q2_genW1_c",
+        "lambda_q1q2_genW2_c",
+        "orthogonaleLength*",
+        "distance*",
+        "deltaR_q1q2_closest",
     },
 )
 def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -675,15 +690,17 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     mask_ratio_b1 = dr_B1_b1 <= dr_B1_b2
     events = set_ak_column(events, "deviation_gen_FitJet_pt_b1", ak.where(
         mask_ratio_b1,
-        abs(events.FitJet[:, 0].pt / gen_top.b[:, 0].pt - 1),
-        abs(events.FitJet[:, 0].pt / gen_top.b[:, 1].pt - 1),
+        events.FitJet[:, 0].pt / gen_top.b[:, 0].pt - 1,
+        events.FitJet[:, 0].pt / gen_top.b[:, 1].pt - 1,
     ))
+    events = set_ak_column(events, "deviation_gen_FitJet_pt_b1_abs", abs(events.deviation_gen_FitJet_pt_b1))
     # b1 Reco
     events = set_ak_column(events, "deviation_gen_RecoJet_pt_b1", ak.where(
         mask_ratio_b1,
-        abs(reco_jet.reco[:, 0].pt / gen_top.b[:, 0].pt - 1),
-        abs(reco_jet.reco[:, 0].pt / gen_top.b[:, 1].pt - 1),
+        reco_jet.reco[:, 0].pt / gen_top.b[:, 0].pt - 1,
+        reco_jet.reco[:, 0].pt / gen_top.b[:, 1].pt - 1,
     ))
+    events = set_ak_column(events, "deviation_gen_RecoJet_pt_b1_abs", abs(events.deviation_gen_RecoJet_pt_b1))
 
     # b2
     dr_B2_b1 = gen_top.b[:, 0].delta_r(events.FitJet[:, 1])
@@ -691,16 +708,24 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     mask_ratio_b2 = dr_B2_b1 <= dr_B2_b2
     events = set_ak_column(events, "deviation_gen_FitJet_pt_b2", ak.where(
         mask_ratio_b2,
-        abs(events.FitJet[:, 1].pt / gen_top.b[:, 0].pt - 1),
-        abs(events.FitJet[:, 1].pt / gen_top.b[:, 1].pt - 1),
+        events.FitJet[:, 1].pt / gen_top.b[:, 0].pt - 1,
+        events.FitJet[:, 1].pt / gen_top.b[:, 1].pt - 1,
     ))
+    events = set_ak_column(events, "deviation_gen_FitJet_pt_b2_abs", abs(events.deviation_gen_FitJet_pt_b1))
     events = set_ak_column(events, "deviation_gen_RecoJet_pt_b2", ak.where(
         mask_ratio_b2,
-        abs(events.FitJet[:, 1].pt / gen_top.b[:, 0].pt - 1),
-        abs(events.FitJet[:, 1].pt / gen_top.b[:, 1].pt - 1),
+        events.FitJet[:, 1].pt / gen_top.b[:, 0].pt - 1,
+        events.FitJet[:, 1].pt / gen_top.b[:, 1].pt - 1,
     ))
+    events = set_ak_column(events, "deviation_gen_RecoJet_pt_b2_abs", abs(events.deviation_gen_RecoJet_pt_b1))
+
     events = set_ak_column(events, "ratio_deviation_b1",
                            (events.deviation_gen_FitJet_pt_b1 / events.deviation_gen_RecoJet_pt_b1) * 100)
+    events = set_ak_column(events, "diff_deviation_b1",
+                           events.deviation_gen_FitJet_pt_b1 - events.deviation_gen_RecoJet_pt_b1)
+    events = set_ak_column(events, "deviation_deviation_b1",
+                           ((events.deviation_gen_RecoJet_pt_b1 - events.deviation_gen_FitJet_pt_b1) /
+                            events.deviation_gen_RecoJet_pt_b1) * 100)
 
     # Calculate jet / reco
     events = set_ak_column(events, "ratio_reco_fit_pt_b1", events.FitJet[:, 0].pt / reco_jet.reco[:, 0].pt)
@@ -829,7 +854,7 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         return ak.where((u_eta**2 + u_phi**2) == 0, FillArray,
                         (u_eta * (jet.eta - r0.eta) + u_phi * (jet.phi - r0.phi)) / (u_eta**2 + u_phi**2))
 
-    def axis_projection_ptSorted(parton_1, parton_2, jet):
+    def axis_projection_ptSorted(parton_1, parton_2, jet, orthogonal_length=False):
         """
         calculat orthogonal axis projection P(jet) = r0 + lambda * u . return lambda
 
@@ -844,27 +869,73 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         u_phi = r1.phi - r0.phi
         lambda_jet = (u_eta * (jet.eta - r0.eta) +
                       u_phi * (jet.phi - r0.phi)) / (u_eta**2 + u_phi**2)
+        if orthogonal_length:
+            n_eta = r0.eta + lambda_jet * u_eta - jet.eta
+            n_phi = r0.phi + lambda_jet * u_phi - jet.phi
+            return lambda_jet, np.sqrt(n_eta**2 + n_phi**2)
         return lambda_jet
 
-    lambda_q1q2_q1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], q1)
-    lambda_q1q2_q2 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], q2)
+    lambda_q1q2_q1, orthogonaleLength_q1q2_q1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
+                                                                         gen_top.w_children[:, 0, 1], q1, True)
+    lambda_q1q2_q2, orthogonaleLength_q1q2_q2 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
+                                                                         gen_top.w_children[:, 0, 1], q2, True)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_q1", ak.fill_none(ak.min(orthogonaleLength_q1q2_q1, axis=1),
+                                                                             -10))
+    events = set_ak_column(events, "orthogonaleLength_q1q2_q2", ak.fill_none(ak.min(orthogonaleLength_q1q2_q2, axis=1),
+                                                                             -10))
     events = set_ak_column(events, "lambda_q1q2_q1", ak.fill_none(ak.min(lambda_q1q2_q1, axis=1), -10))
     events = set_ak_column(events, "lambda_q1q2_q2", ak.fill_none(ak.min(lambda_q1q2_q2, axis=1), -10))
 
-    lambda_q1q2_recoJetq1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
-                                                     gen_top.w_children[:, 0, 1], reco_jet.reco[:, 2])
-    lambda_q1q2_recoJetq2 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
-                                                     gen_top.w_children[:, 0, 1], reco_jet.reco[:, 3])
+    # RecoJet
+    lambda_q1q2_recoJetq1, orthogonaleLength_q1q2_recoJetq1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
+                                                                                       gen_top.w_children[:, 0, 1],
+                                                                                       reco_jet.reco[:, 2], True)
+    lambda_q1q2_recoJetq2, orthogonaleLength_q1q2_recoJetq2 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
+                                                                                       gen_top.w_children[:, 0, 1],
+                                                                                       reco_jet.reco[:, 3], True)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_recoJetq1", orthogonaleLength_q1q2_recoJetq1)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_recoJetq2", orthogonaleLength_q1q2_recoJetq2)
     events = set_ak_column(events, "lambda_q1q2_recoJetq1", lambda_q1q2_recoJetq1)
     events = set_ak_column(events, "lambda_q1q2_recoJetq2", lambda_q1q2_recoJetq2)
 
-    lambda_q1q2_FitJetq1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
-                                                    gen_top.w_children[:, 0, 1], events.FitJet[:, 2])
-    lambda_q1q2_FitJetq2 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
-                                                    gen_top.w_children[:, 0, 1], events.FitJet[:, 3])
+    q1_closest = closest_value(gen_top.w_children[:, :, 0], gen_top.b.delta_r(reco_jet.reco[:, 0]))
+    q2_closest = closest_value(gen_top.w_children[:, :, 1], gen_top.b.delta_r(reco_jet.reco[:, 0]))
+    lambda_q1q2_recoJetq1_c, orthogonaleLength_q1q2_recoJetq1_c = axis_projection_ptSorted(q1_closest,
+                                                                                           q2_closest,
+                                                                                           reco_jet.reco[:, 2], True)
+    lambda_q1q2_recoJetq2_c, orthogonaleLength_q1q2_recoJetq2_c = axis_projection_ptSorted(q1_closest,
+                                                                                           q2_closest,
+                                                                                           reco_jet.reco[:, 3], True)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_recoJetq1_c", orthogonaleLength_q1q2_recoJetq1_c)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_recoJetq2_c", orthogonaleLength_q1q2_recoJetq2_c)
+    events = set_ak_column(events, "lambda_q1q2_recoJetq1_c", lambda_q1q2_recoJetq1_c)
+    events = set_ak_column(events, "lambda_q1q2_recoJetq2_c", lambda_q1q2_recoJetq2_c)
+
+    # FitJet
+    lambda_q1q2_FitJetq1, orthogonaleLength_q1q2_FitJetq1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
+                                                                                     gen_top.w_children[:, 0, 1],
+                                                                                     events.FitJet[:, 2], True)
+    lambda_q1q2_FitJetq2, orthogonaleLength_q1q2_FitJetq2 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
+                                                                                     gen_top.w_children[:, 0, 1],
+                                                                                     events.FitJet[:, 3], True)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_FitJetq1", orthogonaleLength_q1q2_FitJetq1)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_FitJetq2", orthogonaleLength_q1q2_FitJetq2)
     events = set_ak_column(events, "lambda_q1q2_FitJetq1", lambda_q1q2_FitJetq1)
     events = set_ak_column(events, "lambda_q1q2_FitJetq2", lambda_q1q2_FitJetq2)
 
+    lambda_q1q2_FitJetq1_c, orthogonaleLength_q1q2_FitJetq1_c = axis_projection_ptSorted(q1_closest,
+                                                                                         q2_closest,
+                                                                                         events.FitJet[:, 2], True)
+    lambda_q1q2_FitJetq2_c, orthogonaleLength_q1q2_FitJetq2_c = axis_projection_ptSorted(q1_closest,
+                                                                                         q2_closest,
+                                                                                         events.FitJet[:, 3], True)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_FitJetq1_c", orthogonaleLength_q1q2_FitJetq1_c)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_FitJetq2_c", orthogonaleLength_q1q2_FitJetq2_c)
+    events = set_ak_column(events, "lambda_q1q2_FitJetq1_c", lambda_q1q2_FitJetq1_c)
+    events = set_ak_column(events, "lambda_q1q2_FitJetq2_c", lambda_q1q2_FitJetq2_c)
+
+    # deltaR_q1q2_closest
+    events = set_ak_column(events, "deltaR_q1q2_closest", q1_closest.delta_r(q2_closest))
     # axis projection sorted by pt
     q1_ptSorted = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 1].pt, q1, q2)
     q2_ptSorted = ak.where(gen_top.w_children[:, 0, 0].pt > gen_top.w_children[:, 0, 1].pt, q2, q1)
@@ -878,24 +949,53 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "lambda_ptSorted_q1q2_q2", ak.fill_none(ak.min(lambda_ptSorted_q1q2_q2, axis=1), -10))
 
     # axis projection W-Boson
-    lambda_q1q2_FitW1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], events.FitW1)
+    lambda_q1q2_FitW1, orthogonaleLength_q1q2_FitW1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
+                                                                               gen_top.w_children[:, 0, 1],
+                                                                               events.FitW1, True)
     lambda_q1q2_FitW2 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1], events.FitW2)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_FitW1", orthogonaleLength_q1q2_FitW1)
     events = set_ak_column(events, "lambda_q1q2_FitW1", lambda_q1q2_FitW1)
     events = set_ak_column(events, "lambda_q1q2_FitW2", lambda_q1q2_FitW2)
 
-    lambda_q1q2_RecoW1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
-                                                  gen_top.w_children[:, 0, 1], events.RecoW1)
+    lambda_q1q2_RecoW1, orthogonaleLength_q1q2_RecoW1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
+                                                                                 gen_top.w_children[:, 0, 1],
+                                                                                 events.RecoW1, True)
     lambda_q1q2_RecoW2 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
                                                   gen_top.w_children[:, 0, 1], events.RecoW2)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_RecoW1", orthogonaleLength_q1q2_RecoW1)
     events = set_ak_column(events, "lambda_q1q2_RecoW1", lambda_q1q2_RecoW1)
     events = set_ak_column(events, "lambda_q1q2_RecoW2", lambda_q1q2_RecoW2)
 
-    lambda_q1q2_genW1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
-                                                 gen_top.w_children[:, 0, 1], gen_top.w[:, 0])
+    lambda_q1q2_genW1, orthogonaleLength_q1q2_genW1 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
+                                                                               gen_top.w_children[:, 0, 1],
+                                                                               gen_top.w[:, 0], True)
     lambda_q1q2_genW2 = axis_projection_ptSorted(gen_top.w_children[:, 0, 0],
                                                  gen_top.w_children[:, 0, 1], gen_top.w[:, 1])
+    events = set_ak_column(events, "orthogonaleLength_q1q2_genW1", orthogonaleLength_q1q2_genW1)
     events = set_ak_column(events, "lambda_q1q2_genW1", lambda_q1q2_genW1)
     events = set_ak_column(events, "lambda_q1q2_genW2", lambda_q1q2_genW2)
+
+    lambda_q1q2_FitW1_c, orthogonaleLength_q1q2_FitW1_c = axis_projection_ptSorted(q1_closest, q2_closest,
+                                                                                   events.FitW1, True)
+    lambda_q1q2_FitW2_c = axis_projection_ptSorted(q1_closest, q2_closest, events.FitW2)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_FitW1_c", orthogonaleLength_q1q2_FitW1_c)
+    events = set_ak_column(events, "lambda_q1q2_FitW1_c", lambda_q1q2_FitW1_c)
+    events = set_ak_column(events, "lambda_q1q2_FitW2_c", lambda_q1q2_FitW2_c)
+
+    lambda_q1q2_RecoW1_c, orthogonaleLength_q1q2_RecoW1_c = axis_projection_ptSorted(q1_closest, q2_closest,
+                                                                                     events.RecoW1, True)
+    lambda_q1q2_RecoW2_c = axis_projection_ptSorted(q1_closest, q2_closest, events.RecoW2)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_RecoW1_c", orthogonaleLength_q1q2_RecoW1_c)
+    events = set_ak_column(events, "lambda_q1q2_RecoW1_c", lambda_q1q2_RecoW1_c)
+    events = set_ak_column(events, "lambda_q1q2_RecoW2_c", lambda_q1q2_RecoW2_c)
+
+    W_closest = closest_value(gen_top.w, gen_top.b.delta_r(reco_jet.reco[:, 0]))
+    lambda_q1q2_genW1_c, orthogonaleLength_q1q2_genW1_c = axis_projection_ptSorted(q1_closest, q2_closest, W_closest,
+                                                                                   True)
+    lambda_q1q2_genW2_c = axis_projection_ptSorted(q1_closest, q2_closest, W_closest)
+    events = set_ak_column(events, "orthogonaleLength_q1q2_genW1_c", orthogonaleLength_q1q2_genW1_c)
+    events = set_ak_column(events, "lambda_q1q2_genW1_c", lambda_q1q2_genW1_c)
+    events = set_ak_column(events, "lambda_q1q2_genW2_c", lambda_q1q2_genW2_c)
 
     # axis projection b-q
     idx = ak.argmin(gen_top.w_children[:, 0, :2].delta_r(gen_top.b[:, 0]), axis=1)
@@ -924,6 +1024,32 @@ def analyze_jet_overlap(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     W_closest = closest_value(W, gen_top.b.delta_r(reco_jet.reco[:, 0]))
     events = set_ak_column(events, "kappa_FitW1", axis_projection(b_closest, W_closest, events.FitW1))
     events = set_ak_column(events, "kappa_RecoW1", axis_projection(b_closest, W_closest, events.RecoW1))
+
+    # Disance in pt for Fitjet and RecoJet
+    genb1_closest = closest_value(gen_top.b, gen_top.b.delta_r(reco_jet.reco[:, 0]))
+    genq1_closest = closest_value(gen_top.w_children[:, :, 0], gen_top.b.delta_r(reco_jet.reco[:, 0]))
+    genq2_closest = closest_value(gen_top.w_children[:, :, 1], gen_top.b.delta_r(reco_jet.reco[:, 0]))
+
+    distance_pt_Fitb1 = abs((events.FitJet[:, 0].pt - genb1_closest.pt) / genb1_closest.pt)
+    distance_pt_Fitq1 = abs((events.FitJet[:, 2].pt - genq1_closest.pt) / genq1_closest.pt)
+    distance_pt_Fitq2 = abs((events.FitJet[:, 3].pt - genq2_closest.pt) / genq2_closest.pt)
+
+    distance_pt_Recob1 = abs((reco_jet.reco[:, 0].pt - genb1_closest.pt) / genb1_closest.pt)
+    distance_pt_Recoq1 = abs((reco_jet.reco[:, 2].pt - genq1_closest.pt) / genq1_closest.pt)
+    distance_pt_Recoq2 = abs((reco_jet.reco[:, 3].pt - genq2_closest.pt) / genq2_closest.pt)
+
+    events = set_ak_column(events, "distance_pt_Fitb1", distance_pt_Fitb1)
+    events = set_ak_column(events, "distance_pt_Fitq1", distance_pt_Fitq1)
+    events = set_ak_column(events, "distance_pt_Fitq2", distance_pt_Fitq2)
+
+    events = set_ak_column(events, "distance_pt_Recob1", distance_pt_Recob1)
+    events = set_ak_column(events, "distance_pt_Recoq1", distance_pt_Recoq1)
+    events = set_ak_column(events, "distance_pt_Recoq2", distance_pt_Recoq2)
+
+    events = set_ak_column(events, "distance_pt_diffb1", distance_pt_Recob1 - distance_pt_Fitb1)
+    events = set_ak_column(events, "distance_pt_diffq1", distance_pt_Recoq1 - distance_pt_Fitq1)
+    events = set_ak_column(events, "distance_pt_diffq2", distance_pt_Recoq2 - distance_pt_Fitq2)
+
     return events
 
 

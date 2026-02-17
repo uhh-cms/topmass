@@ -181,6 +181,18 @@ def add_categories(cfg: od.Config) -> None:
     )
     add_category(
         cfg,
+        name="gen_eta21_pt60_conv",
+        selection="gen_eta21_pt60_conv",
+        label="GenParticle eta2.1+pt60 Cut + conv",
+    )
+    add_category(
+        cfg,
+        name="gen_eta21_pt60_nconv",
+        selection="gen_eta21_pt60_nconv",
+        label="GenParticle eta2.1+pt60 Cut + nconv",
+    )
+    add_category(
+        cfg,
         name="gen_eta21_pt60_corrB",
         selection="gen_eta21_pt60_corrB",
         label="GenParticle eta2.1+pt60 Cut + corr (B)",
@@ -455,6 +467,46 @@ def add_categories(cfg: od.Config) -> None:
         label=r"gen cut + corr (B) +  $dR^{gen}_{min,bq1q2}$ < 0.4",
     )
 
+    add_category(
+        cfg,
+        name="gen_cut_deltaRminbq1q2_08_q1q2_corr",
+        selection="gen_cut_deltaRminbq1q2_08_q1q2_corr",
+        label=r"gen cut + corr +  $dR^{gen}_{min,bq1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRminbq1q2_06_q1q2_corr",
+        selection="gen_cut_deltaRminbq1q2_06_q1q2_corr",
+        label=r"gen cut + corr +  $dR^{gen}_{min,bq1q2}$ < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRminbq1q2_04_q1q2_corr",
+        selection="gen_cut_deltaRminbq1q2_04_q1q2_corr",
+        label=r"gen cut + corr +  $dR^{gen}_{min,bq1q2}$ < 0.4",
+    )
+
+# ----------------------------------------------------------------------------
+# Angular Distance genParton to genParton (closet)
+# ----------------------------------------------------------------------------
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_q1q2_closest",
+        selection="gen_cut_deltaRgen08_q1q2_closest",
+        label=r"gen cut  +  $dR^{gen}_{q1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_q1q2_closest",
+        selection="gen_cut_deltaRgen06_q1q2_closest",
+        label=r"gen cut  +  $dR^{gen}_{q1q2}$ < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_q1q2_closest",
+        selection="gen_cut_deltaRgen04_q1q2_closest",
+        label=r"gen cut  +  $dR^{gen}_{q1q2}$ < 0.4",
+    )
 # ----------------------------------------------------------------------------
 # Multiple matching Jets
 # ----------------------------------------------------------------------------

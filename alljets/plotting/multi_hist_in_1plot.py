@@ -95,7 +95,7 @@ def hist_2D(
     # Set legend and font sizes for clarity
     default_style_config["legend_cfg"]["ncol"] = 1
     default_style_config["legend_cfg"]["title_fontsize"] = 24
-    default_style_config["rax_cfg"]["xlabel"] = r"$ \lambda$"
+    default_style_config["ax_cfg"]["xlabel"] = r"$ \lambda$"
     default_style_config["legend_cfg"]["fontsize"] = 20
     default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
     kwargs["skip_ratio"] = True

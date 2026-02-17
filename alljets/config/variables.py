@@ -1205,14 +1205,14 @@ def add_variables(cfg: od.Config) -> None:
         expression="lambda_q1q2_q1",
         binning=(200, -1, 2),
         unit="",
-        x_title=r"$\lambda_{q1}$",
+        x_title=r"$\lambda_{q1}^{Jet}$",
     )
     cfg.add_variable(
         name="lambda_q1q2_q2",
         expression="lambda_q1q2_q2",
         binning=(200, -1, 2),
         unit="",
-        x_title=r"$\lambda_{q2}$",
+        x_title=r"$\lambda_{q2}^{Jet}$",
     )
 
     cfg.add_variable(
@@ -1229,6 +1229,29 @@ def add_variables(cfg: od.Config) -> None:
         unit="",
         x_title=r"$\lambda_{q2}^{fit}$",
     )
+    cfg.add_variable(
+        name="orthogonaleLength_q1q2_FitJetq1",
+        expression="orthogonaleLength_q1q2_FitJetq1",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"orthogonal Length FitJetq1",
+    )
+
+    cfg.add_variable(
+        name="lambda_q1q2_FitJetq1_c",
+        expression="lambda_q1q2_FitJetq1_c",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{q1}^{fit}$",
+    )
+    cfg.add_variable(
+        name="orthogonaleLength_q1q2_FitJetq1_c",
+        expression="orthogonaleLength_q1q2_FitJetq1_c",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"orthogonal Length FitJetq1",
+        aux={"overflow": True, "underflow": True},
+    )
 
     cfg.add_variable(
         name="lambda_q1q2_recoJetq2",
@@ -1244,20 +1267,42 @@ def add_variables(cfg: od.Config) -> None:
         unit="",
         x_title=r"$\lambda_{q1}^{reco}$",
     )
+    cfg.add_variable(
+        name="orthogonaleLength_q1q2_recoJetq1",
+        expression="orthogonaleLength_q1q2_recoJetq1",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"orthogonal Length recoJetq1",
+    )
+
+    cfg.add_variable(
+        name="lambda_q1q2_recoJetq1_c",
+        expression="lambda_q1q2_recoJetq1_c",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{q2}^{reco}$",
+    )
+    cfg.add_variable(
+        name="orthogonaleLength_q1q2_recoJetq1_c",
+        expression="orthogonaleLength_q1q2_recoJetq1_c",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"orthogonal Length recoJetq1",
+    )
 
     cfg.add_variable(
         name="lambda_ptSorted_q1q2_q1",
         expression="lambda_ptSorted_q1q2_q1",
         binning=(200, -1, 2),
         unit="",
-        x_title=r"$\lambda_{q1}$",
+        x_title=r"$\lambda_{q1}^{Jet}$",
     )
     cfg.add_variable(
         name="lambda_ptSorted_q1q2_q2",
         expression="lambda_ptSorted_q1q2_q2",
         binning=(200, -1, 2),
         unit="",
-        x_title=r"$\lambda_{q2}$",
+        x_title=r"$\lambda_{q2}^{Jet}$",
     )
 
     cfg.add_variable(
@@ -1342,25 +1387,97 @@ def add_variables(cfg: od.Config) -> None:
     )
 
     cfg.add_variable(
+        name="kappa_RecoW1",
+        expression="kappa_RecoW1",
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\kappa_{RecoW1}$",
+    )
+    cfg.add_variable(
+        name="kappa_FitW1",
+        expression="kappa_FitW1",
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\kappa_{FitW1}$",
+    )
+
+    cfg.add_variable(
         name="deviation_gen_FitJet_pt_b1",
         expression="deviation_gen_FitJet_pt_b1",
-        binning=(50, 0, 5),
+        binning=(50, -1, 5),
         unit="",
-        x_title=r"$| \frac{p_T^{FitJet,b1}}{p_T^{Gen,b1}} - 1|$",
+        x_title=r"$\frac{p_T^{FitJet,b1}}{p_T^{Gen,b1}} - 1$",
     )
     cfg.add_variable(
         name="deviation_gen_RecoJet_pt_b1",
         expression="deviation_gen_RecoJet_pt_b1",
+        binning=(50, -1, 5),
+        unit="",
+        x_title=r"$ \frac{p_T^{RecoJet,b1}}{p_T^{Gen,b1}} - 1 $",
+    )
+    cfg.add_variable(
+        name="deviation_gen_FitJet_pt_b1_abs",
+        expression="deviation_gen_FitJet_pt_b1_abs",
         binning=(50, 0, 5),
         unit="",
-        x_title=r"$ | \frac{p_T^{RecoJet,b1}}{p_T^{Gen,b1}} - 1 |$",
+        x_title=r"$| \frac{p_T^{FitJet,b1}}{p_T^{Gen,b1}} - 1 |$",
+    )
+    cfg.add_variable(
+        name="deviation_gen_RecoJet_pt_b1_abs",
+        expression="deviation_gen_RecoJet_pt_b1_abs",
+        binning=(50, 0, 5),
+        unit="",
+        x_title=r"$|  \frac{p_T^{RecoJet,b1}}{p_T^{Gen,b1}} - 1 |$",
     )
     cfg.add_variable(
         name="ratio_deviation_b1",
         expression="ratio_deviation_b1",
-        binning=(100, 0, 600),
+        binning=(100, 0, 800),
         unit="",
         x_title=r"%",
+    )
+    cfg.add_variable(
+        name="deviation_deviation_b1",
+        expression="deviation_deviation_b1",
+        binning=(100, 0, 800),
+        unit="",
+        x_title=r"%",
+    )
+    cfg.add_variable(
+        name="deviation_deviation_b1_m100_100",
+        expression="deviation_deviation_b1",
+        binning=(100, -100, 100),
+        unit="",
+        x_title=r"%",
+    )
+    cfg.add_variable(
+        name="diff_deviation_b1",
+        expression="diff_deviation_b1",
+        binning=(100, -3, 3),
+        unit="",
+        x_title=r"$1/p_T^{Gen,b1}\cdot (p_T^{Fit,b1} - p_T^{RecoJet,b1})$",
+    )
+
+    cfg.add_variable(
+        name="distance_pt_diffb1",
+        expression="distance_pt_diffb1",
+        binning=(100, -3, 3),
+        unit="",
+        x_title=r"$1/p_T^{Gen,b1}\cdot (\Delta p_T^{Fit-Gen,b1} - \Delta p_T^{RecoJet-Gen,b1})$",
+    )
+    cfg.add_variable(
+        name="distance_pt_diffq1",
+        expression="distance_pt_diffq1",
+        binning=(100, -3, 3),
+        unit="",
+        x_title=r"$1/p_T^{Gen,b1}\cdot (\Delta p_T^{Fit-Gen,q1} - \Delta p_T^{RecoJet-Gen,q1})$",
+    )
+    cfg.add_variable(
+        name="distance_pt_diffq2",
+        expression="distance_pt_diffq2",
+        binning=(100, -3, 3),
+        unit="",
+        x_title=r"$1/p_T^{Gen,b1}\cdot (\Delta p_T^{Fit-Gen,q2} - \Delta p_T^{RecoJet-Gen,q2})$",
     )
 
 
