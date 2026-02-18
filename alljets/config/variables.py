@@ -1463,21 +1463,43 @@ def add_variables(cfg: od.Config) -> None:
         expression="distance_pt_diffb1",
         binning=(100, -3, 3),
         unit="",
-        x_title=r"$1/p_T^{Gen,b1}\cdot (\Delta p_T^{Fit-Gen,b1} - \Delta p_T^{RecoJet-Gen,b1})$",
+        x_title=r"$1/p_T^{Gen,b1}\cdot (|\Delta p_T^{Fit-Gen,b1}| - |\Delta p_T^{RecoJet-Gen,b1}|)$",
     )
     cfg.add_variable(
         name="distance_pt_diffq1",
         expression="distance_pt_diffq1",
         binning=(100, -3, 3),
         unit="",
-        x_title=r"$1/p_T^{Gen,b1}\cdot (\Delta p_T^{Fit-Gen,q1} - \Delta p_T^{RecoJet-Gen,q1})$",
+        x_title=r"$1/p_T^{Gen,q1}\cdot (|\Delta p_T^{Fit-Gen,q1}| - |\Delta p_T^{RecoJet-Gen,q1}|)$",
     )
     cfg.add_variable(
         name="distance_pt_diffq2",
         expression="distance_pt_diffq2",
         binning=(100, -3, 3),
         unit="",
-        x_title=r"$1/p_T^{Gen,b1}\cdot (\Delta p_T^{Fit-Gen,q2} - \Delta p_T^{RecoJet-Gen,q2})$",
+        x_title=r"$1/p_T^{Gen,q2}\cdot (|\Delta p_T^{Fit-Gen,q2}| - |\Delta p_T^{RecoJet-Gen,q2}|)$",
+    )
+
+    cfg.add_variable(
+        name="distance_pt_diffb1_2bins",
+        expression="distance_pt_diffb1",
+        binning=[-9999, 0, 9999],
+        unit="",
+        x_title=r"$1/p_T^{Gen,b1}\cdot (|\Delta p_T^{Fit-Gen,b1}| - |\Delta p_T^{RecoJet-Gen,b1}|)$",
+    )
+    cfg.add_variable(
+        name="distance_pt_diffq1_2bins",
+        expression="distance_pt_diffq1",
+        binning=[-9999, 0, 9999],
+        unit="",
+        x_title=r"$1/p_T^{Gen,q1}\cdot (|\Delta p_T^{Fit-Gen,q1}| - |\Delta p_T^{RecoJet-Gen,q1}|)$",
+    )
+    cfg.add_variable(
+        name="distance_pt_diffq2_2bins",
+        expression="distance_pt_diffq2",
+        binning=[-9999, 0, 9999],
+        unit="",
+        x_title=r"$1/p_T^{Gen,q2}\cdot (|\Delta p_T^{Fit-Gen,q2}| - |\Delta p_T^{RecoJet-Gen,q2}|)$",
     )
 
 
