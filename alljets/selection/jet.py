@@ -18,11 +18,10 @@ ak = maybe_import("awkward")
 
 
 @selector(
-    uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB",
+    uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB", "Jet.jetId", "Jet.puId",
           "Jet.phi", "Jet.mass", attach_coffea_behavior, "HLT.*",
-          "gen_top", "GenPart.*",
+          "gen_top", "GenPart.*", "Jet.veto_map_mask",
           },
-    # "Jet.jetId", "Jet.puId", "Jet.genJetIdx", "GenJet.*",
     produces={"MW1", "MW2", "Mt1", "Mt2", "chi2",
               "deltaRb", "combination_type", "R2b4q",
               },
@@ -50,20 +49,36 @@ def jet_selection(
 
     Returns:
         tuple[ak.Array, SelectionResult]: The updated events and selection results.
+
+    Resources:
+    https://twiki.cern.ch/twiki/bin/view/CMS/JetID?rev=107#nanoAOD_Flags
+    https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVUL?rev=15#Recommendations_for_the_13_T_AN1
+    https://twiki.cern.ch/twiki/bin/view/CMS/PileupJetIDUL?rev=17
+    https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD?rev=100#Jets
     """
-    # example jet selection: at least six jets, lowest jet at least 40 GeV and H_T > 450 GeV
+
+    # Ensure that the Jets we use are passing the tight + tightLepVeto jet Id
+    # and are not vetoed by the jet veto map
+    ak4_mask = (events.Jet.jetId >= 6) & (events.Jet.veto_map_mask)
+
+    # Require tight pileup Id for jets with pt < 50 GeV
+    if self.config_inst.campaign.x.run == 2:
+        ak4_mask = (
+            ak4_mask &
+            ((events.Jet.pt >= 50.0) | (events.Jet.puId == 7))
+        )
 
     # Define a placeholder for empty float values
     EF = -99999.0
 
     # Step 1: Basic event and jet selection
-    ht1_sel = (ak.sum(events.Jet.pt, axis=1) >= 1)              # At least one jet with pt
-    jet_mask0 = (abs(events.Jet.eta) < 2.6)                     # Jets within eta acceptance
-    jet_mask = (jet_mask0 & (events.Jet.pt >= 32.0))            # Jets passing pt and eta
-    ht_sel = (ak.sum(events.Jet.pt[jet_mask], axis=1) >= 450)   # HT > 450 GeV
+    ht1_sel = (ak.sum(events.Jet.pt[ak4_mask], axis=1) >= 1)              # At least one jet with pt
+    jet_mask0 = ak4_mask & (abs(events.Jet.eta) < 2.6)                    # Jets within eta acceptance
+    jet_mask = (jet_mask0 & (events.Jet.pt >= 32.0))                      # Jets passing pt and eta
+    ht_sel = (ak.sum(events.Jet.pt[jet_mask], axis=1) >= 450)             # HT > 450 GeV
 
     # Step 2: Tight selection for leading jets, pT > 40 GeV and |eta| < 2.4, require at least 6 jets
-    jet_mask2 = ((abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 40.0))
+    jet_mask2 = ak4_mask & ((abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 40.0))
     jet_sel = ak.sum(jet_mask2, axis=1) >= 6
 
     # Step 3: Identify veto jets (not passing main selection)

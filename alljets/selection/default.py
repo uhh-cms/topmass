@@ -27,6 +27,7 @@ from collections import defaultdict
 
 from columnflow.columnar_util import set_ak_column
 from columnflow.production.cms.btag import btag_weights
+from columnflow.selection.cms.jets import jet_veto_map
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.pdf import pdf_weights
@@ -93,6 +94,7 @@ def muon_selection(
         cutflow_features,
         process_ids,
         muon_selection,
+        jet_veto_map,
         jet_selection,
         increment_stats,
         attach_coffea_behavior,
@@ -107,6 +109,7 @@ def muon_selection(
         mc_weight,
         cutflow_features,
         process_ids,
+        jet_veto_map,
         jet_selection,
         pdf_weights,
         murmuf_weights,
@@ -170,6 +173,11 @@ def default(
     # muon selection
     events, muon_results = self[muon_selection](events, **kwargs)
     results += muon_results
+
+    # jet veto map
+    if self.has_dep(jet_veto_map):
+        events, veto_result = self[jet_veto_map](events, **kwargs)
+        results += veto_result
 
     # jet selection
     events, jet_results = self[jet_selection](events, **kwargs)
@@ -246,6 +254,7 @@ def default(
         cutflow_features,
         process_ids,
         muon_selection,
+        jet_veto_map,
         jet_selection,
         increment_stats,
         pdf_weights,
@@ -261,6 +270,7 @@ def default(
         mc_weight,
         cutflow_features,
         process_ids,
+        jet_veto_map,
         jet_selection,
         pdf_weights,
         murmuf_weights,
@@ -291,6 +301,9 @@ def default_trig_weight(
         events: The events array with new columns added.
         SelectionResult: Contains selection masks and object indices.
 
+    Important Note: DO NOT use the returned selector step from the jet_veto_map selector
+              for the jet selection. This selector removes the event if one jet lies in the veto region.
+              Instead, we use the Jet.veto_map_mask in the jet selection to remove individual jets.
     """
 
     # ensure coffea behavior
@@ -318,6 +331,10 @@ def default_trig_weight(
     # muon selection
     events, muon_results = self[muon_selection](events, **kwargs)
     results += muon_results
+
+    # jet veto map
+    events, veto_result = self[jet_veto_map](events, **kwargs)
+    results += veto_result
 
     # jet selection
     events, jet_results = self[jet_selection](events, **kwargs)
@@ -407,6 +424,7 @@ def default_trig_weight(
         cutflow_features,
         process_ids,
         muon_selection,
+        jet_veto_map,
         jet_selection,
         increment_stats,
         pdf_weights,
@@ -422,6 +440,7 @@ def default_trig_weight(
         mc_weight,
         cutflow_features,
         process_ids,
+        jet_veto_map,
         jet_selection,
         pdf_weights,
         murmuf_weights,
@@ -451,7 +470,9 @@ def trigger_eff(
         events: The events array with new columns added.
         SelectionResult: Contains selection masks and object indices.
 
-    Alternative name for this selector could be `trigger_efficiency`.
+    Important Note: DO NOT use the returned selector step from the jet_veto_map selector
+                    for the jet selection. This selector removes the event if one jet lies in the veto region.
+                    Instead, we use the Jet.veto_map_mask in the jet selection to remove individual jets.
     """
     # ensure coffea behavior
     events = self[attach_coffea_behavior](events, **kwargs)
@@ -485,6 +506,10 @@ def trigger_eff(
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
     #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
+
+    # jet veto map
+    events, veto_result = self[jet_veto_map](events, **kwargs)
+    results += veto_result
 
     # jet selection
     events, jet_results = self[jet_selection](events, **kwargs)
