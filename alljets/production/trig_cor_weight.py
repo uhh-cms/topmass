@@ -109,6 +109,7 @@ def trig_weights_requires(self: Producer, task: law.Task, reqs: dict) -> None:
         producers="no_norm,trigger_prod",
         variables=self.config_inst.x.trigger_sf_variable + "-trig_bits",
         hist_producer="trig_all_weights",
+        processes="data,tt",
         selector_steps=self.config_inst.x.selector_step_groups[self.config_inst.x.trigger_sf_variable],
         general_settings="bin_sel=1,unweighted=0",
         categories="incl",
