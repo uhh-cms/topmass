@@ -74,6 +74,74 @@ def print_proportions(
     print("Ratio failed: ", hists_base.project(2)[99].value / sum(hists_base.project(2).values()))
     print("Sum of weights:", sum(hists_base.project(2).values()))
     print("#" * 50 + "#")
+    with open("proprotions_v3/proprotions_" + category_inst.name + ".txt", "w", encoding="utf-8") as f:
+        print("#" * 25 + category_inst.name + "#" * 25, file=f)
+        print("Ratio Corr: ", hists_base.project(1)[3].value / sum(hists_base.project(1).values()), file=f)
+        print("Ratio Unmatched: ", hists_base.project(1)[1].value / sum(hists_base.project(1).values()), file=f)
+        print("Ratio failed: ", hists_base.project(2)[99].value / sum(hists_base.project(2).values()), file=f)
+        print("Sum of weights:", sum(hists_base.project(2).values()), file=f)
+
+
+    # Add each hist to the plot config
+    plot_config["hist2"] = {
+        "method": "draw_hist",
+        "hist": hists_base.project(1),
+        "kwargs": {
+            "color": color_list[0],
+            "histtype": "step",
+            "label": hists_base.project(1).axes[0].label,
+        },
+    }
+
+    # Prepare and merge style configuration
+    default_style_config = prepare_style_config(
+        config_inst, category_inst, variable_inst, density, shape_norm, yscale,
+    )
+    # Set legend and font sizes for clarity
+    default_style_config["legend_cfg"]["ncol"] = 1
+    default_style_config["legend_cfg"]["title_fontsize"] = 24
+    default_style_config["rax_cfg"]["xlabel"] = "$p_T^{jet}/p_T^{gen}$"
+    default_style_config["legend_cfg"]["fontsize"] = 20
+    default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
+    kwargs["skip_ratio"] = False
+
+    style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
+
+    # Draw the plot using the aj_plot_all utility
+    return aj_plot_all(plot_config, style_config, **kwargs)
+
+
+def plot_proportions(
+    hists: OrderedDict,
+    config_inst: od.Config,
+    category_inst: od.Category,
+    variable_insts: list[od.Variable],
+    style_config: dict | None = None,
+    density: bool | None = False,
+    shape_norm: bool = False,
+    yscale: str | None = None,
+    process_settings: dict | None = None,
+    variable_settings: dict | None = None,
+    **kwargs,
+) -> plt.Figure:
+    # Use the first variable instance for plotting
+    variable_inst = variable_insts[0]
+    import IPython; IPython.embed()
+    # Apply variable and density settings to histograms
+    hists = apply_variable_settings(hists, variable_insts, variable_settings)
+    hists = apply_density(hists, density)[0]
+
+    # Prepare the plot configuration dictionary
+    plot_config = OrderedDict()
+    # Extract base histograms
+    hists_base = hists[list(hists.keys())[0]]
+
+    print("#" * 25 + category_inst.name + "#" * 25)
+    print("Ratio Corr: ", hists_base.project(1)[3].value / sum(hists_base.project(1).values()))
+    print("Ratio Unmatched: ", hists_base.project(1)[1].value / sum(hists_base.project(1).values()))
+    print("Ratio failed: ", hists_base.project(2)[99].value / sum(hists_base.project(2).values()))
+    print("Sum of weights:", sum(hists_base.project(2).values()))
+    print("#" * 50 + "#")
     with open("proprotions/proprotions_" + category_inst.name + ".txt", "w", encoding="utf-8") as f:
         print("#" * 25 + category_inst.name + "#" * 25, file=f)
         print("Ratio Corr: ", hists_base.project(1)[3].value / sum(hists_base.project(1).values()), file=f)
@@ -144,7 +212,7 @@ def countNegativePositive(
     with open("countNegativePositive/countNegativePositive" +
               category_inst.name + "__" + variable_insts[0].name + ".txt",
               "w", encoding="utf-8") as f:
-        print("#" * 25 + category_inst.name + variable_insts[0].name + "#" * 25, file=f)
+        print("#" * 25 + category_inst.name + "__" + variable_insts[0].name + "#" * 25, file=f)
         print("Positiv: ", hists_base[0, 1].value / norm * 100, " %", file=f)
         print("Negative: ", hists_base[0, 0].value / norm * 100, " %", file=f)
 

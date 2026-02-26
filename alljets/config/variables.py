@@ -1245,6 +1245,13 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$\lambda_{q1}^{fit}$",
     )
     cfg.add_variable(
+        name="lambda_q1q2_FitJetq2_c",
+        expression="lambda_q1q2_FitJetq2_c",
+        binning=(200, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{q2}^{fit}$",
+    )
+    cfg.add_variable(
         name="orthogonaleLength_q1q2_FitJetq1_c",
         expression="orthogonaleLength_q1q2_FitJetq1_c",
         binning=(200, -1, 2),
@@ -1280,6 +1287,13 @@ def add_variables(cfg: od.Config) -> None:
         expression="lambda_q1q2_recoJetq1_c",
         binning=(200, -1, 2),
         unit="",
+        x_title=r"$\lambda_{q1}^{reco}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_recoJetq2_c",
+        expression="lambda_q1q2_recoJetq2_c",
+        binning=(200, -1, 2),
+        unit="",
         x_title=r"$\lambda_{q2}^{reco}$",
     )
     cfg.add_variable(
@@ -1313,6 +1327,13 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$\lambda_{FitW1}$",
     )
     cfg.add_variable(
+        name="lambda_q1q2_FitW1_c",
+        expression="lambda_q1q2_FitW1_c",
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{FitW1}$",
+    )
+    cfg.add_variable(
         name="lambda_q1q2_FitW1_m10_10",
         expression="lambda_q1q2_FitW1",
         binning=(50, -10, 10),
@@ -1335,6 +1356,13 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"$\lambda_{RecoW1}$",
     )
     cfg.add_variable(
+        name="lambda_q1q2_RecoW1_c",
+        expression="lambda_q1q2_RecoW1_c",
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{RecoW1}$",
+    )
+    cfg.add_variable(
         name="lambda_q1q2_RecoW1_m10_10",
         expression="lambda_q1q2_RecoW1",
         binning=(50, -10, 10),
@@ -1352,6 +1380,13 @@ def add_variables(cfg: od.Config) -> None:
     cfg.add_variable(
         name="lambda_q1q2_genW1",
         expression="lambda_q1q2_genW1",
+        binning=(50, -1, 2),
+        unit="",
+        x_title=r"$\lambda_{GenW1}$",
+    )
+    cfg.add_variable(
+        name="lambda_q1q2_genW1_c",
+        expression="lambda_q1q2_genW1_c",
         binning=(50, -1, 2),
         unit="",
         x_title=r"$\lambda_{GenW1}$",
