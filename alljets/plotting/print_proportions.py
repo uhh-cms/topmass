@@ -81,7 +81,6 @@ def print_proportions(
         print("Ratio failed: ", hists_base.project(2)[99].value / sum(hists_base.project(2).values()), file=f)
         print("Sum of weights:", sum(hists_base.project(2).values()), file=f)
 
-
     # Add each hist to the plot config
     plot_config["hist2"] = {
         "method": "draw_hist",
@@ -126,7 +125,6 @@ def plot_proportions(
 ) -> plt.Figure:
     # Use the first variable instance for plotting
     variable_inst = variable_insts[0]
-    import IPython; IPython.embed()
     # Apply variable and density settings to histograms
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
     hists = apply_density(hists, density)[0]
