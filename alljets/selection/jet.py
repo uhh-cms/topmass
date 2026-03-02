@@ -30,6 +30,7 @@ ak = maybe_import("awkward")
 def jet_selection(
     self: Selector,
     events: ak.Array,
+    mode: str = "analysis",
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """
@@ -59,14 +60,19 @@ def jet_selection(
 
     # Ensure that the Jets we use are passing the tight + tightLepVeto jet Id
     # and are not vetoed by the jet veto map
-    ak4_mask = (events.Jet.jetId >= 6) & (events.Jet.veto_map_mask)
+    if mode == "analysis":
+        ak4_mask = (events.Jet.jetId >= 6) & (events.Jet.veto_map_mask)
 
-    # Require tight pileup Id for jets with pt < 50 GeV
-    if self.config_inst.campaign.x.run == 2:
-        ak4_mask = (
-            ak4_mask &
-            ((events.Jet.pt >= 50.0) | (events.Jet.puId == 7))
-        )
+        # Require tight pileup Id for jets with pt < 50 GeV
+        if self.config_inst.campaign.x.run == 2:
+            ak4_mask = (
+                ak4_mask &
+                ((events.Jet.pt >= 50.0) | (events.Jet.puId == 7))
+            )
+    elif mode == "trigger":
+        ak4_mask = ak.ones_like(events.Jet.pt, dtype=bool)
+    else:
+        raise ValueError(f"Unknown jet_selection mode: {mode}")
 
     # Define a placeholder for empty float values
     EF = -99999.0
@@ -80,6 +86,7 @@ def jet_selection(
     # Step 2: Tight selection for leading jets, pT > 40 GeV and |eta| < 2.4, require at least 6 jets
     jet_mask2 = ak4_mask & ((abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 40.0))
     jet_sel = ak.sum(jet_mask2, axis=1) >= 6
+    # jet_sel = ((ak.num(events.Jet) >= 6) & ak.all(jet_mask2[:, :6],axis=1))
 
     # Step 3: Identify veto jets (not passing main selection)
     veto_jet = ~jet_mask

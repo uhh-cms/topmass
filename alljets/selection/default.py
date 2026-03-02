@@ -337,7 +337,7 @@ def default_trig_weight(
     results += veto_result
 
     # jet selection
-    events, jet_results = self[jet_selection](events, **kwargs)
+    events, jet_results = self[jet_selection](events, mode="analysis", **kwargs)
     results += jet_results
 
     # combined event selection after all steps
@@ -512,7 +512,7 @@ def trigger_eff(
     results += veto_result
 
     # jet selection
-    events, jet_results = self[jet_selection](events, **kwargs)
+    events, jet_results = self[jet_selection](events, mode="trigger", **kwargs)
     results += jet_results
 
     # combined event selection after all steps: Choose one of the trigger efficiency selector steps
