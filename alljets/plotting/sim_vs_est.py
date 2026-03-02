@@ -119,7 +119,7 @@ def qcd_mc_vs_est(
     default_style_config["legend_cfg"]["ncol"] = 1
     default_style_config["legend_cfg"]["title_fontsize"] = 24
     default_style_config["legend_cfg"]["fontsize"] = 20
-    default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
+    default_style_config["rax_cfg"]["ylim"] = (0.5, 2.0)
     kwargs["skip_ratio"] = False
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
@@ -177,7 +177,6 @@ def qcd_sig_vs_bkg_sel(
         },
         "ratio_method": "draw_errorbars",
         "ratio_kwargs": {
-            # "linestyle": "none",
             "error_type": "variance",
             "marker": "^",
             "norm": hists[0][list(keys)[qcd_index]][0, :, 1, 1].values() *

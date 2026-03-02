@@ -335,6 +335,141 @@ def draw_errorbars_with_fit(
     )
 
 
+def draw_vline(
+    ax: plt.Axes,
+    x: float,
+    ymin: float | None = None,
+    ymax: float | None = None,
+    relative: bool = True,
+    **kwargs,
+) -> None:
+    """
+    Draw a vertical line.
+
+    If relative=True:
+        ymin and ymax are interpreted as fractions of axis height (0 → 1).
+    If relative=False:
+        ymin and ymax are interpreted in data coordinates.
+    """
+
+    y0, y1 = ax.get_ylim()
+
+    if ymin is None:
+        ymin = y0
+    if ymax is None:
+        ymax = y1
+
+    if relative:
+        ymin = y0 + ymin * (y1 - y0)
+        ymax = y0 + ymax * (y1 - y0)
+
+    ax.vlines(x=x, ymin=ymin, ymax=ymax, **kwargs)
+
+
+def draw_arrow(ax: plt.Axes, **kwargs) -> None:
+
+    x = kwargs.pop("x")
+    y = kwargs.pop("y")
+    length = kwargs.pop("length")
+    direction = kwargs.pop("direction", "right")
+    relative_y = kwargs.pop("relative_y", False)
+
+    color = kwargs.pop("color", "black")
+    linewidth = kwargs.pop("linewidth", 3)
+
+    zorder = kwargs.pop("zorder", 5)
+
+    y0, y1 = ax.get_ylim()
+
+    if relative_y:
+        y = y0 + y * (y1 - y0)
+
+    dx = length if direction == "right" else -length
+
+    # --------------------------------------------------
+    # Dashed guide line (very low zorder)
+    # --------------------------------------------------
+    ax.vlines(
+        x=x,
+        ymin=y0,
+        ymax=y,
+        linestyle="dashed",
+        linewidth=linewidth * 0.7,
+        color=color,
+        alpha=0.5,
+        zorder=zorder,
+    )
+
+    # --------------------------------------------------
+    # Vertical | marker
+    # --------------------------------------------------
+    marker_height = 0.045 * (y1 - y0)
+
+    ax.vlines(
+        x=x,
+        ymin=y - marker_height,
+        ymax=y + marker_height,
+        linewidth=linewidth,
+        color=color,
+        zorder=zorder + 1,
+    )
+
+    # --------------------------------------------------
+    # Horizontal arrow line
+    # --------------------------------------------------
+    ax.hlines(
+        y=y,
+        xmin=x,
+        xmax=x + dx,
+        linewidth=linewidth,
+        color=color,
+        zorder=zorder + 1,
+    )
+
+    # --------------------------------------------------
+    # Arrow tip
+    # --------------------------------------------------
+    tip_x = x + dx
+
+    ax.plot(
+        tip_x,
+        y,
+        marker=">",
+        markersize=14,
+        color=color,
+        zorder=zorder + 2,
+    )
+
+
+def draw_vspan(
+    ax: plt.Axes,
+    x_start: float,
+    x_end: float,
+    ymin: float = 0.0,
+    ymax: float = 1.0,
+    relative: bool = True,
+    **kwargs,
+) -> None:
+    """
+    Draw a vertical shaded region.
+
+    If relative=True:
+        ymin/ymax are axis fractions (0 → 1).
+    """
+
+    defaults = {
+        "color": "grey",
+        "alpha": 0.3,
+        "zorder": 0,
+    }
+
+    defaults.update(kwargs)
+
+    ax.axvspan(x_start, x_end, ymin=ymin if relative else None,
+               ymax=ymax if relative else None,
+               **defaults)
+
+
 def aj_plot_all(
     plot_config: dict,
     style_config: dict,
@@ -399,6 +534,7 @@ def aj_plot_all(
             draw_stat_error_bands, draw_syst_error_bands, draw_stack, draw_hist, draw_profile,
             draw_errorbars, draw_efficiency, draw_efficiency_with_fit, draw_ratio_of_fit, draw_ratio_hist_fit,
             draw_errorbars_with_fit, draw_efficiency_x, draw_hist_twin, draw_error_bands,
+            draw_vline, draw_arrow, draw_vspan,
         ]
     }
 
@@ -407,17 +543,21 @@ def aj_plot_all(
         # check if required fields are present
         if "method" not in cfg:
             raise ValueError(f"no method given in plot_cfg entry {key}")
-        if "hist" not in cfg:
-            raise ValueError(f"no histogram(s) given in plot_cfg entry {key}")
-
         # invoke the method
         method = cfg["method"]
-        h = cfg["hist"]
+
+        # if method != "draw_vline" and "hist" not in cfg:
+        #     raise ValueError(f"no histogram(s) given in plot_cfg entry {key}")
+
+        h = cfg.get("hist", None)
         fit_result = cfg.get("fit_result", None)
+
         if method.endswith("fit"):
             plot_methods[method](ax, h, fit_function, fit_result, **cfg.get("kwargs", {}))
-        else:
+        elif h is not None:
             plot_methods[method](ax, h, **cfg.get("kwargs", {}))
+        else:
+            plot_methods[method](ax, **cfg.get("kwargs", {}))
 
         # repeat for ratio axes if configured
         if not skip_ratio and "ratio_kwargs" in cfg:

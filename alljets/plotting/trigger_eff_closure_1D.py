@@ -183,6 +183,7 @@ def plot_efficiencies(
         "sigmoid": sigmoid,
         "arctan": arctan,
     }
+    cut_vis = kwargs.get("cut_vis", None)
 
     if fit_func not in func_dict:
         TypeError("Unsupported function type")
@@ -267,12 +268,40 @@ def plot_efficiencies(
         },
     }
 
+    if cut_vis == "arrow":
+        plot_config["cut_arrow"] = {
+            "method": "draw_arrow",
+            "kwargs": {
+                "x": 40 if variable_inst == "jet6_pt_trigger" else 450,
+                "y": 0.9,
+                "length": 10 if variable_inst == "jet6_pt_trigger" else 200,
+                "direction": "right",
+                "relative_y": True,
+                "color": "black",
+                "linewidth": 3,
+            },
+        }
+    elif cut_vis == "vspan":
+        plot_config["cut_region"] = {
+            "method": "draw_vspan",
+            "kwargs": {
+                "x_start": 30 if variable_inst == "jet6_pt_trigger" else 250,
+                "x_end": 40 if variable_inst == "jet6_pt_trigger" else 450,
+                "ymin": 0.0,
+                "ymax": 0.7,
+                "relative": True,
+                "color": "grey",
+                "alpha": 0.25,
+                "zorder": 0,
+            },
+        }
     # setup style config
     default_style_config = prepare_style_config(
         config_inst, category_inst, variable_inst, density, shape_norm, yscale,
     )
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
+    default_style_config["ax_cfg"]["xlim"] = (30, 100) if variable_inst == "jet6_pt_trigger" else None
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2
     default_style_config["legend_cfg"]["title_fontsize"] = 17
@@ -349,6 +378,7 @@ def plot_efficiencies_with_uncert(
         logger.warning(
             "No bin selected, bin zero is used for efficiency calculation",
         )
+    cut_vis = kwargs.get("cut_vis", None)
 
     # color_list = ["b", "g", "r", "c", "m", "y"]
     trigger_ref = np.array(config_inst.x.ref_trigger["tt_fh"])
@@ -448,12 +478,42 @@ def plot_efficiencies_with_uncert(
         },
     }
 
+    if cut_vis == "arrow":
+        plot_config["cut_arrow"] = {
+            "method": "draw_arrow",
+            "kwargs": {
+                "x": 40 if variable_inst == "jet6_pt_trigger" else 450,
+                "y": 0.9,
+                "length": 10 if variable_inst == "jet6_pt_trigger" else 200,
+                "direction": "right",
+                "relative_y": True,
+                "color": "black",
+                "linewidth": 3,
+            },
+        }
+    elif cut_vis == "vspan":
+        plot_config["cut_region"] = {
+            "method": "draw_vspan",
+            "kwargs": {
+                "x_start": 30 if variable_inst == "jet6_pt_trigger" else 250,
+                "x_end": 40 if variable_inst == "jet6_pt_trigger" else 450,
+                "ymin": 0.0,
+                "ymax": 0.7,
+                "relative": True,
+                "color": "grey",
+                "alpha": 0.25,
+                "zorder": 0,
+            },
+        }
+
     # setup style config
     default_style_config = prepare_style_config(
         config_inst, category_inst, variable_inst, density, shape_norm, yscale,
     )
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
+    if variable_inst == "jet6_pt_trigger":
+        default_style_config["ax_cfg"]["xlim"] = (30, 100)
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2
     default_style_config["legend_cfg"]["title_fontsize"] = 17
@@ -661,6 +721,7 @@ def produce_trig_weight(
         "sigmoid": sigmoid,
         "arctan": arctan,
     }
+    cut_vis = kwargs.get("cut_vis", None)
 
     if fit_func not in func_dict:
         TypeError("Unsupported function type")
@@ -755,6 +816,33 @@ def produce_trig_weight(
             "capsize": 3,
         },
     }
+    if cut_vis == "arrow":
+        plot_config["cut_arrow"] = {
+            "method": "draw_arrow",
+            "kwargs": {
+                "x": 40,
+                "y": 0.9,
+                "length": 10,
+                "direction": "right",
+                "relative_y": True,
+                "color": "black",
+                "linewidth": 3,
+            },
+        }
+    elif cut_vis == "vspan":
+        plot_config["cut_region"] = {
+            "method": "draw_vspan",
+            "kwargs": {
+                "x_start": 30,
+                "x_end": 40,
+                "ymin": 0.0,
+                "ymax": 0.7,
+                "relative": True,
+                "color": "grey",
+                "alpha": 0.25,
+                "zorder": 0,
+            },
+        }
 
     import correctionlib.schemav2
     weight_name = kwargs.get("name", "trig_cor")
@@ -802,6 +890,7 @@ def produce_trig_weight(
     )
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
+    default_style_config["ax_cfg"]["xlim"] = (30, 100)
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2
     default_style_config["legend_cfg"]["title_fontsize"] = 17

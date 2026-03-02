@@ -13,8 +13,6 @@ from columnflow.plotting.plot_util import (apply_density, apply_variable_setting
 from columnflow.util import maybe_import
 from alljets.plotting.aj_plot_all import aj_plot_all
 from modules.columnflow.columnflow.plotting.plot_util import get_cms_label
-from modules.columnflow.columnflow.plotting.plot_all import plot_all
-
 
 hist = maybe_import("hist")
 np = maybe_import("numpy")
@@ -71,7 +69,7 @@ def plot_hist_matching(
             label = "QCD multijet"
         elif ((list(keys)[i] == "qcd_est")):
             qcd_index = i
-            label = " Multijet est."
+            label = "Multijet est."
         else:
             data_index = i
 
@@ -140,7 +138,7 @@ def plot_hist_matching(
         "ratio_method": "draw_stat_error_bands",
         "hist": stack_qcd,
         "kwargs": {
-            "color": "#ffff00" if "est." not in label else "#4da6ff",
+            "color": "#ffff00" if "est." not in label else "#5790fc",
             "histtype": "fill",
             "label": label,
             "edgecolor": "black",
@@ -217,7 +215,7 @@ def plot_hist_matching(
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
     # Draw the plot using the aj_plot_all utility
-    return plot_all(plot_config, style_config, **kwargs)
+    return aj_plot_all(plot_config, style_config, **kwargs)
 
 
 def plot_hist_matching_MC(
@@ -329,6 +327,21 @@ def plot_hist_matching_MC(
         "hist": stack_unmatched,
     }
 
+    # Add vertical line at 6.3 for fitchi2_50
+    if variable_inst.name == "fitchi2_50":
+        plot_config["cut_line"] = {
+            "method": "draw_vline",
+            "kwargs": {
+                "x": 6.3,
+                "ymin": 0.0,
+                "ymax": 0.9,
+                "relative": True,
+                "color": "black",
+                "linestyle": "--",
+                "linewidth": 3,
+                "zorder": 10,
+            },
+        }
     # Prepare and merge style configuration
     default_style_config = prepare_style_config(
         config_inst, category_inst, variable_inst, density, shape_norm, yscale,
@@ -343,7 +356,7 @@ def plot_hist_matching_MC(
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
     # Draw the plot using the aj_plot_all utility
-    return plot_all(plot_config, style_config, **kwargs)
+    return aj_plot_all(plot_config, style_config, **kwargs)
 
 
 def plot_hist_chi2cuts(
