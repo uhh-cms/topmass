@@ -112,7 +112,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="fit_conv_big",
         selection="cat_fit_conv_big",  # Converged with Pgof > 0.1 (good quality)
-        label="kinfit converged and $P_{gof} > 0.1$ ",
+        label="$P_{gof} > 0.1$ ",
     )
     add_category(
         cfg,
