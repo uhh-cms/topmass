@@ -17,6 +17,7 @@ from columnflow.config_util import (add_shift_aliases,
                                     get_root_processes_from_campaign,
                                     get_shifts_from_sources,
                                     verify_config_processes)
+from columnflow.cms_util import CATInfo, CATSnapshot
 from columnflow.util import DotDict
 from scinum import Number
 
@@ -418,6 +419,7 @@ def add_config(
         # https://cms-jerc.web.cern.ch/Recommendations/#run-2
         # https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC?rev=204
         # https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution?rev=109
+        # See https://twiki.cern.ch/twiki/bin/view/CMS/JECUncertaintySources#Main_uncertainties_2017_94X
         jec_campaign = f"Summer19UL{year2}{campaign.x.postfix}"
         jec_version = {2016: "V7", 2017: "V5", 2018: "V5"}[year]
         jer_campaign = (
@@ -582,9 +584,26 @@ def add_config(
         "TimePtEta",
     ]
 
+    # https://btv-wiki.docs.cern.ch/PerformanceCalibration/SFUncertaintiesAndCorrelations/#ak4-working-point-based-sfs-fixedwp-sfs
     # name of the btag_sf correction set and jec uncertainties to propagate through
-    cfg.x.btag_sf = (
-        "deepJet_shape", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
+    # For the b/c jets, need to consider either deepJet_mujets (QCD enriched) or deepJets_comb (QCD + ttbar enriched)
+    # For the light jets SF, should use deepJet_incl
+
+    # from columnflow.production.cms.btag import BTagSFConfig
+    cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
+
+    # cfg.x.btag_sf_bc = ("deepJet_mujets", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
+    # cfg.x.btag_sf_light = ("deepJet_incl", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
+
+    # Initiated here the Dictonary to obtain the btagging WP counts
+    # See https://github.com/columnflow/columnflow/blob/master/columnflow/selection/cms/btag.py
+    # cfg.x.btag_wp_count_config = ("Jet",
+    #                             "btagDeepFlavB",
+    #                             {"tight": cfg.x.btag_working_points.deepjet.tight},
+    #                             (20, 30, 50, 70, 100, 140, 200, 300, 600, 1000),
+    #                             (0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 3.0),
+    #                             "btag_wp_counts"
+    #                             )
 
     ################################################################################################
     # dataset / process specific methods
@@ -734,6 +753,14 @@ def add_config(
             value = DotDict.wrap(value)
         cfg.x.external_files[name] = value
 
+    if run == 2:
+        cat_info = CATInfo(
+            run=2,
+            era=f"{year}{corr_postfix}-UL",
+            vnano=9,
+            snapshot=CATSnapshot(btv="latest", egm="latest", jme="latest", lum="latest", muo="latest", tau="latest"),
+        )
+
     # common files
     # (versions in the end are for hashing in cases where file contents changed but paths did not)
     # lumi files
@@ -783,7 +810,8 @@ def add_config(
             "v1",
         ),
     )
-
+    # jet veto map
+    add_external("jet_veto_map", (cat_info.get_file("jme", "jetvetomaps.json.gz"), "v2"))
     ################################################################################################
     # reductions
     ################################################################################################
@@ -800,12 +828,13 @@ def add_config(
                 "luminosityBlock",
                 "event",
                 # object info
-                "Jet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
+                "Jet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,neEmEF,neHEF,chEmEF,chHEF,muEF,jetId,puId}",
                 "Bjet.*",
                 "VetoJet.*",
                 "LightJet.*",
                 "JetsByBTag.*",
                 # "EventJet.*",
+                "EventJet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,neEmEF,neHEF,chEmEF,chHEF,muEF,jetId,puId}",
                 "Muon.{pt,eta,phi,mass,pfRelIso04_all}",
                 "MET.{pt,phi,significance,covXX,covXY,covYY}",
                 "PV.{npvs,npvsGood}",
