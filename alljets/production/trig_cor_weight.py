@@ -40,54 +40,52 @@ def trig_weights(
     **kwargs,
 ) -> ak.Array:
     """
-    Apply trigger correction weights to events.
+    Compute event-level trigger scale-factor weights for MC events.
 
-    This producer evaluates a trigger correction weight using a correctionlib
-    CorrectionSet provided via the external file ``trig_sf`` and stores it as
-    event-level columns:
-    - ``trig_weight``
-    - ``trig_weight_up``
-    - ``trig_weight_down``
+    The trigger weight is evaluated using a correctionlib ``CorrectionSet``
+    based on the configured trigger scale-factor variable
+    (e.g. ``jet6_pt`` or ``ht``).
 
-    The weight is evaluated as a function of the configured trigger scale-factor
-    variable (e.g. jet6_pt or ht).
+    The following columns are produced:
+    - ``trig_weight``: nominal trigger scale-factor weight
+    - ``trig_weight_up``: upward systematic variation
+    - ``trig_weight_down``: downward systematic variation
 
-    Uncertainty treatment:
-    ----------------------
-    The current implementation applies a conservative ±100% variation around the
-    nominal weight:
-    - trig_weight_up   = weight + |1 − weight|
-    - trig_weight_down = max(weight − |1 − weight|, 0)
-
-    To use a smaller relative uncertainty (e.g. ±50%), multiply the variation term
-    by a factor, for example:
-    variation = 0.5 * |1 − weight|.
+    The uncertainty is modeled as a symmetric variation around the nominal
+    weight using ±0.5 · |1 − weight|.
 
     For datasets without top quarks, all trigger weights are set to unity.
     """
 
     if self.dataset_inst.has_tag("has_top"):
+        # Determine the pT of the 6th leading jet within |eta| < 2.6. If fewer than 6 jets are present, set to 0.
         jet6_pt = ak.where(
             ak.num(events.Jet[(abs(events.Jet.eta) < 2.6)], axis=1) > 5,
-            ak.sort(events.Jet[(abs(events.Jet.eta) < 2.6)
-                               ].pt[:], ascending=False, axis=1),
-            np.zeros((len(events), 6)),
-        )[:, 5]
-        ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) &
-                                  (abs(events.Jet.eta) < 2.6)], axis=1)
+            ak.sort(events.Jet[(abs(events.Jet.eta) < 2.6)].pt[:], ascending=False, axis=1),
+            np.zeros((len(events), 6)))[:, 5]
+
+        # Compute HT: scalar sum of jet pT for jets passing the trigger-like selection
+        ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) & (abs(events.Jet.eta) < 2.6)], axis=1)
+
+        # Evaluate trigger scale factor using the configured variable
         if self.config_inst.x.trigger_sf_variable.startswith("jet6_pt"):
-            weight = ak.where(jet6_pt == 0, np.zeros(
-                (len(events))), self.trig_sf_corrector(jet6_pt))
+            # Apply the correction as a function of the 6th jet pT. Events with fewer than 6 jets receive weight = 0.
+            weight = ak.where(jet6_pt == 0, np.zeros((len(events))), self.trig_sf_corrector(jet6_pt))
+
         if self.config_inst.x.trigger_sf_variable.startswith("ht"):
+            # Apply the correction as a function of HT.
             weight = self.trig_sf_corrector(ht)
 
+        # Define systematic variations around the nominal weight, corresponds to ±50% of the deviation from unity.
         weight_up = weight + abs(1 - weight) * 0.5
         weight_down = ak.where((weight - abs(1 - weight) * 0.5) > 0, (weight - abs(1 - weight) * 0.5), 0)
-        # store it
+
+        # Store the nominal and varied weights as event-level columns
         events = set_ak_column(events, "trig_weight", weight, value_type=np.float32)
         events = set_ak_column(events, "trig_weight_up", weight_up, value_type=np.float32)
         events = set_ak_column(events, "trig_weight_down", weight_down, value_type=np.float32)
     else:
+        # For datasets without top quarks, no trigger correction is applied and all weights default to unity.
         events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
         events = set_ak_column(events, "trig_weight_up", np.ones(len(events)), value_type=np.float32)
         events = set_ak_column(events, "trig_weight_down", np.ones(len(events)), value_type=np.float32)
@@ -99,8 +97,6 @@ def trig_weights_requires(self: Producer, task: law.Task, reqs: dict) -> None:
     if ("external_files") in reqs:
         return
 
-    # from columnflow.tasks.external import BundleExternalFiles
-    # reqs["external_files"] = BundleExternalFiles.req(self.task)
     from alljets.tasks.ProduceTriggerWeights import ProduceTriggerWeight
     pinned_version = get("versions", "cfg_2017_v9__task_cf.ProduceTriggerWeight")
     reqs["external_files"] = ProduceTriggerWeight(

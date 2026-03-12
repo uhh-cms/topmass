@@ -46,117 +46,64 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 @producer(
     uses={
         # nano columns
-        "Jet.pt",
-        "Bjet.pt",
-        "LightJet*.pt",
-        "Jet.phi",
-        "Bjet.phi",
-        "LightJet.phi",
-        "Jet.eta",
-        "Bjet.eta",
-        "LightJet.eta",
-        "Jet.mass",
-        "VetoJet.pt",
-        "Bjet.mass",
-        "LightJet.mass",
+        "Jet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId,veto_map_mask}",
+        "EventJet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId,veto_map_mask}",
         "event",
         attach_coffea_behavior,
         "HLT.*",
-        "Jet.btagDeepFlavB",
-        "Jet.jetId",
-        "Jet.puId",
-        "Jet.veto_map_mask",
+
     },
     produces={
+        "Jet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId,veto_map_mask}",
+        "EventJet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId,veto_map_mask}",
+        "event",
+        attach_coffea_behavior,
+        "HLT.*",
         # new columns
         "ht",
-        "ht_old",
         "n_jet",
         "n_bjet",
         "maxbtag",
         "secmaxbtag",
-        "Jet.pt",
-        "Bjet.pt",
-        "LightJet*.pt",
-        "Jet.phi",
-        "Bjet.phi",
-        "LightJet.phi",
-        "Jet.eta",
-        "Bjet.eta",
-        "LightJet.eta",
-        "Jet.mass",
-        "VetoJet.pt",
-        "Bjet.mass",
-        "LightJet.mass",
-        "event",
-        attach_coffea_behavior,
-        "HLT.*",
-        "Jet.btagDeepFlavB",
-        "Jet.jetId",
-        "Jet.puId",
-        "Jet.veto_map_mask",
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
     Compute event-level features and simple jet summaries.
 
-    Produces: `ht`, `ht_old`, `n_jet`, `n_bjet`, `maxbtag`, `secmaxbtag`,
-    `deltaMt` and forwards several Jet/Bjet/LightJet fields.
+    Produces: `ht`, `n_jet`, `n_bjet`, `maxbtag`, `secmaxbtag`
     """
 
     # Prepare coffea-like behavior for selected jet collections so that
     # subsequent vector operations behave like physics objects.
     jetcollections = {
-        "Bjet": {
-            "type_name": "Jet",
-            "check_attr": "metric_table",
-            "skip_fields": "*Idx*G",
-        },
-        "LightJet": {
+        "Eventjet": {
             "type_name": "Jet",
             "check_attr": "metric_table",
             "skip_fields": "*Idx*G",
         },
     }
     events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
-    # events = set_ak_column(events, "ht", (ak.sum(events.Jet.pt, axis=1) + ak.sum(events.VetoJet.pt, axis=1)))
-    events = set_ak_column(
-        events,
-        "ht_old",
-        (ak.sum(events.Jet[(abs(events.Jet.eta) < 2.4)].pt, axis=1)),
-    )
-    events = set_ak_column(
-        events,
-        "ht",
-        (ak.sum(events.Jet[(events.Jet.pt >= 30.0)].pt, axis=1)),
-    )
-    events = set_ak_column(
-        events,
-        "n_jet",
-        ak.num(events.Jet.pt, axis=1),
-        value_type=np.int32,
-    )
+
+    # Compute HT, similar to trigger definition (jets with pt >= 32 GeV, |eta| <= 2.6)
+    # https://cmshltcfg.app.cern.ch/cfg?path=/cdaq/physics/Run2017/2e34/v3.2.0/HLT/V1&db=online&tab=paths&type=mods&snippet=hltHtMhtPFJetsSixC32
+    events = set_ak_column(events, "ht", (ak.sum(events.Jet[(events.Jet.pt >= 32.0)].pt, axis=1)))
+
+    # Compute jet multiplicity for the main jet collection (pT >= 40 GeV, |eta| < 2.4)
+    events = set_ak_column(events, "n_jet", ak.num(events.EventJet.pt, axis=1), value_type=np.int32)
+
+    # Compute b-jet multiplicity using the tight working point on the EventJet collection
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    events = set_ak_column(
-        events,
-        "n_bjet",
-        ak.sum((events.Jet.btagDeepFlavB >= wp_tight), axis=1),
-        value_type=np.int32,
-    )
-    events = set_ak_column(
-        events,
-        "maxbtag",
-        (ak.max(events.Jet[(abs(events.Jet.eta) < 2.4)].btagDeepFlavB, axis=1)),
-    )
+    events = set_ak_column(events, "n_bjet",
+                           ak.sum((events.EventJet.btagDeepFlavB >= wp_tight), axis=1), value_type=np.int32)
+
+    # Extract max and second max b-tag scores among the EventJets
+    events = set_ak_column(events, "maxbtag", (ak.max(events.EventJet.btagDeepFlavB, axis=1)))
+
     # Insert dummy value for one jet events
-    secmax = ak.sort(events.Jet.btagDeepFlavB, axis=1, ascending=False)
+    secmax = ak.sort(events.EventJet.btagDeepFlavB, axis=1, ascending=False)
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
-    events = set_ak_column(
-        events,
-        "secmaxbtag",
-        (ak.concatenate([secmax, empty, empty], axis=1)[:, 1]),
-    )
+    events = set_ak_column(events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1]))
     return events
 
 
@@ -325,10 +272,10 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         mc_weight,
         category_ids,
         # nano columns
-        "Jet.pt",
-        "Jet.eta",
-        "Jet.phi",
-        "Jet.btagDeepFlavB",
+        "EventJet.pt",
+        "EventJet.eta",
+        "EventJet.phi",
+        "EventJet.btagDeepFlavB",
     },
     produces={
         mc_weight,
@@ -359,51 +306,33 @@ def cutflow_features(
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
 
-    # apply object masks and create new collections (placeholder)
-    # reduced_events = create_collections_from_masks(events, object_masks)
-
     # add cutflow columns
-    events = set_ak_column(
-        events,
-        "cutflow.jet6_pt",
-        Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT),
-    )
-    events = set_ak_column(events, "cutflow.ht", ak.sum(events.Jet.pt, axis=1))
-    events = set_ak_column(
-        events,
-        "cutflow.jet1_pt",
-        Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT),
-    )
-    events = set_ak_column(events, "cutflow.n_jet", ak.num(events.Jet.pt, axis=1))
+    events = set_ak_column(events, "cutflow.ht", ak.sum(events.EventJet.pt, axis=1))
+    events = set_ak_column(events, "cutflow.n_jet", ak.num(events.EventJet.pt, axis=1))
+    events = set_ak_column(events, "cutflow.jet1_pt", Route("EventJet.pt[:,0]").apply(events, EMPTY_FLOAT))
+    events = set_ak_column(events, "cutflow.jet6_pt", Route("EventJet.pt[:,5]").apply(events, EMPTY_FLOAT))
+
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    events = set_ak_column(
-        events,
-        "cutflow.n_bjet",
-        ak.sum((events.Jet.btagDeepFlavB >= wp_tight), axis=1),
-    )
+    events = set_ak_column(events, "cutflow.n_bjet", ak.sum((events.EventJet.btagDeepFlavB >= wp_tight), axis=1))
+
     return events
 
 
 @producer(
     uses={
         features,
-        category_ids,
-        normalization_weights,
-        muon_weights,
-        deterministic_seeds,
         kinFitMatch,
-        # gen_top_lookup,
+        category_ids,
+        deterministic_seeds,
+        normalization_weights,
         attach_coffea_behavior,
     },
     produces={
         features,
-        category_ids,
-        normalization_weights,
-        muon_weights,
-        deterministic_seeds,
         kinFitMatch,
-        # gen_top_lookup,
-        # "gen_top",
+        category_ids,
+        deterministic_seeds,
+        normalization_weights,
         attach_coffea_behavior,
     },
     require_producers={"kinFitMatch"},
@@ -435,28 +364,23 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         # normalization weights (luminosity, xsec, pileup, ...)
         events = self[normalization_weights](events, **kwargs)
 
-        # muon weights (commented out here; enable if available)
-        # events = self[muon_weights](events, **kwargs)
-
     return events
 
 
 @producer(
     uses={
-        normalization_weights,
         features,
-        category_ids,
-        muon_weights,
-        deterministic_seeds,
         kinFitMatch,
+        category_ids,
+        deterministic_seeds,
+        normalization_weights,
     },
     produces={
-        normalization_weights,
         features,
-        category_ids,
-        muon_weights,
-        deterministic_seeds,
         kinFitMatch,
+        category_ids,
+        deterministic_seeds,
+        normalization_weights,
     },
 )
 def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -490,20 +414,8 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # MC: set normalization and mc weights to 1 (placeholder)
     if self.dataset_inst.is_mc:
         events = self[normalization_weights](events, **kwargs)
-        events = set_ak_column(
-            events,
-            "normalization_weight",
-            np.ones(len(events)),
-            value_type=np.float32,
-        )
-        events = set_ak_column(
-            events,
-            "mc_weight",
-            np.ones(len(events)),
-            value_type=np.float32,
-        )
-        # muon weights are optional
-        # events = self[muon_weights](events, **kwargs)
+        events = set_ak_column(events, "normalization_weight", np.ones(len(events)), value_type=np.float32)
+        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
 
     return events
 
@@ -514,13 +426,18 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 )
 def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
-    Produce trigger bit matrices for configured triggers.
+    Construct trigger bit matrices for configured triggers.
 
-    - `trig_bits`: vector per event marking which triggers fired (indexed
-        by id).
-    - `trig_bits_orth`: orthogonalized bits relative to the channel
-        reference trigger (used for orthogonal trigger studies).
+    For each event, this producer creates two arrays:
 
+    - `trig_bits`: marks which configured triggers fired, using an
+    integer ID per trigger.
+
+    - `trig_bits_orth`: same as `trig_bits`, but only when the trigger
+    fired together with the channel reference trigger.
+
+    The resulting matrices are stored as Awkward Array columns in the
+    event record.
     """
 
     # Start with empty singleton columns to concatenate trigger entries
@@ -552,12 +469,11 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                 ),
                 axis=1,
             )
-            # trig_passed_orth = ak.singletons(ak.nan_to_none(
-            #     ak.where((events.HLT[ref_trig] & events.HLT[trigger]), id, np.float64(np.nan))
-            # ))
+
             arr = ak.concatenate([arr, trig_passed], axis=1)
             arr_orth = ak.concatenate([arr_orth, trig_passed_orth], axis=1)
             id += 1
+
         bkg_trig = self.config_inst.x.bkg_trigger[channel]
         trig_passed_bkg = ak.singletons(
             ak.flatten(
@@ -566,6 +482,7 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                 ),
             ),
         )
+
         trig_passed_bkg_orth = ak.flatten(
             ak.singletons(
                 ak.nan_to_none(
@@ -582,17 +499,6 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         arr = ak.concatenate([arr, trig_passed_bkg], axis=1)
         arr_orth = ak.concatenate([arr_orth, trig_passed_bkg_orth], axis=1)
         id += 1
-    """ for channel, trig_cols in self.config_inst.x.trigger.items():
-        for trig_col in trig_cols:
-            trig_passed = ak.singletons(ak.nan_to_none(
-                ak.where(events.HLT[trig_col], id, np.float64(np.nan))
-            ))
-            trig_passed_orth = ak.singletons(ak.nan_to_none(
-                ak.where((events.HLT[ref_trig] & events.HLT[trig_col]), id, np.float64(np.nan))
-            ))
-            arr = ak.concatenate([arr, trig_passed], axis=1)
-            arr_orth = ak.concatenate([arr_orth, trig_passed_orth], axis=1)
-            id += 1 """
 
     events = set_ak_column(events, "trig_bits", arr)
     events = set_ak_column(events, "trig_bits_orth", arr_orth)
@@ -714,25 +620,3 @@ def btag_eff(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[normalization_weights](events, **kwargs)
 
     return events
-
-# Trigger categories
-#
-# @producer(
-#     uses=category_ids,
-#     produces=category_ids,
-#     version=1,
-# )
-# def trig_cats(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-#     """
-#     Reproduces the category ids to include the trigger categories
-#     """
-
-#     events = self[category_ids](events, **kwargs)
-
-#     return events
-
-
-# @trig_cats.init
-# def trig_cats_init(self: Producer) -> None:
-
-#     add_trigger_categories(self.config_inst)
