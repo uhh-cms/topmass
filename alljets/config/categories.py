@@ -168,6 +168,76 @@ def add_categories(cfg: od.Config) -> None:
         label="wrong or umatched events",
         tags={"matched"},
     )
+
+    # ==============================================================================
+    # Jet selection categories
+    # ==============================================================================
+    add_category(
+        cfg,
+        name="sig_correct",
+        selection="cat_sig_correct",
+        label="Signal Region + \n correctly matched events",
+    )
+    add_category(
+        cfg,
+        name="jetid",
+        selection="cat_jetid",
+        label="Signal Region +\n" r"$\geq 6$ jets passing TightLepVeto Jet ID",
+    )
+    add_category(
+        cfg,
+        name="jetid_correct",
+        selection="cat_jetid_correct",
+        label="Signal Region + \n correctly matched events +\n" r"$\geq 6$ jets passing TightLepVeto Jet ID",
+    )
+    add_category(
+        cfg,
+        name="puid",
+        selection="cat_jetpuid",
+        label="Signal Region + \n" r"$\geq 6$ jets passing Tight Pileup ID",
+    )
+    add_category(
+        cfg,
+        name="puid_correct",
+        selection="cat_jetpuid_correct",
+        label="Signal Region + \n correctly matched events +\n" r"$\geq 6$ jets passing Tight Pileup ID",
+    )
+    add_category(
+        cfg,
+        name="veto_map_mask",
+        selection="cat_jetvetomap",
+        label="Signal Region + \n" r"$\geq 6$ jets passing Jet Veto Map",
+    )
+    add_category(
+        cfg,
+        name="veto_map_mask_correct",
+        selection="cat_jetvetomap_correct",
+        label="Signal Region + \n correctly matched events +\n" r"$\geq 6$ jets passing Jet Veto Map",
+    )
+    add_category(
+        cfg,
+        name="jetid_puid",
+        selection="cat_jetid_puid",
+        label="Signal Region + \n" r"$\geq 6$ jets passing Jet ID + Pileup ID",
+    )
+    add_category(
+        cfg,
+        name="jetid_puid_correct",
+        selection="cat_jetid_puid_correct",
+        label="Signal Region + \n correctly matched events +\n" r"$\geq 6$ jets passing Jet ID + Pileup ID",
+    )
+    add_category(
+        cfg,
+        name="jetcleaning",
+        selection="cat_jetfullclean",
+        label="Signal Region + \n" r"$\geq 6$ jets passing Full Jet Cleaning",
+    )
+    add_category(
+        cfg,
+        name="jetcleaning_correct",
+        selection="cat_jetfullclean_correct",
+        label="Signal Region + \n correctly matched events + \n" r"$\geq 6$ jets passing Full Jet Cleaning",
+    )
     # add_category(
     #     cfg,
     #     name="reco_sig",

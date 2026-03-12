@@ -216,6 +216,269 @@ def cat_fit_unmatched(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak
     """
     return events, (events.fitCombinationType != 2)
 
+# ==============================================================================
+# Jet selection categories
+# ==============================================================================
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb", "fitCombinationType"})
+def cat_sig_correct(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Signal region: >= 2 b-tagged jets + signal trigger + good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+    signal_region = (events.HLT[signal_trigger] &
+                     (events.FitPgof > pgofcut) &
+                     (events.FitRbb > 2.0) &
+                     (ak.sum((events.Jet.pt >= 40) &
+                             (abs(events.Jet.eta) < 2.4) &
+                             (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                      ))
+    if self.dataset_inst.is_mc:
+        signal_region = signal_region & (events.fitCombinationType == 2)
+    return events, signal_region
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb",
+                   "Jet.puId", "Jet.veto_map_mask", "Jet.jetId"})
+def cat_jetid(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+
+    signal_region = (events.HLT[signal_trigger] &
+                     (events.FitPgof > pgofcut) &
+                     (events.FitRbb > 2.0) &
+                     (ak.sum((events.Jet.pt >= 40) &
+                             (abs(events.Jet.eta) < 2.4) &
+                             (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                      ))
+    jetid_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) & (events.Jet.jetId >= 6))
+    return events, signal_region & (ak.sum(jetid_mask, axis=1) >= 6)
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb", "Jet.puId",
+                   "Jet.veto_map_mask", "Jet.jetId", "fitCombinationType"})
+def cat_jetid_correct(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+
+    signal_region = (events.HLT[signal_trigger] &
+                     (events.FitPgof > pgofcut) &
+                     (events.FitRbb > 2.0) &
+                     (ak.sum((events.Jet.pt >= 40) &
+                             (abs(events.Jet.eta) < 2.4) &
+                             (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                      ))
+    jetid_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) & (events.Jet.jetId >= 6))
+    if self.dataset_inst.is_mc:
+        signal_region = signal_region & (events.fitCombinationType == 2)
+    return events, signal_region & (ak.sum(jetid_mask, axis=1) >= 6)
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb",
+                   "Jet.puId", "Jet.veto_map_mask", "Jet.jetId"})
+def cat_jetpuid(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+    signal_region = (events.HLT[signal_trigger] &
+                     (events.FitPgof > pgofcut) &
+                     (events.FitRbb > 2.0) &
+                     (ak.sum((events.Jet.pt >= 40) &
+                             (abs(events.Jet.eta) < 2.4) &
+                             (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                      ))
+    pu_mask = (events.Jet.pt >= 50) | (events.Jet.puId == 7)
+
+    jet_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) & pu_mask)
+    return events, signal_region & (ak.sum(jet_mask, axis=1) >= 6)
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb",
+                   "Jet.puId", "Jet.veto_map_mask", "Jet.jetId", "fitCombinationType"})
+def cat_jetpuid_correct(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+    signal_region = (events.HLT[signal_trigger] &
+                     (events.FitPgof > pgofcut) &
+                     (events.FitRbb > 2.0) &
+                     (ak.sum((events.Jet.pt >= 40) &
+                             (abs(events.Jet.eta) < 2.4) &
+                             (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                      ))
+    pu_mask = (events.Jet.pt >= 50) | (events.Jet.puId == 7)
+
+    jet_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) & pu_mask)
+    if self.dataset_inst.is_mc:
+        signal_region = signal_region & (events.fitCombinationType == 2)
+    return events, signal_region & (ak.sum(jet_mask, axis=1) >= 6)
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb",
+                   "Jet.puId", "Jet.veto_map_mask", "Jet.jetId"})
+def cat_jetvetomap(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+    signal_region = (events.HLT[signal_trigger] &
+                    (events.FitPgof > pgofcut) &
+                    (events.FitRbb > 2.0) &
+                    (ak.sum((events.Jet.pt >= 40) &
+                            (abs(events.Jet.eta) < 2.4) &
+                            (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                     ))
+    jet_veto_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) & events.Jet.veto_map_mask)
+    return events, signal_region & (ak.sum(jet_veto_mask, axis=1) >= 6)
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb",
+                   "Jet.puId", "Jet.veto_map_mask", "Jet.jetId", "fitCombinationType"})
+def cat_jetvetomap_correct(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+    signal_region = (events.HLT[signal_trigger] &
+                    (events.FitPgof > pgofcut) &
+                    (events.FitRbb > 2.0) &
+                    (ak.sum((events.Jet.pt >= 40) &
+                            (abs(events.Jet.eta) < 2.4) &
+                            (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                     ))
+    jet_veto_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) & events.Jet.veto_map_mask)
+    if self.dataset_inst.is_mc:
+        signal_region = signal_region & (events.fitCombinationType == 2)
+    return events, signal_region & (ak.sum(jet_veto_mask, axis=1) >= 6)
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb",
+                   "Jet.puId", "Jet.veto_map_mask", "Jet.jetId"})
+def cat_jetid_puid(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+    signal_region = (events.HLT[signal_trigger] &
+                     (events.FitPgof > pgofcut) &
+                     (events.FitRbb > 2.0) &
+                     (ak.sum((events.Jet.pt >= 40) &
+                             (abs(events.Jet.eta) < 2.4) &
+                             (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                      ))
+
+    pu_mask = (events.Jet.pt >= 50) | (events.Jet.puId == 7)
+    jet_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) & (events.Jet.jetId >= 6) & pu_mask)
+
+    return events, signal_region & (ak.sum(jet_mask, axis=1) >= 6)
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb",
+                   "Jet.puId", "Jet.veto_map_mask", "Jet.jetId", "fitCombinationType"})
+def cat_jetid_puid_correct(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+    signal_region = (events.HLT[signal_trigger] &
+                     (events.FitPgof > pgofcut) &
+                     (events.FitRbb > 2.0) &
+                     (ak.sum((events.Jet.pt >= 40) &
+                             (abs(events.Jet.eta) < 2.4) &
+                             (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                      ))
+
+    pu_mask = (events.Jet.pt >= 50) | (events.Jet.puId == 7)
+    jet_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) & (events.Jet.jetId >= 6) & pu_mask)
+    if self.dataset_inst.is_mc:
+        signal_region = signal_region & (events.fitCombinationType == 2)
+
+    return events, signal_region & (ak.sum(jet_mask, axis=1) >= 6)
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb",
+                   "Jet.puId", "Jet.veto_map_mask", "Jet.jetId"})
+def cat_jetfullclean(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+    signal_region = (events.HLT[signal_trigger] &
+                    (events.FitPgof > pgofcut) &
+                    (events.FitRbb > 2.0) &
+                    (ak.sum((events.Jet.pt >= 40) &
+                            (abs(events.Jet.eta) < 2.4) &
+                            (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                     ))
+    pu_mask = (events.Jet.pt >= 50) | (events.Jet.puId == 7)
+
+    jet_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) &
+                (events.Jet.jetId >= 6) & events.Jet.veto_map_mask & pu_mask)
+    return events, signal_region & (ak.sum(jet_mask, axis=1) >= 6)
+
+
+@categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "FitRbb",
+                   "Jet.puId", "Jet.veto_map_mask", "Jet.jetId", "fitCombinationType"})
+def cat_jetfullclean_correct(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
+    """
+    Select events with at least 6 jets passing tight jet ID, signal trigger, and good fit quality.
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 6 jets with tight jet ID.
+    """
+    pgofcut = self.config_inst.x.fitpgofcut
+    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
+    signal_region = (events.HLT[signal_trigger] &
+                    (events.FitPgof > pgofcut) &
+                    (events.FitRbb > 2.0) &
+                    (ak.sum((events.Jet.pt >= 40) &
+                            (abs(events.Jet.eta) < 2.4) &
+                            (events.Jet.btagDeepFlavB >= wp_tight), axis=1) >= 2
+                     ))
+    pu_mask = (events.Jet.pt >= 50) | (events.Jet.puId == 7)
+
+    jet_mask = ((events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4) & (events.Jet.jetId >= 6) &
+                events.Jet.veto_map_mask & pu_mask)
+    if self.dataset_inst.is_mc:
+        signal_region = signal_region & (events.fitCombinationType == 2)
+    return events, signal_region & (ak.sum(jet_mask, axis=1) >= 6)
+
 # @categorizer(uses={"Jet.pt", "Jet.btagDeepFlavB", "Jet.eta", "HLT.*", "deltaRb", "chi2"})
 # def cat_reco_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
 #     # two or more b-jets
