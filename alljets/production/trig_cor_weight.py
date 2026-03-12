@@ -7,6 +7,7 @@ Trigger related event weights.
 from __future__ import annotations
 
 import law
+from law.config import get
 from columnflow.columnar_util import set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
@@ -101,8 +102,9 @@ def trig_weights_requires(self: Producer, task: law.Task, reqs: dict) -> None:
     # from columnflow.tasks.external import BundleExternalFiles
     # reqs["external_files"] = BundleExternalFiles.req(self.task)
     from alljets.tasks.ProduceTriggerWeights import ProduceTriggerWeight
+    pinned_version = get("versions", "cfg_2017_v9__task_cf.ProduceTriggerWeight")
     reqs["external_files"] = ProduceTriggerWeight(
-        version=task.version,  # "withbtagalt",  # task.version,
+        version=pinned_version,
         datasets="tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,data*",
         configs=task.config,
         selector="trigger_eff",
@@ -111,7 +113,7 @@ def trig_weights_requires(self: Producer, task: law.Task, reqs: dict) -> None:
         hist_producer="trig_all_weights",
         processes="data,tt",
         selector_steps=self.config_inst.x.selector_step_groups[self.config_inst.x.trigger_sf_variable],
-        general_settings="bin_sel=1,unweighted=0",
+        general_settings="bin_sel=1,unweighted=0,cut_vis=vspan",
         categories="incl",
     )
 
