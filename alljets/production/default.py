@@ -66,6 +66,9 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "Jet.btagDeepFlavB",
         "Mt1",
         "Mt2",
+        "Jet.jetId",
+        "Jet.puId",
+        "Jet.veto_map_mask",
     },
     produces={
         # new columns
@@ -93,6 +96,9 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         attach_coffea_behavior,
         "HLT.*",
         "Jet.btagDeepFlavB",
+        "Jet.jetId",
+        "Jet.puId",
+        "Jet.veto_map_mask",
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -162,14 +168,14 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 @producer(
     uses={
         # nano columns
-        "Jet.pt",
-        "Jet.phi",
-        "Jet.eta",
-        "Jet.mass",
+        "EventJet.pt",
+        "EventJet.phi",
+        "EventJet.eta",
+        "EventJet.mass",
+        "EventJet.btagDeepFlavB",
         "event",
         attach_coffea_behavior,
         gen_top_lookup,
-        "Jet.btagDeepFlavB",
         kinFit,
         "gen_top",
     },
@@ -204,15 +210,21 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
 
     from alljets.scripts.default import combinationtype
-
-    events = self[attach_coffea_behavior](events, **kwargs)
-
+    jetcollections = {
+        "EventJet": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "",
+        },
+    }
+    events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
+    
     # Ensure gen_top column exists for datasets without top truth
     if not self.dataset_inst.has_tag("has_top"):
         events = set_ak_column(events, "gen_top", False)
 
     EF = -99999.0
-    kinFit_jetmask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+    kinFit_jetmask = (events.EventJet.pt >= 40.0) & (abs(events.EventJet.eta) < 2.4)
     kinFit_eventmask = ak.sum(kinFit_jetmask, axis=1) >= 6
 
     events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)

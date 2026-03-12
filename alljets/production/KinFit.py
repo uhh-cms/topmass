@@ -12,13 +12,10 @@ How this producer is used:
 - It accepts masks selecting jets and events to run the fit on and
     returns the original `events` array with added `FitJet`, `FitChi2`,
     and `FitPgof` columns.
-
-Alternative name (suggested): "run_kinfit".
 """
 
 from columnflow.columnar_util import EMPTY_FLOAT, flat_np_view, set_ak_column
 from columnflow.production import Producer, producer
-# from columnflow.selection.util import create_collections_from_masks
 from columnflow.util import maybe_import
 
 np = maybe_import("numpy")
@@ -49,7 +46,8 @@ def kinFit(
     eventmask: ak.Array,
     **kwargs,
 ) -> ak.Array:
-    """Run the external kinematic fitter and produce `FitJet` + quality columns.
+    """
+    Run the external kinematic fitter and produce `FitJet` + quality columns.
 
     Parameters
     ----------
@@ -69,7 +67,7 @@ def kinFit(
 
     # Slice to events that will be fitted
     sel_events = events[eventmask]
-    sel_Jets = sel_events.Jet[sel_jet_mask[eventmask]]
+    sel_Jets = sel_events.EventJet[sel_jet_mask[eventmask]]
 
     # Pick ordering strategy: if >=2 b-tags exist prefer btag ordering
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
@@ -120,11 +118,11 @@ def kinFit(
 
     # Repeat the ordering logic on the full events to map reco jets
     sorted_reco_indices = ak.where(
-        ak.sum(events.Jet[sel_jet_mask].btagDeepFlavB >= wp_tight, axis=1) >= 2,
-        ak.argsort(events.Jet[sel_jet_mask].btagDeepFlavB, ascending=False),
-        ak.argsort(events.Jet[sel_jet_mask].pt, ascending=False),
+        ak.sum(events.EventJet[sel_jet_mask].btagDeepFlavB >= wp_tight, axis=1) >= 2,
+        ak.argsort(events.EventJet[sel_jet_mask].btagDeepFlavB, ascending=False),
+        ak.argsort(events.EventJet[sel_jet_mask].pt, ascending=False),
     )
-    sorted_reco = (events.Jet[sel_jet_mask])[sorted_reco_indices]
+    sorted_reco = (events.EventJet[sel_jet_mask])[sorted_reco_indices]
     sorted_jet = sorted_reco[combined_indices]
 
     # Only keep the first 6 jets per event (fitter returns up to 6)
