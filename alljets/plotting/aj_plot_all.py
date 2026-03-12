@@ -470,6 +470,86 @@ def draw_vspan(
                **defaults)
 
 
+import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+from typing import Literal
+
+
+def hatch_vregion(
+    ax: Axes,
+    x: float,
+    side: Literal["left", "right"] = "right",
+    xmin: float | None = None,
+    xmax: float | None = None,
+    ymin: float | None = None,
+    ymax: float | None = None,
+    relative: bool = True,
+    hatch: str = "///",
+    **kwargs,
+) -> None:
+    """
+    Hatch a vertical region.
+
+    Parameters
+    ----------
+    x : float
+        Reference x position.
+    side : "left" | "right"
+        Which side of x to hatch.
+    xmin, xmax : float | None
+        Optional manual x-limits for region.
+    ymin, ymax : float | None
+        Vertical limits.
+    relative : bool
+        If True, ymin/ymax are fractions of axis height (0 → 1).
+        If False, they are data coordinates.
+    hatch : str
+        Matplotlib hatch pattern.
+    """
+
+    x0, x1 = ax.get_xlim()
+    y0, y1 = ax.get_ylim()
+
+    # Decide horizontal span
+    if side == "left":
+        xmin = x0 if xmin is None else xmin
+        xmax = x
+    elif side == "right":
+        xmin = x
+        xmax = x1 if xmax is None else xmax
+    else:
+        raise ValueError("side must be 'left' or 'right'")
+
+    # Vertical span
+    if ymin is None:
+        ymin = 0 if relative else y0
+    if ymax is None:
+        ymax = 1 if relative else y1
+
+    if relative:
+        ax.axvspan(
+            xmin,
+            xmax,
+            ymin=ymin,
+            ymax=ymax,
+            facecolor="none",
+            hatch=hatch,
+            **kwargs,
+        )
+    else:
+        # Convert data coords manually
+        ymin_data = ymin
+        ymax_data = ymax
+        ax.fill_betweenx(
+            [ymin_data, ymax_data],
+            xmin,
+            xmax,
+            facecolor="none",
+            hatch=hatch,
+            **kwargs,
+        )
+
+
 def aj_plot_all(
     plot_config: dict,
     style_config: dict,
@@ -533,7 +613,7 @@ def aj_plot_all(
         for func in [
             draw_stat_error_bands, draw_syst_error_bands, draw_stack, draw_hist, draw_profile,
             draw_errorbars, draw_efficiency, draw_efficiency_with_fit, draw_ratio_of_fit, draw_ratio_hist_fit,
-            draw_errorbars_with_fit, draw_efficiency_x, draw_hist_twin, draw_error_bands,
+            draw_errorbars_with_fit, draw_efficiency_x, draw_hist_twin, draw_error_bands, hatch_vregion,
             draw_vline, draw_arrow, draw_vspan,
         ]
     }

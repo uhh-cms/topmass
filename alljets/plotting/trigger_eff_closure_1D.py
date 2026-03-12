@@ -233,6 +233,22 @@ def plot_efficiencies(
     yerrors = np.concatenate((yerror_low.reshape(yerror_low.shape[0], 1),
                             yerror_high.reshape(yerror_high.shape[0], 1)), axis=1)
     yerrors = yerrors.T
+
+    # plot config for ttbar MC
+    plot_config["fit_1"] = {
+        "method": "draw_efficiency_x",
+        "hist": convert_weightedmean_to_weight(hist_list_mean[1][weighted, 0, :, eff_bin]),
+        "kwargs": {
+            "x": hist_list_mean[1][weighted, 0, :, eff_bin].values(),
+            "color": "r",
+            "linestyle": "none",
+            "norm": norm_hist_1,
+            "label": f"{list(hists[0].keys())[1].name} ",
+            "capsize": 3,
+        },
+    }
+
+    # plot config for data
     plot_config["fit_0"] = {
         "method": "draw_efficiency_x",
         "hist": convert_weightedmean_to_weight(hist_list_mean[0][weighted, 0, :, eff_bin]),
@@ -253,18 +269,6 @@ def plot_efficiencies(
             "linestyle": "none",
             "norm": (myhist_1.values() * norm_hist_0) / norm_hist_1,
             "yerr": yerrors,
-        },
-    }
-    plot_config["fit_1"] = {
-        "method": "draw_efficiency_x",
-        "hist": convert_weightedmean_to_weight(hist_list_mean[1][weighted, 0, :, eff_bin]),
-        "kwargs": {
-            "x": hist_list_mean[1][weighted, 0, :, eff_bin].values(),
-            "color": "r",
-            "linestyle": "none",
-            "norm": norm_hist_1,
-            "label": f"{list(hists[0].keys())[1].name} ",
-            "capsize": 3,
         },
     }
 
@@ -301,11 +305,12 @@ def plot_efficiencies(
     )
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
-    default_style_config["ax_cfg"]["xlim"] = (30, 100) if variable_inst == "jet6_pt_trigger" else None
+    if variable_inst == "jet6_pt_trigger":
+        default_style_config["ax_cfg"]["xlim"] = (30, 100)
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2
-    default_style_config["legend_cfg"]["title_fontsize"] = 17
-    default_style_config["legend_cfg"]["fontsize"] = 17
+    default_style_config["legend_cfg"]["title_fontsize"] = 20
+    default_style_config["legend_cfg"]["fontsize"] = 20
     default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
     kwargs["skip_ratio"] = False
 
@@ -451,7 +456,7 @@ def plot_efficiencies_with_uncert(
                     "x": myhist[0, :, eff_bin].values(),
                     "color": "r",
                     "norm": norm_hist,
-                    "label": f"{proc_key.name}",
+                    "label": r"$t\bar{t}$",
                     "capsize": 3,
                 },
             }
@@ -516,8 +521,8 @@ def plot_efficiencies_with_uncert(
         default_style_config["ax_cfg"]["xlim"] = (30, 100)
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2
-    default_style_config["legend_cfg"]["title_fontsize"] = 17
-    default_style_config["legend_cfg"]["fontsize"] = 15
+    default_style_config["legend_cfg"]["title_fontsize"] = 20
+    default_style_config["legend_cfg"]["fontsize"] = 20
     default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
     kwargs["skip_ratio"] = False
 
@@ -630,7 +635,7 @@ def plot_efficiencies_with_fit(
             "x": hist_list_mean[0][weighted, 0, :, eff_bin].values(),
             "color": "b",
             "norm": norm_hist_0,
-            "label": f"{list(hists[0].keys())[0].name} " + r"($\chi^2$/d.o.f. $= \,$" + f"{round(chi2[0],3)})",
+            "label": f"{list(hists[0].keys())[0].name} ",  # + r"($\chi^2$/d.o.f. $= \,$" + f"{round(chi2[0],3)})
             "capsize": 3,
         },
         "ratio_method": "draw_ratio_of_fit",
@@ -652,7 +657,7 @@ def plot_efficiencies_with_fit(
             "x": hist_list_mean[1][weighted, 0, :, eff_bin].values(),
             "color": "r",
             "norm": norm_hist_1,
-            "label": f"{list(hists[0].keys())[1].name} " + r"($\chi^2$/d.o.f. $= \,$" + f"{round(chi2[1],3)})",
+            "label": f"{list(hists[0].keys())[1].name} ",  # + r"($\chi^2$/d.o.f. $= \,$" + f"{round(chi2[1],3)})
             "capsize": 3,
         },
     }
@@ -782,6 +787,22 @@ def produce_trig_weight(
     yerrors = np.concatenate((yerror_low.reshape(yerror_low.shape[0], 1),
                             yerror_high.reshape(yerror_high.shape[0], 1)), axis=1)
     yerrors = yerrors.T
+
+    # ttbar plot config
+    plot_config["fit_1"] = {
+        "method": "draw_efficiency_with_fit",
+        "hist": convert_weightedmean_to_weight(hist_list_mean[1][weighted, 0, :, eff_bin]),
+        "fit_result": fit_result[1],
+        "kwargs": {
+            "x": hist_list_mean[1][weighted, 0, :, eff_bin].values(),
+            "color": "r",
+            "norm": norm_hist_1,
+            "label": r"$t\bar{t}$",
+            "capsize": 3,
+        },
+    }
+
+    # data plot config
     plot_config["fit_0"] = {
         "method": "draw_efficiency_with_fit",
         "hist": convert_weightedmean_to_weight(hist_list_mean[0][weighted, 0, :, eff_bin]),
@@ -790,7 +811,7 @@ def produce_trig_weight(
             "x": hist_list_mean[0][weighted, 0, :, eff_bin].values(),
             "color": "b",
             "norm": norm_hist_0,
-            "label": f"{list(hists[0].keys())[0].name} " + r"($\chi^2$/d.o.f. $= \,$" + f"{round(chi2[0],3)})",
+            "label": "data",
             "capsize": 3,
         },
         "ratio_method": "draw_ratio_of_fit",
@@ -804,18 +825,7 @@ def produce_trig_weight(
             "fit_norm": fit_result[1],
         },
     }
-    plot_config["fit_1"] = {
-        "method": "draw_efficiency_with_fit",
-        "hist": convert_weightedmean_to_weight(hist_list_mean[1][weighted, 0, :, eff_bin]),
-        "fit_result": fit_result[1],
-        "kwargs": {
-            "x": hist_list_mean[1][weighted, 0, :, eff_bin].values(),
-            "color": "r",
-            "norm": norm_hist_1,
-            "label": f"{list(hists[0].keys())[1].name} " + r"($\chi^2$/d.o.f. $= \,$" + f"{round(chi2[1],3)})",
-            "capsize": 3,
-        },
-    }
+
     if cut_vis == "arrow":
         plot_config["cut_arrow"] = {
             "method": "draw_arrow",
@@ -893,8 +903,8 @@ def produce_trig_weight(
     default_style_config["ax_cfg"]["xlim"] = (30, 100)
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2
-    default_style_config["legend_cfg"]["title_fontsize"] = 17
-    default_style_config["legend_cfg"]["fontsize"] = 17
+    default_style_config["legend_cfg"]["title_fontsize"] = 20
+    default_style_config["legend_cfg"]["fontsize"] = 20
     default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
     kwargs["skip_ratio"] = False
 
