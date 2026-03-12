@@ -25,7 +25,13 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 
 
 @producer(
-    uses={"Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB"},
+    uses={
+        "EventJet.pt",
+        "EventJet.eta",
+        "EventJet.phi",
+        "EventJet.mass",
+        "EventJet.btagDeepFlavB",
+    },
     produces={
         "FitJet.pt",
         "FitJet.eta",
