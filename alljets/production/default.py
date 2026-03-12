@@ -218,7 +218,7 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         },
     }
     events = self[attach_coffea_behavior](events, jetcollections, **kwargs)
-    
+
     # Ensure gen_top column exists for datasets without top truth
     if not self.dataset_inst.has_tag("has_top"):
         events = set_ak_column(events, "gen_top", False)
