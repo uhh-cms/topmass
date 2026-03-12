@@ -33,7 +33,6 @@ from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.normalization import normalization_weights
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.columnar_util import attach_coffea_behavior as attach_coffea_behavior_fn
-# from columnflow.selection.util import create_collections_from_masks
 from columnflow.util import maybe_import
 
 from alljets.production.KinFit import kinFit
@@ -64,8 +63,6 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         attach_coffea_behavior,
         "HLT.*",
         "Jet.btagDeepFlavB",
-        "Mt1",
-        "Mt2",
         "Jet.jetId",
         "Jet.puId",
         "Jet.veto_map_mask",
@@ -78,7 +75,6 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "n_bjet",
         "maxbtag",
         "secmaxbtag",
-        "deltaMt",
         "Jet.pt",
         "Bjet.pt",
         "LightJet*.pt",
@@ -156,7 +152,6 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Insert dummy value for one jet events
     secmax = ak.sort(events.Jet.btagDeepFlavB, axis=1, ascending=False)
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
-    events = set_ak_column(events, "deltaMt", (events.Mt1 - events.Mt2))
     events = set_ak_column(
         events,
         "secmaxbtag",
@@ -196,7 +191,6 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "recoTopMass",
         gen_top_lookup,
         "gen_top",
-        # "Mt1", "Mt2", "MW1", "MW2", "chi2", "deltaRb",
     },
 )
 def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:

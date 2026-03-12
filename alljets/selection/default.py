@@ -97,166 +97,6 @@ def muon_selection(
         jet_veto_map,
         jet_selection,
         increment_stats,
-        attach_coffea_behavior,
-        pdf_weights,
-        murmuf_weights,
-        pu_weight,
-        btag_weights,
-        gen_top_lookup,
-    },
-    produces={
-        # selectors / producers whose newly created columns should be kept
-        mc_weight,
-        cutflow_features,
-        process_ids,
-        jet_veto_map,
-        jet_selection,
-        pdf_weights,
-        murmuf_weights,
-        pu_weight,
-        btag_weights,
-        gen_top_lookup,
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        "gen_top.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
-        "gen_top",
-    },
-    exposed=True,
-)
-def default(
-    self: Selector,
-    events: ak.Array,
-    stats: defaultdict,
-    **kwargs,
-) -> tuple[ak.Array, SelectionResult]:
-    """
-    Full event selection pipeline for top mass analysis.
-
-    This selector applies the following steps:
-    - Ensures proper awkward-array (coffea) behavior.
-    - Optionally reconstructs generator-level top quarks.
-    - Ensures trigger columns are present.
-    - Applies muon and jet selections.
-    - Combines selection steps into a final event mask.
-    - Assigns process IDs and MC weights.
-    - Applies PDF, scale, pileup, and btag weights for MC.
-    - Adds cutflow features and increments statistics.
-
-    Returns:
-        events: The events array with new columns added.
-        SelectionResult: Contains selection masks and object indices.
-
-    """
-
-    # ensure coffea behavior
-    events = self[attach_coffea_behavior](events, **kwargs)
-
-    # prepare the selection results that are updated at every step
-    results = SelectionResult()
-
-    # Produce gen_top_decay if available
-    if self.dataset_inst.has_tag("has_top"):
-        events = self[gen_top_lookup](events, **kwargs)
-    else:
-        # If not available, fill with False
-        events = set_ak_column(events, "gen_top", False)
-        events = set_ak_column(events, "GenPart.eta", False)
-
-    # ensure trigger columns exist
-    if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(
-            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
-        )
-    #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
-    # else:
-    #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
-
-    # muon selection
-    events, muon_results = self[muon_selection](events, **kwargs)
-    results += muon_results
-
-    # jet veto map
-    if self.has_dep(jet_veto_map):
-        events, veto_result = self[jet_veto_map](events, **kwargs)
-        results += veto_result
-
-    # jet selection
-    events, jet_results = self[jet_selection](events, **kwargs)
-    results += jet_results
-
-    # combined event selection after all steps
-    results.event = (
-        results.steps.jet &
-        results.steps.Trigger &
-        results.steps.BTag &
-        results.steps.HT
-        # & results.steps.FitChi2 & results.steps.Chi2 &
-        # results.steps.SixJets
-    )
-    # results.steps.BaseTrigger
-
-    # create process ids
-    events = self[process_ids](events, **kwargs)
-
-    # add the mc weight and other weights for MC datasets
-    if self.dataset_inst.is_mc:
-        events = self[mc_weight](events, **kwargs)
-        events = self[process_ids](events, **kwargs)     # create process ids
-        events = self[pdf_weights](events, **kwargs)     # pdf weights
-        events = self[murmuf_weights](events, **kwargs)  # renormalization/factorization scale weights
-        events = self[pu_weight](events, **kwargs)       # pileup weights
-        # btag weights: only for jets passing pt/eta cuts
-        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
-        events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
-
-    # add cutflow features, passing per-object masks
-    events = self[cutflow_features](events, results.objects, **kwargs)
-
-    # increment stats for bookkeeping and monitoring
-    weight_map = {
-        "num_events": Ellipsis,
-        "num_events_selected": results.event,
-    }
-    group_map = {}
-    if self.dataset_inst.is_mc:
-        weight_map = {
-            **weight_map,
-            "sum_mc_weight": (events.mc_weight, Ellipsis),
-            "sum_mc_weight_selected": (events.mc_weight, results.event),
-        }
-        group_map = {
-            # per process
-            "process": {
-                "values": events.process_id,
-                "mask_fn": (lambda v: events.process_id == v),
-            },
-            # per jet multiplicity
-            "njet": {
-                "values": results.x.n_jets,
-                "mask_fn": (lambda v: results.x.n_jets == v),
-            },
-        }
-    events, results = self[increment_stats](
-        events,
-        results,
-        stats,
-        weight_map=weight_map,
-        group_map=group_map,
-        **kwargs,
-    )
-
-    return events, results
-
-
-@selector(
-    uses={
-        # selectors / producers called within _this_ selector
-        mc_weight,
-        cutflow_features,
-        process_ids,
-        muon_selection,
-        jet_veto_map,
-        jet_selection,
-        increment_stats,
         pdf_weights,
         murmuf_weights,
         pu_weight,
@@ -324,9 +164,6 @@ def default_trig_weight(
         events = set_ak_column(
             events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
-    #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
-    # else:
-    #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
 
     # muon selection
     events, muon_results = self[muon_selection](events, **kwargs)
@@ -336,7 +173,7 @@ def default_trig_weight(
     events, veto_result = self[jet_veto_map](events, **kwargs)
     results += veto_result
 
-    # jet selection
+    # jet selection, using the jet veto map mask and jet Id criteria
     events, jet_results = self[jet_selection](events, mode="analysis", **kwargs)
     results += jet_results
 
@@ -347,7 +184,6 @@ def default_trig_weight(
         results.steps.BTag &
         results.steps.HT
     )
-    # results.steps.BaseTrigger
 
     # create process ids
     events = self[process_ids](events, **kwargs)
@@ -488,14 +324,8 @@ def trigger_eff(
         events = set_ak_column(events, "GenPart.eta", False)
 
     # Calculate HT from trigger objects (jets with pt >= 32 GeV, |eta| <= 2.6, id == 1)
-    trig_ht = ak.sum(
-        events.TrigObj.pt[
-            (events.TrigObj.pt >= 32) &
-            (abs(events.TrigObj.eta) <= 2.6) &
-            (events.TrigObj.id == 1)
-        ],
-        axis=1,
-    )
+    trig_ht = ak.sum(events.TrigObj.pt[(events.TrigObj.pt >= 32) & (abs(events.TrigObj.eta) <= 2.6) &
+                                       (events.TrigObj.id == 1)], axis=1)
     events = set_ak_column(events, "trig_ht", trig_ht)
 
     # ensure trigger columns
@@ -503,9 +333,6 @@ def trigger_eff(
         events = set_ak_column(
             events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
-    #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
-    # else:
-    #     results += SelectionResult(steps={"missing_whatever": np.ones(len(events), dtype=bool)})
 
     # jet veto map
     events, veto_result = self[jet_veto_map](events, **kwargs)
@@ -538,13 +365,7 @@ def trigger_eff(
 
     # add the mc weight and other weights for MC datasets
     if self.dataset_inst.is_mc:
-        # events = self[mc_weight](events, **kwargs)
-        events = set_ak_column(
-            events,
-            "mc_weight",
-            np.ones(len(events)),
-            value_type=np.float32,
-        )
+        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
         events = self[pdf_weights](events, **kwargs)
         events = self[murmuf_weights](events, **kwargs)
         events = self[pu_weight](events, **kwargs)
