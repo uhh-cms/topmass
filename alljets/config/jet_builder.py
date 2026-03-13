@@ -227,6 +227,12 @@ def build_avg_w_mass(events):
     return (W1_mass + W2_mass) / 2
 
 
+def build_avg_reco_Top_mass(events):
+    Top1_mass = build_top1recojet(events, which="mass")
+    Top2_mass = build_top2recojet(events, which="mass")
+    return (Top1_mass + Top2_mass) / 2
+
+
 def build_reco_R_bq(events):
     events = attach_coffea_behavior(events, {"FitJet.reco": default_coffea_collections["Jet"]})
 
