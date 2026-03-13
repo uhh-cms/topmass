@@ -1,20 +1,9 @@
-# coding: utf-8
-
 """
-Selection methods for the top mass analysis.
-
-This module event selection pipelines using the columnflow framework.
-It defines several selectors, each encapsulating a
-sequence of selection steps and object definitions for physics analyses.
-
-The core concept is the `Selector` class, which represents a configurable
-selection pipeline. Each selector function is decorated with `@selector`,
-which registers its dependencies and outputs. Selectors can be composed,
-allowing modular and reusable analysis code.
+Selection methods for the top mass analysis, specifically for trigger studies.
 
 Selectors in this file:
-- muon_selection: Selects events with muons passing basic kinematic cuts.
-- default_trig_weight: Like `example`, but also applies trigger weights.
+- trigger_eff: Selector for computing trigger efficiency using trigger objects.
+- trigger_eval: Selector for evaluating trigger efficiency on selected events.
 
 Each selector returns a tuple of (events, SelectionResult), where
 SelectionResult contains selection masks and object indices for downstream use.
@@ -39,6 +28,7 @@ from columnflow.util import maybe_import
 from alljets.production.default import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights
 from alljets.selection.jet import jet_selection
+from alljets.selection.default import muon_selection
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -46,42 +36,158 @@ coffea = maybe_import("coffea")
 
 
 @selector(
-    uses={"Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass"},
+    uses={
+        # selectors / producers called within _this_ selector
+        mc_weight,
+        cutflow_features,
+        process_ids,
+        muon_selection,
+        jet_veto_map,
+        jet_selection,
+        increment_stats,
+        pdf_weights,
+        murmuf_weights,
+        pu_weight,
+        btag_weights,
+        attach_coffea_behavior,
+        gen_top_lookup,
+        "TrigObj*",
+    },
+    produces={
+        # selectors / producers whose newly created columns should be kept
+        mc_weight,
+        cutflow_features,
+        process_ids,
+        jet_veto_map,
+        jet_selection,
+        pdf_weights,
+        murmuf_weights,
+        pu_weight,
+        btag_weights,
+        gen_top_lookup,
+        "trig_weight",
+        "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+        "trig_ht",
+    },
+    exposed=True,
 )
-def muon_selection(
+def trigger_eff(
     self: Selector,
     events: ak.Array,
+    stats: defaultdict,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """
-    Selects muons passing basic kinematic cuts.
+    Computes trigger efficiency using trigger objects.
 
-    This selector applies a simple muon selection: at least one muon with
-    pt >= 20 GeV and |eta| < 2.1. It returns a mask for selected muons and
-    a step mask for events passing the selection.
+    This selector calculates the HT of trigger objects, ensures trigger columns,
+    applies jet selection, and builds a combined event selection mask. It is
+    intended for studies of trigger efficiency.
 
     Returns:
-        events: The unchanged events array.
-        SelectionResult: Contains the muon selection mask and step.
+        events: The events array with new columns added.
+        SelectionResult: Contains selection masks and object indices.
+
+    Important Note: DO NOT use the returned selector step from the jet_veto_map selector
+                    for the jet selection. This selector removes the event if one jet lies in the veto region.
+                    Instead, we use the Jet.veto_map_mask in the jet selection to remove individual jets.
     """
+    # ensure coffea behavior
+    events = self[attach_coffea_behavior](events, **kwargs)
 
-    # example muon selection: at least one muon with pt and eta cuts
-    muon_mask = (events.Muon.pt >= 20.0) & (abs(events.Muon.eta) < 2.1)
-    muon_sel = ak.sum(muon_mask, axis=1) >= 0
+    # prepare the selection results that are updated at every step
+    results = SelectionResult()
 
-    # build and return selection results
-    # "objects" maps source columns to new columns and selections to be applied on the old columns
-    # to create them, e.g. {"Muon": {"MySelectedMuon": indices_applied_to_Muon}}
-    return events, SelectionResult(
-        steps={
-            "muon": muon_sel,
-        },
-        objects={
-            "Muon": {
-                "Muon": muon_mask,
-            },
-        },
+    # Produce gen_top_decay
+    if self.dataset_inst.has_tag("has_top"):
+        events = self[gen_top_lookup](events, **kwargs)
+    else:
+        events = set_ak_column(events, "gen_top", False)
+        events = set_ak_column(events, "GenPart.eta", False)
+
+    # Calculate HT from trigger objects (jets with pt >= 32 GeV, |eta| <= 2.6, id == 1)
+    trig_ht = ak.sum(events.TrigObj.pt[(events.TrigObj.pt >= 32) & (abs(events.TrigObj.eta) <= 2.6) &
+                                       (events.TrigObj.id == 1)], axis=1)
+    events = set_ak_column(events, "trig_ht", trig_ht)
+
+    # ensure trigger columns
+    if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
+        events = set_ak_column(
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
+        )
+
+    # jet veto map
+    events, veto_result = self[jet_veto_map](events, **kwargs)
+    results += veto_result
+
+    # jet selection
+    events, jet_results = self[jet_selection](events, mode="trigger", **kwargs)
+    results += jet_results
+
+    # combined event selection after all steps: Choose one of the trigger efficiency selector steps
+    results.event = (
+        results.steps.All &
+        results.steps.BaseTrigger &
+        results.steps.SixJets &
+        results.steps.BTag &
+        results.steps.jet &
+        results.steps.HT
     )
+
+    # create process ids
+    events = self[process_ids](events, **kwargs)
+
+    # Set default trigger weight to 1 (for data or MC without trigger weights)
+    events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
+
+    # add the mc weight and other weights for MC datasets
+    if self.dataset_inst.is_mc:
+        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+        events = self[pdf_weights](events, **kwargs)
+        events = self[murmuf_weights](events, **kwargs)
+        events = self[pu_weight](events, **kwargs)
+        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+        events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
+
+    # add cutflow features, passing per-object masks
+    events = self[cutflow_features](events, results.objects, **kwargs)
+
+    # increment stats for bookkeeping and monitoring
+    weight_map = {
+        "num_events": Ellipsis,
+        "num_events_selected": results.event,
+    }
+    group_map = {}
+    if self.dataset_inst.is_mc:
+        weight_map = {
+            **weight_map,
+            "sum_mc_weight": (events.mc_weight, Ellipsis),
+            "sum_mc_weight_selected": (events.mc_weight, results.event),
+            "sum_trig_weight": (events.trig_weight, Ellipsis),
+            "sum_trig_weight_selected": (events.trig_weight, results.event),
+        }
+        group_map = {
+            # per process
+            "process": {
+                "values": events.process_id,
+                "mask_fn": (lambda v: events.process_id == v),
+            },
+            # per jet multiplicity
+            "njet": {
+                "values": results.x.n_jets,
+                "mask_fn": (lambda v: results.x.n_jets == v),
+            },
+        }
+    events, results = self[increment_stats](
+        events,
+        results,
+        stats,
+        weight_map=weight_map,
+        group_map=group_map,
+        **kwargs,
+    )
+
+    return events, results
 
 
 @selector(
@@ -121,7 +227,7 @@ def muon_selection(
     },
     exposed=True,
 )
-def default_trig_weight(
+def trigger_eval(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
@@ -130,9 +236,14 @@ def default_trig_weight(
     """
     Event selection pipeline with trigger weights.
 
-    This selector is similar to `example`, but also applies trigger weights
-    for MC events. It ensures all relevant columns exist, applies muon and
+    This selector is similar to `default_trig_weight`
+    It ensures all relevant columns exist, applies muon and
     jet selections, and computes weights for MC, including trigger weights.
+
+    This should be used for evaluating trigger efficiency on selected events.
+    Specifically, on the pt of the Jet used for the trigger SF and the HT of the event.
+
+    As we want to evaluate the trigger efficiency, we want to have Jets close to the trigger.
 
     Returns:
         events: The events array with new columns added.
@@ -171,7 +282,7 @@ def default_trig_weight(
     results += veto_result
 
     # jet selection, using the jet veto map mask and jet Id criteria
-    events, jet_results = self[jet_selection](events, mode="analysis", **kwargs)
+    events, jet_results = self[jet_selection](events, mode="trigger", **kwargs)
     results += jet_results
 
     # combined event selection after all steps
@@ -238,132 +349,6 @@ def default_trig_weight(
                     "mask_fn": (lambda v: results.x.n_jets == v),
                 },
             }
-    events, results = self[increment_stats](
-        events,
-        results,
-        stats,
-        weight_map=weight_map,
-        group_map=group_map,
-        **kwargs,
-    )
-
-    return events, results
-
-
-@selector(
-    uses={
-        # selectors / producers called within _this_ selector
-        mc_weight,
-        cutflow_features,
-        process_ids,
-        jet_selection,
-        increment_stats,
-        pdf_weights,
-        murmuf_weights,
-        pu_weight,
-        attach_coffea_behavior,
-        gen_top_lookup,
-    },
-    produces={
-        # selectors / producers whose newly created columns should be kept
-        mc_weight,
-        cutflow_features,
-        process_ids,
-        jet_selection,
-        pdf_weights,
-        murmuf_weights,
-        pu_weight,
-        gen_top_lookup,
-        "gen_top.*.{eta,phi,pt,mass,pdgId}",
-        "gen_top",
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-    },
-    exposed=True,
-)
-def no_btag(
-    self: Selector,
-    events: ak.Array,
-    stats: defaultdict,
-    **kwargs,
-) -> tuple[ak.Array, SelectionResult]:
-    """
-    Selector for the b-tagging efficiency in the simulation using the pre-selection.
-    Essentially the same as default selector but without b-tagging step.
-
-    Returns:
-        events: The events array with new columns added.
-        SelectionResult: Contains selection masks and object indices.
-
-    """
-
-    # ensure coffea behavior
-    events = self[attach_coffea_behavior](events, **kwargs)
-
-    # prepare the selection results that are updated at every step
-    results = SelectionResult()
-
-    # Produce gen_top_decay if available
-    if self.dataset_inst.has_tag("has_top"):
-        events = self[gen_top_lookup](events, **kwargs)
-    else:
-        events = set_ak_column(events, "gen_top", False)
-        events = set_ak_column(events, "GenPart.eta", False)
-
-    # ensure trigger columns exist
-    if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(
-            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
-        )
-
-    # jet selection
-    events, jet_results = self[jet_selection](events, **kwargs)
-    results += jet_results
-
-    # combined event selection after all steps
-    results.event = (
-        results.steps.jet &
-        results.steps.Trigger &
-        results.steps.HT
-    )
-
-    # create process ids
-    events = self[process_ids](events, **kwargs)
-
-    # add the mc weight and other weights for MC datasets
-    if self.dataset_inst.is_mc:
-        events = self[mc_weight](events, **kwargs)
-        events = self[process_ids](events, **kwargs)
-        events = self[pdf_weights](events, **kwargs)
-        events = self[murmuf_weights](events, **kwargs)
-        events = self[pu_weight](events, **kwargs)
-
-    # add cutflow features, passing per-object masks
-    events = self[cutflow_features](events, results.objects, **kwargs)
-
-    # increment stats for bookkeeping and monitoring
-    weight_map = {
-        "num_events": Ellipsis,
-        "num_events_selected": results.event,
-    }
-    group_map = {}
-    if self.dataset_inst.is_mc:
-        weight_map = {
-            **weight_map,
-            "sum_mc_weight": (events.mc_weight, Ellipsis),
-            "sum_mc_weight_selected": (events.mc_weight, results.event),
-        }
-        group_map = {
-            # per process
-            "process": {
-                "values": events.process_id,
-                "mask_fn": (lambda v: events.process_id == v),
-            },
-            # per jet multiplicity
-            "njet": {
-                "values": results.x.n_jets,
-                "mask_fn": (lambda v: results.x.n_jets == v),
-            },
-        }
     events, results = self[increment_stats](
         events,
         results,
