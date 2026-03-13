@@ -274,10 +274,10 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         mc_weight,
         category_ids,
         # nano columns
-        "EventJet.pt",
-        "EventJet.eta",
-        "EventJet.phi",
-        "EventJet.btagDeepFlavB",
+        "Jet.pt",
+        "Jet.eta",
+        "Jet.phi",
+        "Jet.btagDeepFlavB",
     },
     produces={
         mc_weight,
@@ -309,13 +309,13 @@ def cutflow_features(
         events = self[mc_weight](events, **kwargs)
 
     # add cutflow columns
-    events = set_ak_column(events, "cutflow.ht", ak.sum(events.EventJet.pt, axis=1))
-    events = set_ak_column(events, "cutflow.n_jet", ak.num(events.EventJet.pt, axis=1))
-    events = set_ak_column(events, "cutflow.jet1_pt", Route("EventJet.pt[:,0]").apply(events, EMPTY_FLOAT))
-    events = set_ak_column(events, "cutflow.jet6_pt", Route("EventJet.pt[:,5]").apply(events, EMPTY_FLOAT))
+    events = set_ak_column(events, "cutflow.ht", ak.sum(events.Jet.pt, axis=1))
+    events = set_ak_column(events, "cutflow.n_jet", ak.num(events.Jet.pt, axis=1))
+    events = set_ak_column(events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT))
+    events = set_ak_column(events, "cutflow.jet6_pt", Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT))
 
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    events = set_ak_column(events, "cutflow.n_bjet", ak.sum((events.EventJet.btagDeepFlavB >= wp_tight), axis=1))
+    events = set_ak_column(events, "cutflow.n_bjet", ak.sum((events.Jet.btagDeepFlavB >= wp_tight), axis=1))
 
     return events
 
