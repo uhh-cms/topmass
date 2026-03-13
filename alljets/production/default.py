@@ -115,6 +115,8 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "EventJet.eta",
         "EventJet.mass",
         "EventJet.btagDeepFlavB",
+        "EventJet.jetId",
+        "EventJet.puId",
         "event",
         attach_coffea_behavior,
         gen_top_lookup,

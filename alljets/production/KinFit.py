@@ -31,6 +31,8 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "EventJet.phi",
         "EventJet.mass",
         "EventJet.btagDeepFlavB",
+        "EventJet.jetId",
+        "EventJet.puId",
     },
     produces={
         "FitJet.pt",
@@ -118,7 +120,7 @@ def kinFit(
         return combined
 
     # Build index mappings from the original jet layout to the fitted order
-    lok_ind = ak.local_index(events.Jet[sel_jet_mask])
+    lok_ind = ak.local_index(events.EventJet[sel_jet_mask])
     indexmask = appendindices(indexlist, ak.num(lok_ind[eventmask], axis=1))
     combined_indices = insert_at_index(indexmask, lok_ind, eventmask)
 
