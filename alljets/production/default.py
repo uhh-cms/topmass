@@ -46,16 +46,16 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 @producer(
     uses={
         # nano columns
-        "Jet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId,veto_map_mask}",
-        "EventJet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId,veto_map_mask}",
+        "Jet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId}",
+        "EventJet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId}",
         "event",
         attach_coffea_behavior,
         "HLT.*",
 
     },
     produces={
-        "Jet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId,veto_map_mask}",
-        "EventJet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId,veto_map_mask}",
+        "Jet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId}",
+        "EventJet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId}",
         "event",
         attach_coffea_behavior,
         "HLT.*",
