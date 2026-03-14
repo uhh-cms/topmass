@@ -63,15 +63,31 @@ def jet_selection(
 
     # Ensure that the Jets we use are passing the tight + tightLepVeto jet Id
     # and are not vetoed by the jet veto map
-    if mode == "analysis":
-        ak4_mask = (events.Jet.jetId >= 6) & (events.Jet.veto_map_mask)
+    # Individual masks
 
-        # Require tight pileup Id for jets with pt < 50 GeV
-        if self.config_inst.campaign.x.run == 2:
-            ak4_mask = (ak4_mask & ((events.Jet.pt >= 50.0) | (events.Jet.puId == 7)))
+    jetid_mask = (events.Jet.jetId >= 6)
+    veto_mask = (events.Jet.veto_map_mask)
 
-    elif mode == "trigger":
+    pu_mask = ak.ones_like(events.Jet.pt, dtype=bool)
+    if self.config_inst.campaign.x.run == 2:
+        pu_mask = ((events.Jet.pt >= 50.0) | (events.Jet.puId == 7))
+
+    # Mode logic
+    if mode == "trigger":
         ak4_mask = ak.ones_like(events.Jet.pt, dtype=bool)
+
+    elif mode == "analysis":
+        ak4_mask = jetid_mask & veto_mask & pu_mask
+
+    elif mode == "veto_only":
+        ak4_mask = veto_mask
+
+    elif mode == "jetid_only":
+        ak4_mask = jetid_mask
+
+    elif mode == "puid_only":
+        ak4_mask = pu_mask
+
     else:
         raise ValueError(f"Unknown jet_selection mode: {mode}")
 
