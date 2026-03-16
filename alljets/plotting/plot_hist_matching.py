@@ -162,6 +162,7 @@ def plot_hist_matching(
         "fit_Top1_mass": (140, 195),
         "reco_Top1_mass": (140, 210),
         "reco_Top2_mass": (140, 210),
+        "reco_Top_mass_avg": (140, 210),
     }
 
     data_hist = hists[0][list(hists[0].keys())[data_index]][0, :, sum]
