@@ -219,6 +219,144 @@ def plot_hist_matching(
     return aj_plot_all(plot_config, style_config, **kwargs)
 
 
+def plot_hist_matching_ttbar_data(
+    hists: OrderedDict,
+    config_inst: od.Config,
+    category_inst: od.Category,
+    variable_insts: list[od.Variable],
+    style_config: dict | None = None,
+    density: bool | None = False,
+    shape_norm: bool = False,
+    yscale: str | None = None,
+    process_settings: dict | None = None,
+    variable_settings: dict | None = None,
+    **kwargs,
+) -> plt.Figure:
+    """
+    Plot only ttbar MC (correct, wrong, unmatched) and data.
+    """
+    # Identify indices for ttbar and data
+    keys = list(hists.keys())
+    for i, key in enumerate(keys):
+        if key == "tt":
+            tt_index = i
+            tt_label = r"$t\bar{t}$"
+        else:
+            data_index = i
+
+    variable_inst = variable_insts[0]
+
+    # Apply variable and density settings
+    hists = apply_variable_settings(hists, variable_insts, variable_settings)
+    hists = apply_density(hists, density)
+
+    # Extract base histograms
+    correct_hist = hists[0][keys[tt_index]][0, :, 3]
+    wrong_hist = hists[0][keys[tt_index]][0, :, 2]
+    unmatched_hist = hists[0][keys[tt_index]][0, :, 1]
+
+    # Build cumulative stacks
+    stack_correct = correct_hist
+    stack_wrong = stack_correct + wrong_hist
+    stack_unmatched = stack_wrong + unmatched_hist
+
+    # Prepare plot config
+    plot_config = OrderedDict()
+    plot_config["hist_correct"] = {
+        "method": "draw_hist",
+        "hist": stack_correct,
+        "kwargs": {
+            "color": "#cc0000",
+            "histtype": "fill",
+            "label": f"{tt_label} correct",
+            "edgecolor": "black",
+            "linewidth": 1,
+            "zorder": 3,
+        },
+    }
+
+    plot_config["hist_wrong"] = {
+        "method": "draw_hist",
+        "hist": stack_wrong,
+        "kwargs": {
+            "color": "#ff6666",
+            "histtype": "fill",
+            "label": f"{tt_label} wrong",
+            "edgecolor": "black",
+            "linewidth": 1,
+            "zorder": 2,
+        },
+    }
+
+    plot_config["hist_unmatched"] = {
+        "method": "draw_hist",
+        "hist": stack_unmatched,
+        "kwargs": {
+            "color": "#ffcccc",
+            "histtype": "fill",
+            "label": f"{tt_label} unmatched",
+            "edgecolor": "black",
+            "linewidth": 1,
+            "zorder": 1,
+        },
+    }
+
+    # Statistical uncertainty band
+    plot_config["hist_total_uncert"] = {
+        "method": "draw_stat_error_bands",
+        "hist": stack_unmatched,
+        "kwargs": {"label": "MC stat. unc.", "zorder": 4},
+    }
+
+    # Data histogram
+    HIDE_DATA_MARKERS = {
+        "fit_Top1_mass": (140, 195),
+        "reco_Top1_mass": (140, 210),
+        "reco_Top2_mass": (140, 210),
+        "reco_Top_mass_avg": (140, 210),
+    }
+
+    data_hist = hists[0][list(hists[0].keys())[data_index]][0, :, sum]
+    hide_range = HIDE_DATA_MARKERS.get(variable_inst.name)
+
+    if hide_range is not None:
+        low, high = hide_range
+
+        # Bin edges & centers
+        edges = data_hist.axes[0].edges
+        centers = 0.5 * (edges[:-1] + edges[1:])
+
+        # Mask bins inside the hide window
+        mask = (centers >= low) & (centers <= high)
+
+        # Copy to avoid modifying original histogram
+        data_hist = data_hist.copy()
+
+        # Zero values & variances → markers disappear
+        data_hist.values()[mask] = -999.0
+        data_hist.variances()[mask] = 0.0
+
+    plot_config["hist_data"] = {
+        "method": "draw_errorbars",
+        "ratio_method": "draw_errorbars",
+        "hist": data_hist,
+        "kwargs": {"label": f"{list(hists[0].keys())[data_index].name}", "zorder": 5},
+        "ratio_kwargs": {"norm": stack_unmatched.values()},
+    }
+
+    # Style config
+    default_style_config = prepare_style_config(config_inst, category_inst, variable_inst, density, shape_norm, yscale)
+    default_style_config["legend_cfg"]["ncol"] = 1
+    default_style_config["legend_cfg"]["title_fontsize"] = 24
+    default_style_config["legend_cfg"]["fontsize"] = 20
+    default_style_config["rax_cfg"]["ylim"] = (0.61, 1.39)
+    kwargs["skip_ratio"] = True
+
+    style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
+
+    return aj_plot_all(plot_config, style_config, **kwargs)
+
+
 def plot_hist_matching_MC(
     hists: OrderedDict,
     config_inst: od.Config,
