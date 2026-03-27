@@ -33,6 +33,9 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "EventJet.btagDeepFlavB",
         "EventJet.jetId",
         "EventJet.puId",
+        "event",
+        "run",
+        "luminosityBlock",
     },
     produces={
         "FitJet.pt",
@@ -74,19 +77,28 @@ def kinFit(
     import pyKinFit
 
     # Slice to events that will be fitted
+    # Consider only the leading six jets per event for the fitter
     sel_events = events[eventmask]
-    sel_Jets = sel_events.EventJet[sel_jet_mask[eventmask]]
+    sel_Jets = sel_events.EventJet[sel_jet_mask[eventmask]][:, :6]
 
-    # Pick ordering strategy: if >=2 b-tags exist prefer btag ordering
+    # Sorting logic for the b-jet candidates for the kinFit input
+    # The first 2 jets are used as b-jet candidates,
+    # therefore we sort the jets by b-tag score if there are at least 2 among the first six jets
+    # If there are not enough b-tagged jets, we randomly sort the jets and choose the bjet candidates
+
+    seeds = (sel_events.run + sel_events.luminosityBlock + sel_events.event) % (2**32)
+    random_indices = ak.Array([np.random.default_rng(int(seed)).permutation(len(j)) for seed, j in zip(seeds, sel_Jets)])
+
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     sorted_indices = ak.where(
         ak.sum(sel_Jets.btagDeepFlavB >= wp_tight, axis=1) >= 2,
         ak.argsort(sel_Jets.btagDeepFlavB, ascending=False),
-        ak.argsort(sel_Jets.pt, ascending=False),
+        random_indices,
     )
 
     # Apply ordering and call fitter (returns lists per-event)
     sorted_jets = sel_Jets[sorted_indices]
+
     fitPt, fitEta, fitPhi, fitMass, indexlist, fitChi2, fitPgof = pyKinFit.setBestCombi(
         ak.to_list(sorted_jets.pt),
         ak.to_list(sorted_jets.eta),
