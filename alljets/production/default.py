@@ -168,18 +168,9 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     EF = -99999.0
 
     # Prepare masks for the kinematic fit
-    # Jets considered for the fit: pT >= 40 GeV, |eta| < 2.4
-    # For signal events, require at least 6 such jets with exactly 2 passing the tight b-tag WP among the leading 6 jets,
-    # or 0 passing the loose WP among the leading 6 jets
-
-    wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     kinFit_jetmask = (events.EventJet.pt >= 40.0) & (abs(events.EventJet.eta) < 2.4)
 
-    kinFit_eventmask = ((ak.sum(kinFit_jetmask, axis=1) >= 6) & (
-        (ak.sum(events.EventJet[kinFit_jetmask][:, :6].btagDeepFlavB >= wp_tight, axis=1) == 2) |
-        (ak.sum(events.EventJet[kinFit_jetmask][:, :6].btagDeepFlavB >= wp_loose, axis=1) == 0))
-    )
+    kinFit_eventmask = (ak.sum(kinFit_jetmask, axis=1) >= 6)
 
     events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
 

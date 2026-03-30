@@ -67,32 +67,49 @@ def kinFit(
     eventmask : ak.Array
         Boolean mask selecting which events should run the fit.
 
-    The function runs `pyKinFit.setBestCombi` on the selected events,
-    collects the best-fit four-vector components, and inserts them into
-    a `FitJet` collection with a `reco` subfield. It also fills
-    `FitChi2` and `FitPgof` for the fitted events and `EMPTY_FLOAT`
-    elsewhere.
+    Returns
+    -------
+    ak.Array
+        Original events array with added columns:
+        - `FitJet` : fitted jet collection (with `reco` subfield pointing to original jets)
+        - `FitChi2` : chi2 of the fit (EMPTY_FLOAT for events not fitted)
+        - `FitPgof` : p-value of the fit (EMPTY_FLOAT for events not fitted)
+
+    Notes
+    -----
+    The fitter (`pyKinFit.setBestCombi`) requires a choice of b-jet candidates:
+
+    1. If the event has at least 2 b-tagged jets (using the tight deepjet working point),
+    the two highest-pt b-tagged jets are chosen as b-jet candidates.
+
+    2. If fewer than 2 b-tagged jets are available, the six leading jets are randomly permuted
+    and the first two are used as b-jet candidates.
+
+    The `FitJet` collection stores the fitted four-vector components in the following order:
+    (B1, B2, W1Prod1, W1Prod2, W2Prod1, W2Prod2).
     """
 
     import pyKinFit
 
     # Slice to events that will be fitted
-    # Consider only the leading six jets per event for the fitter
     sel_events = events[eventmask]
-    sel_Jets = sel_events.EventJet[sel_jet_mask[eventmask]][:, :6]
+    sel_Jets = sel_events.EventJet[sel_jet_mask[eventmask]]
 
-    # Sorting logic for the b-jet candidates for the kinFit input
+    # Generate per-event random seeds based on event identifiers for reproducibility
+    # Use these seeds to generate random indices for each event to shuffle the six leading jets
+    seeds = (events.run + events.luminosityBlock + events.event) % (2**32)
+    random_indices = ak.Array([list(np.random.default_rng(int(seed)).permutation(min(len(j), 6))) +
+                               list(range(6, len(j))) for seed, j in zip(seeds, events.EventJet)])
+
+    # Sorting logic for the b-jet candidates for the kinFit input:
     # The first 2 jets are used as b-jet candidates,
-    # therefore we sort the jets by b-tag score if there are at least 2 among the first six jets
-    # If there are not enough b-tagged jets, we randomly sort the jets and choose the bjet candidates
-
-    seeds = (sel_events.run + sel_events.luminosityBlock + sel_events.event) % (2**32)
-    random_indices = ak.Array([np.random.default_rng(int(seed)).permutation(len(j)) for seed, j in zip(seeds, sel_Jets)])
+    # If an event has at least 2 b-tagged jets, sort b-tagged jets by pt and use highest two as b-jet candidates.
+    # If there are < 2 b-tagged jets, randomly sort six leading jets for b-jet candidates.
 
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     sorted_indices = ak.where(
         ak.sum(sel_Jets.btagDeepFlavB >= wp_tight, axis=1) >= 2,
-        ak.argsort(sel_Jets.btagDeepFlavB, ascending=False),
+        ak.argsort(ak.where(sel_Jets.btagDeepFlavB >= wp_tight, sel_Jets.pt, -999), ascending=False),
         random_indices,
     )
 
@@ -138,9 +155,9 @@ def kinFit(
 
     # Repeat the ordering logic on the full events to map reco jets
     sorted_reco_indices = ak.where(
-        ak.sum(events.EventJet[sel_jet_mask].btagDeepFlavB >= wp_tight, axis=1) >= 2,
-        ak.argsort(events.EventJet[sel_jet_mask].btagDeepFlavB, ascending=False),
-        ak.argsort(events.EventJet[sel_jet_mask].pt, ascending=False),
+        ak.sum(events.EventJet.btagDeepFlavB >= wp_tight, axis=1) >= 2,
+        ak.argsort(ak.where(events.EventJet.btagDeepFlavB >= wp_tight, events.EventJet.pt, -999), ascending=False),
+        random_indices,
     )
     sorted_reco = (events.EventJet[sel_jet_mask])[sorted_reco_indices]
     sorted_jet = sorted_reco[combined_indices]
