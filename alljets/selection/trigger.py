@@ -19,6 +19,7 @@ from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.pdf import pdf_weights
 from columnflow.production.cms.pileup import pu_weight
 from columnflow.production.cms.scale import murmuf_weights
+from columnflow.production.cms.parton_shower import ps_weights
 from columnflow.production.processes import process_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
@@ -52,6 +53,7 @@ coffea = maybe_import("coffea")
         attach_coffea_behavior,
         gen_top_lookup,
         "TrigObj*",
+        ps_weights,
     },
     produces={
         # selectors / producers whose newly created columns should be kept
@@ -64,6 +66,7 @@ coffea = maybe_import("coffea")
         murmuf_weights,
         pu_weight,
         btag_weights,
+        ps_weights,
         gen_top_lookup,
         "trig_weight",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
@@ -148,6 +151,7 @@ def trigger_eff(
         events = self[pu_weight](events, **kwargs)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
+        events = self[ps_weights](events, **kwargs)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)
@@ -204,6 +208,7 @@ def trigger_eff(
         murmuf_weights,
         pu_weight,
         btag_weights,
+        ps_weights,
         attach_coffea_behavior,
         gen_top_lookup,
         trig_weights,
@@ -219,6 +224,7 @@ def trigger_eff(
         murmuf_weights,
         pu_weight,
         btag_weights,
+        ps_weights,
         gen_top_lookup,
         trig_weights,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
@@ -305,6 +311,7 @@ def trigger_eval(
         events = self[pu_weight](events, **kwargs)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
+        events = self[ps_weights](events, **kwargs)
 
         # trigger weight
         events = self[trig_weights](events, **kwargs)

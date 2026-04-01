@@ -30,6 +30,7 @@ from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.pdf import pdf_weights
 from columnflow.production.cms.pileup import pu_weight
 from columnflow.production.cms.scale import murmuf_weights
+from columnflow.production.cms.parton_shower import ps_weights
 from columnflow.production.processes import process_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
@@ -101,6 +102,7 @@ def muon_selection(
         attach_coffea_behavior,
         gen_top_lookup,
         trig_weights,
+        ps_weights,
     },
     produces={
         # selectors / producers whose newly created columns should be kept
@@ -118,6 +120,7 @@ def muon_selection(
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+        ps_weights,
     },
     exposed=True,
 )
@@ -194,6 +197,7 @@ def default_trig_weight(
         events = self[pu_weight](events, **kwargs)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
+        events = self[ps_weights](events, **kwargs)
 
         # trigger weight
         events = self[trig_weights](events, **kwargs)

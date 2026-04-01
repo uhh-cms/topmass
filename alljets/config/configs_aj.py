@@ -682,6 +682,28 @@ def add_config(
             "pu_weight": "pu_weight_minbias_xs_{direction}",
         },
     )
+
+    # FSR shifts
+    cfg.add_shift(name="fsr_up", id=152, type="shape", tags="pu_weight")
+    cfg.add_shift(name="fsr_down", id=153, type="shape", tags="pu_weight")
+    add_shift_aliases(
+        cfg,
+        "fsr",
+        {
+            "fsr_weight": "fsr_weight_{direction}",
+        },
+    )
+
+    # ISR shifts
+    cfg.add_shift(name="isr_up", id=154, type="shape", tags="pu_weight")
+    cfg.add_shift(name="isr_down", id=155, type="shape", tags="pu_weight")
+    add_shift_aliases(
+        cfg,
+        "isr",
+        {
+            "isr_weight": "isr_weight_{direction}",
+        },
+    )
     # Top mass sample shifts
 
     ################################################################################################
@@ -839,6 +861,8 @@ def add_config(
             "pdf_weight": get_shifts("pdf"),
             "murmuf_weight": get_shifts("murmuf"),
             "pu_weight": get_shifts("pu_weight_minbias_xs"),
+            "fsr_weight": get_shifts("fsr"),
+            "isr_weight": get_shifts("isr"),
         },
     )
     # define per-dataset event weights
