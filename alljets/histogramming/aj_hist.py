@@ -288,8 +288,6 @@ def bkg_all_weights(self: HistProducer, events: ak.Array, **kwargs) -> ak.Array:
                     f"missing_dataset_weight_{column}",
                     f"weight '{column}' for dataset {self.dataset_inst.name} not found",
                 )
-    import IPython
-    IPython.embed()
     if self.dataset_inst.is_data and len(events):
         if has_ak_column(events, "bkg_weight"):
             weight = weight * Route("bkg_weight").apply(events)
