@@ -13,6 +13,7 @@ from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.pdf import pdf_weights
 from columnflow.production.cms.pileup import pu_weight
 from columnflow.production.cms.scale import murmuf_weights
+from columnflow.production.cms.parton_shower import ps_weights
 from columnflow.production.processes import process_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
@@ -223,6 +224,7 @@ def example(
         pdf_weights,
         murmuf_weights,
         pu_weight,
+        ps_weights,
         btag_weights,
         attach_coffea_behavior,
         gen_top_lookup,
@@ -237,6 +239,7 @@ def example(
         pdf_weights,
         murmuf_weights,
         pu_weight,
+        ps_weights,
         btag_weights,
         gen_top_lookup,
         trig_weights,
@@ -268,7 +271,7 @@ def example_trig_weight(
     # ensure trigger columns
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(
-            events, "HLT.PFHT38y0_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
+            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
     #     results += SelectionResult(steps={"missing_whatever": events.HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2})
     # else:
@@ -312,6 +315,8 @@ def example_trig_weight(
         # pileup weights
         events = self[pu_weight](events, **kwargs)
 
+        # parton shower (isr/fsr) weights
+        events = self[ps_weights](events, **kwargs)
         # btag weights
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
