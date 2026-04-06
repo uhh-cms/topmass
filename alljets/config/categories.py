@@ -3,7 +3,7 @@
 """
 Definition of categories for the top mass analysis.
 
-This module defines event categories used to classify events based on:
+This module defines event categories used to classify events.
 
 Each category defined here must have a corresponding categorizer function
 in alljets/categorization/default.py that implements the selection logic.
@@ -31,7 +31,7 @@ def add_categories(cfg: od.Config) -> None:
     add_category(
         cfg,
         name="incl",
-        selection="cat_incl",  # All events
+        selection="cat_incl",
         label="inclusive",
     )
 
@@ -42,13 +42,13 @@ def add_categories(cfg: od.Config) -> None:
     add_category(
         cfg,
         name="6j",
-        selection="cat_6j",  # Exactly 6 jets with pT >= 40 GeV
+        selection="cat_6j",
         label="6 jets",
     )
     add_category(
         cfg,
         name="7j",
-        selection="cat_7j",  # 7 or more jets with pT >= 40 GeV
+        selection="cat_7j",
         label="7+ jets",
     )
 
@@ -59,13 +59,13 @@ def add_categories(cfg: od.Config) -> None:
     add_category(
         cfg,
         name="2btj",
-        selection="cat_2btj",  # >= 2 b-tagged jets (tight WP)
+        selection="cat_2btj",
         label="2 b-tagged jets or more",
     )
     add_category(
         cfg,
         name="0btj",
-        selection="cat_0btj",  # 0 b-tagged jets (tight WP)
+        selection="cat_0btj",
         label="0 b-tagged jets",
     )
 
@@ -76,13 +76,13 @@ def add_categories(cfg: od.Config) -> None:
     add_category(
         cfg,
         name="fit_nconv",
-        selection="cat_fit_nconv",  # FitChi2 >= 10000 (non-converged)
+        selection="cat_fit_nconv",
         label="kinfit not converged",
     )
     add_category(
         cfg,
         name="fit_conv",
-        selection="cat_fit_conv",  # FitChi2 < 10000 (converged)
+        selection="cat_fit_conv",
         label="kinfit converged",
     )
 
@@ -93,13 +93,13 @@ def add_categories(cfg: od.Config) -> None:
     add_category(
         cfg,
         name="fitPgof_fail",
-        selection="cat_fitPgof_fail",  # Converged with Pgof <= 0.1 (poor quality)
+        selection="cat_fitPgof_fail",
         label="kinfit converged and $P_{gof} < 0.1$",
     )
     add_category(
         cfg,
         name="fitPgof_pass",
-        selection="cat_fitPgof_pass",  # Converged with Pgof > 0.1 (good quality)
+        selection="cat_fitPgof_pass",
         label="$P_{gof} > 0.1$ ",
     )
     add_category(
@@ -121,14 +121,14 @@ def add_categories(cfg: od.Config) -> None:
     add_category(
         cfg,
         name="bkg",
-        selection="cat_0btj_bkg",  # 0 b-tags + background trigger + fit quality
+        selection="cat_0btj_bkg",
         label="QCD estimation",
         tags={"0btj"},
     )
     add_category(
         cfg,
         name="sig",
-        selection="cat_2btj_sig",  # >= 2 b-tags + signal trigger + fit quality
+        selection="cat_2btj_sig",
         label="Signal Region",
         tags={"2btj"},
     )
@@ -139,14 +139,14 @@ def add_categories(cfg: od.Config) -> None:
     add_category(
         cfg,
         name="fit_matched",
-        selection="cat_fit_matched",  # fitCombinationType == 2 (correct match)
+        selection="cat_fit_matched",
         label="correctly matched events",
         tags={"matched"},
     )
     add_category(
         cfg,
         name="fit_unmatched",
-        selection="cat_fit_unmatched",  # fitCombinationType != 2 (wrong/unmatched)
+        selection="cat_fit_unmatched",
         label="wrong or umatched events",
         tags={"matched"},
     )

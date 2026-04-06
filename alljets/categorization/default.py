@@ -35,45 +35,45 @@ def cat_incl(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, a
 # ============================================================================
 
 
-@categorizer(uses={"EventJet.pt"})
+@categorizer(uses={"SelectedJets.pt"})
 def cat_6j(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Select events with exactly 6 jets (pT >= 40 GeV) within |eta| < 2.4.
     """
-    return events, ak.sum((events.EventJet.pt >= 40.0), axis=1) == 6
+    return events, ak.sum((events.SelectedJets.pt >= 40.0), axis=1) == 6
 
 
-@categorizer(uses={"EventJet.pt"})
+@categorizer(uses={"SelectedJets.pt"})
 def cat_7j(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Select events with 7 or more jets (pT >= 40 GeV) within |eta| < 2.4.
     """
-    return events, ak.sum((events.EventJet.pt >= 40.0), axis=1) >= 7
+    return events, ak.sum((events.SelectedJets.pt >= 40.0), axis=1) >= 7
 
 # ============================================================================
 # B-tagging categorizers
 # ============================================================================
 
 
-@categorizer(uses={"EventJet.pt", "EventJet.btagDeepFlavB", "EventJet.eta"})
+@categorizer(uses={"SelectedJets.pt", "SelectedJets.btagDeepFlavB", "SelectedJets.eta"})
 def cat_0btj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Select events with 0 b-tagged jets (tight WP).
     Requires: pT >= 40 GeV, |eta| < 2.4, DeepJet b-tag < tight WP.
     """
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    bjet_mask = (events.EventJet.btagDeepFlavB >= wp_tight)
+    bjet_mask = (events.SelectedJets.btagDeepFlavB >= wp_tight)
     return events, (ak.sum(bjet_mask, axis=1) == 0)
 
 
-@categorizer(uses={"EventJet.pt", "EventJet.btagDeepFlavB", "EventJet.eta"})
+@categorizer(uses={"SelectedJets.pt", "SelectedJets.btagDeepFlavB", "SelectedJets.eta"})
 def cat_2btj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Select events with >= 2 b-tagged jets (tight WP).
     Requires: pT >= 40 GeV, |eta| < 2.4, DeepJet b-tag >= tight WP.
     """
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    bjet_mask = (events.EventJet.btagDeepFlavB >= wp_tight)
+    bjet_mask = (events.SelectedJets.btagDeepFlavB >= wp_tight)
     return events, (ak.sum(bjet_mask, axis=1) >= 2)
 
 # ============================================================================
@@ -91,21 +91,21 @@ def cat_fitPgof_pass(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.
     return events, (events.FitChi2 < 10000) & (events.FitPgof > pgofcut)
 
 
-@categorizer(uses={"FitPgof", "FitRbb"})
+@categorizer(uses={"FitChi2", "FitPgof", "FitRbb"})
 def cat_fitPgof_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Select events with fitPgof > 0.1 and FitRbb > 2.
     """
     pgofcut = self.config_inst.x.fitpgofcut
-    return events, (events.FitPgof > pgofcut) & (events.FitRbb > 2.0)
+    return events, (events.FitChi2 < 10000) & (events.FitPgof > pgofcut) & (events.FitRbb > 2.0)
 
 
-@categorizer(uses={"FitRbb"})
+@categorizer(uses={"FitChi2", "FitRbb"})
 def cat_rbb(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Select events with FitRbb > 2, regardless of fit quality.
     """
-    return events, (events.FitRbb > 2.0)
+    return events, (events.FitChi2 < 10000) & (events.FitRbb > 2.0)
 
 
 @categorizer(uses={"FitPgof", "FitChi2"})
@@ -138,21 +138,21 @@ def cat_fit_nconv(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arr
 # ============================================================================
 
 
-@categorizer(uses={"EventJet.pt", "EventJet.btagDeepFlavB", "EventJet.eta", "HLT.*", "FitRbb"})
+@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagDeepFlavB", "KinFitJets.eta", "HLT.*", "FitPgof", "FitRbb"})
 def cat_2btj_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
-    Signal region: >= 2 b-tagged jets + signal trigger + good fit quality.
+    Signal region: == 2 b-tagged jets among LeadingSix Jets (KinFitJets) + signal trigger + good fit quality.
     Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
     """
     pgofcut = self.config_inst.x.fitpgofcut
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     signal_trigger = self.config_inst.x.trigger["tt_fh"][0]
     signal_region = (events.HLT[signal_trigger] & (events.FitPgof > pgofcut) & (events.FitRbb > 2.0) &
-                     (ak.sum((events.EventJet.btagDeepFlavB >= wp_tight), axis=1) >= 2))
+                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_tight), axis=1) == 2))
     return events, signal_region
 
 
-@categorizer(uses={"EventJet.pt", "EventJet.btagDeepFlavB", "EventJet.eta", "HLT.*", "FitChi2", "FitRbb"})
+@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagDeepFlavB", "KinFitJets.eta", "HLT.*", "FitPgof", "FitRbb"})
 def cat_0btj_bkg(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Background region: 0 b-tagged jets + background trigger + good fit quality.
@@ -162,7 +162,7 @@ def cat_0btj_bkg(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
     wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
     bkg_trigger = self.config_inst.x.bkg_trigger["tt_fh"][0]
     bkg_region = (events.HLT[bkg_trigger] & (events.FitPgof > pgofcut) & (events.FitRbb > 2.0) &
-                  (ak.sum((events.EventJet.btagDeepFlavB >= wp_loose), axis=1) == 0))
+                  (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_loose), axis=1) == 0))
     return events, bkg_region
 
 # ============================================================================
