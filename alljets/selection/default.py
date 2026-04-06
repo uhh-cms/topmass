@@ -3,10 +3,6 @@
 """
 Selection methods for the top mass analysis.
 
-This module event selection pipelines using the columnflow framework.
-It defines several selectors, each encapsulating a
-sequence of selection steps and object definitions for physics analyses.
-
 The core concept is the `Selector` class, which represents a configurable
 selection pipeline. Each selector function is decorated with `@selector`,
 which registers its dependencies and outputs. Selectors can be composed,
@@ -22,24 +18,27 @@ SelectionResult contains selection masks and object indices for downstream use.
 
 from collections import defaultdict
 
+from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
-from columnflow.production.cms.btag import btag_weights
-from columnflow.selection.cms.jets import jet_veto_map
-from columnflow.production.cms.gen_particles import gen_top_lookup
-from columnflow.production.cms.mc_weight import mc_weight
-from columnflow.production.cms.pdf import pdf_weights
-from columnflow.production.cms.pileup import pu_weight
-from columnflow.production.cms.scale import murmuf_weights
-from columnflow.production.cms.parton_shower import ps_weights
+from columnflow.selection.stats import increment_stats
 from columnflow.production.processes import process_ids
+from columnflow.production.categories import category_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
-from columnflow.selection.stats import increment_stats
-from columnflow.util import maybe_import
 
+from columnflow.production.cms.pdf import pdf_weights
+from columnflow.selection.cms.jets import jet_veto_map
+from columnflow.production.cms.pileup import pu_weight
+from columnflow.production.cms.btag import btag_weights
+from columnflow.production.cms.mc_weight import mc_weight
+from columnflow.production.cms.scale import murmuf_weights
+from columnflow.production.cms.parton_shower import ps_weights
+from columnflow.production.cms.seeds import deterministic_seeds
+from columnflow.production.cms.gen_particles import gen_top_lookup
+
+from alljets.selection.jet import jet_selection
 from alljets.production.default import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights
-from alljets.selection.jet import jet_selection
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -71,8 +70,6 @@ def muon_selection(
     muon_sel = ak.sum(muon_mask, axis=1) >= 0
 
     # build and return selection results
-    # "objects" maps source columns to new columns and selections to be applied on the old columns
-    # to create them, e.g. {"Muon": {"MySelectedMuon": indices_applied_to_Muon}}
     return events, SelectionResult(
         steps={
             "muon": muon_sel,
@@ -85,42 +82,50 @@ def muon_selection(
     )
 
 
+# Extract the category ids for the inclusve category, used for CutFlow
+incl_category_ids = category_ids.derive("incl_category_ids",
+                                        cls_dict={"skip_category": lambda self, cat: cat.name != "incl"},
+                                        )
+
+
 @selector(
     uses={
-        # selectors / producers called within _this_ selector
-        mc_weight,
         cutflow_features,
-        process_ids,
         muon_selection,
         jet_veto_map,
         jet_selection,
+        attach_coffea_behavior,
+        gen_top_lookup,
+        process_ids,
         increment_stats,
+        deterministic_seeds,
+        incl_category_ids,
+        mc_weight,
         pdf_weights,
         murmuf_weights,
         pu_weight,
         btag_weights,
-        attach_coffea_behavior,
-        gen_top_lookup,
         trig_weights,
         ps_weights,
     },
     produces={
-        # selectors / producers whose newly created columns should be kept
-        mc_weight,
         cutflow_features,
-        process_ids,
         jet_veto_map,
         jet_selection,
+        gen_top_lookup,
+        process_ids,
+        deterministic_seeds,
+        incl_category_ids,
+        mc_weight,
         pdf_weights,
         murmuf_weights,
         pu_weight,
         btag_weights,
-        gen_top_lookup,
         trig_weights,
+        ps_weights,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        ps_weights,
     },
     exposed=True,
 )
@@ -133,7 +138,7 @@ def default_trig_weight(
     """
     Event selection pipeline with trigger weights.
 
-    This selector is similar to `example`, but also applies trigger weights
+    This selector is the main for the analysis and applies trigger weights
     for MC events. It ensures all relevant columns exist, applies muon and
     jet selections, and computes weights for MC, including trigger weights.
 
@@ -179,14 +184,17 @@ def default_trig_weight(
 
     # combined event selection after all steps
     results.event = (
-        results.steps.jet &
         results.steps.Trigger &
+        results.steps.HT &
+        results.steps.jet &
         results.steps.BTag &
-        results.steps.HT
+        results.steps.LeadingSix2BTag
     )
 
-    # create process ids
+    # create process ids, deterministic seeds, and inclusive category ids for cutflow
     events = self[process_ids](events, **kwargs)
+    events = self[deterministic_seeds](events, **kwargs)
+    events = self[incl_category_ids](events, **kwargs)
 
     # add the mc weight and other weights for MC datasets
     if self.dataset_inst.is_mc:
@@ -198,8 +206,6 @@ def default_trig_weight(
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
         events = self[ps_weights](events, **kwargs)
-
-        # trigger weight
         events = self[trig_weights](events, **kwargs)
 
     # add cutflow features, passing per-object masks
