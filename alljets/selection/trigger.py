@@ -11,25 +11,27 @@ SelectionResult contains selection masks and object indices for downstream use.
 
 from collections import defaultdict
 
+from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
-from columnflow.production.cms.btag import btag_weights
-from columnflow.selection.cms.jets import jet_veto_map
-from columnflow.production.cms.gen_particles import gen_top_lookup
-from columnflow.production.cms.mc_weight import mc_weight
-from columnflow.production.cms.pdf import pdf_weights
-from columnflow.production.cms.pileup import pu_weight
-from columnflow.production.cms.scale import murmuf_weights
-from columnflow.production.cms.parton_shower import ps_weights
+from columnflow.selection.stats import increment_stats
 from columnflow.production.processes import process_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
-from columnflow.selection.stats import increment_stats
-from columnflow.util import maybe_import
 
-from alljets.production.default import cutflow_features
-from alljets.production.trig_cor_weight import trig_weights
+from columnflow.production.cms.pdf import pdf_weights
+from columnflow.production.cms.pileup import pu_weight
+from columnflow.selection.cms.jets import jet_veto_map
+from columnflow.production.cms.btag import btag_weights
+from columnflow.production.cms.mc_weight import mc_weight
+from columnflow.production.cms.scale import murmuf_weights
+from columnflow.production.cms.parton_shower import ps_weights
+from columnflow.production.cms.seeds import deterministic_seeds
+from columnflow.production.cms.gen_particles import gen_top_lookup
+
 from alljets.selection.jet import jet_selection
 from alljets.selection.default import muon_selection
+from alljets.production.default import cutflow_features
+from alljets.production.trig_cor_weight import trig_weights
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -38,36 +40,35 @@ coffea = maybe_import("coffea")
 
 @selector(
     uses={
-        # selectors / producers called within _this_ selector
-        mc_weight,
+        attach_coffea_behavior,
         cutflow_features,
-        process_ids,
         muon_selection,
-        jet_veto_map,
         jet_selection,
+        jet_veto_map,
+        process_ids,
         increment_stats,
+        deterministic_seeds,
+        gen_top_lookup,
+        mc_weight,
         pdf_weights,
         murmuf_weights,
         pu_weight,
         btag_weights,
-        attach_coffea_behavior,
-        gen_top_lookup,
-        "TrigObj*",
         ps_weights,
+        "TrigObj*",
     },
     produces={
-        # selectors / producers whose newly created columns should be kept
-        mc_weight,
         cutflow_features,
-        process_ids,
-        jet_veto_map,
         jet_selection,
+        jet_veto_map,
+        process_ids,
+        gen_top_lookup,
+        mc_weight,
         pdf_weights,
         murmuf_weights,
         pu_weight,
         btag_weights,
         ps_weights,
-        gen_top_lookup,
         "trig_weight",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "trig_ht",
@@ -137,8 +138,9 @@ def trigger_eff(
         results.steps.HT
     )
 
-    # create process ids
+    # create process ids and deterministic seeds
     events = self[process_ids](events, **kwargs)
+    events = self[deterministic_seeds](events, **kwargs)
 
     # Set default trigger weight to 1 (for data or MC without trigger weights)
     events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
@@ -196,36 +198,36 @@ def trigger_eff(
 
 @selector(
     uses={
-        # selectors / producers called within _this_ selector
-        mc_weight,
+        attach_coffea_behavior,
         cutflow_features,
-        process_ids,
         muon_selection,
-        jet_veto_map,
         jet_selection,
+        jet_veto_map,
+        process_ids,
         increment_stats,
+        deterministic_seeds,
+        gen_top_lookup,
+        mc_weight,
         pdf_weights,
         murmuf_weights,
         pu_weight,
         btag_weights,
         ps_weights,
-        attach_coffea_behavior,
-        gen_top_lookup,
         trig_weights,
     },
     produces={
-        # selectors / producers whose newly created columns should be kept
-        mc_weight,
         cutflow_features,
-        process_ids,
-        jet_veto_map,
+        muon_selection,
         jet_selection,
+        jet_veto_map,
+        process_ids,
+        gen_top_lookup,
+        mc_weight,
         pdf_weights,
         murmuf_weights,
         pu_weight,
         btag_weights,
         ps_weights,
-        gen_top_lookup,
         trig_weights,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
@@ -299,8 +301,9 @@ def trigger_eval(
         results.steps.HT
     )
 
-    # create process ids
+    # create process ids and deterministic seeds
     events = self[process_ids](events, **kwargs)
+    events = self[deterministic_seeds](events, **kwargs)
 
     # add the mc weight and other weights for MC datasets
     if self.dataset_inst.is_mc:
@@ -312,8 +315,6 @@ def trigger_eval(
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
         events = self[ps_weights](events, **kwargs)
-
-        # trigger weight
         events = self[trig_weights](events, **kwargs)
 
     # add cutflow features, passing per-object masks
