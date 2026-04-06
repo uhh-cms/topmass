@@ -22,20 +22,20 @@ How `@producer` works (brief):
     specialized variants with `.derive`.
 """
 
-
-from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
+from columnflow.util import maybe_import
 from columnflow.production import Producer, producer
 from columnflow.production.categories import category_ids
-from columnflow.production.cms.gen_particles import gen_top_lookup
-from columnflow.production.cms.mc_weight import mc_weight
-from columnflow.production.cms.muon import muon_weights
-from columnflow.production.cms.seeds import deterministic_seeds
-from columnflow.production.normalization import normalization_weights
 from columnflow.production.util import attach_coffea_behavior
+from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
 from columnflow.columnar_util import attach_coffea_behavior as attach_coffea_behavior_fn
-from columnflow.util import maybe_import
+
+from columnflow.production.cms.muon import muon_weights
+from columnflow.production.cms.mc_weight import mc_weight
+from columnflow.production.cms.gen_particles import gen_top_lookup
+from columnflow.production.normalization import normalization_weights
 
 from alljets.production.KinFit import kinFit
+from alljets.scripts.default import combinationtype
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -45,21 +45,14 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 
 @producer(
     uses={
-        # nano columns
-        "Jet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId}",
-        "EventJet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId}",
-        "event",
         attach_coffea_behavior,
+        "TrigJets.{pt,eta,phi,mass,btagDeepFlavB}",
+        "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB}",
+        "event",
         "HLT.*",
 
     },
     produces={
-        "Jet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId}",
-        "EventJet.{pt,eta,phi,mass,btagDeepFlavB,jetId,puId}",
-        "event",
-        attach_coffea_behavior,
-        "HLT.*",
-        # new columns
         "ht",
         "n_jet",
         "n_bjet",
@@ -74,10 +67,14 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     Produces: `ht`, `n_jet`, `n_bjet`, `maxbtag`, `secmaxbtag`
     """
 
-    # Prepare coffea-like behavior for selected jet collections so that
-    # subsequent vector operations behave like physics objects.
+    # Prepare coffea-like behavior for selected jet collections
     jetcollections = {
-        "Eventjet": {
+        "TrigJets": {
+            "type_name": "Jet",
+            "check_attr": "metric_table",
+            "skip_fields": "*Idx*G",
+        },
+        "SelectedJets": {
             "type_name": "Jet",
             "check_attr": "metric_table",
             "skip_fields": "*Idx*G",
@@ -87,21 +84,21 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # Compute HT, similar to trigger definition (jets with pt >= 32 GeV, |eta| <= 2.6)
     # https://cmshltcfg.app.cern.ch/cfg?path=/cdaq/physics/Run2017/2e34/v3.2.0/HLT/V1&db=online&tab=paths&type=mods&snippet=hltHtMhtPFJetsSixC32
-    events = set_ak_column(events, "ht", (ak.sum(events.Jet[(events.Jet.pt >= 32.0)].pt, axis=1)))
+    events = set_ak_column(events, "ht", (ak.sum(events.TrigJets[(events.TrigJets.pt >= 32.0)].pt, axis=1)))
 
     # Compute jet multiplicity for the main jet collection (pT >= 40 GeV, |eta| < 2.4)
-    events = set_ak_column(events, "n_jet", ak.num(events.EventJet.pt, axis=1), value_type=np.int32)
+    events = set_ak_column(events, "n_jet", ak.num(events.SelectedJets.pt, axis=1), value_type=np.int32)
 
-    # Compute b-jet multiplicity using the tight working point on the EventJet collection
+    # Compute b-jet multiplicity using the tight working point on the SelectedJets collection
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     events = set_ak_column(events, "n_bjet",
-                           ak.sum((events.EventJet.btagDeepFlavB >= wp_tight), axis=1), value_type=np.int32)
+                           ak.sum((events.SelectedJets.btagDeepFlavB >= wp_tight), axis=1), value_type=np.int32)
 
-    # Extract max and second max b-tag scores among the EventJets
-    events = set_ak_column(events, "maxbtag", (ak.max(events.EventJet.btagDeepFlavB, axis=1)))
+    # Extract max and second max b-tag scores among the SelectedJets (pT >= 40 GeV, |eta| < 2.4)
+    events = set_ak_column(events, "maxbtag", (ak.max(events.SelectedJets.btagDeepFlavB, axis=1)))
 
     # Insert dummy value for one jet events
-    secmax = ak.sort(events.EventJet.btagDeepFlavB, axis=1, ascending=False)
+    secmax = ak.sort(events.SelectedJets.btagDeepFlavB, axis=1, ascending=False)
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
     events = set_ak_column(events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1]))
     return events
@@ -109,23 +106,20 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
 @producer(
     uses={
-        # nano columns
-        "EventJet.pt",
-        "EventJet.phi",
-        "EventJet.eta",
-        "EventJet.mass",
-        "EventJet.btagDeepFlavB",
-        "EventJet.jetId",
-        "EventJet.puId",
         attach_coffea_behavior,
         gen_top_lookup,
         kinFit,
         "gen_top",
+        "KinFitJets.pt",
+        "KinFitJets.phi",
+        "KinFitJets.eta",
+        "KinFitJets.mass",
+        "KinFitJets.btagDeepFlavB",
     },
     produces={
-        # new columns
         kinFit,
-        "fitCombinationType",
+        gen_top_lookup,
+        "gen_top",
         "FitW1.*",
         "FitW2.*",
         "FitTop1.*",
@@ -135,10 +129,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "RecoW2.*",
         "RecoTop1.*",
         "RecoTop2.*",
-        "fitTopMass",
-        "recoTopMass",
-        gen_top_lookup,
-        "gen_top",
+        "fitCombinationType",
     },
 )
 def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -151,9 +142,8 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     available it also computes a `fitCombinationType` matching.
     """
 
-    from alljets.scripts.default import combinationtype
     jetcollections = {
-        "EventJet": {
+        "KinFitJets": {
             "type_name": "Jet",
             "check_attr": "metric_table",
             "skip_fields": "",
@@ -165,14 +155,7 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     if not self.dataset_inst.has_tag("has_top"):
         events = set_ak_column(events, "gen_top", False)
 
-    EF = -99999.0
-
-    # Prepare masks for the kinematic fit
-    kinFit_jetmask = (events.EventJet.pt >= 40.0) & (abs(events.EventJet.eta) < 2.4)
-
-    kinFit_eventmask = (ak.sum(kinFit_jetmask, axis=1) >= 6)
-
-    events = self[kinFit](events, kinFit_jetmask, kinFit_eventmask, **kwargs)
+    events = self[kinFit](events, **kwargs)
 
     if events.gen_top.ndim > 1:
         jetcollections = {
@@ -214,16 +197,16 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             },
         )
         fitcomb = combinationtype(
-            events.FitJet.reco[kinFit_eventmask][:, 0],
-            events.FitJet.reco[kinFit_eventmask][:, 1],
-            events.FitJet.reco[kinFit_eventmask][:, 2],
-            events.FitJet.reco[kinFit_eventmask][:, 3],
-            events.FitJet.reco[kinFit_eventmask][:, 4],
-            events.FitJet.reco[kinFit_eventmask][:, 5],
-            gen_top[kinFit_eventmask],
+            events.FitJet.reco[:, 0],
+            events.FitJet.reco[:, 1],
+            events.FitJet.reco[:, 2],
+            events.FitJet.reco[:, 3],
+            events.FitJet.reco[:, 4],
+            events.FitJet.reco[:, 5],
+            gen_top,
         )
-        full_fitcomb = np.full(len(events), EF)
-        full_fitcomb[kinFit_eventmask] = fitcomb
+
+        full_fitcomb = fitcomb
         events = set_ak_column(events, "fitCombinationType", full_fitcomb)
     else:
         events = set_ak_column(events, "fitCombinationType", 0)
@@ -251,6 +234,7 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     RecoW2 = events.FitJet.reco[:, 4].add(events.FitJet.reco[:, 5])
     RecoTop1 = events.FitJet.reco[:, 0].add(RecoW1)
     RecoTop2 = events.FitJet.reco[:, 1].add(RecoW2)
+
     events = set_ak_column(events, "FitRbb", B1.delta_r(B2))
     events = set_ak_column(events, "RecoW1", RecoW1)
     events = set_ak_column(events, "RecoW2", RecoW2)
@@ -262,11 +246,6 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "FitW2", W2)
     events = set_ak_column(events, "FitTop1", Top1)
     events = set_ak_column(events, "FitTop2", Top2)
-
-    mtfit_mass = Top1.mass
-    mtreco_mass = RecoTop1.mass
-    events = set_ak_column(events, "fitTopMass", mtfit_mass)
-    events = set_ak_column(events, "recoTopMass", mtreco_mass)
 
     return events
 
@@ -327,7 +306,6 @@ def cutflow_features(
         features,
         kinFitMatch,
         category_ids,
-        deterministic_seeds,
         normalization_weights,
         attach_coffea_behavior,
     },
@@ -335,7 +313,6 @@ def cutflow_features(
         features,
         kinFitMatch,
         category_ids,
-        deterministic_seeds,
         normalization_weights,
         attach_coffea_behavior,
     },
@@ -346,8 +323,8 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     Top-level default production pipeline.
 
     Orchestrates a typical production sequence: attaches coffea
-    behaviour, computes features, assigns category ids, sets
-    deterministic seeds and — for MC — applies normalization (and
+    behaviour, computes features, assigns category ids
+    and — for MC — applies normalization (and
     optionally muon) weights.
 
     """
@@ -360,12 +337,8 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Compute category ids used by later stages
     events = self[category_ids](events, **kwargs)
 
-    # Deterministic seeds (for e.g. reproducible pseudo-randoms)
-    events = self[deterministic_seeds](events, **kwargs)
-
     # MC-only weights
     if self.dataset_inst.is_mc:
-        # normalization weights (luminosity, xsec, pileup, ...)
         events = self[normalization_weights](events, **kwargs)
 
     return events
@@ -376,14 +349,12 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         features,
         kinFitMatch,
         category_ids,
-        deterministic_seeds,
         normalization_weights,
     },
     produces={
         features,
         kinFitMatch,
         category_ids,
-        deterministic_seeds,
         normalization_weights,
     },
 )
@@ -408,12 +379,11 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Provide fake kinfit outputs used by other tools
     events = set_ak_column(events, "FitChi2", 0)
     events = set_ak_column(events, "FitPgof", 1)
-    events = set_ak_column(events, "fitCombinationType", 2)
     events = set_ak_column(events, "FitRbb", 2.5)
+    events = set_ak_column(events, "fitCombinationType", 2)
 
     # Category assignment and deterministic seeds
     events = self[category_ids](events, **kwargs)
-    events = self[deterministic_seeds](events, **kwargs)
 
     # MC: set normalization and mc weights to 1 (placeholder)
     if self.dataset_inst.is_mc:
@@ -532,7 +502,6 @@ tt_fh_trigger_prod = trigger_prod.derive(
         category_ids,
         normalization_weights,
         muon_weights,
-        deterministic_seeds,
         attach_coffea_behavior,
         "gen_top",
         "Jet.hadronFlavour",
@@ -542,7 +511,6 @@ tt_fh_trigger_prod = trigger_prod.derive(
         category_ids,
         normalization_weights,
         muon_weights,
-        deterministic_seeds,
         attach_coffea_behavior,
         "gen_top",
         "jets_light.*",
@@ -614,9 +582,6 @@ def btag_eff(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # Compute category ids used by later stages
     events = self[category_ids](events, **kwargs)
-
-    # Deterministic seeds (for e.g. reproducible pseudo-randoms)
-    events = self[deterministic_seeds](events, **kwargs)
 
     # MC-only weights
     if self.dataset_inst.is_mc:
