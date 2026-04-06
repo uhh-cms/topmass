@@ -1,6 +1,6 @@
 # coding: utf-8
 """
-Jet selection and reconstruction methods for top quark mass analysis.
+Jet selection for top quark mass analysis.
 
 This module defines the main jet selection logic, including trigger selection,
 jet kinematic cuts, b-tagging, combinatorics for top/W reconstruction, and
@@ -8,20 +8,23 @@ event categorization for signal and background. It is designed for use with
 columnar data (awkward arrays) in the context of the columnflow framework.
 """
 
-from columnflow.selection import Selector, SelectionResult, selector
 from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.columnar_util import sorted_indices_from_mask
+from columnflow.selection import Selector, SelectionResult, selector
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
 
 @selector(
-    uses={"Jet.pt", "Jet.eta", "Jet.btagDeepFlavB", "Jet.jetId", "Jet.puId",
-          "Jet.phi", "Jet.mass", attach_coffea_behavior, "HLT.*",
-          "gen_top", "GenPart.*", "Jet.veto_map_mask",
-          },
+    uses={
+        attach_coffea_behavior,
+        "Jet.{pt, eta, btagDeepFlavB, jetId, puId, phi, mass, veto_map_mask}",
+        "HLT.*",
+        "gen_top",
+        "GenPart.*",
+    },
     jet_pt=None, jet_trigger=None, jet_base_trigger=None, alt_jet_trigger=None,
 )
 def jet_selection(
@@ -34,17 +37,17 @@ def jet_selection(
     Perform jet selection for top mass analysis.
 
     This function applies a series of kinematic and trigger-based selections
-    to jets in each event, identifies b-tagged and light jets.
+    to jets in each event.
 
     The function returns SelectionResult object containing selection masks and object indices.
 
-    The objects returned in the SelectionResult include the following jet collections:
+    The objects returned in the SelectionResult include the following Jet collections:
 
-    - Jet: All Jets within the |eta| < 2.6 acceptance, interesting for trigger studies
-    - EventJet: Jets passing the main selection (pT >= 40 GeV, |eta| < 2.4),
-    - Bjet: Subset of EventJet that are b-tagged (passing the tight working point)
-    - VetoJet: Jets that fail the main selection (not passing pT or eta cuts)
-    - LightJet: Subset of EventJet that are not b-tagged (failing the tight working point)
+    - TrigJets: All Jets within the |eta| < 2.6 acceptance, interesting for trigger studies
+
+    - SelectedJets: Jets passing the main selection (pT >= 40 GeV, |eta| < 2.4),
+
+    - KinFitJets: The leading 6 jets passing the main selection, used for kinematic fit
 
     Args:
         self (Selector): The selector instance.
@@ -63,7 +66,6 @@ def jet_selection(
 
     # Ensure that the Jets we use are passing the tight + tightLepVeto jet Id
     # and are not vetoed by the jet veto map
-    # Individual masks
 
     jetid_mask = (events.Jet.jetId >= 6)
     veto_mask = (events.Jet.veto_map_mask)
@@ -75,49 +77,57 @@ def jet_selection(
     # Mode logic
     if mode == "trigger":
         ak4_mask = ak.ones_like(events.Jet.pt, dtype=bool)
-
-    elif mode == "analysis":
-        ak4_mask = jetid_mask & veto_mask & pu_mask
-
     elif mode == "veto_only":
         ak4_mask = veto_mask
-
     elif mode == "jetid_only":
         ak4_mask = jetid_mask
-
     elif mode == "puid_only":
         ak4_mask = pu_mask
-
+    elif mode == "analysis":
+        ak4_mask = jetid_mask & veto_mask & pu_mask
     else:
         raise ValueError(f"Unknown jet_selection mode: {mode}")
 
     # Step 1: Basic event and jet selection
-    ht1_sel = (ak.sum(events.Jet.pt[ak4_mask], axis=1) >= 1)              # At least one jet with pt
-    jet_mask0 = ak4_mask & (abs(events.Jet.eta) < 2.6)                    # Jets within eta acceptance
-    jet_mask = (jet_mask0 & (events.Jet.pt >= 32.0))                      # Jets passing pt and eta
-    ht_sel = (ak.sum(events.Jet.pt[jet_mask], axis=1) >= 450)             # HT > 450 GeV
+    ht1_sel = (ak.sum(events.Jet.pt[ak4_mask], axis=1) >= 1)
+    jet_mask0 = ak4_mask & (abs(events.Jet.eta) < 2.6)
+    jet_mask = (jet_mask0 & (events.Jet.pt >= 32.0))
+    ht_sel = (ak.sum(events.Jet.pt[jet_mask], axis=1) >= 450)
+
+    # Extract the indices of jets passing the initial selection, sorted by pt (descending)
+    trigjet_idx = sorted_indices_from_mask(jet_mask0, events.Jet.pt, ascending=False)
 
     # Step 2: Tight selection for jets, pT > 40 GeV and |eta| < 2.4, require at least 6 jets
     jet_mask2 = ak4_mask & ((abs(events.Jet.eta) < 2.4) & (events.Jet.pt >= 40.0))
     jet_sel = ak.sum(jet_mask2, axis=1) >= 6
 
-    # Step 3: Identify veto jets (not passing main selection)
-    veto_jet = ~jet_mask
-
-    # Step 4: Identify b-tagged and light jets
+    # Step 3: Identify b-tagged and light jets
     wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
     light_jet = (jet_mask2) & (events.Jet.btagDeepFlavB < wp_tight)
     bjet_mask = (jet_mask2) & (events.Jet.btagDeepFlavB >= wp_tight)
 
-    # Step 5: Event selection based on b-jet and light jet multiplicity
+    # Step 4: Event selection based on b-jet and light jet multiplicity
     bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2))
     sixjets_sel = (bjet_sel & (ak.sum(light_jet, axis=1) >= 4))
 
-    # Step 6: Background estimation (b-jet veto)
+    # Step 5: Background estimation (b-jet veto)
     wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
     loose_bjet_mask = (events.Jet.btagDeepFlavB >= wp_loose)
     bjet_rej = (ak.sum(((jet_mask2) & loose_bjet_mask), axis=1) == 0)
-    sel_bjet_2or0 = ak.any([bjet_sel, bjet_rej], axis=0)
+    sel_bjet_2or0 = bjet_sel | bjet_rej
+
+    # Step 6: Requiring exactly 2 or 0 b-tags among the leading 6 jets
+    # Extract the indices of jets passing the main selection, sorted by pt (descending)
+    eventjet_idx = sorted_indices_from_mask(jet_mask2, events.Jet.pt, ascending=False)
+    leading6_idx = eventjet_idx[:, :6]
+    leading6_jets = events.Jet[leading6_idx]
+
+    # Tight: exactly 2 b-tags; Loose: exactly 0 b-tags among the leading 6 jets
+    leading6_2BTag_sel = ak.sum(leading6_jets.btagDeepFlavB >= wp_tight, axis=1) == 2
+    leading6_0BTag_sel = ak.sum(leading6_jets.btagDeepFlavB >= wp_loose, axis=1) == 0
+
+    # Combine
+    sel_bjet_2or0_leading6 = leading6_2BTag_sel | leading6_0BTag_sel
 
     # Step 7: Trigger selection (skip for QCD MC)
     if not self.dataset_inst.name.startswith("qcd"):
@@ -129,11 +139,10 @@ def jet_selection(
         jet_trigger_sel = [True] * len(events)
         alt_jet_trigger_sel = [True] * len(events)
         jet_base_trigger_sel = [True] * len(events)
-    signal_or_bkg_trigger = ak.any([jet_trigger_sel, alt_jet_trigger_sel], axis=0)
+
+    signal_or_bkg_trigger = jet_trigger_sel | alt_jet_trigger_sel
 
     # Step 8: Build and return selection results
-    # The SelectionResult object contains masks for each selection step,
-    # indices for jet collections, and auxiliary variables.
     return events, SelectionResult(
         steps={
             "All": ht1_sel,
@@ -146,15 +155,14 @@ def jet_selection(
             "BTag": bjet_sel,
             "BTag20": sel_bjet_2or0,
             "SixJets": sixjets_sel,
+            "LeadingSix2BTag": leading6_2BTag_sel,
+            "LeadingSix20BTag": sel_bjet_2or0_leading6,
         },
         objects={
             "Jet": {
-                "Jet": sorted_indices_from_mask(jet_mask0, events.Jet.pt, ascending=False),
-                "EventJet": sorted_indices_from_mask(jet_mask2, events.Jet.pt, ascending=False),
-                "Bjet": sorted_indices_from_mask(bjet_mask, events.Jet.pt, ascending=False),
-                "VetoJet": sorted_indices_from_mask(veto_jet, events.Jet.pt, ascending=False),
-                "LightJet": sorted_indices_from_mask(light_jet, events.Jet.pt, ascending=False),
-                "JetsByBTag": sorted_indices_from_mask(jet_mask, events.Jet.btagDeepFlavB, ascending=False),
+                "TrigJets": trigjet_idx,
+                "SelectedJets": eventjet_idx,
+                "KinFitJets": leading6_idx,
             },
         },
         aux={
@@ -171,13 +179,7 @@ def jet_selection_init(self: Selector) -> None:
     """
     year = self.config_inst.campaign.x.year
     # register shifts
-    self.shifts |= {
-        shift_inst.name
-        for shift_inst in self.config_inst.shifts
-        if shift_inst.has_tag(("jec", "jer", "tune", "hdamp", "trig"))
-    }
-    # NOTE: the none will not be overwritten later when doing this...
-    # self.jet_trigger = None
+    self.shifts |= {shift_inst.name for shift_inst in self.config_inst.shifts if shift_inst.has_tag(("jec", "jer"))}
 
     # Jet pt thresholds (if not set manually) based on year (1 pt above trigger threshold)
     # When jet pt thresholds are set manually, don't use any trigger
@@ -187,35 +189,40 @@ def jet_selection_init(self: Selector) -> None:
         # Trigger choice based on year of data-taking (for now: only single trigger)
         self.jet_trigger = {
             2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
-            # or "HLT_PFHT450_SixJet40_BTagCSV_p056")
             2017: "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
-            # "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2" or "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2"
-            # or "PFHT430_SixPFJet40_PFBTagCSV_1p5"
-            # Base Trigger: "PFHT370"
             2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
-            # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
         }[year]
         self.uses.add(f"HLT.{self.jet_trigger}")
 
         # Trigger choice based on year of data-taking (for now: only single trigger)
         self.jet_base_trigger = {
             2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
-            # or "HLT_PFHT450_SixJet40_BTagCSV_p056")
             2017: "PFHT350",
-            # Base Trigger: "PFHT370", "PFHT350", "IsoMu24", "Physics"
             2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
-            # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
         }[year]
         self.uses.add(f"HLT.{self.jet_base_trigger}")
 
         self.alt_jet_trigger = {
             2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
-            # or "HLT_PFHT450_SixJet40_BTagCSV_p056")
             2017: "PFHT380_SixPFJet32",
-            # "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2" or "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2"
-            # or "PFHT430_SixPFJet40_PFBTagCSV_1p5"
-            # Base Trigger: "PFHT370"
             2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
-            # or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59")
         }[year]
         self.uses.add(f"HLT.{self.alt_jet_trigger}")
+
+
+# ===================================================================
+# List of trigger usable for jet selection (for reference) per year:
+# ===================================================================
+
+# jet_triggers (Signal trigger)
+# 2016: "PFHT400_SixJet30_DoubleBTagCSV_p056" or "HLT_PFHT450_SixJet40_BTagCSV_p056"
+# 2017: "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2" or "PFBTagDeepCSV_2p2" or "PFHT430_SixPFJet40_PFBTagCSV_1p5"
+# 2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94" or "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59"
+
+# jet_base_triggers (Baseline trigger for trigger correction)
+# 2016/2017/2018: "IsoMu24", "Physics" or any "PFHT*" trigger below the signal trigger
+
+# alt_jet_triggers (Trigger of background events, signal trigger without b-tag requirement)
+# 2016: ""PFHT400_SixJet30" or "HLT_PFHT450_SixJet40"
+# 2017: "PFHT380_SixPFJet32" or "PFHT430_SixPFJet40"
+# 2018: "PFHT400_SixPFJet32" or "HLT_PFHT450_SixPFJet36"
