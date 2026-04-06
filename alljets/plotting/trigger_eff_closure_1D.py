@@ -153,7 +153,7 @@ def plot_efficiencies(
     --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*' \
     --selector-steps All,BaseTrigger,BTag,HT --selector trigger_eff
     --producers no_norm,trigger_prod \
-    --variables jet6_pt_trigger-trig_bits --hist-producer trig_all_weights \
+    --variables trigjet6_pt-trig_bits --hist-producer trig_all_weights \
     --processes data,tt --categories incl \
     --plot-function alljets.plotting.trigger_eff_closure_1D.plot_efficiencies --general-settings "bin_sel=1"
 
@@ -214,7 +214,6 @@ def plot_efficiencies(
         trigger_names[eff_bin] = trig_alias
 
     # for updating labels of individual selector steps
-    # myhist_0 = convert_weightedmean_to_weight(hist_list_mean[0][weighted, 0, :, eff_bin])
     myhist_1 = convert_weightedmean_to_weight(hist_list_mean[1][weighted, 0, :, eff_bin])
 
     norm_hist_0 = np.array(convert_weightedmean_to_weight(hist_list_mean[0][1, 0, :, 0]).values())
@@ -276,9 +275,9 @@ def plot_efficiencies(
         plot_config["cut_arrow"] = {
             "method": "draw_arrow",
             "kwargs": {
-                "x": 40 if variable_inst == "jet6_pt_trigger" else 450,
+                "x": 40 if variable_inst == "trigjet6_pt" else 450,
                 "y": 0.9,
-                "length": 10 if variable_inst == "jet6_pt_trigger" else 200,
+                "length": 10 if variable_inst == "trigjet6_pt" else 200,
                 "direction": "right",
                 "relative_y": True,
                 "color": "black",
@@ -289,8 +288,8 @@ def plot_efficiencies(
         plot_config["cut_region"] = {
             "method": "draw_vspan",
             "kwargs": {
-                "x_start": 30 if variable_inst == "jet6_pt_trigger" else 250,
-                "x_end": 40 if variable_inst == "jet6_pt_trigger" else 450,
+                "x_start": 30 if variable_inst == "trigjet6_pt" else 250,
+                "x_end": 40 if variable_inst == "trigjet6_pt" else 450,
                 "ymin": 0.0,
                 "ymax": 0.7,
                 "relative": True,
@@ -305,7 +304,7 @@ def plot_efficiencies(
     )
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
-    if variable_inst == "jet6_pt_trigger":
+    if variable_inst == "trigjet6_pt":
         default_style_config["ax_cfg"]["xlim"] = (30, 100)
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2
@@ -350,7 +349,7 @@ def plot_efficiencies_with_uncert(
     law run cf.PlotShiftedVariables1D --version v1 --configs 2017_v9 \
     --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*' \
     --producers no_norm,trigger_prod \
-    --variables jet6_pt_trigger-trig_bits \
+    --variables trigjet6_pt-trig_bits \
     --hist-producer trig_all_weights \
     --processes data,tt \
     --categories incl \
@@ -487,9 +486,9 @@ def plot_efficiencies_with_uncert(
         plot_config["cut_arrow"] = {
             "method": "draw_arrow",
             "kwargs": {
-                "x": 40 if variable_inst == "jet6_pt_trigger" else 450,
+                "x": 40 if variable_inst == "trigjet6_pt" else 450,
                 "y": 0.9,
-                "length": 10 if variable_inst == "jet6_pt_trigger" else 200,
+                "length": 10 if variable_inst == "trigjet6_pt" else 200,
                 "direction": "right",
                 "relative_y": True,
                 "color": "black",
@@ -500,8 +499,8 @@ def plot_efficiencies_with_uncert(
         plot_config["cut_region"] = {
             "method": "draw_vspan",
             "kwargs": {
-                "x_start": 30 if variable_inst == "jet6_pt_trigger" else 250,
-                "x_end": 40 if variable_inst == "jet6_pt_trigger" else 450,
+                "x_start": 30 if variable_inst == "trigjet6_pt" else 250,
+                "x_end": 40 if variable_inst == "trigjet6_pt" else 450,
                 "ymin": 0.0,
                 "ymax": 0.7,
                 "relative": True,
@@ -517,7 +516,7 @@ def plot_efficiencies_with_uncert(
     )
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
-    if variable_inst == "jet6_pt_trigger":
+    if variable_inst == "trigjet6_pt":
         default_style_config["ax_cfg"]["xlim"] = (30, 100)
     default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
     default_style_config["legend_cfg"]["ncol"] = 2

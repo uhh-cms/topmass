@@ -388,8 +388,8 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="jet6_pt_trigger",
-        expression="Jet.pt[:,5]",
+        name="trigjet6_pt",
+        expression="TrigJets.pt[:,5]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 100.0),
         aux={"overflow": False, "underflow": False},

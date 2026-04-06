@@ -26,33 +26,32 @@ ak = maybe_import("awkward")
         "trig_weight_up",
         "trig_weight_down",
     },
-    # only run on mc
     mc_only=True,
-    # function to determine the correction file
-    # get_trig_file=(lambda self, external_files: external_files.trig_sf),
-    # function to determine the trigger weight config
-    # get_trig_config=(lambda self: self.config_inst.x.trig_sf_names),
 )
 def trig_weights(
     self: Producer,
     events: ak.Array,
-    # trig_mask: ak.Array | type(Ellipsis) = Ellipsis,
     **kwargs,
 ) -> ak.Array:
     """
     Compute event-level trigger scale-factor weights for MC events.
 
-    The trigger weight is evaluated using a correctionlib ``CorrectionSet``
-    based on the configured trigger scale-factor variable
-    (e.g. ``jet6_pt`` or ``ht``).
+    The trigger weight is evaluated using a correctionlib CorrectionSet
+    built from the ProduceTriggerWeights task. The underlying trigger efficiency
+    is parameterized as a function of a jet-based variable (trigjet6_pt, or ht),
+    originally derived from trigger-like jets (TrigJets).
 
-    The following columns are produced:
-    - ``trig_weight``: nominal trigger scale-factor weight
-    - ``trig_weight_up``: upward systematic variation
-    - ``trig_weight_down``: downward systematic variation
+    In this function, the same variable is reconstructed from the NanoAOD
+    Jet collection, and the corresponding scale factor is evaluated.
+    The resulting weight is applied at the event level.
 
-    The uncertainty is modeled as a symmetric variation around the nominal
-    weight using ±0.5 · |1 − weight|.
+    The following event-level columns are produced:
+    - trig_weight: nominal trigger scale-factor weight
+    - trig_weight_up: upward systematic variation
+    - trig_weight_down: downward systematic variation
+
+    Systematic variations are modeled as a symmetric ±50% deviation from
+    unity around the nominal weight.
 
     For datasets without top quarks, all trigger weights are set to unity.
     """
@@ -68,7 +67,7 @@ def trig_weights(
         ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) & (abs(events.Jet.eta) < 2.6)], axis=1)
 
         # Evaluate trigger scale factor using the configured variable
-        if self.config_inst.x.trigger_sf_variable.startswith("jet6_pt"):
+        if self.config_inst.x.trigger_sf_variable.startswith("trigjet6_pt"):
             # Apply the correction as a function of the 6th jet pT. Events with fewer than 6 jets receive weight = 0.
             weight = ak.where(jet6_pt == 0, np.zeros((len(events))), self.trig_sf_corrector(jet6_pt))
 
@@ -122,20 +121,11 @@ def trig_weights_setup(
     inputs: dict,
     reader_targets: InsertableDict,
 ) -> None:
-    # bundle = reqs["external_files"]
-    # create the corrector
+
     import correctionlib
     correctionlib.highlevel.Correction.__call__ = correctionlib.highlevel.Correction.evaluate
-    # correction_set = correctionlib.CorrectionSet.from_string(
-    #     self.get_trig_file(bundle.files).load(formatter="gzip").decode("utf-8"),
-    # )
     correction_set = correctionlib.CorrectionSet.from_string(
         inputs["external_files"]["collection"].targets[0]["weights"][0].load(
             formatter="gzip").decode("utf-8"),
     )
-    # Add distinction for year and working point later. For now only one
-    # corrector_name, self.year, self.wp = self.get_trig_config()
-    # self.trig_sf_corrector = correction_set[corrector_name]
     self.trig_sf_corrector = correction_set["trig_cor"]
-    # self.trig_sf_up_corrector = correction_set["trig_cor_up"]
-    # self.trig_sf_down_corrector = correction_set["trig_cor_down"]

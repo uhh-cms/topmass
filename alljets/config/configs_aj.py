@@ -261,7 +261,7 @@ def add_config(
         "default": [],
         "default_bkg": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
         "ht_trigger": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
-        "jet6_pt_trigger": ["All", "BaseTrigger", "BTag", "HT"],
+        "trigjet6_pt": ["All", "BaseTrigger", "BTag", "HT"],
         "trig_eff_bjet": ["All", "BaseTrigger", "jet", "HT"],
         "trig_eff_ht_pt": ["All", "BaseTrigger", "BTag"],
     }
@@ -556,7 +556,7 @@ def add_config(
     ################################################################################################
     cfg.x.fitchi2cut = 6.3
     cfg.x.fitpgofcut = 0.1
-    cfg.x.trigger_sf_variable = "jet6_pt_trigger"
+    cfg.x.trigger_sf_variable = "trigjet6_pt"
 
     ################################################################################################
     # shifts
@@ -796,12 +796,9 @@ def add_config(
                 "luminosityBlock",
                 "event",
                 # object info
-                "Jet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,neEmEF,neHEF,chEmEF,chHEF,muEF,jetId,puId}",
-                "EventJet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,neEmEF,neHEF,chEmEF,chHEF,muEF,jetId,puId}",
-                "Bjet.*",
-                "VetoJet.*",
-                "LightJet.*",
-                "JetsByBTag.*",
+                "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,veto_map_mask}",
+                "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,jetId,puId,veto_map_mask}",
+                "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,jetId,puId,veto_map_mask}",
                 "Muon.{pt,eta,phi,mass,pfRelIso04_all}",
                 "PV.{npvs,npvsGood}",
                 "GenPart.*",
