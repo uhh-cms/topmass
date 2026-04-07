@@ -20,7 +20,7 @@ ak = maybe_import("awkward")
 @selector(
     uses={
         attach_coffea_behavior,
-        "Jet.{pt, eta, btagDeepFlavB, jetId, puId, phi, mass, veto_map_mask}",
+        "Jet.{pt,eta,btagDeepFlavB,jetId,puId,phi,mass,veto_map_mask}",
         "HLT.*",
         "gen_top",
         "GenPart.*",
