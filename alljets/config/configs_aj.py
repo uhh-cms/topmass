@@ -549,6 +549,18 @@ def add_config(
     # register shifts
     cfg.add_shift(name="nominal", id=0)
 
+    # top mass shifts of 1GeV
+    cfg.add_shift(name="mtop1_up", id=5, type="shape", tags={"disjoint_from_nominal", "mtop1"})
+    cfg.add_shift(name="mtop1_down", id=6, type="shape", tags={"disjoint_from_nominal", "mtop1"})
+
+    # top mass shifts of 3 GeV
+    cfg.add_shift(name="mtop3_up", id=12, type="shape", tags={"disjoint_from_nominal", "mtop3"})
+    cfg.add_shift(name="mtop3_down", id=13, type="shape", tags={"disjoint_from_nominal", "mtop3"})
+
+    # top mass shifts of 6 GeV
+    cfg.add_shift(name="mtop6_up", id=14, type="shape", tags={"disjoint_from_nominal", "mtop6"})
+    cfg.add_shift(name="mtop6_down", id=15, type="shape", tags={"disjoint_from_nominal", "mtop6"})
+
     # tune shifts are covered by dedicated, varied datasets, so tag the shift as "disjoint_from_nominal"
     # (this is currently used to decide whether ML evaluations are done on the full shifted dataset)
     cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal", "tune"})
@@ -557,9 +569,6 @@ def add_config(
 
     cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal", "hdamp"})
     cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal", "hdamp"})
-
-    cfg.add_shift(name="mtop_up", id=5, type="shape", tags={"disjoint_from_nominal", "mtop"})
-    cfg.add_shift(name="mtop_down", id=6, type="shape", tags={"disjoint_from_nominal", "mtop"})
 
     # fake jet energy correction shift, with aliases flaged as "selection_dependent", i.e. the aliases
     # affect columns that might change the output of the event selection
