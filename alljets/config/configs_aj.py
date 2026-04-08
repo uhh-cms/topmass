@@ -299,10 +299,6 @@ def add_config(
             # },
         },
     }
-    # plotting overwrites
-    # from hbt.config.styles import setup_plot_styles
-
-    # setup_plot_styles(cfg)
 
     ################################################################################################
     # luminosity and normalization
@@ -386,58 +382,58 @@ def add_config(
                     filter(
                         bool,
                         [
-                            # "AbsoluteStat",
-                            # "AbsoluteScale",
+                            "AbsoluteStat",
+                            "AbsoluteScale",
                             # "AbsoluteSample",
                             # "AbsoluteFlavMap",
-                            # "AbsoluteMPFBias",
-                            # "Fragmentation",
-                            # "SinglePionECAL",
-                            # "SinglePionHCAL",
+                            "AbsoluteMPFBias",
+                            "Fragmentation",
+                            "SinglePionECAL",
+                            "SinglePionHCAL",
                             # "FlavorQCD",
-                            # "TimePtEta",
-                            # "RelativeJEREC1",
-                            # "RelativeJEREC2",
-                            # "RelativeJERHF",
-                            # "RelativePtBB",
-                            # "RelativePtEC1",
-                            # "RelativePtEC2",
-                            # "RelativePtHF",
-                            # "RelativeBal",
-                            # "RelativeSample",
-                            # "RelativeFSR",
-                            # "RelativeStatFSR",
-                            # "RelativeStatEC",
-                            # "RelativeStatHF",
-                            # "PileUpDataMC",
-                            # "PileUpPtRef",
-                            # "PileUpPtBB",
-                            # "PileUpPtEC1",
-                            # "PileUpPtEC2",
-                            # "PileUpPtHF",
-                            # "PileUpMuZero",
-                            # "PileUpEnvelope",
+                            "TimePtEta",
+                            "RelativeJEREC1",
+                            "RelativeJEREC2",
+                            "RelativeJERHF",
+                            "RelativePtBB",
+                            "RelativePtEC1",
+                            "RelativePtEC2",
+                            "RelativePtHF",
+                            "RelativeBal",
+                            "RelativeSample",
+                            "RelativeFSR",
+                            "RelativeStatFSR",
+                            "RelativeStatEC",
+                            "RelativeStatHF",
+                            "PileUpDataMC",
+                            "PileUpPtRef",
+                            "PileUpPtBB",
+                            "PileUpPtEC1",
+                            "PileUpPtEC2",
+                            "PileUpPtHF",
+                            "PileUpMuZero",
+                            "PileUpEnvelope",
                             # "SubTotalPileUp",
                             # "SubTotalRelative",
                             # "SubTotalPt",
                             # "SubTotalScale",
                             # "SubTotalAbsolute",
                             # "SubTotalMC",
-                            "Total",
+                            # "Total",
                             # "TotalNoFlavor",
                             # "TotalNoTime",
                             # "TotalNoFlavorNoTime",
                             # "FlavorZJet",
                             # "FlavorPhotonJet",
-                            # "FlavorPureGluon",
-                            # "FlavorPureQuark",
-                            # "FlavorPureCharm",
-                            # "FlavorPureBottom",
-                            "CorrelationGroupMPFInSitu",
-                            "CorrelationGroupIntercalibration",
-                            "CorrelationGroupbJES",
-                            "CorrelationGroupFlavor",
-                            "CorrelationGroupUncorrelated",
+                            "FlavorPureGluon",
+                            "FlavorPureQuark",
+                            "FlavorPureCharm",
+                            "FlavorPureBottom",
+                            # "CorrelationGroupMPFInSitu",
+                            # "CorrelationGroupIntercalibration",
+                            # "CorrelationGroupbJES",
+                            # "CorrelationGroupFlavor",
+                            # "CorrelationGroupUncorrelated",
                         ],
                     ),
                 ),
@@ -455,19 +451,6 @@ def add_config(
             },
         },
     )
-
-    # updated jet id
-    from columnflow.production.cms.jet import JetIdConfig
-
-    cfg.x.jet_id = JetIdConfig(
-        corrections={"AK4PUPPI_Tight": 2, "AK4PUPPI_TightLeptonVeto": 3},
-    )
-    cfg.x.fatjet_id = JetIdConfig(
-        corrections={"AK8PUPPI_Tight": 2, "AK8PUPPI_TightLeptonVeto": 3},
-    )
-
-    # trigger sf corrector
-    cfg.x.jet_trigger_corrector = "jetlegSFs"
 
     ################################################################################################
     # b tagging
@@ -619,18 +602,6 @@ def add_config(
                     "normalized_njet_btag_pnet_weight": "normalized_njet_btag_pnet_weight_{name}",
                 },
             )
-    # cfg.add_shift(name="jec_up", id=20, type="shape", tags="jec")
-    # cfg.add_shift(name="jec_down", id=21, type="shape", tags="jec")
-    # add_shift_aliases(
-    #     cfg,
-    #     "jec",
-    #     {
-    #         "Jet.pt": "Jet.pt_{name}",
-    #         "Jet.mass": "Jet.mass_{name}",
-    #         "MET.pt": "MET.pt_{name}",
-    #         "MET.phi": "MET.phi_{name}",
-    #     },
-    # )
 
     # event weights due to muon scale factors
     cfg.add_shift(name="mu_up", id=10, type="shape")
