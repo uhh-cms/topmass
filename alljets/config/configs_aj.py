@@ -796,9 +796,9 @@ def add_config(
                 "luminosityBlock",
                 "event",
                 # object info
-                "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,veto_map_mask}",
-                "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,jetId,puId,veto_map_mask}",
-                "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,jetId,puId,veto_map_mask}",
+                "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,artonFlavour,hadronFlavour,veto_map_mask}",
+                "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,artonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
+                "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,artonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
                 "Muon.{pt,eta,phi,mass,pfRelIso04_all}",
                 "PV.{npvs,npvsGood}",
                 "GenPart.*",
@@ -852,9 +852,7 @@ def add_config(
         {
             "normalization_weight": [],
             "btag_weight": [],
-            # "trig_weight": [],
             "trig_weight": get_shifts("trig"),
-            # "muon_weight": get_shifts("mu"),
             "pdf_weight": get_shifts("pdf"),
             "murmuf_weight": get_shifts("murmuf"),
             "pu_weight": get_shifts("pu_weight_minbias_xs"),
