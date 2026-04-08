@@ -4,5 +4,5 @@
 	branch = master
 [submodule "modules/cmsdb"]
 	path = modules/cmsdb
-	url = git@github.com:uhh-cms/cmsdb.git
+	url = git@github.com:LennertGriesing/cmsdb.git
 	branch = master
