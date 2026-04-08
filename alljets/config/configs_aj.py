@@ -330,8 +330,10 @@ def add_config(
             },
         )
     elif year == 2017:
+        # Updated the lumi value for 2017 based on the latest brilcalc results for the relevant trigger, see
+        # /afs/cern.ch/user/l/lgriesin/eos/BrilCal/2017/ValuesFb/HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2.csv
         cfg.x.luminosity = Number(
-            36674,
+            37_186,
             {
                 "lumi_13TeV_2017": 0.02j,
                 "lumi_13TeV_1718": 0.006j,
