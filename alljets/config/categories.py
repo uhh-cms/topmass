@@ -90,7 +90,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="fit_conv_big_rbb",
         selection="cat_fit_conv_big_rbb",
-        label=r"$P_{gof} > 0.1$ and above $\Delta R_{\text{b}}$ cut",
+        label=r"$P_{gof} > 0.1$ & $\Delta R_{{bb}} > 2.0$ ",
     )
     # add_category(
     #     cfg,
