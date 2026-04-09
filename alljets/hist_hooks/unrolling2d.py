@@ -6,13 +6,11 @@ Histogram hook for QCD data-driven estimation.
 
 from __future__ import annotations
 
-from collections import defaultdict
 
 import law
 import order as od
-import scinum as sn
 
-from columnflow.util import maybe_import, DotDict
+from columnflow.util import maybe_import
 from columnflow.types import Any
 
 np = maybe_import("numpy")
@@ -29,7 +27,7 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
     def unrolling_2D(
         task: law.Task,
         hists: dict[od.Process, Any],
-        **kwargs
+        **kwargs,
     ) -> dict[od.Process, Any, Any]:
 
         for config, proc_dict in hists.items():
@@ -37,13 +35,11 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
 
                 cat_axis = h.axes["category"]
                 shift_axis = h.axes["shift"]
-                top_axis = h.axes["fit_Top1_mass_percentile"]
-                w_axis = h.axes["reco_W_mass_avg_percentile"]
 
                 # ---- Define rebin groups ----
                 # 8 → 6 (top)
                 top_groups = [
-                    [0], [1], [2], [3], [4], [5, 6, 7]
+                    [0], [1], [2], [3], [4], [5, 6, 7],
                 ]
 
                 # 8 → 3 (W)
@@ -60,7 +56,7 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
                     n_unrolled,
                     0,
                     n_unrolled,
-                    name="unrolled"
+                    name="unrolled",
                 )
 
                 new_hist = hist.Hist(
@@ -90,7 +86,7 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
                                         var += variances[i_cat, i_shift, t, w]
 
                                 new_hist.view(flow=False)[
-                                    i_cat, i_shift, unroll_index
+                                    i_cat, i_shift, unroll_index,
                                 ] = (val, var)
 
                                 unroll_index += 1
