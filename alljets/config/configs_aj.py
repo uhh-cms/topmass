@@ -223,6 +223,29 @@ def add_config(
     if not sync_mode:
         verify_config_processes(cfg, warn=True)
 
+    # ---------------------------------------------------------
+    # DATASET GROUPS (for efficiency calculation)
+    # ---------------------------------------------------------
+    cfg.x.btag_wp_eff_groups = [
+        ["tt_*"], ["qcd_*"],   # only top-like processes
+    ]
+
+    # assign dataset tags based on these groups
+    for dataset in cfg.datasets:
+        group_matched = False
+        for i, dataset_pattern in enumerate(cfg.x.btag_wp_eff_groups):
+            if law.util.multi_match(dataset.name, dataset_pattern):
+                if group_matched:
+                    raise ValueError(
+                        f"dataset '{dataset.name}' already has a btag WP group assigned!",
+                    )
+                group_matched = True
+                dataset.add_tag(f"btag_wp_eff_group_{i}")
+        if not group_matched and dataset.is_mc:
+            raise ValueError(f"no btag_wp_eff_group_* assigned to dataset '{dataset.name}'")
+        if group_matched and dataset.is_data:
+            raise ValueError(f"must not assign btag_wp_eff_group_* to dataset '{dataset.name}'")
+
     ################################################################################################
     # task defaults and groups
     ################################################################################################
@@ -458,21 +481,23 @@ def add_config(
     # b tagging
     ################################################################################################
     # b-tag working points
+    btag_key = f"{year}{campaign.x.postfix}"
+    # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL16preVFP?rev=6
+    # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL16postVFP?rev=8
     # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
-    cfg.x.btag_working_points = DotDict.wrap(
-        {
-            "deepjet": {
-                "loose": 0.0532,
-                "medium": 0.3040,
-                "tight": 0.7476,
-            },
-            "deepcsv": {
-                "loose": 0.1355,
-                "medium": 0.4506,
-                "tight": 0.7738,
-            },
+    # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18?rev=18
+    cfg.x.btag_working_points = DotDict.wrap({
+        "deepjet": {
+            "loose": {"2016APV": 0.0508, "2016": 0.0480, "2017": 0.0532, "2018": 0.0490}[btag_key],
+            "medium": {"2016APV": 0.2598, "2016": 0.2489, "2017": 0.3040, "2018": 0.2783}[btag_key],
+            "tight": {"2016APV": 0.6502, "2016": 0.6377, "2017": 0.7476, "2018": 0.7100}[btag_key],
         },
-    )
+        "deepcsv": {
+            "loose": {"2016APV": 0.2027, "2016": 0.1918, "2017": 0.1355, "2018": 0.1208}[btag_key],
+            "medium": {"2016APV": 0.6001, "2016": 0.5847, "2017": 0.4506, "2018": 0.4168}[btag_key],
+            "tight": {"2016APV": 0.8819, "2016": 0.8767, "2017": 0.7738, "2018": 0.7665}[btag_key],
+        },
+    })
     # JEC uncertainty sources propagated to btag scale factors
     # (names derived from contents in BTV correctionlib file)
     cfg.x.btag_sf_jec_sources = [
@@ -517,24 +542,49 @@ def add_config(
 
     # https://btv-wiki.docs.cern.ch/PerformanceCalibration/SFUncertaintiesAndCorrelations/#ak4-working-point-based-sfs-fixedwp-sfs
     # name of the btag_sf correction set and jec uncertainties to propagate through
-    # For the b/c jets, need to consider either deepJet_mujets (QCD enriched) or deepJets_comb (QCD + ttbar enriched)
+    # For the b/c jets consider deepJets_comb (QCD + ttbar enriched)
     # For the light jets SF, should use deepJet_incl
 
-    # from columnflow.production.cms.btag import BTagSFConfig
     cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
+    # ---------------------------------------------------------
+    # BTag WP COUNT CONFIG
+    # ---------------------------------------------------------
+    from columnflow.selection.cms.btag import BTagWPCountConfig
 
-    # cfg.x.btag_sf_bc = ("deepJet_mujets", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
-    # cfg.x.btag_sf_light = ("deepJet_incl", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
+    cfg.x.btag_wp_count_config = BTagWPCountConfig(
+        jet_name="Jet",
+        btag_column="btagDeepFlavB",
+        btag_wps={"tight": cfg.x.btag_working_points.deepjet.tight},
+        pt_edges=(20, 30, 50, 70, 100, 140, 200, 300, 600, 1000),
+        abs_eta_edges=(0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.5),
+    )
 
-    # Initiated here the Dictonary to obtain the btagging WP counts
-    # See https://github.com/columnflow/columnflow/blob/master/columnflow/selection/cms/btag.py
-    # cfg.x.btag_wp_count_config = ("Jet",
-    #                             "btagDeepFlavB",
-    #                             {"tight": cfg.x.btag_working_points.deepjet.tight},
-    #                             (20, 30, 50, 70, 100, 140, 200, 300, 600, 1000),
-    #                             (0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 3.0),
-    #                             "btag_wp_counts"
-    #                             )
+    # ---------------------------------------------------------
+    # BTag WP SCALE FACTOR CONFIG
+    # ---------------------------------------------------------
+    from columnflow.production.cms.btag import BTagWPSFConfig
+
+    def dataset_groups(dataset_inst: od.Dataset) -> list[od.Dataset]:
+        for group_index in range(len(cfg.x.btag_wp_eff_groups)):
+            group_tag = f"btag_wp_eff_group_{group_index}"
+            if dataset_inst.has_tag(group_tag):
+                return [
+                    _dataset_inst
+                    for _dataset_inst in cfg.datasets
+                    if _dataset_inst.has_tag(group_tag)
+                ]
+        raise NotImplementedError(f"btag WP efficiency group not implemented for dataset {dataset_inst.name}")
+
+    cfg.x.btag_wp_sf_config = BTagWPSFConfig(
+        jet_name="Jet",
+        btag_column="btagDeepFlavB",
+        # correction_set= TODO,
+        btag_wps={"tight": cfg.x.btag_working_points.deepjet.tight},
+        dataset_groups=dataset_groups,
+        pt_edges=(20, 30, 50, 70, 100, 140, 200, 300, 600, 1000),
+        abs_eta_edges=(0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.5),
+        wp_merging={},
+    )
 
     ################################################################################################
     # dataset / process specific methods
