@@ -211,9 +211,10 @@ def add_variables(cfg: od.Config) -> None:
     add_variable(
         cfg,
         name="jet6_pt",
-        expression="Jet.pt[:,5]",
+        expression=lambda events: events.Jet[events.Jet.pt >= 40 & abs(
+            events.Jet.eta) < 2.4].pt[:, 5],
         null_value=EMPTY_FLOAT,
-        binning=(20, 40.0, 100.0),
+        binning=(23, 30.0, 100.0),
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )
@@ -1262,7 +1263,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fit_Top1_mass",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
-        binning=(100, 0, 500),
+        binning=(90, 50, 500),
         unit="GeV",
         x_title=r"$m_{\text{t}}^{\text{fit}}$",
     )
@@ -1277,12 +1278,21 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="fit_Top1_mass_2",
+        name="fit_Top1_mass_percentile",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs, "overflow": False},
-        binning=(60, 100, 700),
+        binning=[99.9, 161, 167, 172, 177, 184, 214, 287, 1.47e+03],
         unit="GeV",
         x_title=r"fitted Top mass",
+    )
+    add_variable(
+        cfg,
+        name="fit_Top1_pt",
+        expression=partial(build_top1jet, which="pt"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"$m_{\text{t}}^{\text{fit}}$",
     )
 
     def build_top2jet(events, which=None):
@@ -1441,12 +1451,30 @@ def add_variables(cfg: od.Config) -> None:
     build_avg_w_mass.inputs = (build_w1jet.inputs + build_w2jet.inputs)
     add_variable(
         cfg,
+        name="reco_W_mass_avg_percentile",
+        expression=partial(build_avg_w_mass),
+        aux={"inputs": build_avg_w_mass.inputs},
+        binning=[65.3, 76.3, 79.5, 81.9, 84.1, 86.3, 88.8, 91.9, 108],
+        unit="GeV",
+        x_title=r"average $m_{W}^{\text{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_W_mass_avg_percentile_test",
+        expression="RecoW_avg_mass",
+        binning=[65.3, 76.3, 79.5, 81.9, 84.1, 86.3, 88.8, 91.9, 108],
+        unit="GeV",
+        x_title=r"average $m_{W}^{\text{reco}}$",
+    )
+
+    add_variable(
+        cfg,
         name="reco_W_mass_avg",
         expression=partial(build_avg_w_mass),
         aux={"inputs": build_avg_w_mass.inputs},
-        binning=(40, 50, 120),
+        binning=(10, 60, 110),
         unit="GeV",
-        x_title=r"average W mass",
+        x_title=r"average $m_{W}^{\text{reco}}$",
     )
 
     def build_reco_R_bq(events):
@@ -1460,12 +1488,107 @@ def add_variables(cfg: od.Config) -> None:
     build_reco_R_bq.inputs = ["FitJet.reco.{pt,eta,phi,mass}"]
     add_variable(
         cfg,
+        name="reco_R_bq_percentile",
+        expression=build_reco_R_bq,
+        aux={"inputs": build_reco_R_bq.inputs},
+        binning=[0.0884, 0.329, 0.413, 0.493, 0.578, 0.677, 0.805, 1.01, 12.8],
+        unit="",
+        x_title=r"$R_{bq}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_percentile_test",
+        expression="Reco_R_bq",
+        binning=[0.0884, 0.329, 0.413, 0.493, 0.578, 0.677, 0.805, 1.01, 12.8],
+        unit="",
+        x_title=r"$R_{bq}$",
+    )
+
+    add_variable(
+        cfg,
         name="reco_R_bq",
         expression=build_reco_R_bq,
         aux={"inputs": build_reco_R_bq.inputs},
-        binning=(50, 0, 5),
+        binning=(10, 0, 2),
         unit="",
-        x_title=r"R_{bq}",
+        x_title=r"$R_{bq}$",
+    )
+
+    def build_jets(events, which=None):
+        # events = attach_coffea_behavior(
+        #     events, {"Jet": default_coffea_collections["Jet"]},
+        # )
+        reco = events.Jet
+        if which == "bottom":
+            return reco[(abs(events.Jet.partonFlavour) == 5)].pt
+            # return reco[:, :2].pt
+        if which == "light":
+            return reco[(abs(events.Jet.partonFlavour) != 5)].pt
+            # return reco[:, 2:].pt
+        if which is None:
+            return reco.pt * 1
+
+    build_jets.inputs = ["Jet.{pt,partonFlavour,eta,phi,mass}"]
+
+    add_variable(
+        cfg,
+        name="reco_bjet_pt",
+        expression=lambda events: events.Jet[(abs(events.Jet.partonFlavour) == 5) & (
+            events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4)].pt,
+        aux={"inputs": build_jets.inputs},
+        binning=(100, 0, 400),
+        unit="GeV",
+        x_title=r"bjet $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_lightjet_pt",
+        expression=lambda events: events.Jet[(abs(events.Jet.partonFlavour) == 3) & (events.Jet.pt >= 40) &
+                                             (abs(events.Jet.eta) < 2.4) |
+                                             ((abs(events.Jet.partonFlavour) == 2) & (
+                                                 events.Jet.pt >= 40) &
+                                              (abs(events.Jet.eta) < 2.4)) | ((abs(events.Jet.partonFlavour) == 1) &
+                                                                (events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4))].pt,
+        aux={"inputs": build_jets.inputs},
+        binning=(100, 0, 400),
+        unit="GeV",
+        x_title=r"lightjet $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_charmjet_pt",
+        expression=lambda events: events.Jet[(
+            abs(events.Jet.partonFlavour) == 4)].pt,
+        aux={"inputs": build_jets.inputs},
+        binning=(100, 0, 400),
+        unit="GeV",
+        x_title=r"charmjet $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_gluonjet_pt",
+        expression=lambda events: events.Jet[(
+            abs(events.Jet.partonFlavour) == 21)].pt,
+        aux={"inputs": build_jets.inputs},
+        binning=(100, 0, 400),
+        unit="GeV",
+        x_title=r"gluonjet $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="fit_bjet_pt",
+        expression="FitJet[:2].pt",
+        binning=(100, 0, 400),
+        unit="GeV",
+        x_title=r"fitted bjet $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="fit_delta_rbb",
+        expression="FitRbb",
+        binning=(40, 0, 4),
+        unit="",
+        x_title=r"$\Delta R_{bb}$",
     )
 
 # helper to add a variable to the config with some defaults
