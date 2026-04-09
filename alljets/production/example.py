@@ -495,7 +495,8 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                 ak.where(events.HLT[trig_col], id, np.float64(np.nan))
             ))
             trig_passed_orth = ak.singletons(ak.nan_to_none(
-                ak.where((events.HLT[ref_trig] & events.HLT[trig_col]), id, np.float64(np.nan))
+                ak.where(
+                    (events.HLT[ref_trig] & events.HLT[trig_col]), id, np.float64(np.nan))
             ))
             arr = ak.concatenate([arr, trig_passed], axis=1)
             arr_orth = ak.concatenate([arr_orth, trig_passed_orth], axis=1)

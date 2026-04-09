@@ -96,43 +96,51 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
                 events, **kwargs)
 
     # apply flavour corrections only to the correct columns
-    if self.dataset_inst.is_mc and task.global_shift_inst.is_nominal: 
+    if self.dataset_inst.is_mc and task.global_shift_inst.is_nominal:
         pf = abs(events.Jet.partonFlavour)
 
         # bottom
-        events = set_ak_column(events, "Jet.pt_jec_FlavorPureBottom_up" ,(ak.where(pf == 5,
-                 events.Jet.pt_jec_FlavorPureBottom_up, events.Jet.pt)))
-        events = set_ak_column(events, "Jet.mass_jec_FlavorPureBottom_up" ,(ak.where(pf == 5,
-                 events.Jet.mass_jec_FlavorPureBottom_up, events.Jet.mass)))
-        events = set_ak_column(events, "Jet.pt_jec_FlavorPureBottom_down" ,ak.where(pf == 5,
-                 events.Jet.pt_jec_FlavorPureBottom_down, events.Jet.pt))
-        events = set_ak_column(events, "Jet.mass_jec_FlavorPureBottom_down" ,ak.where(pf == 5,
-                 events.Jet.mass_jec_FlavorPureBottom_down, events.Jet.mass))
+        events = set_ak_column(events, "Jet.pt_jec_FlavorPureBottom_up", (ak.where(pf == 5,
+                                events.Jet.pt_jec_FlavorPureBottom_up, events.Jet.pt)))
+        events = set_ak_column(events, "Jet.mass_jec_FlavorPureBottom_up", (ak.where(pf == 5,
+                                events.Jet.mass_jec_FlavorPureBottom_up, events.Jet.mass)))
+        events = set_ak_column(events, "Jet.pt_jec_FlavorPureBottom_down", ak.where(pf == 5,
+                                events.Jet.pt_jec_FlavorPureBottom_down, events.Jet.pt))
+        events = set_ak_column(events, "Jet.mass_jec_FlavorPureBottom_down", ak.where(pf == 5,
+                                events.Jet.mass_jec_FlavorPureBottom_down, events.Jet.mass))
 
         # charm
-        events = set_ak_column(events, "Jet.pt_jec_FlavorPureCharm_up" ,ak.where(pf == 4,
-                 events.Jet.pt_jec_FlavorPureCharm_up, events.Jet.pt))
-        events = set_ak_column(events, "Jet.mass_jec_FlavorPureCharm_up" ,ak.where(pf == 4,
-                 events.Jet.mass_jec_FlavorPureCharm_up, events.Jet.mass))
-        events = set_ak_column(events, "Jet.pt_jec_FlavorPureCharm_down" ,ak.where(pf == 4,
-                 events.Jet.pt_jec_FlavorPureCharm_down, events.Jet.pt))
-        events = set_ak_column(events, "Jet.mass_jec_FlavorPureCharm_down" ,ak.where(pf == 4,
-                 events.Jet.mass_jec_FlavorPureCharm_down, events.Jet.mass))
+        events = set_ak_column(events, "Jet.pt_jec_FlavorPureCharm_up", ak.where(pf == 4,
+                                            events.Jet.pt_jec_FlavorPureCharm_up, events.Jet.pt))
+        events = set_ak_column(events, "Jet.mass_jec_FlavorPureCharm_up", ak.where(pf == 4,
+                                            events.Jet.mass_jec_FlavorPureCharm_up, events.Jet.mass))
+        events = set_ak_column(events, "Jet.pt_jec_FlavorPureCharm_down", ak.where(pf == 4,
+                                            events.Jet.pt_jec_FlavorPureCharm_down, events.Jet.pt))
+        events = set_ak_column(events, "Jet.mass_jec_FlavorPureCharm_down", ak.where(pf == 4,
+                                                events.Jet.mass_jec_FlavorPureCharm_down, events.Jet.mass))
         # gluon
-        events = set_ak_column(events, "Jet.pt_jec_FlavorPureGluon_up" ,ak.where((pf == 0 )| (pf == 21),  events.Jet.pt_jec_FlavorPureGluon_up, events.Jet.pt))
-        events = set_ak_column(events, "Jet.mass_jec_FlavorPureGluon_up" ,ak.where((pf== 0 )| (pf == 21),  events.Jet.mass_jec_FlavorPureGluon_up, events.Jet.mass))
-        events = set_ak_column(events, "Jet.pt_jec_FlavorPureGluon_down" ,ak.where((pf == 0 )| (pf == 21),  events.Jet.pt_jec_FlavorPureGluon_down, events.Jet.pt))
-        events = set_ak_column(events, "Jet.mass_jec_FlavorPureGluon_down" ,ak.where((pf == 0 )| (pf == 21),  events.Jet.mass_jec_FlavorPureGluon_down, events.Jet.mass))
+        events = set_ak_column(events, "Jet.pt_jec_FlavorPureGluon_up", ak.where(
+            (pf == 0) | (pf == 21), events.Jet.pt_jec_FlavorPureGluon_up, events.Jet.pt))
+        events = set_ak_column(events, "Jet.mass_jec_FlavorPureGluon_up", ak.where(
+            (pf == 0) | (pf == 21), events.Jet.mass_jec_FlavorPureGluon_up, events.Jet.mass))
+        events = set_ak_column(events, "Jet.pt_jec_FlavorPureGluon_down", ak.where(
+            (pf == 0) | (pf == 21), events.Jet.pt_jec_FlavorPureGluon_down, events.Jet.pt))
+        events = set_ak_column(events, "Jet.mass_jec_FlavorPureGluon_down", ak.where(
+            (pf == 0) | (pf == 21), events.Jet.mass_jec_FlavorPureGluon_down, events.Jet.mass))
 
         # uds quarks
-        events = set_ak_column(events, "Jet.pt_jec_FlavorPureQuark_up" ,ak.where((pf == 1)|(pf ==  2)|(pf == 3),  events.Jet.pt_jec_FlavorPureQuark_up, events.Jet.pt))
-        events = set_ak_column(events, "Jet.mass_jec_FlavorPureQuark_up" ,ak.where((pf == 1)|(pf ==  2)|(pf == 3),  events.Jet.mass_jec_FlavorPureQuark_up, events.Jet.mass))
-        events = set_ak_column(events, "Jet.pt_jec_FlavorPureQuark_down" ,ak.where((pf == 1)|(pf ==  2)|(pf == 3),  events.Jet.pt_jec_FlavorPureQuark_down, events.Jet.pt))
-        events = set_ak_column(events, "Jet.mass_jec_FlavorPureQuark_down" ,ak.where((pf == 1)|(pf ==  2)|(pf == 3),  events.Jet.mass_jec_FlavorPureQuark_down, events.Jet.mass))
+        events = set_ak_column(events, "Jet.pt_jec_FlavorPureQuark_up", ak.where((pf == 1) | (
+            pf == 2) | (pf == 3), events.Jet.pt_jec_FlavorPureQuark_up, events.Jet.pt))
+        events = set_ak_column(events, "Jet.mass_jec_FlavorPureQuark_up", ak.where((pf == 1) | (
+            pf == 2) | (pf == 3), events.Jet.mass_jec_FlavorPureQuark_up, events.Jet.mass))
+        events = set_ak_column(events, "Jet.pt_jec_FlavorPureQuark_down", ak.where((pf == 1) | (
+            pf == 2) | (pf == 3), events.Jet.pt_jec_FlavorPureQuark_down, events.Jet.pt))
+        events = set_ak_column(events, "Jet.mass_jec_FlavorPureQuark_down", ak.where((pf == 1) | (
+            pf == 2) | (pf == 3), events.Jet.mass_jec_FlavorPureQuark_down, events.Jet.mass))
     return events
 
 
-@ default.init
+@default.init
 def default_init(self: Calibrator, **kwargs) -> None:
     # set the name of the met collection to use
     met_name = self.config_inst.x.met_name
@@ -171,13 +179,13 @@ def default_init(self: Calibrator, **kwargs) -> None:
         self.config_inst.set_aux(flag, True)
 
     # store references to classes
-    self.jec_full_cls= self.config_inst.x.calib_jec_full_cls
-    self.jec_nominal_cls= self.config_inst.x.calib_jec_nominal_cls
-    self.deterministic_jer_jec_full_cls= self.config_inst.x.calib_deterministic_jer_jec_full_cls
-    self.deterministic_jec_jec_nominal_cls= self.config_inst.x.calib_deterministic_jec_jec_nominal_cls
+    self.jec_full_cls = self.config_inst.x.calib_jec_full_cls
+    self.jec_nominal_cls = self.config_inst.x.calib_jec_nominal_cls
+    self.deterministic_jer_jec_full_cls = self.config_inst.x.calib_deterministic_jer_jec_full_cls
+    self.deterministic_jec_jec_nominal_cls = self.config_inst.x.calib_deterministic_jec_jec_nominal_cls
 
     # collect derived calibrators and add them to the calibrator uses and produces
-    derived_calibrators= {
+    derived_calibrators = {
         self.jec_full_cls,
         self.jec_nominal_cls,
         self.deterministic_jer_jec_full_cls,
