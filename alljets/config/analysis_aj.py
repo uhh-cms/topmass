@@ -5,6 +5,8 @@ Configuration of the topmass_alljets analysis.
 """
 
 from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
+from alljets.hist_hooks.unrolling2d import add_hooks as add_unrolling_hooks
+from alljets.hist_hooks.dividebybinwidth import add_hooks as add_divide_by_bin_width_hooks
 import importlib
 import os
 
@@ -31,6 +33,8 @@ analysis_aj = ana = od.Analysis(
 analysis_aj.x.hist_hooks = DotDict()
 # QCD hist hooks
 add_qcd_hooks(analysis_aj)
+add_unrolling_hooks(analysis_aj)
+add_divide_by_bin_width_hooks(analysis_aj)
 
 # analysis-global versions
 # (see cfg.x.versions below for more info)
