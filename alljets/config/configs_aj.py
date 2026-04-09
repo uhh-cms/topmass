@@ -345,6 +345,9 @@ def add_config(
             # "ax_cfg": {
             #     "ylim": (-10, 10),
             # },
+            "ax_cfg": {
+                "ylabel": "Entries/BinWidth",
+            },
             "rax_cfg": {
                 "ylim": (0.9, 1.1),
             },
@@ -353,6 +356,86 @@ def add_config(
             #     "xycoords": "axes fraction",
             #     "fontsize": 16,
             # },
+        },
+        "default_rax5": {
+            "ax_cfg": {
+                "ylabel": "Entries/BinWidth",
+            },
+            "rax_cfg": {
+                "ylim": (0.95, 1.05),
+            },
+        },
+        "default_rax25": {
+            "ax_cfg": {
+                "ylabel": "Entries/BinWidth",
+            },
+            "rax_cfg": {
+                "ylim": (0.75, 1.25),
+            },
+        },
+        "ax_50_400": {
+
+            "ax_cfg": {
+                "xlim": (50, 400),
+                "ylabel": "Entries/BinWidth",
+            },
+        },
+        "ax_50_400_rax_05": {
+
+            "ax_cfg": {
+                "xlim": (50, 400),
+                "ylabel": "Entries/BinWidth",
+            },
+            "rax_cfg": {
+                "ylim": (0.95, 1.05),
+            },
+        },
+        "ax_50_400_rax_1": {
+
+            "ax_cfg": {
+                "xlim": (50, 400),
+                "ylabel": "Entries/BinWidth",
+            },
+            "rax_cfg": {
+                "ylim": (0.9, 1.1),
+            },
+        },
+        "ax_50_400_rax_2": {
+
+            "ax_cfg": {
+                "xlim": (50, 400),
+                "ylabel": "Entries/BinWidth",
+            },
+            "rax_cfg": {
+                "ylim": (0.8, 1.2),
+            },
+        },
+        "Rbq_ax2": {
+
+            "ax_cfg": {
+                "xlim": (0.0, 2.0),
+                "ylabel": "Entries/BinWidth",
+            },
+        },
+        "Rbq_ax2_rax_05": {
+
+            "ax_cfg": {
+                "ylabel": "Entries/BinWidth",
+                "xlim": (0.0, 2.0),
+            },
+            "rax_cfg": {
+                "ylim": (0.95, 1.05),
+            },
+        },
+        "Rbq_ax2_rax_1": {
+
+            "ax_cfg": {
+                "ylabel": "Entries/BinWidth",
+                "xlim": (0.0, 2.0),
+            },
+            "rax_cfg": {
+                "ylim": (0.9, 1.1),
+            },
         },
     }
     # plotting overwrites
@@ -441,35 +524,35 @@ def add_config(
                     filter(
                         bool,
                         [
-                            # "AbsoluteStat",
-                            # "AbsoluteScale",
+                            "AbsoluteStat",
+                            "AbsoluteScale",
                             # "AbsoluteSample",
-                            # "AbsoluteFlavMap",
-                            # "AbsoluteMPFBias",
-                            # "Fragmentation",
-                            # "SinglePionECAL",
-                            # "SinglePionHCAL",
+                            # "AbsoluteFlavMap", #obsolete for Run2
+                            "AbsoluteMPFBias",
+                            "Fragmentation",
+                            "SinglePionECAL",
+                            "SinglePionHCAL",
                             # "FlavorQCD",
                             # "TimePtEta",
-                            # "RelativeJEREC1",
-                            # "RelativeJEREC2",
-                            # "RelativeJERHF",
-                            # "RelativePtBB",
-                            # "RelativePtEC1",
-                            # "RelativePtEC2",
-                            # "RelativePtHF",
-                            # "RelativeBal",
-                            # "RelativeSample",
-                            # "RelativeFSR",
-                            # "RelativeStatFSR",
-                            # "RelativeStatEC",
-                            # "RelativeStatHF",
-                            # "PileUpDataMC",
-                            # "PileUpPtRef",
-                            # "PileUpPtBB",
-                            # "PileUpPtEC1",
-                            # "PileUpPtEC2",
-                            # "PileUpPtHF",
+                            "RelativeJEREC1",
+                            "RelativeJEREC2",
+                            "RelativeJERHF",
+                            "RelativePtBB",
+                            "RelativePtEC1",
+                            "RelativePtEC2",
+                            "RelativePtHF",
+                            "RelativeBal",
+                            "RelativeSample",
+                            "RelativeFSR",
+                            "RelativeStatFSR",
+                            "RelativeStatEC",
+                            "RelativeStatHF",
+                            "PileUpDataMC",
+                            "PileUpPtRef",
+                            "PileUpPtBB",
+                            "PileUpPtEC1",
+                            "PileUpPtEC2",
+                            "PileUpPtHF",
                             # "PileUpMuZero",
                             # "PileUpEnvelope",
                             # "SubTotalPileUp",
@@ -478,21 +561,21 @@ def add_config(
                             # "SubTotalScale",
                             # "SubTotalAbsolute",
                             # "SubTotalMC",
-                            "Total",
+                            # "Total",
                             # "TotalNoFlavor",
                             # "TotalNoTime",
                             # "TotalNoFlavorNoTime",
                             # "FlavorZJet",
                             # "FlavorPhotonJet",
-                            # "FlavorPureGluon",
-                            # "FlavorPureQuark",
-                            # "FlavorPureCharm",
-                            # "FlavorPureBottom",
-                            "CorrelationGroupMPFInSitu",
-                            "CorrelationGroupIntercalibration",
-                            "CorrelationGroupbJES",
-                            "CorrelationGroupFlavor",
-                            "CorrelationGroupUncorrelated",
+                            "FlavorPureGluon",
+                            "FlavorPureQuark",
+                            "FlavorPureCharm",
+                            "FlavorPureBottom",
+                            # "CorrelationGroupMPFInSitu",
+                            # "CorrelationGroupIntercalibration",
+                            # "CorrelationGroupbJES",
+                            # "CorrelationGroupFlavor",
+                            # "CorrelationGroupUncorrelated",
                         ],
                     ),
                 ),
@@ -608,12 +691,29 @@ def add_config(
     cfg.add_shift(name="tune_down", id=2, type="shape",
                   tags={"disjoint_from_nominal", "tune"})
     add_shift_aliases(cfg, "tune", {"tune": "tune_{direction}"})
+    cfg.add_shift(name="tune_rtt_up", id=200, type="shape",
+                  tags={"disjoint_from_nominal", "tune_rtt"})
+    cfg.add_shift(name="tune_rtt_down", id=201, type="shape",
+                  tags={"disjoint_from_nominal", "tune_rtt"})
+    cfg.add_shift(name="tune_erdON_up", id=202, type="shape",
+                  tags={"disjoint_from_nominal", "tune_erdON"})
+    cfg.add_shift(name="tune_erdON_down", id=203, type="shape",
+                  tags={"disjoint_from_nominal", "tune_erdON"})
+    cfg.add_shift(name="tune_cr1_up", id=204, type="shape",
+                  tags={"disjoint_from_nominal", "tune_cr1"})
+    cfg.add_shift(name="tune_cr1_down", id=205, type="shape",
+                  tags={"disjoint_from_nominal", "tune_cr1"})
+    cfg.add_shift(name="tune_cr2_up", id=206, type="shape",
+                  tags={"disjoint_from_nominal", "tune_cr2"})
+    cfg.add_shift(name="tune_cr2_down", id=207, type="shape",
+                  tags={"disjoint_from_nominal", "tune_cr2"})
 
     cfg.add_shift(name="hdamp_up", id=3, type="shape",
                   tags={"disjoint_from_nominal", "hdamp"})
     cfg.add_shift(name="hdamp_down", id=4, type="shape",
                   tags={"disjoint_from_nominal", "hdamp"})
 
+    # Top mass sample shifts
     cfg.add_shift(name="mtop_up", id=5, type="shape",
                   tags={"disjoint_from_nominal", "mtop"})
     cfg.add_shift(name="mtop_down", id=6, type="shape",
@@ -659,6 +759,7 @@ def add_config(
                     "normalized_njet_btag_deepjet_weight": "normalized_njet_btag_deepjet_weight_{name}",
                     "normalized_btag_pnet_weight": "normalized_btag_pnet_weight_{name}",
                     "normalized_njet_btag_pnet_weight": "normalized_njet_btag_pnet_weight_{name}",
+                    "btag_weight": "btag_weight_{name}",
                 },
             )
     # cfg.add_shift(name="jec_up", id=20, type="shape", tags="jec")
@@ -673,6 +774,10 @@ def add_config(
     #         "MET.phi": "MET.phi_{name}",
     #     },
     # )
+    # Jet energy resolution
+    cfg.add_shift(name="jer_up", id=8, type="shape", tags="jer")
+    cfg.add_shift(name="jer_down", id=9, type="shape", tags="jer")
+    add_shift_aliases(cfg, "jer", {"jer": "jer_{direction}"})
 
     # event weights due to muon scale factors
     cfg.add_shift(name="mu_up", id=10, type="shape")
@@ -713,7 +818,25 @@ def add_config(
             "trig_weight": "trig_weight_{direction}",
         },
     )
-
+    # Parton shower (isr/fsr) shifts
+    cfg.add_shift(name="isr_up", id=122, type="shape", tags="isr")
+    cfg.add_shift(name="isr_down", id=123, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr",
+        {
+            "isr_weight": "isr_weight_{direction}",
+        },
+    )
+    cfg.add_shift(name="fsr_up", id=124, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_down", id=125, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr",
+        {
+            "fsr_weight": "fsr_weight_{direction}",
+        },
+    )
     # Pile-up shifts
     cfg.add_shift(name="pu_weight_minbias_xs_up",
                   id=150, type="shape", tags="pu_weight")
@@ -726,7 +849,6 @@ def add_config(
             "pu_weight": "pu_weight_minbias_xs_{direction}",
         },
     )
-    # Top mass sample shifts
 
     ################################################################################################
     # external files
@@ -808,7 +930,8 @@ def add_config(
                 "luminosityBlock",
                 "event",
                 # object info
-                "Jet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
+                "Jet.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,partonFlavour}",
+                "Jet.*",
                 "Bjet.*",
                 "VetoJet.*",
                 "LightJet.*",
@@ -830,8 +953,8 @@ def add_config(
                 "Mt2",
                 "chi2",
                 "deltaRb",
-                "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,\
-                      PFHT380_SixPFJet32,IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}",
+                "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,"
+                "PFHT380_SixPFJet32,IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}",
                 # columns added during selection
                 "deterministic_seed",
                 "process_id",
@@ -881,9 +1004,11 @@ def add_config(
     cfg.x.event_weights = DotDict(
         {
             "normalization_weight": [],
-            # "btag_weight": [],
+            "btag_weight": [],
             # "trig_weight": [],
             "trig_weight": get_shifts("trig"),
+            "isr_weight": get_shifts("isr"),
+            "fsr_weight": get_shifts("fsr"),
             # "muon_weight": get_shifts("mu"),
             "pdf_weight": get_shifts("pdf"),
             "murmuf_weight": get_shifts("murmuf"),
