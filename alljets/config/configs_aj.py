@@ -190,12 +190,12 @@ def add_config(
         "tt_sl_powheg",
         "tt_dl_powheg",
         "tt_fh_powheg",
-        "tt_fh_mt166p5_powheg",
-        "tt_fh_mt169p5_powheg",
-        "tt_fh_mt171p5_powheg",
-        "tt_fh_mt173p5_powheg",
-        "tt_fh_mt175p5_powheg",
-        "tt_fh_mt178p5_powheg",
+        # "tt_fh_mt166p5_powheg",
+        # "tt_fh_mt169p5_powheg",
+        # "tt_fh_mt171p5_powheg",
+        # "tt_fh_mt173p5_powheg",
+        # "tt_fh_mt175p5_powheg",
+        # "tt_fh_mt178p5_powheg",
     ]
     for dataset_name in dataset_names:
         # skip when in sync mode and not exiting
@@ -795,14 +795,12 @@ def add_config(
     add_external(
         "jet_jerc", (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
     )
-    # btag scale factor
+    # WP based btag SF
     add_external(
-        "btag_sf_corr", (
-            f"{json_mirror}/POG/BTV/{year}{corr_postfix}_UL/btagging.json.gz",
-            "v1",
-        ),
-
+        "btag_wp_sf_corr",
+        (f"/afs/cern.ch/user/l/lgriesin/public/mTop/BTV_files/deepJet_{year}{corr_postfix}_merged.json.gz", "v1"),
     )
+
     # electron scale factors
     add_external(
         "electron_sf", (
@@ -828,9 +826,9 @@ def add_config(
                 "luminosityBlock",
                 "event",
                 # object info
-                "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,artonFlavour,hadronFlavour,veto_map_mask}",
-                "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,artonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
-                "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,artonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
+                "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask}",
+                "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
+                "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
                 "Muon.{pt,eta,phi,mass,pfRelIso04_all}",
                 "PV.{npvs,npvsGood}",
                 "GenPart.*",

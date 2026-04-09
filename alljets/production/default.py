@@ -31,8 +31,10 @@ from columnflow.columnar_util import attach_coffea_behavior as attach_coffea_beh
 
 from columnflow.production.cms.muon import muon_weights
 from columnflow.production.cms.mc_weight import mc_weight
+from columnflow.production.cms.btag import btag_wp_weights
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.production.normalization import normalization_weights
+
 
 from alljets.production.KinFit import kinFit
 from alljets.scripts.default import combinationtype
@@ -306,13 +308,16 @@ def cutflow_features(
         features,
         kinFitMatch,
         category_ids,
+        btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
+        "SelectedJets.{pt,eta,phi,mass,hadronFlavour,btagDeepFlavB}",
     },
     produces={
         features,
         kinFitMatch,
         category_ids,
+        btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
     },
@@ -336,6 +341,9 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # Compute category ids used by later stages
     events = self[category_ids](events, **kwargs)
+
+    # WP based btag SF
+    events = self[btag_wp_weights](events, **kwargs)
 
     # MC-only weights
     if self.dataset_inst.is_mc:

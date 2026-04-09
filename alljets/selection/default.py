@@ -29,7 +29,6 @@ from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.production.cms.pdf import pdf_weights
 from columnflow.selection.cms.jets import jet_veto_map
 from columnflow.production.cms.pileup import pu_weight
-from columnflow.production.cms.btag import btag_weights
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.scale import murmuf_weights
 from columnflow.production.cms.parton_shower import ps_weights
@@ -104,7 +103,6 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         pdf_weights,
         murmuf_weights,
         pu_weight,
-        btag_weights,
         trig_weights,
         ps_weights,
     },
@@ -120,7 +118,6 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         pdf_weights,
         murmuf_weights,
         pu_weight,
-        btag_weights,
         trig_weights,
         ps_weights,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
@@ -203,8 +200,6 @@ def default_trig_weight(
         events = self[pdf_weights](events, **kwargs)
         events = self[murmuf_weights](events, **kwargs)
         events = self[pu_weight](events, **kwargs)
-        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
-        events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
         events = self[ps_weights](events, **kwargs)
         events = self[trig_weights](events, **kwargs)
 
@@ -217,37 +212,31 @@ def default_trig_weight(
         "num_events_selected": results.event,
     }
     group_map = {}
-    if self.dataset_inst.is_mc:
-        for route in sorted(self[btag_weights].produced_columns):
-            weight_name = str(route)
-            if not weight_name.startswith(btag_weights.weight_name):
-                continue
 
-            if self.dataset_inst.is_mc:
-                weight_map = {
-                    **weight_map,
-                    # mc weight for all events
-                    "sum_mc_weight": (events.mc_weight, Ellipsis),
-                    "sum_mc_weight_selected": (events.mc_weight, results.event),
-                    # TODO: Add variations for shifts
-                    "sum_mc_weight_pu_weight": (events.mc_weight * events.pu_weight, Ellipsis),
-                    "sum_btag_weight": (events[weight_name], Ellipsis),
-                    "sum_btag_weight_selected": (events[weight_name], results.event),
-                    "sum_trig_weight": (events.trig_weight, Ellipsis),
-                    "sum_trig_weight_selected": (events.trig_weight, results.event),
-                }
-            group_map = {
-                # per process
-                "process": {
-                    "values": events.process_id,
-                    "mask_fn": (lambda v: events.process_id == v),
-                },
-                # per jet multiplicity
-                "njet": {
-                    "values": results.x.n_jets,
-                    "mask_fn": (lambda v: results.x.n_jets == v),
-                },
-            }
+    if self.dataset_inst.is_mc:
+        weight_map = {
+            **weight_map,
+            # mc weight for all events
+            "sum_mc_weight": (events.mc_weight, Ellipsis),
+            "sum_mc_weight_selected": (events.mc_weight, results.event),
+            # TODO: Add variations for shifts
+            "sum_mc_weight_pu_weight": (events.mc_weight * events.pu_weight, Ellipsis),
+            "sum_trig_weight": (events.trig_weight, Ellipsis),
+            "sum_trig_weight_selected": (events.trig_weight, results.event),
+        }
+
+    group_map = {
+        # per process
+        "process": {
+            "values": events.process_id,
+            "mask_fn": (lambda v: events.process_id == v),
+        },
+        # per jet multiplicity
+        "njet": {
+            "values": results.x.n_jets,
+            "mask_fn": (lambda v: results.x.n_jets == v),
+        },
+    }
     events, results = self[increment_stats](
         events,
         results,
