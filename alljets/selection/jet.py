@@ -93,6 +93,7 @@ def jet_selection(
     jet_mask0 = ak4_mask & (abs(events.Jet.eta) < 2.6)
     jet_mask = (jet_mask0 & (events.Jet.pt >= 32.0))
     ht_sel = (ak.sum(events.Jet.pt[jet_mask], axis=1) >= 450)
+    jet_idx = sorted_indices_from_mask(jet_mask, events.Jet.pt, ascending=False)
 
     # Extract the indices of jets passing the initial selection, sorted by pt (descending)
     trigjet_idx = sorted_indices_from_mask(jet_mask0, events.Jet.pt, ascending=False)
@@ -160,6 +161,7 @@ def jet_selection(
         },
         objects={
             "Jet": {
+                "Jet": jet_idx,
                 "TrigJets": trigjet_idx,
                 "SelectedJets": eventjet_idx,
                 "KinFitJets": leading6_idx,

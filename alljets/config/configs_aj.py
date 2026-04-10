@@ -826,6 +826,7 @@ def add_config(
                 "luminosityBlock",
                 "event",
                 # object info
+                "Jet.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask}",
                 "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask}",
                 "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
                 "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
