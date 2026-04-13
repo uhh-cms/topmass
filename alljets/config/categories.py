@@ -32,7 +32,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="incl",
         selection="cat_incl",
-        id = 1,
+        id=1,
         label="inclusive",
     )
 
@@ -44,14 +44,14 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="6j",
         selection="cat_6j",
-        id = 101,
+        id=101,
         label="6 jets",
     )
     add_category(
         cfg,
         name="7j",
         selection="cat_7j",
-        id = 102,
+        id=102,
         label="7+ jets",
     )
 
@@ -63,14 +63,14 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="2btj",
         selection="cat_2btj",
-        id = 201,
+        id=201,
         label="2 b-tagged jets or more",
     )
     add_category(
         cfg,
         name="0btj",
         selection="cat_0btj",
-        id = 202,
+        id=202,
         label="0 b-tagged jets",
     )
 
@@ -82,14 +82,14 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="fit_nconv",
         selection="cat_fit_nconv",
-        id = 301,
+        id=301,
         label="kinfit not converged",
     )
     add_category(
         cfg,
         name="fit_conv",
         selection="cat_fit_conv",
-        id = 302,
+        id=302,
         label="kinfit converged",
     )
 
@@ -101,42 +101,42 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="fitPgof_fail",
         selection="cat_fitPgof_fail",
-        id = 401,
+        id=401,
         label="kinfit converged and $P_{gof} < 0.1$",
     )
     add_category(
         cfg,
         name="fitPgof_pass",
         selection="cat_fitPgof_pass",
-        id = 402,
+        id=402,
         label="$P_{gof} > 0.1$ ",
     )
     add_category(
         cfg,
         name="fitPgof_rbb",
         selection="cat_fitPgof_rbb",
-        id = 403,
+        id=403,
         label=r"below $\chi^2$ cut and above $\Delta R_{\text{b}}$ cut",
     )
     add_category(
         cfg,
         name="fit_rbb",
         selection="cat_rbb",
-        id = 404,
+        id=404,
         label=r"$\Delta R_{\text{b}}$ > 2",
     )
     add_category(
         cfg,
         name="rbb_sig",
         selection="cat_Rbb_sig",
-        id = 405,
+        id=405,
         label=r"$\Delta R_{\text{bb}}$ > 2",
     )
     add_category(
         cfg,
         name="pgof_sig",
         selection="cat_FitPgof_sig",
-        id = 406,
+        id=406,
         label=r"$P_{gof} > 0.1$ ",
     )
     # ========================================================================
@@ -147,7 +147,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="bkg",
         selection="cat_0btj_bkg",
-        id = 501,
+        id=501,
         label="QCD estimation",
         tags={"0btj"},
     )
@@ -155,7 +155,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="sig",
         selection="cat_2btj_sig",
-        id = 502,
+        id=502,
         label="Signal Region",
         tags={"2btj"},
     )
@@ -167,7 +167,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="fit_matched",
         selection="cat_fit_matched",
-        id = 601,
+        id=601,
         label="correctly matched events",
         tags={"matched"},
     )
@@ -175,7 +175,7 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="fit_unmatched",
         selection="cat_fit_unmatched",
-        id = 602,
+        id=602,
         label="wrong or umatched events",
         tags={"matched"},
     )
