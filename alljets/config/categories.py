@@ -114,6 +114,18 @@ def add_categories(cfg: od.Config) -> None:
         selection="cat_rbb",
         label=r"$\Delta R_{\text{b}}$ > 2",
     )
+    add_category(
+        cfg,
+        name="rbb_sig",
+        selection="cat_Rbb_sig",
+        label=r"$\Delta R_{\text{bb}}$ > 2",
+    )
+    add_category(
+        cfg,
+        name="pgof_sig",
+        selection="cat_FitPgof_sig",
+        label=r"$P_{gof} > 0.1$ ",
+    )
     # ========================================================================
     # Signal and background regions
     # ========================================================================
