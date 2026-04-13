@@ -8,12 +8,13 @@ from columnflow.inference import InferenceModel, ParameterType, inference_model,
 
 
 @inference_model
-def default_2D(self):
+def default_2D(self: InferenceModel) -> None:
+
     self.add_category(
-        "fit_conv_big_2D_mtfit_W_mass_avg",
+        "SR_2D_mtfit_W_mass_avg",
         config_data={
             config_inst.name: self.category_config_spec(
-                category="fit_conv_big_rbb",
+                category="sig",
                 variable="fit_Top1_mass_percentile-reco_W_mass_avg_percentile",
                 data_datasets=["data_jetht*"],
             )

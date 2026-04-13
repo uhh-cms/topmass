@@ -15,10 +15,10 @@ def default_1D(self: InferenceModel) -> None:
     #
 
     self.add_category(
-        "fit_conv_big_top_mass",
+        "SR_top_mass",
         config_data={
             config_inst.name: self.category_config_spec(
-                category="fit_conv_big_rbb",
+                category="sig",
                 variable="fit_Top1_mass_percentile",
                 data_datasets=["data_jetht*"],
             )
@@ -27,10 +27,10 @@ def default_1D(self: InferenceModel) -> None:
     )
 
     self.add_category(
-        "fit_conv_big_reco_W_avg",
+        "SR_reco_W_avg",
         config_data={
             config_inst.name: self.category_config_spec(
-                category="fit_conv_big_rbb",
+                category="sig",
                 variable="reco_W_mass_avg_percentile",
                 data_datasets=["data_jetht*"],
             )
@@ -39,10 +39,10 @@ def default_1D(self: InferenceModel) -> None:
     )
 
     self.add_category(
-        "fit_conv_big_reco_R_bq",
+        "SR_reco_R_bq",
         config_data={
             config_inst.name: self.category_config_spec(
-                category="fit_conv_big_rbb",
+                category="sig",
                 variable="reco_R_bq_percentile",
                 data_datasets=["data_jetht*"],
             )
@@ -653,4 +653,3 @@ def default_1D(self: InferenceModel) -> None:
 #     transformations=[ParameterTransformation.effect_from_rate],
 #     effect=(0.5, 1.1),
 # )
-
