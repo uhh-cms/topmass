@@ -18,7 +18,7 @@ SelectionResult contains selection masks and object indices for downstream use.
 
 from collections import defaultdict
 
-from columnflow.util import maybe_import
+from columnflow.util import maybe_import, DotDict
 from columnflow.columnar_util import set_ak_column
 from columnflow.selection.stats import increment_stats
 from columnflow.production.processes import process_ids
@@ -34,6 +34,7 @@ from columnflow.production.cms.scale import murmuf_weights
 from columnflow.production.cms.parton_shower import ps_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
+from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 
 from alljets.selection.jet import jet_selection
 from alljets.production.default import cutflow_features
@@ -42,6 +43,7 @@ from alljets.production.trig_cor_weight import trig_weights
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 coffea = maybe_import("coffea")
+hist = maybe_import("hist")
 
 
 @selector(
@@ -94,6 +96,7 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         jet_veto_map,
         jet_selection,
         attach_coffea_behavior,
+        fill_btag_wp_count_hists,
         gen_top_lookup,
         process_ids,
         increment_stats,
@@ -113,6 +116,7 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         gen_top_lookup,
         process_ids,
         deterministic_seeds,
+        fill_btag_wp_count_hists,
         incl_category_ids,
         mc_weight,
         pdf_weights,
@@ -130,6 +134,7 @@ def default_trig_weight(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
+    hists: DotDict[str, hist.Hist],
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """
@@ -181,11 +186,18 @@ def default_trig_weight(
 
     # combined event selection after all steps
     results.event = (
-        results.steps.Trigger &
+        results.steps.SignalOrBkgTrigger &
         results.steps.HT &
         results.steps.jet &
-        results.steps.BTag &
-        results.steps.LeadingSix2BTag
+        results.steps.BTag20 &
+        results.steps.LeadingSix20BTag
+    )
+
+    # Combined event selection for efficiency calculation, without b-tagging requirements
+    results.event_eff = (
+        results.steps.SignalOrBkgTrigger &
+        results.steps.HT &
+        results.steps.jet
     )
 
     # create process ids, deterministic seeds, and inclusive category ids for cutflow
@@ -202,6 +214,8 @@ def default_trig_weight(
         events = self[pu_weight](events, **kwargs)
         events = self[ps_weights](events, **kwargs)
         events = self[trig_weights](events, **kwargs)
+        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+        self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)

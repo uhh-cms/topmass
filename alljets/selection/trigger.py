@@ -11,7 +11,7 @@ SelectionResult contains selection masks and object indices for downstream use.
 
 from collections import defaultdict
 
-from columnflow.util import maybe_import
+from columnflow.util import maybe_import, DotDict
 from columnflow.columnar_util import set_ak_column
 from columnflow.selection.stats import increment_stats
 from columnflow.production.processes import process_ids
@@ -26,15 +26,18 @@ from columnflow.production.cms.scale import murmuf_weights
 from columnflow.production.cms.parton_shower import ps_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
+from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 
 from alljets.selection.jet import jet_selection
 from alljets.selection.default import muon_selection
 from alljets.production.default import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights
 
+
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 coffea = maybe_import("coffea")
+hist = maybe_import("hist")
 
 
 @selector(
@@ -47,6 +50,7 @@ coffea = maybe_import("coffea")
         process_ids,
         increment_stats,
         deterministic_seeds,
+        fill_btag_wp_count_hists,
         gen_top_lookup,
         mc_weight,
         pdf_weights,
@@ -61,6 +65,7 @@ coffea = maybe_import("coffea")
         jet_veto_map,
         process_ids,
         gen_top_lookup,
+        fill_btag_wp_count_hists,
         mc_weight,
         pdf_weights,
         murmuf_weights,
@@ -76,6 +81,7 @@ def trigger_eff(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
+    hists: DotDict[str, hist.Hist],
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """
@@ -129,9 +135,14 @@ def trigger_eff(
     results.event = (
         results.steps.All &
         results.steps.BaseTrigger &
-        results.steps.SixJets &
         results.steps.BTag &
-        results.steps.jet &
+        results.steps.HT
+    )
+
+    # Combined event selection for efficiency calculation, without b-tagging requirements
+    results.event_eff = (
+        results.steps.All &
+        results.steps.BaseTrigger &
         results.steps.HT
     )
 
@@ -149,6 +160,8 @@ def trigger_eff(
         events = self[murmuf_weights](events, **kwargs)
         events = self[pu_weight](events, **kwargs)
         events = self[ps_weights](events, **kwargs)
+        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+        self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)
@@ -201,6 +214,7 @@ def trigger_eff(
         process_ids,
         increment_stats,
         deterministic_seeds,
+        fill_btag_wp_count_hists,
         gen_top_lookup,
         mc_weight,
         pdf_weights,
@@ -216,6 +230,7 @@ def trigger_eff(
         jet_veto_map,
         process_ids,
         gen_top_lookup,
+        fill_btag_wp_count_hists,
         mc_weight,
         pdf_weights,
         murmuf_weights,
@@ -232,6 +247,7 @@ def trigger_eval(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
+    hists: DotDict[str, hist.Hist],
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """
@@ -294,6 +310,13 @@ def trigger_eval(
         results.steps.HT
     )
 
+    # Combined event selection for efficiency calculation, without b-tagging requirements
+    results.event_eff = (
+        results.steps.All &
+        results.steps.BaseTrigger &
+        results.steps.HT
+    )
+
     # create process ids and deterministic seeds
     events = self[process_ids](events, **kwargs)
     events = self[deterministic_seeds](events, **kwargs)
@@ -307,6 +330,8 @@ def trigger_eval(
         events = self[pu_weight](events, **kwargs)
         events = self[ps_weights](events, **kwargs)
         events = self[trig_weights](events, **kwargs)
+        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+        self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)

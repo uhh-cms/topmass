@@ -311,7 +311,7 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
-        "SelectedJets.{pt,eta,phi,mass,hadronFlavour,btagDeepFlavB}",
+        "Jet.*",
     },
     produces={
         features,
@@ -322,6 +322,8 @@ def cutflow_features(
         attach_coffea_behavior,
     },
     require_producers={"kinFitMatch"},
+    # whether weight producers should be added and called
+    produce_weights=True,
 )
 def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
@@ -342,12 +344,11 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Compute category ids used by later stages
     events = self[category_ids](events, **kwargs)
 
-    # WP based btag SF
-    events = self[btag_wp_weights](events, **kwargs)
-
     # MC-only weights
     if self.dataset_inst.is_mc:
         events = self[normalization_weights](events, **kwargs)
+        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+        events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
 
     return events
 
@@ -357,14 +358,18 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         features,
         kinFitMatch,
         category_ids,
+        btag_wp_weights,
         normalization_weights,
+        "Jet.*",
     },
     produces={
         features,
         kinFitMatch,
         category_ids,
+        btag_wp_weights,
         normalization_weights,
     },
+    produce_weights=True,
 )
 def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
@@ -398,6 +403,8 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[normalization_weights](events, **kwargs)
         events = set_ak_column(events, "normalization_weight", np.ones(len(events)), value_type=np.float32)
         events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+        events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
 
     return events
 
