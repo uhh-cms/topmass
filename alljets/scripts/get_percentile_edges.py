@@ -1,5 +1,6 @@
-import awkward as ak
-import numpy as np
+from columnflow.util import maybe_import
+ak = maybe_import("awkward")
+np = maybe_import("numpy")
 
 mtfit = ak.from_parquet("""/data/dust/user/schaller/aj_store/analysis_aj/analysis_aj/cf.ProduceColumns/2017_v9/
 tt_*_powheg/nominal/calib__default/sel__example_trig_weight/red__cf_default/prod__example/v1/columns_*.parquet""",
