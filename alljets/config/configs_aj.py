@@ -764,21 +764,18 @@ def add_config(
     # common files
     # (versions in the end are for hashing in cases where file contents changed but paths did not)
     # lumi files
-    add_external(
-        "lumi",
-        {
-            "golden": (
-                "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collision"
-                "s17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_"
-                "Collisions17_GoldenJSON.txt",
-                "v1",
-            ),  # noqa
-            "normtag": (
-                "/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json",
-                "v1",
-            ),
-        },
-    )
+    add_external("lumi", {
+        "golden": {
+            2016: ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt", "v1"),  # noqa: E501
+            2017: ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa: E501
+            2018: ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt", "v1"),  # noqa: E501
+        }[year],
+        "normtag": {
+            2016: ("/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json", "v1"),
+            2017: ("/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json", "v1"),
+            2018: ("/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json", "v1"),
+        }[year],
+    })
     # pileup weight corrections
     add_external(
         "pu_sf", (
