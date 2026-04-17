@@ -648,8 +648,8 @@ def add_config(
             {
                 "Jet.pt": "Jet.pt_{name}",
                 "Jet.mass": "Jet.mass_{name}",
-                "MET.pt": "MET.pt_{name}",
-                "MET.phi": "MET.phi_{name}",
+                f"{cfg.x.met_name}.pt": f"{cfg.x.met_name}.pt_{{name}}",
+                f"{cfg.x.met_name}.phi": f"{cfg.x.met_name}.phi_{{name}}",
             },
         )
         # TODO: check the JEC de/correlation across years and the interplay with btag weights
@@ -664,6 +664,20 @@ def add_config(
                     "normalized_njet_btag_pnet_weight": "normalized_njet_btag_pnet_weight_{name}",
                 },
             )
+
+    # JER shift
+    cfg.add_shift(name="jer_up", id=6000, type="shape", tags={"jer"})
+    cfg.add_shift(name="jer_down", id=6001, type="shape", tags={"jer"})
+    add_shift_aliases(
+        cfg,
+        "jer",
+        {
+            "Jet.pt": "Jet.pt_{name}",
+            "Jet.mass": "Jet.mass_{name}",
+            f"{cfg.x.met_name}.pt": f"{cfg.x.met_name}.pt_{{name}}",
+            f"{cfg.x.met_name}.phi": f"{cfg.x.met_name}.phi_{{name}}",
+        },
+    )
 
     # event weights due to muon scale factors
     cfg.add_shift(name="mu_up", id=10, type="shape")
