@@ -1579,40 +1579,6 @@ def add_variables(cfg: od.Config) -> None:
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 6 $\eta$",
     )
-    add_variable(
-        cfg,
-        name="fitjetreco_B_pt_coarse",
-        expression="FitJet.reco.pt[:,0:2]",
-        null_value=EMPTY_FLOAT,
-        binning=(15, 40, 500.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{fit}}$ of b-jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjetreco_B_eta_coarse",
-        expression="FitJet.reco.eta[:,0:2]",
-        null_value=EMPTY_FLOAT,
-        binning=(18, -2.7, 2.7),
-        x_title=r"$\eta^{\mathrm{fit}}$ of b-jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_light_pt_coarse",
-        expression="FitJet.pt[:,2:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(15, 40.0, 500.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{fit}}$ of light quark jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_light_eta_coarse",
-        expression="FitJet.eta[:,2:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(18, -2.7, 2.7),
-        x_title=r"$\eta^{\mathrm{fit}}$ of light quark jet candidates",
-    )
 ############################################################
 #              Observables for b tagging efficiency        #
 ############################################################
