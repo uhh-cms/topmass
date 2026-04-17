@@ -467,25 +467,12 @@ def plot_hist_matching_MC(
     }
 
     # Add vertical line at 6.3 for fitchi2_50
-    if variable_inst.name == "fitchi2_50" or variable_inst.name == "fitPgof":
-        # plot_config["cut_line"] = {
-        #     "method": "draw_vline",
-        #     "kwargs": {
-        #         "x": 6.3,
-        #         "ymin": 0.0,
-        #         "ymax": 0.9,
-        #         "relative": True,
-        #         "color": "black",
-        #         "linestyle": "--",
-        #         "linewidth": 3,
-        #         "zorder": 10,
-        #     },
-        # }
+    if variable_inst.name == "fitchi2" or variable_inst.name == "fitPgof":
         plot_config["cut_region"] = {
             "method": "hatch_vregion",
             "kwargs": {
-                "x": 6.3 if variable_inst.name == "fitchi2_50" else 0.1,
-                "side": "right" if variable_inst.name == "fitchi2_50" else "left",
+                "x": 6.3 if variable_inst.name == "fitchi2" else 0.1,
+                "side": "right" if variable_inst.name == "fitchi2" else "left",
                 "ymin": 0.0,
                 "ymax": 0.7,
                 "relative": True,
