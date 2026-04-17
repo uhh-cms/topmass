@@ -137,9 +137,10 @@ def jet_selection(
         alt_jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.alt_jet_trigger]
         jet_base_trigger_sel = ones if not self.jet_base_trigger else events.HLT[self.jet_base_trigger]
     else:
-        jet_trigger_sel = [True] * len(events)
-        alt_jet_trigger_sel = [True] * len(events)
-        jet_base_trigger_sel = [True] * len(events)
+        ones = ak.ones_like(jet_sel)
+        jet_trigger_sel = ones
+        alt_jet_trigger_sel = ones
+        jet_base_trigger_sel = ones
 
     signal_or_bkg_trigger = jet_trigger_sel | alt_jet_trigger_sel
 
