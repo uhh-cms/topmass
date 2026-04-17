@@ -381,6 +381,10 @@ def add_config(
     #       dependence, usage in calibrator, etc
     ################################################################################################
 
+    # Met names for Run2, mainly needed for alias in JEC and JER shifts
+    cfg.x.met_name = "MET"
+    cfg.x.raw_met_name = "RawMET"
+
     # common jec/jer settings configuration
     if run == 2:
         # https://cms-jerc.web.cern.ch/Recommendations/#run-2
@@ -909,8 +913,6 @@ def add_config(
     ################################################################################################
     # external configs: channels, categories, met filters, triggers, variables
     ################################################################################################
-    cfg.x.met_name = "MET"
-    cfg.x.raw_met_name = "RawMET"
 
     # names of muon correction sets and working points
     # (used in the muon producer)
