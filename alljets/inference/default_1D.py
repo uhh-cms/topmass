@@ -4,7 +4,7 @@
 Example inference model.
 """
 
-from columnflow.inference import InferenceModel, ParameterType, inference_model, ParameterTransformation
+from columnflow.inference import InferenceModel, ParameterType, inference_model  # , ParameterTransformation
 
 
 @inference_model
@@ -621,7 +621,7 @@ def default_1D(self: InferenceModel) -> None:
         type=ParameterType.shape,
         config_data={
             config_inst.name: self.parameter_config_spec(
-                shift_source="mtop3",
+                shift_source="mtop1",
             )
             for config_inst in self.config_insts
         },
