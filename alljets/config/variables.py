@@ -26,8 +26,6 @@ from columnflow.columnar_util import (
     EMPTY_FLOAT,
 )
 from .jet_builder import (
-    build_b1jet,
-    build_b2jet,
     build_top1jet,
     build_top1recojet,
     build_top2recojet,
@@ -158,14 +156,13 @@ def add_variables(cfg: od.Config) -> None:
         x_title="trigger weight",
     )
     ###############################################################################
-    #                            Jet Kinematics                                   #
-    #                       Trigger near Jets (pt sorted)                         #
+    #                            TriJet Kinematics                                #
     #                       Using Jets within |eta| < 2.6                         #
     ###############################################################################
     add_variable(
         cfg,
-        name="jet1_pt",
-        expression="Jet.pt[:,0]",
+        name="trigjet1_pt",
+        expression="TrigJets.pt[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 400.0),
         unit="GeV",
@@ -173,42 +170,24 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="jet1_eta",
-        expression="Jet.eta[:,0]",
+        name="trigjet1_eta",
+        expression="TrigJets.eta[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(30, -3.0, 3.0),
         x_title=r"Jet 1 $\eta$",
     )
     add_variable(
         cfg,
-        name="jet1_phi",
-        expression="Jet.phi[:,0]",
+        name="trigjet1_phi",
+        expression="TrigJets.phi[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(66, -3.3, 3.3),
         x_title=r"Jet 1 $\phi$",
     )
     add_variable(
         cfg,
-        name="jet1_jetid",
-        expression="Jet.jetId[:,0]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 1",
-    )
-    add_variable(
-        cfg,
-        name="jet1_puId",
-        expression="Jet.puId[:,0]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 1 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="jet2_pt",
-        expression="Jet.pt[:,1]",
+        name="trigjet2_pt",
+        expression="TrigJets.pt[:,1]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 400.0),
         unit="GeV",
@@ -216,42 +195,24 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="jet2_eta",
-        expression="Jet.eta[:,1]",
+        name="trigjet2_eta",
+        expression="TrigJets.eta[:,1]",
         null_value=EMPTY_FLOAT,
         binning=(30, -3.0, 3.0),
         x_title=r"Jet 2 $\eta$",
     )
     add_variable(
         cfg,
-        name="jet2_phi",
-        expression="Jet.phi[:,1]",
+        name="trigjet2_phi",
+        expression="TrigJets.phi[:,1]",
         null_value=EMPTY_FLOAT,
         binning=(66, -3.3, 3.3),
         x_title=r"Jet 2 $\phi$",
     )
     add_variable(
         cfg,
-        name="jet2_jetid",
-        expression="Jet.jetId[:,1]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 2",
-    )
-    add_variable(
-        cfg,
-        name="jet2_puId",
-        expression="Jet.puId[:,1]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 2 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="jet3_pt",
-        expression="Jet.pt[:,2]",
+        name="trigjet3_pt",
+        expression="TrigJets.pt[:,2]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 400.0),
         unit="GeV",
@@ -259,42 +220,24 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="jet3_eta",
-        expression="Jet.eta[:,2]",
+        name="trigjet3_eta",
+        expression="TrigJets.eta[:,2]",
         null_value=EMPTY_FLOAT,
         binning=(30, -3.0, 3.0),
         x_title=r"Jet 3 $\eta$",
     )
     add_variable(
         cfg,
-        name="jet3_phi",
-        expression="Jet.phi[:,2]",
+        name="trigjet3_phi",
+        expression="TrigJets.phi[:,2]",
         null_value=EMPTY_FLOAT,
         binning=(66, -3.3, 3.3),
         x_title=r"Jet 3 $\phi$",
     )
     add_variable(
         cfg,
-        name="jet3_jetid",
-        expression="Jet.jetId[:,2]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 3",
-    )
-    add_variable(
-        cfg,
-        name="jet3_puId",
-        expression="Jet.puId[:,2]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 3 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="jet4_pt",
-        expression="Jet.pt[:,3]",
+        name="trigjet4_pt",
+        expression="TrigJets.pt[:,3]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 400.0),
         unit="GeV",
@@ -302,42 +245,24 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="jet4_eta",
-        expression="Jet.eta[:,3]",
+        name="trigjet4_eta",
+        expression="TrigJets.eta[:,3]",
         null_value=EMPTY_FLOAT,
         binning=(30, -3.0, 3.0),
         x_title=r"Jet 4 $\eta$",
     )
     add_variable(
         cfg,
-        name="jet4_phi",
-        expression="Jet.phi[:,3]",
+        name="trigjet4_phi",
+        expression="TrigJets.phi[:,3]",
         null_value=EMPTY_FLOAT,
         binning=(66, -3.3, 3.3),
         x_title=r"Jet 4 $\phi$",
     )
     add_variable(
         cfg,
-        name="jet4_jetid",
-        expression="Jet.jetId[:,3]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 4",
-    )
-    add_variable(
-        cfg,
-        name="jet4_puId",
-        expression="Jet.puId[:,3]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 4 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="jet5_pt",
-        expression="Jet.pt[:,4]",
+        name="trigjet5_pt",
+        expression="TrigJets.pt[:,4]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 400.0),
         unit="GeV",
@@ -345,46 +270,19 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="jet5_eta",
-        expression="Jet.eta[:,4]",
+        name="trigjet5_eta",
+        expression="TrigJets.eta[:,4]",
         null_value=EMPTY_FLOAT,
         binning=(30, -3.0, 3.0),
         x_title=r"Jet 5 $\eta$",
     )
     add_variable(
         cfg,
-        name="jet5_phi",
-        expression="Jet.phi[:,4]",
+        name="trigjet5_phi",
+        expression="TrigJets.phi[:,4]",
         null_value=EMPTY_FLOAT,
         binning=(66, -3.3, 3.3),
         x_title=r"Jet 5 $\phi$",
-    )
-    add_variable(
-        cfg,
-        name="jet5_jetid",
-        expression="Jet.jetId[:,4]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 5",
-    )
-    add_variable(
-        cfg,
-        name="jet5_puId",
-        expression="Jet.puId[:,4]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 5 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="jet6_pt",
-        expression="Jet.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"Jet 6 $p_{T}$",
     )
     add_variable(
         cfg,
@@ -398,123 +296,41 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="jet6_eta",
-        expression="Jet.eta[:,5]",
+        name="trigjet6_eta",
+        expression="TrigJets.eta[:,5]",
         null_value=EMPTY_FLOAT,
         binning=(30, -3.0, 3.0),
         x_title=r"Jet 6 $\eta$",
     )
     add_variable(
         cfg,
-        name="jet6_phi",
-        expression="Jet.phi[:,5]",
+        name="trigjet6_phi",
+        expression="TrigJets.phi[:,5]",
         null_value=EMPTY_FLOAT,
         binning=(66, -3.3, 3.3),
         x_title=r"Jet 6 $\phi$",
     )
     add_variable(
         cfg,
-        name="jet6_jetid",
-        expression="Jet.jetId[:,5]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 6",
-    )
-    add_variable(
-        cfg,
-        name="jet6_puId",
-        expression="Jet.puId[:,5]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 6 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="jets_pt",
-        expression="Jet.pt",
+        name="trigjets_pt",
+        expression="TrigJets.pt",
         binning=(40, 0.0, 400.0),
         unit="GeV",
         x_title=r"$p_{T}$ of all jets",
     )
     add_variable(
         cfg,
-        name="jets_eta",
-        expression="Jet.eta",
+        name="trigjets_eta",
+        expression="TrigJets.eta",
         binning=(30, -3.0, 3.0),
         x_title=r"$\eta$ of all jets",
     )
     add_variable(
         cfg,
-        name="jets_phi",
-        expression="Jet.phi",
+        name="trigjets_phi",
+        expression="TrigJets.phi",
         binning=(66, -3.3, 3.3),
         x_title=r"$\phi$ of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_jetId",
-        expression="Jet.jetId",
-        binning=(8, -0.5, 7.5),
-        discrete_x=True,
-        x_title=r"Jet ID of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_puId",
-        expression="Jet.puId",
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet PU ID of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_chHEF",
-        expression="Jet.chHEF",
-        null_value=EMPTY_FLOAT,
-        binning=(10, 0, 1),
-        x_title=r"Jet charged Hadron Energy Fraction of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_chEmEF",
-        expression="Jet.chEmEF",
-        null_value=EMPTY_FLOAT,
-        binning=(10, 0, 1),
-        x_title=r"Jet charged EM Energy Fraction of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_neHEF",
-        expression="Jet.neHEF",
-        null_value=EMPTY_FLOAT,
-        binning=(10, 0, 1),
-        x_title=r"Jet neutral Hadron Energy Fraction of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_neEmEF",
-        expression="Jet.neEmEF",
-        null_value=EMPTY_FLOAT,
-        binning=(10, 0, 1),
-        x_title=r"Jet neutral EM Energy Fraction of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_muEF",
-        expression="Jet.muEF",
-        null_value=EMPTY_FLOAT,
-        binning=(10, 0, 1),
-        x_title=r"Jet muon Energy Fraction of all jets",
-    )
-    add_variable(
-        cfg,
-        name="jets_nConstituents",
-        expression="Jet.nConstituents",
-        null_value=EMPTY_FLOAT,
-        binning=(10, -0.5, 9.5),
-        x_title=r"Number of Jet constituents of all jets",
     )
     ###############################################################################
     #                      HT (Scalar sum of pT of the Jets)                      #
@@ -547,699 +363,8 @@ def add_variables(cfg: od.Config) -> None:
         x_title="$H_T$",
     )
     ###############################################################################
-    #                           EventJet Kinematics                               #
-    #                       Analysis Jets (pt sorted)                             #
-    #                       Using Jets within |eta| < 2.4 & pt >= 40 GeV          #
+    #                                 B-Jet Tagging                               #
     ###############################################################################
-    add_variable(
-        cfg,
-        name="n_jet",
-        expression="n_jet",
-        binning=(16, -0.5, 15.5),
-        x_title="Number of jets",
-        discrete_x=True,
-    )
-    add_variable(
-        cfg,
-        name="n_bjet",
-        expression="n_bjet",
-        binning=(6, -0.5, 5.5),
-        x_title="Number of Bjets",
-    )
-    add_variable(
-        cfg,
-        name="eventjet1_pt",
-        expression="EventJet.pt[:,0]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"Jet 1 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet1_eta",
-        expression="EventJet.eta[:,0]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"Jet 1 $\eta$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet1_phi",
-        expression="EventJet.phi[:,0]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"Jet 1 $\phi$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet1_jetid",
-        expression="EventJet.jetId[:,0]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 1",
-    )
-    add_variable(
-        cfg,
-        name="eventjet1_puId",
-        expression="EventJet.puId[:,0]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 1 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="eventjet2_pt",
-        expression="EventJet.pt[:,1]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"Jet 2 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet2_eta",
-        expression="EventJet.eta[:,1]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"Jet 2 $\eta$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet2_phi",
-        expression="EventJet.phi[:,1]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"Jet 2 $\phi$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet2_jetid",
-        expression="EventJet.jetId[:,1]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 2",
-    )
-    add_variable(
-        cfg,
-        name="eventjet2_puId",
-        expression="EventJet.puId[:,1]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 2 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="eventjet3_pt",
-        expression="EventJet.pt[:,2]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"Jet 3 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet3_eta",
-        expression="EventJet.eta[:,2]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"Jet 3 $\eta$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet3_phi",
-        expression="EventJet.phi[:,2]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"Jet 3 $\phi$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet3_jetid",
-        expression="EventJet.jetId[:,2]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 3",
-    )
-    add_variable(
-        cfg,
-        name="eventjet3_puId",
-        expression="EventJet.puId[:,2]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 3 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="eventjet4_pt",
-        expression="EventJet.pt[:,3]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"Jet 4 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet4_eta",
-        expression="EventJet.eta[:,3]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"Jet 4 $\eta$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet4_phi",
-        expression="EventJet.phi[:,3]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"Jet 4 $\phi$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet4_jetid",
-        expression="EventJet.jetId[:,3]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 4",
-    )
-    add_variable(
-        cfg,
-        name="eventjet4_puId",
-        expression="EventJet.puId[:,3]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 4 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="eventjet5_pt",
-        expression="EventJet.pt[:,4]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"Jet 5 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet5_eta",
-        expression="EventJet.eta[:,4]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"Jet 5 $\eta$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet5_phi",
-        expression="EventJet.phi[:,4]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"Jet 5 $\phi$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet5_jetid",
-        expression="EventJet.jetId[:,4]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 5",
-    )
-    add_variable(
-        cfg,
-        name="eventjet5_puId",
-        expression="EventJet.puId[:,4]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 5 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="eventjet6_pt",
-        expression="EventJet.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"Jet 6 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet6_eta",
-        expression="EventJet.eta[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"Jet 6 $\eta$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet6_phi",
-        expression="EventJet.phi[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"Jet 6 $\phi$",
-    )
-    add_variable(
-        cfg,
-        name="eventjet6_jetid",
-        expression="EventJet.jetId[:,5]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 6",
-    )
-    add_variable(
-        cfg,
-        name="eventjet6_puId",
-        expression="EventJet.puId[:,5]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet 6 PU Id",
-    )
-    add_variable(
-        cfg,
-        name="eventjets_pt",
-        expression="EventJet.pt",
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_{T}$ of all jets",
-    )
-    add_variable(
-        cfg,
-        name="eventjets_eta",
-        expression="EventJet.eta",
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta$ of all jets",
-    )
-    add_variable(
-        cfg,
-        name="eventjets_phi",
-        expression="EventJet.phi",
-        binning=(66, -3.3, 3.3),
-        x_title=r"$\phi$ of all jets",
-    )
-    add_variable(
-        cfg,
-        name="eventjets_jetId",
-        expression="EventJet.jetId",
-        binning=(8, -0.5, 7.5),
-        discrete_x=True,
-        x_title=r"Jet ID of all jets",
-    )
-    add_variable(
-        cfg,
-        name="eventjets_puId",
-        expression="EventJet.puId",
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet PU ID of all jets",
-    )
-    add_variable(
-        cfg,
-        name="eventjets_puId_continuous",
-        expression="EventJet.puId",
-        binning=(10, -0.5, 9.5),
-        discrete_x=False,
-        x_title=r"Jet PU ID of all jets",
-    )
-    ###############################################################################
-    #                           FitJet reco kinematics                            #
-    #                Reco values of the six jets that entered the fit             #
-    ###############################################################################
-    add_variable(
-        cfg,
-        name="fitjet1_pt",
-        expression="FitJet.reco.pt[:,0]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_{T}$ of Jet 1 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet1_eta",
-        expression="FitJet.reco.eta[:,0]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta$ of Jet 1 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet1_phi",
-        expression="FitJet.reco.phi[:,0]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"$\phi$ of Jet 1 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet1_jetid",
-        expression="FitJet.reco.jetId[:,0]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 1 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet1_puId",
-        expression="FitJet.reco.puId[:,0]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"PU Id of Jet 1 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet2_pt",
-        expression="FitJet.reco.pt[:,1]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_{T}$ of Jet 2 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet2_eta",
-        expression="FitJet.reco.eta[:,1]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta$ of Jet 2 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet2_phi",
-        expression="FitJet.reco.phi[:,1]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"$\phi$ of Jet 2 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet2_jetid",
-        expression="FitJet.reco.jetId[:,1]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 2 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet2_puId",
-        expression="FitJet.reco.puId[:,1]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"PU Id of Jet 2 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet3_pt",
-        expression="FitJet.reco.pt[:,2]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_{T}$ of Jet 3 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet3_eta",
-        expression="FitJet.reco.eta[:,2]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta$ of Jet 3 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet3_phi",
-        expression="FitJet.reco.phi[:,2]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"$\phi$ of Jet 3 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet3_jetid",
-        expression="FitJet.reco.jetId[:,2]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 3 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet3_puId",
-        expression="FitJet.reco.puId[:,2]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"PU Id of Jet 3 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet4_pt",
-        expression="FitJet.reco.pt[:,3]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_{T}$ of Jet 4 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet4_eta",
-        expression="FitJet.reco.eta[:,3]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta$ of Jet 4 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet4_phi",
-        expression="FitJet.reco.phi[:,3]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"$\phi$ of Jet 4 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet4_jetid",
-        expression="FitJet.reco.jetId[:,3]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 4 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet4_puId",
-        expression="FitJet.reco.puId[:,3]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"PU Id of Jet 4 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet5_pt",
-        expression="FitJet.reco.pt[:,4]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_{T}$ of Jet 5 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet5_eta",
-        expression="FitJet.reco.eta[:,4]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta$ of Jet 5 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet5_phi",
-        expression="FitJet.reco.phi[:,4]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"$\phi$ of Jet 5 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet5_jetid",
-        expression="FitJet.reco.jetId[:,4]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 5 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet5_puId",
-        expression="FitJet.reco.puId[:,4]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"PU Id of Jet 5 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet6_pt",
-        expression="FitJet.reco.pt[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_{T}$ of Jet 6 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet6_eta",
-        expression="FitJet.reco.eta[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta$ of Jet 6 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet6_phi",
-        expression="FitJet.reco.phi[:,5]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"$\phi$ of Jet 6 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet6_jetid",
-        expression="FitJet.reco.jetId[:,5]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jet 6 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjet6_puId",
-        expression="FitJet.reco.puId[:,5]",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"PU Id of Jet 6 from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjets_pt",
-        expression="FitJet.reco.pt",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p^{\mathrm{reco}}_{T}$ of Jets from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjets_eta",
-        expression="FitJet.reco.eta",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta^{\mathrm{reco}}$ of Jets from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjets_phi",
-        expression="FitJet.reco.phi",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        x_title=r"$\phi^{\mathrm{reco}}$ of Jets from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjets_jetid",
-        expression="FitJet.reco.jetId",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet Id of Jets from kinematic fit",
-    )
-    add_variable(
-        cfg,
-        name="fitjets_puId",
-        expression="FitJet.reco.puId",
-        null_value=-1,
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"PU Id of Jets from kinematic fit",
-    )
-    ###############################################################################
-    #                           B-Jet Kinematics & Tagging                        #
-    ###############################################################################
-    add_variable(
-        cfg,
-        name="bjet1_pt",
-        expression="Bjet.pt[:,0]",
-        null_value=EMPTY_FLOAT,
-        binning=(15, 0.0, 300.0),
-        unit="GeV",
-        x_title=r"BJet 1 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="bjet1_eta",
-        expression="Bjet.eta[:,0]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        unit="GeV",
-        x_title=r"BJet 1 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="bjet1_phi",
-        expression="Bjet.phi[:,0]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        unit="GeV",
-        x_title=r"BJet 1 $\phi$",
-    )
-    add_variable(
-        cfg,
-        name="bjet2_pt",
-        expression="Bjet.pt[:,1]",
-        null_value=EMPTY_FLOAT,
-        binning=(15, 0.0, 300.0),
-        unit="GeV",
-        x_title=r"BJet 2 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="bjet2_eta",
-        expression="Bjet.eta[:,1]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        unit="GeV",
-        x_title=r"BJet 2 $p_{T}$",
-    )
-    add_variable(
-        cfg,
-        name="bjet2_phi",
-        expression="Bjet.phi[:,1]",
-        null_value=EMPTY_FLOAT,
-        binning=(66, -3.3, 3.3),
-        unit="GeV",
-        x_title=r"BJet 2 $\phi$",
-    )
-    add_variable(
-        cfg,
-        name="eventjets_btag",
-        expression="EventJet.btagDeepFlavB",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0, 1),
-        x_title=r"btag scores",
-    )
     add_variable(
         cfg,
         name="maxbtag",
@@ -1262,68 +387,852 @@ def add_variables(cfg: od.Config) -> None:
         expression="secmaxbtag",
         null_value=EMPTY_FLOAT,
         binning=[0, 0.7476, 1],
-        x_title=r"Second highest b tag score",
+        x_title=r"Second highest B-Tag score",
     )
     ###############################################################################
-    #                            Cutflow Features                                 #
+    #                           SelectedJets Kinematics                           #
+    #                   Jets within |eta| < 2.4 & pt >= 40 GeV                    #
     ###############################################################################
     add_variable(
         cfg,
-        name="cf_jet1_pt",
-        expression="cutflow.jet1_pt",
+        name="n_jet",
+        expression="n_jet",
+        binning=(16, -0.5, 15.5),
+        x_title="Number of jets",
+        discrete_x=True,
+    )
+    add_variable(
+        cfg,
+        name="n_bjet",
+        expression="n_bjet",
+        binning=(6, -0.5, 5.5),
+        x_title="Number of Bjets",
+    )
+    add_variable(
+        cfg,
+        name="seljet1_pt",
+        expression="SelectedJets.pt[:,0]",
+        null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 400.0),
         unit="GeV",
         x_title=r"Jet 1 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="cf_ht",
-        expression="cutflow.ht",
-        binning=(50, 0.0, 1000.0),
-        unit="GeV",
-        x_title=r"$H_{T}$",
+        name="seljet1_eta",
+        expression="SelectedJets.eta[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 1 $\eta$",
     )
     add_variable(
         cfg,
-        name="cf_jet6_pt",
-        expression="cutflow.jet6_pt",
-        binning=(25, 0.0, 100.0),
+        name="seljet1_phi",
+        expression="SelectedJets.phi[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 1 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="seljet1_jetid",
+        expression="SelectedJets.jetId[:,0]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet Id of Jet 1",
+    )
+    add_variable(
+        cfg,
+        name="seljet1_puId",
+        expression="SelectedJets.puId[:,0]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet 1 PU Id",
+    )
+    add_variable(
+        cfg,
+        name="seljet2_pt",
+        expression="SelectedJets.pt[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"Jet 2 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="seljet2_eta",
+        expression="SelectedJets.eta[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 2 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="seljet2_phi",
+        expression="SelectedJets.phi[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 2 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="seljet2_jetid",
+        expression="SelectedJets.jetId[:,1]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet Id of Jet 2",
+    )
+    add_variable(
+        cfg,
+        name="seljet2_puId",
+        expression="SelectedJets.puId[:,1]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet 2 PU Id",
+    )
+    add_variable(
+        cfg,
+        name="seljet3_pt",
+        expression="SelectedJets.pt[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"Jet 3 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="seljet3_eta",
+        expression="SelectedJets.eta[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 3 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="seljet3_phi",
+        expression="SelectedJets.phi[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 3 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="seljet3_jetid",
+        expression="SelectedJets.jetId[:,2]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet Id of Jet 3",
+    )
+    add_variable(
+        cfg,
+        name="seljet3_puId",
+        expression="SelectedJets.puId[:,2]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet 3 PU Id",
+    )
+    add_variable(
+        cfg,
+        name="seljet4_pt",
+        expression="SelectedJets.pt[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"Jet 4 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="seljet4_eta",
+        expression="SelectedJets.eta[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 4 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="seljet4_phi",
+        expression="SelectedJets.phi[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 4 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="seljet4_jetid",
+        expression="SelectedJets.jetId[:,3]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet Id of Jet 4",
+    )
+    add_variable(
+        cfg,
+        name="seljet4_puId",
+        expression="SelectedJets.puId[:,3]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet 4 PU Id",
+    )
+    add_variable(
+        cfg,
+        name="seljet5_pt",
+        expression="SelectedJets.pt[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"Jet 5 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="seljet5_eta",
+        expression="SelectedJets.eta[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 5 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="seljet5_phi",
+        expression="SelectedJets.phi[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 5 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="seljet5_jetid",
+        expression="SelectedJets.jetId[:,4]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet Id of Jet 5",
+    )
+    add_variable(
+        cfg,
+        name="seljet5_puId",
+        expression="SelectedJets.puId[:,4]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet 5 PU Id",
+    )
+    add_variable(
+        cfg,
+        name="seljet6_pt",
+        expression="SelectedJets.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="cf_n_bjet",
-        expression="cutflow.n_bjet",
-        binning=(6, -0.5, 5.5),
-        unit="GeV",
-        x_title=r"Number of Bjets",
-    )
-    add_variable(
-        cfg,
-        name="cf_n_jet",
-        expression="cutflow.n_jet",
-        binning=(6, -0.5, 5.5),
-        unit="GeV",
-        x_title=r"Number of Jets",
-    )
-    add_variable(
-        cfg,
-        name="cf_turnon",
-        expression="cutflow.turnon",
-        binning=(2, -0.5, 1.5),
-        x_title=r"0: only in base trigger, 1: In both",
-    )
-    add_variable(
-        cfg,
-        name="cf_combination_type",
-        expression="cutflow.combination_type",
+        name="seljet6_eta",
+        expression="SelectedJets.eta[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(4, -1.5, 2.5),
-        x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 6 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="seljet6_phi",
+        expression="SelectedJets.phi[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 6 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="seljet6_jetid",
+        expression="SelectedJets.jetId[:,5]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet Id of Jet 6",
+    )
+    add_variable(
+        cfg,
+        name="seljet6_puId",
+        expression="SelectedJets.puId[:,5]",
+        null_value=-1,
+        binning=(9, -0.5, 8.5),
+        discrete_x=True,
+        x_title=r"Jet 6 PU Id",
+    )
+    add_variable(
+        cfg,
+        name="seljets_pt",
+        expression="SelectedJets.pt",
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_{T}$ of all jets",
+    )
+    add_variable(
+        cfg,
+        name="seljets_eta",
+        expression="SelectedJets.eta",
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta$ of all jets",
+    )
+    add_variable(
+        cfg,
+        name="seljets_phi",
+        expression="SelectedJets.phi",
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi$ of all jets",
+    )
+    add_variable(
+        cfg,
+        name="seljets_jetId",
+        expression="SelectedJets.jetId",
+        binning=(8, -0.5, 7.5),
+        discrete_x=True,
+        x_title=r"Jet ID of all jets",
+    )
+    add_variable(
+        cfg,
+        name="seljets_puId",
+        expression="SelectedJets.puId",
+        binning=(10, -0.5, 9.5),
+        discrete_x=False,
+        x_title=r"Jet PU ID of all jets",
+    )
+    add_variable(
+        cfg,
+        name="seljets_btag",
+        expression="SelectedJets.btagDeepFlavB",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0, 1),
+        x_title=r"B-Tag scores of all Jets",
+    )
+    ###############################################################################
+    #                           FitJet reco kinematics                            #
+    #                Reco values of the six jets that entered the fit             #
+    #  First two jets are b-jet candidates, then light quark jets for W1,then W2  #
+    ###############################################################################
+    add_variable(
+        cfg,
+        name="fitjetreco1_pt",
+        expression="FitJet.reco.pt[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{b_1\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco1_eta",
+        expression="FitJet.reco.eta[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{b_1\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco1_phi",
+        expression="FitJet.reco.phi[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{b_1\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco2_pt",
+        expression="FitJet.reco.pt[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{b_2\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco2_eta",
+        expression="FitJet.reco.eta[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{b_2\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco2_phi",
+        expression="FitJet.reco.phi[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{b_2\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco3_pt",
+        expression="FitJet.reco.pt[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{q_1\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco3_eta",
+        expression="FitJet.reco.eta[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{q_1\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco3_phi",
+        expression="FitJet.reco.phi[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{q_1\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco4_pt",
+        expression="FitJet.reco.pt[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{q_2\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco4_eta",
+        expression="FitJet.reco.eta[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{q_2\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco4_phi",
+        expression="FitJet.reco.phi[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{q_2\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco5_pt",
+        expression="FitJet.reco.pt[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{q_3\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco5_eta",
+        expression="FitJet.reco.eta[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{q_3\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco5_phi",
+        expression="FitJet.reco.phi[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{q_3\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco6_pt",
+        expression="FitJet.reco.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{q_4\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco6_eta",
+        expression="FitJet.reco.eta[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{q_4\,\mathrm{reco}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco6_phi",
+        expression="FitJet.reco.phi[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{q_4\,\mathrm{reco}}$",
+    )
+    # Variables for both b-jet canditates
+    add_variable(
+        cfg,
+        name="fitjetreco_B_pt",
+        expression="FitJet.reco.pt[:,0:2]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{reco}}$ of b-jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_B_eta",
+        expression="FitJet.reco.eta[:,0:2]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{\mathrm{reco}}$ of b-jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_B_phi",
+        expression="FitJet.reco.phi[:,0:2]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{\mathrm{reco}}$ of b-jet candidates",
+    )
+    # Variables for light quark jet candidates of W1
+    add_variable(
+        cfg,
+        name="fitjetreco_W1_pt",
+        expression="FitJet.reco.pt[:,2:4]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{reco}}$ of jet candidates for W1",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_W1_eta",
+        expression="FitJet.reco.eta[:,2:4]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{\mathrm{reco}}$ of jet candidates for W1",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_W1_phi",
+        expression="FitJet.reco.phi[:,2:4]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{\mathrm{reco}}$ of jet candidates for W1",
+    )
+    # Variables for light quark jet candidates of W2
+    add_variable(
+        cfg,
+        name="fitjetreco_W2_pt",
+        expression="FitJet.reco.pt[:,4:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{reco}}$ of jet candidates for W2",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_W2_eta",
+        expression="FitJet.reco.eta[:,4:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{\mathrm{reco}}$ of jet candidates for W2",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_W2_phi",
+        expression="FitJet.reco.phi[:,4:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{\mathrm{reco}}$ of jet candidates for W2",
+    )
+    # Variables for all light quark jet candidates
+    add_variable(
+        cfg,
+        name="fitjetreco_light_pt",
+        expression="FitJet.reco.pt[:,2:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{reco}}$ of light quark jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_light_eta",
+        expression="FitJet.reco.eta[:,2:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{\mathrm{reco}}$ of light quark jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_light_phi",
+        expression="FitJet.reco.phi[:,2:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{\mathrm{reco}}$ of light quark jet candidates",
+    )
+    ###############################################################################
+    #                           FitJet kinematics                                 #
+    #                Fitted values of the jets that entered the fit               #
+    #  First two jets are b-jet candidates, then light quark jets for W1,then W2  #
+    ###############################################################################
+    add_variable(
+        cfg,
+        name="fitjet1_pt",
+        expression="FitJet.pt[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{b_1\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet1_eta",
+        expression="FitJet.eta[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{b_1\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet1_phi",
+        expression="FitJet.phi[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{b_1\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet2_pt",
+        expression="FitJet.pt[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{b_2\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet2_eta",
+        expression="FitJet.eta[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{b_2\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet2_phi",
+        expression="FitJet.phi[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{b_2\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet3_pt",
+        expression="FitJet.pt[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{q_1\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet3_eta",
+        expression="FitJet.eta[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{q_1\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet3_phi",
+        expression="FitJet.phi[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{q_1\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet4_pt",
+        expression="FitJet.pt[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{q_2\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet4_eta",
+        expression="FitJet.eta[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{q_2\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet4_phi",
+        expression="FitJet.phi[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{q_2\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet5_pt",
+        expression="FitJet.pt[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{q_3\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet5_eta",
+        expression="FitJet.eta[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{q_3\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet5_phi",
+        expression="FitJet.phi[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{q_3\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet6_pt",
+        expression="FitJet.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{q_4\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet6_eta",
+        expression="FitJet.eta[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{q_4\,\mathrm{fit}}$",
+    )
+    add_variable(
+        cfg,
+        name="fitjet6_phi",
+        expression="FitJet.phi[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{q_4\,\mathrm{fit}}$",
+    )
+    # Variables for both b-jet canditates
+    add_variable(
+        cfg,
+        name="fitjet_B_pt",
+        expression="FitJet.pt[:,0:2]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{fit}}$ of b-jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_B_eta",
+        expression="FitJet.eta[:,0:2]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{\mathrm{fit}}$ of b-jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_B_phi",
+        expression="FitJet.phi[:,0:2]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{\mathrm{fit}}$ of b-jet candidates",
+    )
+    # Variables for light quark jet candidates of W1
+    add_variable(
+        cfg,
+        name="fitjet_W1_pt",
+        expression="FitJet.pt[:,2:4]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{fit}}$ of jet candidates for W1",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_W1_eta",
+        expression="FitJet.eta[:,2:4]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{\mathrm{fit}}$ of jet candidates for W1",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_W1_phi",
+        expression="FitJet.phi[:,2:4]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{\mathrm{fit}}$ of jet candidates for W1",
+    )
+    # Variables for light quark jet candidates of W2
+    add_variable(
+        cfg,
+        name="fitjet_W2_pt",
+        expression="FitJet.pt[:,4:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{fit}}$ of jet candidates for W2",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_W2_eta",
+        expression="FitJet.eta[:,4:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{\mathrm{fit}}$ of jet candidates for W2",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_W2_phi",
+        expression="FitJet.phi[:,4:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{\mathrm{fit}}$ of jet candidates for W2",
+    )
+    # Variables for all light quark jet candidates
+    add_variable(
+        cfg,
+        name="fitjet_light_pt",
+        expression="FitJet.pt[:,2:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{fit}}$ of light quark jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_light_eta",
+        expression="FitJet.eta[:,2:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"$\eta^{\mathrm{fit}}$ of light quark jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_light_phi",
+        expression="FitJet.phi[:,2:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"$\phi^{\mathrm{fit}}$ of light quark jet candidates",
     )
     ###############################################################################
     #                            Features from kinematic fit                      #
+    #                           Columns extra produced / stored                   #
     ###############################################################################
     add_variable(
         cfg,
@@ -1445,7 +1354,7 @@ def add_variables(cfg: od.Config) -> None:
         aux={"inputs": build_ttbar.inputs},
         binning=(100, 0, 2000),
         unit="GeV",
-        x_title=r"$m_{t\bar{t}}^{reco}$",
+        x_title=r"$m_{t\overline{t}}^{reco}$",
     )
     build_top1jet.inputs = ["FitTop1.{x,y,z,t}"]
     add_variable(
@@ -1485,19 +1394,8 @@ def add_variables(cfg: od.Config) -> None:
         unit="",
         x_title=r"$R_{bq}$",
     )
-    build_b1jet.inputs = ["FitB1.{pt,eta,phi,mass}"]
-    add_variable(
-        cfg,
-        name="fit_B1_mass_",
-        expression=partial(build_b1jet, which="mass"),
-        aux={"inputs": build_b1jet.inputs},
-        binning=(40, 0, 300),
-        unit="GeV",
-        x_title=r"fitted B1 mass",
-    )
-    build_b2jet.inputs = ["FitB2.{x,y,z,t}"]
     ###############################################################################
-    #                            Feautures with coarse binning                    #
+    #                            Features with coarse binning                     #
     #                                 for validation plots                        #
     ###############################################################################
     add_variable(
@@ -1581,105 +1479,139 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="fitjet1_pt_coarse",
-        expression="FitJet.reco.pt[:,0]",
+        name="seljet1_pt_coarse",
+        expression="SelectedJets.pt[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 50, 500.0),
+        binning=(15, 40, 500.0),
         unit="GeV",
-        x_title=r"$p_{T}$ of Jet 1 from kinematic fit",
+        x_title=r"Jet 1 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="fitjet1_eta_coarse",
-        expression="FitJet.reco.eta[:,0]",
+        name="seljet1_eta_coarse",
+        expression="SelectedJets.eta[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
-        x_title=r"$\eta$ of Jet 1 from kinematic fit",
+        x_title=r"Jet 1 $\eta$",
     )
     add_variable(
         cfg,
-        name="fitjet2_pt_coarse",
-        expression="FitJet.reco.pt[:,1]",
+        name="seljet2_pt_coarse",
+        expression="SelectedJets.pt[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 40.0, 340.0),
+        binning=(15, 40.0, 500.0),
         unit="GeV",
-        x_title=r"$p_{T}$ of Jet 2 from kinematic fit",
+        x_title=r"Jet 2 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="fitjet2_eta_coarse",
-        expression="FitJet.reco.eta[:,1]",
+        name="seljet2_eta_coarse",
+        expression="SelectedJets.eta[:,1]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
-        x_title=r"$\eta$ of Jet 2 from kinematic fit",
+        x_title=r"Jet 2 $\eta$",
     )
     add_variable(
         cfg,
-        name="fitjet3_pt_coarse",
-        expression="FitJet.reco.pt[:,2]",
+        name="seljet3_pt_coarse",
+        expression="SelectedJets.pt[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 40.0, 190.0),
+        binning=(15, 40.0, 500.0),
         unit="GeV",
-        x_title=r"$p_{T}$ of Jet 3 from kinematic fit",
+        x_title=r"Jet 3 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="fitjet3_eta_coarse",
-        expression="FitJet.reco.eta[:,2]",
+        name="seljet3_eta_coarse",
+        expression="SelectedJets.eta[:,2]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
-        x_title=r"$\eta$ of Jet 3 from kinematic fit",
+        x_title=r"Jet 3 $\eta$",
     )
     add_variable(
         cfg,
-        name="fitjet4_pt_coarse",
-        expression="FitJet.reco.pt[:,3]",
+        name="seljet4_pt_coarse",
+        expression="SelectedJets.pt[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 40.0, 140.0),
+        binning=(15, 40.0, 500.0),
         unit="GeV",
-        x_title=r"$p_{T}$ of Jet 4 from kinematic fit",
+        x_title=r"Jet 4 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="fitjet4_eta_coarse",
-        expression="FitJet.reco.eta[:,3]",
+        name="seljet4_eta_coarse",
+        expression="SelectedJets.eta[:,3]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
-        x_title=r"$\eta$ of Jet 4 from kinematic fit",
+        x_title=r"Jet 4 $\eta$",
     )
     add_variable(
         cfg,
-        name="fitjet5_pt_coarse",
-        expression="FitJet.reco.pt[:,4]",
+        name="seljet5_pt_coarse",
+        expression="SelectedJets.pt[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 35.0, 115.0),
+        binning=(15, 40.0, 400.0),
         unit="GeV",
-        x_title=r"$p_{T}$ of Jet 5 from kinematic fit",
+        x_title=r"Jet 5 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="fitjet5_eta_coarse",
-        expression="FitJet.reco.eta[:,4]",
+        name="seljet5_eta_coarse",
+        expression="SelectedJets.eta[:,4]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
-        x_title=r"$\eta$ of Jet 5 from kinematic fit",
+        x_title=r"Jet 5 $\eta$",
     )
     add_variable(
         cfg,
-        name="fitjet6_pt_coarse",
-        expression="FitJet.reco.pt[:,5]",
+        name="seljet6_pt_coarse",
+        expression="SelectedJets.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(17, 37.5, 80.0),
+        binning=(15, 40, 500.0),
         unit="GeV",
-        x_title=r"$p_{T}$ of Jet 6 from kinematic fit",
+        x_title=r"Jet 6 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="fitjet6_eta_coarse",
-        expression="FitJet.reco.eta[:,5]",
+        name="seljet6_eta_coarse",
+        expression="SelectedJets.eta[:,5]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
-        x_title=r"$\eta$ of Jet 6 from kinematic fit",
+        x_title=r"Jet 6 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_B_pt_coarse",
+        expression="FitJet.reco.pt[:,0:2]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 40, 500.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{fit}}$ of b-jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjetreco_B_eta_coarse",
+        expression="FitJet.reco.eta[:,0:2]",
+        null_value=EMPTY_FLOAT,
+        binning=(18, -2.7, 2.7),
+        x_title=r"$\eta^{\mathrm{fit}}$ of b-jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_light_pt_coarse",
+        expression="FitJet.pt[:,2:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(15, 40.0, 500.0),
+        unit="GeV",
+        x_title=r"$p_T^{\mathrm{fit}}$ of light quark jet candidates",
+    )
+    add_variable(
+        cfg,
+        name="fitjet_light_eta_coarse",
+        expression="FitJet.eta[:,2:6]",
+        null_value=EMPTY_FLOAT,
+        binning=(18, -2.7, 2.7),
+        x_title=r"$\eta^{\mathrm{fit}}$ of light quark jet candidates",
     )
 ############################################################
 #              Observables for b tagging efficiency        #
@@ -1833,46 +1765,63 @@ def add_variables(cfg: od.Config) -> None:
         binning=[0., 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 3.0],
         x_title=r"True light flavoured b-tagged jet $\eta$",
     )
-
+    ###############################################################################
+    #                            Cutflow Features                                 #
+    ###############################################################################
     add_variable(
         cfg,
-        name="puId_40leq_pt_lt50",
-        expression=lambda events: events.EventJet.puId[:, :6][
-            (events.EventJet.pt[:, :6] >= 40) & (events.EventJet.pt[:, :6] < 50)
-        ],
-        aux={"inputs": {"EventJet.{pt,puId,eta,phi,rho}"}},
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet puId for $40 \leq p_T < 50$ GeV (leading 6 jets)",
+        name="cf_jet1_pt",
+        expression="cutflow.jet1_pt",
+        binning=(40, 0.0, 400.0),
+        unit="GeV",
+        x_title=r"Jet 1 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="puId_leq_pt50",
-        expression=lambda events: events.EventJet.puId[events.EventJet.pt < 50],
-        aux={"inputs": {"EventJet.{pt,puId,eta,phi,rho}"}},
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet puId for $p_T < 50$ GeV",
+        name="cf_ht",
+        expression="cutflow.ht",
+        binning=(50, 0.0, 1000.0),
+        unit="GeV",
+        x_title=r"$H_{T}$",
     )
     add_variable(
         cfg,
-        name="puId_40leq_pt50_all",
-        expression=lambda events: events.EventJet.puId[
-            (events.EventJet.pt >= 40) & (events.EventJet.pt < 50)
-        ],
-        aux={"inputs": {"EventJet.{pt,puId,eta,phi,rho}"}},
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet puId for $40 \leq p_T < 50$ GeV",
+        name="cf_jet6_pt",
+        expression="cutflow.jet6_pt",
+        binning=(25, 0.0, 100.0),
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
     )
     add_variable(
         cfg,
-        name="puId_leq_pt50_all",
-        expression=lambda events: events.EventJet.puId[events.EventJet.pt < 50],
-        aux={"inputs": {"EventJet.{pt,puId,eta,phi,rho}"}},
-        binning=(9, -0.5, 8.5),
-        discrete_x=True,
-        x_title=r"Jet puId for $p_T < 50$ GeV",
+        name="cf_n_bjet",
+        expression="cutflow.n_bjet",
+        binning=(6, -0.5, 5.5),
+        unit="GeV",
+        x_title=r"Number of Bjets",
+    )
+    add_variable(
+        cfg,
+        name="cf_n_jet",
+        expression="cutflow.n_jet",
+        binning=(6, -0.5, 5.5),
+        unit="GeV",
+        x_title=r"Number of Jets",
+    )
+    add_variable(
+        cfg,
+        name="cf_turnon",
+        expression="cutflow.turnon",
+        binning=(2, -0.5, 1.5),
+        x_title=r"0: only in base trigger, 1: In both",
+    )
+    add_variable(
+        cfg,
+        name="cf_combination_type",
+        expression="cutflow.combination_type",
+        null_value=EMPTY_FLOAT,
+        binning=(4, -1.5, 2.5),
+        x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
     )
 
 
