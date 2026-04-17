@@ -1356,7 +1356,7 @@ def add_variables(cfg: od.Config) -> None:
         expression="FitRbb",
         null_value=EMPTY_FLOAT,
         binning=(59, 0, 5.8),
-        x_title=r"$\Delta R_{b}$ ",
+        x_title=r"$\Delta R_{b\overline{b}}$",
     )
     build_w1recojet.inputs = ["RecoW1.{x,y,z,t}"]
     add_variable(

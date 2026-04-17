@@ -400,6 +400,7 @@ def add_config(
             "Jet": {
                 "campaign": jec_campaign,
                 "version": jec_version,
+                "data_per_era": True,
                 "jet_type": jet_type,
                 "levels": ["L1FastJet", "L2Relative", "L2L3Residual", "L3Absolute"],
                 "levels_for_type1_met": ["L1FastJet"],

@@ -116,21 +116,21 @@ def add_categories(cfg: od.Config) -> None:
         name="fitPgof_rbb",
         selection="cat_fitPgof_rbb",
         id=403,
-        label=r"below $\chi^2$ cut and above $\Delta R_{\text{b}}$ cut",
+        label=r"below $\chi^2$ cut and above $\Delta R_{b\overline{b}}$ cut",
     )
     add_category(
         cfg,
         name="fit_rbb",
         selection="cat_rbb",
         id=404,
-        label=r"$\Delta R_{\text{b}}$ > 2",
+        label=r"$\Delta R_{b\overline{b}} > 2$",
     )
     add_category(
         cfg,
         name="rbb_sig",
         selection="cat_Rbb_sig",
         id=405,
-        label=r"$\Delta R_{\text{bb}}$ > 2",
+        label=r"$\Delta R_{b\overline{b}} > 2$",
     )
     add_category(
         cfg,
