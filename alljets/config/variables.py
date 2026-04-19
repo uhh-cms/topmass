@@ -1304,7 +1304,7 @@ def add_variables(cfg: od.Config) -> None:
         aux={"inputs": build_avg_w_mass.inputs},
         binning=[65.5, 76.3, 79.5, 82, 84.3, 86.6, 89.1, 92.3, 107],
         unit="GeV",
-        x_title=r"average W mass",
+        x_title=r"$m_{W_{avg}}^{reco}$",
     )
     build_w1jet.inputs = ["FitW1.{x,y,z,t}"]
     add_variable(
@@ -1482,7 +1482,7 @@ def add_variables(cfg: od.Config) -> None:
         name="seljet1_pt_coarse",
         expression="SelectedJets.pt[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 40, 500.0),
+        binning=(15, 50.0, 340.0),
         unit="GeV",
         x_title=r"Jet 1 $p_{T}$",
     )
@@ -1499,7 +1499,7 @@ def add_variables(cfg: od.Config) -> None:
         name="seljet2_pt_coarse",
         expression="SelectedJets.pt[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 40.0, 500.0),
+        binning=(20, 50.0, 500.0),
         unit="GeV",
         x_title=r"Jet 2 $p_{T}$",
     )
@@ -1516,7 +1516,7 @@ def add_variables(cfg: od.Config) -> None:
         name="seljet3_pt_coarse",
         expression="SelectedJets.pt[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 40.0, 500.0),
+        binning=(15, 40.0, 190),
         unit="GeV",
         x_title=r"Jet 3 $p_{T}$",
     )
@@ -1533,7 +1533,7 @@ def add_variables(cfg: od.Config) -> None:
         name="seljet4_pt_coarse",
         expression="SelectedJets.pt[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 40.0, 500.0),
+        binning=(15, 40.0, 140.0),
         unit="GeV",
         x_title=r"Jet 4 $p_{T}$",
     )
@@ -1550,7 +1550,7 @@ def add_variables(cfg: od.Config) -> None:
         name="seljet5_pt_coarse",
         expression="SelectedJets.pt[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 40.0, 400.0),
+        binning=(16, 35.0, 115.0),
         unit="GeV",
         x_title=r"Jet 5 $p_{T}$",
     )
@@ -1567,7 +1567,7 @@ def add_variables(cfg: od.Config) -> None:
         name="seljet6_pt_coarse",
         expression="SelectedJets.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(15, 40, 500.0),
+        binning=(17, 37.5, 80.0),
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
     )

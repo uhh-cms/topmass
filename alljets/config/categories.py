@@ -116,7 +116,7 @@ def add_categories(cfg: od.Config) -> None:
         name="fitPgof_rbb",
         selection="cat_fitPgof_rbb",
         id=403,
-        label=r"$P_{gof} > 0.1$ and $\Delta R_{b\overline{b}}$ cut",
+        label=r"$P_{gof} > 0.1,\ \Delta R_{b\overline{b}} > 2$",
     )
     add_category(
         cfg,

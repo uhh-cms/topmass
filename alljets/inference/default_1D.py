@@ -97,17 +97,17 @@ def default_1D(self: InferenceModel) -> None:
     #     },
     # )
     # jet energy resolution
-    # self.add_parameter(
-    #     "jer",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: self.parameter_config_spec(
-    #             shift_source="jer",
-    #         )
-    #         for config_inst in self.config_insts
-    #     },
-    # )
+    self.add_parameter(
+        "jer",
+        process=["TT"],
+        type=ParameterType.shape,
+        config_data={
+            config_inst.name: self.parameter_config_spec(
+                shift_source="jer",
+            )
+            for config_inst in self.config_insts
+        },
+    )
     # jet energy correction uncertainties
 
     # self.add_parameter(

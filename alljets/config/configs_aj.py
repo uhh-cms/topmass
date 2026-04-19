@@ -321,6 +321,23 @@ def add_config(
             #     "fontsize": 16,
             # },
         },
+        "shift_plots_mtop": {
+            "ax_cfg": {
+                "xlim": (50, 400),
+                "ylabel": "Entries/BinWidth",
+            },
+        },
+        "shift_plots_mwreco": {
+            "ax_cfg": {
+                "ylabel": "Entries/BinWidth",
+            },
+        },
+        "shift_plots_rbq": {
+            "ax_cfg": {
+                "xlim": (0, 2),
+                "ylabel": "Entries/BinWidth",
+            },
+        },
     }
 
     ################################################################################################
