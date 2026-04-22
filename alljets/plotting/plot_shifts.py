@@ -58,6 +58,7 @@ def plot_shifted_variable(
     """
     import hist
 
+    pretty_labels = kwargs.get("pretty_labels", False)
     show_shift_percent = kwargs.get("show_shift_percent", False)
     variable_inst = variable_insts[0]
 
@@ -115,6 +116,8 @@ def plot_shifted_variable(
             if factor is not None:
                 label = rf"$h_{{damp}} = {factor:.4f} \cdot m_t$"
 
+        elif pretty_labels:
+            label = format_shift_label(shift_inst)
         else:
             label = shift_inst.label
 
@@ -234,3 +237,24 @@ def get_hdamp_factor(shift_name):
     elif shift_name == "hdamp_down":
         return 0.8738
     return None
+
+
+def format_shift_label(shift_inst):
+    name = shift_inst.name
+
+    if name == "nominal":
+        return "Nominal"
+
+    parts = name.split("_")
+
+    if len(parts) >= 2:
+        source = parts[0].upper()
+        direction = parts[-1].capitalize()
+        middle = " ".join(parts[1:-1])  # handles complex cases
+
+        if middle:
+            return f"{source} {middle} {direction}"
+        else:
+            return f"{source} {direction}"
+
+    return shift_inst.label
