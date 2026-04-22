@@ -29,7 +29,7 @@ from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 
 from alljets.selection.jet import jet_selection
-from alljets.selection.default import muon_selection
+from alljets.selection.lepton import lepton_selection
 from alljets.production.default import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights
 
@@ -44,7 +44,7 @@ hist = maybe_import("hist")
     uses={
         attach_coffea_behavior,
         cutflow_features,
-        muon_selection,
+        lepton_selection,
         jet_selection,
         jet_veto_map,
         process_ids,
@@ -123,6 +123,10 @@ def trigger_eff(
             events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
 
+    # Lepton selection
+    events, lepton_results = self[lepton_selection](events, **kwargs)
+    results += lepton_results
+
     # jet veto map
     events, veto_result = self[jet_veto_map](events, **kwargs)
     results += veto_result
@@ -134,15 +138,9 @@ def trigger_eff(
     # combined event selection after all steps: Choose one of the trigger efficiency selector steps
     results.event = (
         results.steps.All &
+        results.steps.Lepton_Veto &
         results.steps.BaseTrigger &
         results.steps.BTag &
-        results.steps.HT
-    )
-
-    # Combined event selection for efficiency calculation, without b-tagging requirements
-    results.event_eff = (
-        results.steps.All &
-        results.steps.BaseTrigger &
         results.steps.HT
     )
 
@@ -161,6 +159,13 @@ def trigger_eff(
         events = self[pu_weight](events, **kwargs)
         events = self[ps_weights](events, **kwargs)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+        # Combined event selection for efficiency calculation, without b-tagging requirements
+        results.event_eff = (
+            results.steps.All &
+            results.steps.Lepton_Veto &
+            results.steps.BaseTrigger &
+            results.steps.HT
+        )
         self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
 
     # add cutflow features, passing per-object masks
@@ -208,7 +213,7 @@ def trigger_eff(
     uses={
         attach_coffea_behavior,
         cutflow_features,
-        muon_selection,
+        lepton_selection,
         jet_selection,
         jet_veto_map,
         process_ids,
@@ -225,7 +230,6 @@ def trigger_eff(
     },
     produces={
         cutflow_features,
-        muon_selection,
         jet_selection,
         jet_veto_map,
         process_ids,
@@ -289,10 +293,9 @@ def trigger_eval(
         events = set_ak_column(
             events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
-
-    # muon selection
-    events, muon_results = self[muon_selection](events, **kwargs)
-    results += muon_results
+    # Lepton selection
+    events, lepton_results = self[lepton_selection](events, **kwargs)
+    results += lepton_results
 
     # jet veto map
     events, veto_result = self[jet_veto_map](events, **kwargs)
@@ -304,16 +307,11 @@ def trigger_eval(
 
     # combined event selection after all steps
     results.event = (
+        results.steps.All &
+        results.steps.Lepton_Veto &
         results.steps.jet &
         results.steps.Trigger &
         results.steps.BTag &
-        results.steps.HT
-    )
-
-    # Combined event selection for efficiency calculation, without b-tagging requirements
-    results.event_eff = (
-        results.steps.All &
-        results.steps.BaseTrigger &
         results.steps.HT
     )
 
@@ -331,6 +329,13 @@ def trigger_eval(
         events = self[ps_weights](events, **kwargs)
         events = self[trig_weights](events, **kwargs)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+        # Combined event selection for efficiency calculation, without b-tagging requirements
+        results.event_eff = (
+            results.steps.All &
+            results.steps.Lepton_Veto &
+            results.steps.BaseTrigger &
+            results.steps.HT
+        )
         self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
 
     # add cutflow features, passing per-object masks

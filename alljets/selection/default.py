@@ -37,6 +37,7 @@ from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 
 from alljets.selection.jet import jet_selection
+from alljets.selection.lepton import lepton_selection
 from alljets.production.default import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights
 
@@ -44,43 +45,6 @@ np = maybe_import("numpy")
 ak = maybe_import("awkward")
 coffea = maybe_import("coffea")
 hist = maybe_import("hist")
-
-
-@selector(
-    uses={"Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass"},
-)
-def muon_selection(
-    self: Selector,
-    events: ak.Array,
-    **kwargs,
-) -> tuple[ak.Array, SelectionResult]:
-    """
-    Selects muons passing basic kinematic cuts.
-
-    This selector applies a simple muon selection: at least one muon with
-    pt >= 20 GeV and |eta| < 2.1. It returns a mask for selected muons and
-    a step mask for events passing the selection.
-
-    Returns:
-        events: The unchanged events array.
-        SelectionResult: Contains the muon selection mask and step.
-    """
-
-    # example muon selection: at least one muon with pt and eta cuts
-    muon_mask = (events.Muon.pt >= 20.0) & (abs(events.Muon.eta) < 2.1)
-    muon_sel = ak.sum(muon_mask, axis=1) >= 0
-
-    # build and return selection results
-    return events, SelectionResult(
-        steps={
-            "muon": muon_sel,
-        },
-        objects={
-            "Muon": {
-                "Muon": muon_mask,
-            },
-        },
-    )
 
 
 # Extract the category ids for the inclusve category, used for CutFlow
@@ -92,7 +56,7 @@ incl_category_ids = category_ids.derive("incl_category_ids",
 @selector(
     uses={
         cutflow_features,
-        muon_selection,
+        lepton_selection,
         jet_veto_map,
         jet_selection,
         attach_coffea_behavior,
@@ -172,9 +136,8 @@ def default_trig_weight(
             events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
 
-    # muon selection
-    events, muon_results = self[muon_selection](events, **kwargs)
-    results += muon_results
+    events, lepton_results = self[lepton_selection](events, **kwargs)
+    results += lepton_results
 
     # jet veto map
     events, veto_result = self[jet_veto_map](events, **kwargs)
@@ -186,18 +149,12 @@ def default_trig_weight(
 
     # combined event selection after all steps
     results.event = (
+        results.steps.Lepton_Veto &
         results.steps.SignalOrBkgTrigger &
         results.steps.HT &
         results.steps.jet &
         results.steps.BTag20 &
         results.steps.LeadingSix20BTag
-    )
-
-    # Combined event selection for efficiency calculation, without b-tagging requirements
-    results.event_eff = (
-        results.steps.SignalOrBkgTrigger &
-        results.steps.HT &
-        results.steps.jet
     )
 
     # create process ids, deterministic seeds, and inclusive category ids for cutflow
@@ -214,6 +171,12 @@ def default_trig_weight(
         events = self[pu_weight](events, **kwargs)
         events = self[ps_weights](events, **kwargs)
         events = self[trig_weights](events, **kwargs)
+        # Combined event selection for efficiency calculation, without b-tagging requirements
+        results.event_eff = (
+            results.steps.SignalOrBkgTrigger &
+            results.steps.HT &
+            results.steps.jet
+        )
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
 

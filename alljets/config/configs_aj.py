@@ -863,7 +863,8 @@ def add_config(
                 "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask}",
                 "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
                 "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
-                "Muon.{pt,eta,phi,mass,pfRelIso04_all}",
+                "Electron.{pt,eta,cutBased}",
+                "Muon.{pt,eta,looseId,pfIsoId}",
                 "PV.{npvs,npvsGood}",
                 "GenPart.*",
                 (
