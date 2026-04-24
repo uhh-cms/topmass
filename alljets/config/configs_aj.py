@@ -12,7 +12,7 @@ import os
 import law
 import order as od
 import yaml
-from columnflow.columnar_util import ColumnCollection
+from columnflow.columnar_util import ColumnCollection, skip_column
 from columnflow.config_util import (add_shift_aliases,
                                     get_root_processes_from_campaign,
                                     get_shifts_from_sources,
@@ -718,16 +718,16 @@ def add_config(
     )
 
     # Pdf shifts
-    cfg.add_shift(name="pdf_up", id=130, type="shape", tags="pdf")
-    cfg.add_shift(name="pdf_down", id=131, type="shape", tags="pdf")
-    add_shift_aliases(
-        cfg,
-        "pdf",
-        {
-            "pdf_weight": "pdf_weight_{direction}",
-            "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
-        },
-    )
+    # cfg.add_shift(name="pdf_up", id=130, type="shape", tags="pdf")
+    # cfg.add_shift(name="pdf_down", id=131, type="shape", tags="pdf")
+    # add_shift_aliases(
+    #     cfg,
+    #     "pdf",
+    #     {
+    #         "pdf_weight": "pdf_weight_{direction}",
+    #         "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
+    #     },
+    # )
 
     # Trigger shifts
     cfg.add_shift(name="trig_up", id=120, type="shape", tags="trig")
@@ -752,8 +752,8 @@ def add_config(
     )
 
     # FSR shifts
-    cfg.add_shift(name="fsr_up", id=152, type="shape", tags="pu_weight")
-    cfg.add_shift(name="fsr_down", id=153, type="shape", tags="pu_weight")
+    cfg.add_shift(name="fsr_up", id=152, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_down", id=153, type="shape", tags="fsr")
     add_shift_aliases(
         cfg,
         "fsr",
@@ -763,8 +763,8 @@ def add_config(
     )
 
     # ISR shifts
-    cfg.add_shift(name="isr_up", id=154, type="shape", tags="pu_weight")
-    cfg.add_shift(name="isr_down", id=155, type="shape", tags="pu_weight")
+    cfg.add_shift(name="isr_up", id=154, type="shape", tags="isr")
+    cfg.add_shift(name="isr_down", id=155, type="shape", tags="isr")
     add_shift_aliases(
         cfg,
         "isr",
@@ -876,7 +876,6 @@ def add_config(
                 "deterministic_seed",
                 "process_id",
                 "mc_weight",
-                "cutflow.*",
                 "pdf_weight",
                 "trig_weight",
                 "trig_weight_up",
@@ -888,6 +887,9 @@ def add_config(
                 "gen_top",
                 "gen_top.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
                 ColumnCollection.ALL_FROM_SELECTOR,
+                skip_column("pdf_weights_alphas"),
+                skip_column("pdf_weights_hessian"),
+                skip_column("cutflow"),
             },
             "cf.MergeSelectionMasks": {
                 "normalization_weight",
