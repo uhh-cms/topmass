@@ -27,6 +27,7 @@ from columnflow.production.cms.parton_shower import ps_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
+from columnflow.production.cms.top_pt_weight import top_pt_weight
 
 from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
@@ -167,6 +168,12 @@ def trigger_eff(
             results.steps.HT
         )
         self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
+        # Add top pt weight and variations
+        # We don't apply these weights and therefore set the nominal column to 1
+        # We symmetrize the up/down variations
+        events = self[top_pt_weight](events, **kwargs)
+        events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight_up))
+        events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight_up)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)
@@ -337,6 +344,12 @@ def trigger_eval(
             results.steps.HT
         )
         self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
+        # Add top pt weight and variations
+        # We don't apply these weights and therefore set the nominal column to 1
+        # We symmetrize the up/down variations
+        events = self[top_pt_weight](events, **kwargs)
+        events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight_up))
+        events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight_up)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)

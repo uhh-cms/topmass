@@ -615,6 +615,32 @@ def add_config(
     cfg.x.fitpgofcut = 0.1
     cfg.x.trigger_sf_variable = "trigjet6_pt"
 
+    # top pt reweighting
+    # https://twiki.cern.ch/twiki/bin/view/CMS/TopPtReweighting?rev=31
+
+    # theory-based method preferred
+    from columnflow.production.cms.top_pt_weight import TopPtWeightFromTheoryConfig
+    cfg.x.top_pt_weight = TopPtWeightFromTheoryConfig(params={
+        "a": 0.103,
+        "b": -0.0118,
+        "c": -0.000134,
+        "d": 0.973,
+    })
+
+    # data-based method preferred
+    # from columnflow.production.cms.top_pt_weight import TopPtWeightFromDataConfig
+    # cfg.x.top_pt_weight = TopPtWeightFromDataConfig(
+    #     params={
+    #         "a": 0.0615,
+    #         "a_up": 0.0615 * 1.5,
+    #         "a_down": 0.0615 * 0.5,
+    #         "b": -0.0005,
+    #         "b_up": -0.0005 * 1.5,
+    #         "b_down": -0.0005 * 0.5,
+    #     },
+    #     pt_max=500.0,
+    # )
+
     ################################################################################################
     # shifts
     ################################################################################################
@@ -772,8 +798,17 @@ def add_config(
             "isr_weight": "isr_weight_{direction}",
         },
     )
-    # Top mass sample shifts
 
+    # Top pt reweighting shifts
+    cfg.add_shift(name="top_pt_up", id=156, type="shape", tags="top_pt")
+    cfg.add_shift(name="top_pt_down", id=157, type="shape", tags="top_pt")
+    add_shift_aliases(
+        cfg,
+        "top_pt",
+        {
+            "top_pt_weight": "top_pt_weight_{direction}",
+        },
+    )
     ################################################################################################
     # external files
     ################################################################################################
@@ -927,6 +962,12 @@ def add_config(
             "isr_weight": get_shifts("isr"),
         },
     )
+
+    # # define per-dataset event weights
+    for dataset in cfg.datasets:
+        if dataset.has_tag("ttbar"):
+            dataset.x.event_weights = {"top_pt_weight": get_shifts("top_pt")}
+
     # define per-dataset event weights
     cfg.x.shift_groups = {}
 

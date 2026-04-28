@@ -35,6 +35,7 @@ from columnflow.production.cms.parton_shower import ps_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
+from columnflow.production.cms.top_pt_weight import top_pt_weight
 
 from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
@@ -72,6 +73,7 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         pu_weight,
         trig_weights,
         ps_weights,
+        top_pt_weight,
     },
     produces={
         cutflow_features,
@@ -88,6 +90,7 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         pu_weight,
         trig_weights,
         ps_weights,
+        top_pt_weight,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
@@ -171,6 +174,14 @@ def default_trig_weight(
         events = self[pu_weight](events, **kwargs)
         events = self[ps_weights](events, **kwargs)
         events = self[trig_weights](events, **kwargs)
+
+        if self.dataset_inst.has_tag("ttbar"):
+            # Add top pt weight and variations
+            # We don't apply these weights and therefore set the nominal column to 1
+            # We symmetrize the up/down variations
+            events = self[top_pt_weight](events, **kwargs)
+            events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight_up))
+            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight_up)
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
             results.steps.SignalOrBkgTrigger &

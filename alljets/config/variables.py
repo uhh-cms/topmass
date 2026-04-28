@@ -155,6 +155,14 @@ def add_variables(cfg: od.Config) -> None:
         binning=(20, 0.7, 1.1),
         x_title="trigger weight",
     )
+    add_variable(
+        cfg,
+        name="top_pt_weight",
+        expression="top_pt_weight",
+        null_value=EMPTY_FLOAT,
+        binning=(20, 0.7, 1.4),
+        x_title="top pt weight",
+    )
     ###############################################################################
     #                            TriJet Kinematics                                #
     #                       Using Jets within |eta| < 2.6                         #
