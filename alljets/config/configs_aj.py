@@ -743,17 +743,17 @@ def add_config(
         },
     )
 
-    # Pdf shifts
-    # cfg.add_shift(name="pdf_up", id=130, type="shape", tags="pdf")
-    # cfg.add_shift(name="pdf_down", id=131, type="shape", tags="pdf")
-    # add_shift_aliases(
-    #     cfg,
-    #     "pdf",
-    #     {
-    #         "pdf_weight": "pdf_weight_{direction}",
-    #         "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
-    #     },
-    # )
+    # Pdf shifts (up/down variations from CF)
+    cfg.add_shift(name="pdf_up", id=130, type="shape", tags="pdf")
+    cfg.add_shift(name="pdf_down", id=131, type="shape", tags="pdf")
+    add_shift_aliases(
+        cfg,
+        "pdf",
+        {
+            "pdf_weight": "pdf_weight_{direction}",
+            "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
+        },
+    )
 
     # Trigger shifts
     cfg.add_shift(name="trig_up", id=120, type="shape", tags="trig")
@@ -809,6 +809,31 @@ def add_config(
             "top_pt_weight": "top_pt_weight_{direction}",
         },
     )
+
+    # PDF shifts based on alpha_s variations
+    cfg.add_shift(name="alphas_up", id=158, type="shape", tags="alphas")
+    cfg.add_shift(name="alphas_down", id=159, type="shape", tags="alphas")
+    add_shift_aliases(
+        cfg,
+        "alphas",
+        {
+            "pdf_weight": "pdf_alphas_weight_{direction}",
+        },
+    )
+
+    # PDF shifts based on hessian variations, up to 100 variations
+    for i in range(100):
+        idx = i + 1
+        name = f"hessian_{idx:03d}"
+        cfg.add_shift(name=f"{name}_up", id=2000 + 2 * i, type="shape", tags="hessian")
+        cfg.add_shift(name=f"{name}_down", id=2001 + 2 * i, type="shape", tags="hessian")
+        add_shift_aliases(
+            cfg,
+            name,
+            {
+                "pdf_weight": f"pdf_hessian_{idx:03d}_weight_{{direction}}",
+            },
+        )
     ################################################################################################
     # external files
     ################################################################################################
@@ -922,9 +947,9 @@ def add_config(
                 "gen_top",
                 "gen_top.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
                 ColumnCollection.ALL_FROM_SELECTOR,
-                skip_column("pdf_weights_alphas"),
-                skip_column("pdf_weights_hessian"),
-                skip_column("cutflow"),
+                skip_column("pdf_weights_alphas*"),
+                skip_column("pdf_weights_hessian*"),
+                skip_column("cutflow.*"),
             },
             "cf.MergeSelectionMasks": {
                 "normalization_weight",
@@ -955,7 +980,7 @@ def add_config(
             "normalization_weight": [],
             "btag_weight": [],
             "trig_weight": get_shifts("trig"),
-            "pdf_weight": get_shifts("pdf"),
+            "pdf_weight": get_shifts("pdf", "alphas", "hessian_*"),
             "murmuf_weight": get_shifts("murmuf"),
             "pu_weight": get_shifts("pu_weight_minbias_xs"),
             "fsr_weight": get_shifts("fsr"),

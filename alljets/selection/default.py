@@ -25,6 +25,7 @@ from columnflow.production.processes import process_ids
 from columnflow.production.categories import category_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.columnar_util import IF_DATASET_HAS_TAG
 
 from columnflow.production.cms.pdf import pdf_weights
 from columnflow.selection.cms.jets import jet_veto_map
@@ -54,6 +55,11 @@ incl_category_ids = category_ids.derive("incl_category_ids",
                                         )
 
 
+pdf_all_weights = pdf_weights.derive("pdf_all_weights",
+                                     cls_dict={"store_all_weights": True, "store_split_sets": True},
+                                     )
+
+
 @selector(
     uses={
         cutflow_features,
@@ -69,6 +75,7 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         incl_category_ids,
         mc_weight,
         pdf_weights,
+        pdf_all_weights,
         murmuf_weights,
         pu_weight,
         trig_weights,
@@ -86,6 +93,7 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         incl_category_ids,
         mc_weight,
         pdf_weights,
+        pdf_all_weights,
         murmuf_weights,
         pu_weight,
         trig_weights,
@@ -94,6 +102,8 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+        IF_DATASET_HAS_TAG("ttbar")("pdf_hessian_*_weight_{up,down}"),
+        IF_DATASET_HAS_TAG("ttbar")("pdf_alphas_weight_{up,down}"),
     },
     exposed=True,
 )
@@ -170,6 +180,7 @@ def default_trig_weight(
         events = self[mc_weight](events, **kwargs)
         events = self[process_ids](events, **kwargs)
         events = self[pdf_weights](events, **kwargs)
+
         events = self[murmuf_weights](events, **kwargs)
         events = self[pu_weight](events, **kwargs)
         events = self[ps_weights](events, **kwargs)
@@ -182,6 +193,20 @@ def default_trig_weight(
             events = self[top_pt_weight](events, **kwargs)
             events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight_up))
             events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight_up)
+
+            # Use the derived pdf weight producer to store all weights
+            # For the pdf hessian weights, store them in seperate columns for up/down variations as needed.
+            events = self[pdf_all_weights](events, **kwargs)
+            events = set_ak_column(events, "pdf_alphas_weight_down", events.pdf_weights_alphas[:, 0])
+            events = set_ak_column(events, "pdf_alphas_weight_up", events.pdf_weights_alphas[:, 1])
+            hessian = events.pdf_weights_hessian
+            for i in range(100):
+                idx = i + 1
+                weight_up = hessian[:, i]
+                weight_down = 2 - hessian[:, i]
+                events = ak.with_field(events, weight_up, f"pdf_hessian_{idx:03d}_weight_up")
+                events = ak.with_field(events, weight_down, f"pdf_hessian_{idx:03d}_weight_down")
+
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
             results.steps.SignalOrBkgTrigger &
