@@ -162,20 +162,13 @@ def add_config(
                 "data_jetht_d",
             ],
         ),
-        # ttbar
-        # "tt_sl_powheg",
-        # "tt_dl_powheg",
         # single top
-        # "st_tchannel_t_4f_powheg",
-        # "st_tchannel_tbar_4f_powheg",
-        # "st_twchannel_t_sl_powheg",
-        # "st_twchannel_tbar_sl_powheg",
-        # "st_twchannel_t_dl_powheg",
-        # "st_twchannel_tbar_dl_powheg",
-        # "st_twchannel_t_fh_powheg",
-        # "st_twchannel_tbar_fh_powheg",
-        # "st_schannel_t_lep_4f_amcatnlo",
-        # "st_schannel_tbar_lep_4f_amcatnlo",
+        "st_tchannel_t_4f_powheg",
+        "st_tchannel_tbar_4f_powheg",
+        "st_twchannel_t_powheg",
+        "st_twchannel_tbar_powheg",
+        "st_schannel_lep_4f_amcatnlo",
+        "st_schannel_had_4f_amcatnlo",
         # qcd datasets
         # "qcd_ht50to100_madgraph",
         # "qcd_ht100to200_madgraph",
@@ -190,12 +183,6 @@ def add_config(
         "tt_sl_powheg",
         "tt_dl_powheg",
         "tt_fh_powheg",
-        # "tt_fh_mt166p5_powheg",
-        # "tt_fh_mt169p5_powheg",
-        # "tt_fh_mt171p5_powheg",
-        # "tt_fh_mt173p5_powheg",
-        # "tt_fh_mt175p5_powheg",
-        # "tt_fh_mt178p5_powheg",
     ]
     for dataset_name in dataset_names:
         # skip when in sync mode and not exiting
@@ -227,7 +214,8 @@ def add_config(
     # DATASET GROUPS (for efficiency calculation)
     # ---------------------------------------------------------
     cfg.x.btag_wp_eff_groups = [
-        ["tt_*"], ["qcd_*"],   # only top-like processes
+        ["tt_*", "st_*"],
+        ["qcd_*"],
     ]
 
     # assign dataset tags based on these groups

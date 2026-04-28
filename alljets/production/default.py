@@ -159,7 +159,7 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     events = self[kinFit](events, **kwargs)
 
-    if events.gen_top.ndim > 1:
+    if events.gen_top.ndim > 1 and self.dataset_inst.has_tag("tt"):
         jetcollections = {
             "FitJet": {
                 "type_name": "Jet",
