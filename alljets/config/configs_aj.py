@@ -244,7 +244,7 @@ def add_config(
     cfg.x.default_reducer = "cf_default"
     cfg.x.default_producer = ["default", "kinFitMatch"]
     cfg.x.default_ml_model = None
-    cfg.x.default_inference_model = "default_no_shifts"
+    cfg.x.default_inference_model = "default_2D"
     cfg.x.default_categories = ("incl",)
     cfg.x.default_variables = ("njet", "jet1_pt")
     cfg.x.default_hist_producer = "all_weights"
