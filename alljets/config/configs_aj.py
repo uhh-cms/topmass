@@ -256,7 +256,7 @@ def add_config(
     cfg.x.default_reducer = "cf_default"
     cfg.x.default_producer = ["default", "kinFitMatch"]
     cfg.x.default_ml_model = None
-    cfg.x.default_inference_model = "default_no_shifts"
+    cfg.x.default_inference_model = "default_2D"
     cfg.x.default_categories = ("incl",)
     cfg.x.default_variables = ("njet", "jet1_pt")
     cfg.x.default_hist_producer = "all_weights"
@@ -642,6 +642,8 @@ def add_config(
     cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal", "hdamp"})
     cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal", "hdamp"})
 
+    cfg.add_shift(name="tune_cr1_up", id=204, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
+    cfg.add_shift(name="tune_cr1_down", id=205, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
     # fake jet energy correction shift, with aliases flaged as "selection_dependent", i.e. the aliases
     # affect columns that might change the output of the event selection
     # load jec sources
@@ -718,16 +720,16 @@ def add_config(
     )
 
     # Pdf shifts
-    # cfg.add_shift(name="pdf_up", id=130, type="shape", tags="pdf")
-    # cfg.add_shift(name="pdf_down", id=131, type="shape", tags="pdf")
-    # add_shift_aliases(
-    #     cfg,
-    #     "pdf",
-    #     {
-    #         "pdf_weight": "pdf_weight_{direction}",
-    #         "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
-    #     },
-    # )
+    cfg.add_shift(name="pdf_up", id=130, type="shape", tags="pdf")
+    cfg.add_shift(name="pdf_down", id=131, type="shape", tags="pdf")
+    add_shift_aliases(
+        cfg,
+        "pdf",
+        {
+            "pdf_weight": "pdf_weight_{direction}",
+            "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
+        },
+    )
 
     # Trigger shifts
     cfg.add_shift(name="trig_up", id=120, type="shape", tags="trig")
