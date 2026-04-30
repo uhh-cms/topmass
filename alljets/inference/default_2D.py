@@ -4,7 +4,7 @@
 Example inference model.
 """
 
-from columnflow.inference import InferenceModel, ParameterType, inference_model  # , ParameterTransformation
+from columnflow.inference import InferenceModel, FlowStrategy, inference_model  # , ParameterTransformation
 
 from alljets.inference.helper import add_processes, add_parameters
 
@@ -21,6 +21,8 @@ def default_2D(self: InferenceModel) -> None:
             )
             for config_inst in self.config_insts
         },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
     )
     #
     # processes

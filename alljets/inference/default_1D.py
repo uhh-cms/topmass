@@ -24,6 +24,7 @@ def default_1D(self: InferenceModel) -> None:
             )
             for config_inst in self.config_insts
         },
+        mc_stats=[100, 1, 1],
         flow_strategy=FlowStrategy.remove,
     )
 
@@ -37,6 +38,8 @@ def default_1D(self: InferenceModel) -> None:
             )
             for config_inst in self.config_insts
         },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
     )
 
     self.add_category(
@@ -49,6 +52,8 @@ def default_1D(self: InferenceModel) -> None:
             )
             for config_inst in self.config_insts
         },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
     )
     #
     # processes
