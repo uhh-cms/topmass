@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import functools
 import os
+import glob
 
 import law
 import order as od
@@ -183,6 +184,10 @@ def add_config(
         "tt_sl_powheg",
         "tt_dl_powheg",
         "tt_fh_powheg",
+        # custom datsets
+        "tt_sl_powheg_17",
+        "tt_dl_powheg_17",
+        "tt_fh_powheg_17",
     ]
     for dataset_name in dataset_names:
         # skip when in sync mode and not exiting
@@ -214,8 +219,9 @@ def add_config(
     # DATASET GROUPS (for efficiency calculation)
     # ---------------------------------------------------------
     cfg.x.btag_wp_eff_groups = [
-        ["tt_*", "st_*"],
+        ["tt_*_powheg", "st_*"],
         ["qcd_*"],
+        ["tt_*_powheg_17"],
     ]
 
     # assign dataset tags based on these groups
@@ -937,6 +943,9 @@ def add_config(
                 "pu_weight",
                 "btag_weight",
                 "trig_ht",
+                "xb.*",
+                "weight.*",
+                "PSWeight",
                 "gen_top",
                 "gen_top.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
                 ColumnCollection.ALL_FROM_SELECTOR,
@@ -1034,4 +1043,45 @@ def add_config(
 
     # whether to validate the number of obtained LFNs in GetDatasetLFNs
     cfg.x.validate_dataset_lfns = False
+
+    def get_dataset_lfns(dataset_inst, shift_inst, dataset_key):
+        base_path = "/pnfs/desy.de/cms/tier2/store/user/stadie/nanoaod_run2/v9_v2"
+
+        dataset_map = {
+            "tt_dl_powheg_17": "tt_dl_powheg_17",
+            "tt_sl_powheg_17": "tt_sl_powheg_17",
+            "tt_fh_powheg_17": "tt_fh_powheg_17",
+        }
+
+        if dataset_inst.name in dataset_map:
+            dataset_dir = os.path.join(base_path, dataset_map[dataset_inst.name])
+
+            if not os.path.exists(dataset_dir):
+                raise Exception(f"Dataset directory not found: {dataset_dir}")
+
+            files = glob.glob(dataset_dir + "/*.root")
+
+            if not files:
+                raise Exception(f"No ROOT files found in: {dataset_dir}")
+
+            # convert PNFS → LFN
+            files = [f.replace("/pnfs/desy.de/cms/tier2", "") for f in files]
+
+            skip_map = {
+                "tt_fh_powheg_17": ["nano_2393.root", "nano_2355.root"],
+                "tt_sl_powheg_17": ["nano_847.root"],
+            }
+
+            if dataset_inst.name in skip_map:
+                skip_files = skip_map[dataset_inst.name]
+                files = [f for f in files if not any(sf in f for sf in skip_files)]
+
+            return sorted(files)
+
+        from columnflow.tasks.external import GetDatasetLFNs
+        return GetDatasetLFNs.get_dataset_lfns_dasgoclient(
+            dataset_inst, shift_inst, dataset_key,
+        )
+    cfg.x.get_dataset_lfns = get_dataset_lfns
+
     return cfg
