@@ -1334,6 +1334,15 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{t_{1}}^{reco}$",
     )
+    add_variable(
+        cfg,
+        name="reco_Top1_pt",
+        expression=partial(build_top1recojet, which="pt"),
+        aux={"inputs": build_top1recojet.inputs},
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"$p_{T_{1}}^{reco}$",
+    )
     build_top2recojet.inputs = ["RecoTop2.{x,y,z,t}"]
     add_variable(
         cfg,
@@ -1343,6 +1352,15 @@ def add_variables(cfg: od.Config) -> None:
         binning=(100, 0, 500),
         unit="GeV",
         x_title=r"$m_{t_{2}}^{reco}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_Top2_pt",
+        expression=partial(build_top2recojet, which="pt"),
+        aux={"inputs": build_top2recojet.inputs},
+        binning=(100, 0, 500),
+        unit="GeV",
+        x_title=r"$p_{T_{2}}^{reco}$",
     )
     build_avg_reco_Top_mass.inputs = (build_top1recojet.inputs + build_top2recojet.inputs)
     add_variable(
