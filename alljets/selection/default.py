@@ -186,6 +186,19 @@ def default_trig_weight(
         events = self[ps_weights](events, **kwargs)
         events = self[trig_weights](events, **kwargs)
 
+        # Use the derived pdf weight producer to store all weights
+        # For the pdf hessian weights, store them in seperate columns for up/down variations as needed.
+        events = self[pdf_all_weights](events, **kwargs)
+        events = set_ak_column(events, "pdf_alphas_weight_down", events.pdf_weights_alphas[:, 0])
+        events = set_ak_column(events, "pdf_alphas_weight_up", events.pdf_weights_alphas[:, 1])
+        hessian = events.pdf_weights_hessian
+        for i in range(100):
+            idx = i + 1
+            weight_up = hessian[:, i]
+            weight_down = 2 - hessian[:, i]
+            events = ak.with_field(events, weight_up, f"pdf_hessian_{idx:03d}_weight_up")
+            events = ak.with_field(events, weight_down, f"pdf_hessian_{idx:03d}_weight_down")
+
         if self.dataset_inst.has_tag("ttbar"):
             # Add top pt weight and variations
             # We don't apply these weights and therefore set the nominal column to 1
@@ -193,19 +206,6 @@ def default_trig_weight(
             events = self[top_pt_weight](events, **kwargs)
             events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight_up))
             events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight_up)
-
-            # Use the derived pdf weight producer to store all weights
-            # For the pdf hessian weights, store them in seperate columns for up/down variations as needed.
-            events = self[pdf_all_weights](events, **kwargs)
-            events = set_ak_column(events, "pdf_alphas_weight_down", events.pdf_weights_alphas[:, 0])
-            events = set_ak_column(events, "pdf_alphas_weight_up", events.pdf_weights_alphas[:, 1])
-            hessian = events.pdf_weights_hessian
-            for i in range(100):
-                idx = i + 1
-                weight_up = hessian[:, i]
-                weight_down = 2 - hessian[:, i]
-                events = ak.with_field(events, weight_up, f"pdf_hessian_{idx:03d}_weight_up")
-                events = ak.with_field(events, weight_down, f"pdf_hessian_{idx:03d}_weight_down")
 
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
