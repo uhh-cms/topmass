@@ -822,6 +822,11 @@ def add_config(
                 "pdf_weight": f"pdf_hessian_{idx:03d}_weight_{{direction}}",
             },
         )
+
+    # Tune CR1 shift
+    cfg.add_shift(name="tune_cr1_up", id=204, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
+    cfg.add_shift(name="tune_cr1_down", id=205, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
+
     ################################################################################################
     # external files
     ################################################################################################
