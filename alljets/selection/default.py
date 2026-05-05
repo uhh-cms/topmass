@@ -32,11 +32,9 @@ from columnflow.selection.cms.jets import jet_veto_map
 from columnflow.production.cms.pileup import pu_weight
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.scale import murmuf_weights
-from columnflow.production.cms.parton_shower import ps_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
-from columnflow.production.cms.top_pt_weight import top_pt_weight
 
 from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
@@ -79,8 +77,6 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         murmuf_weights,
         pu_weight,
         trig_weights,
-        ps_weights,
-        top_pt_weight,
     },
     produces={
         cutflow_features,
@@ -97,8 +93,6 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         murmuf_weights,
         pu_weight,
         trig_weights,
-        ps_weights,
-        top_pt_weight,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
@@ -183,7 +177,6 @@ def default_trig_weight(
 
         events = self[murmuf_weights](events, **kwargs)
         events = self[pu_weight](events, **kwargs)
-        events = self[ps_weights](events, **kwargs)
         events = self[trig_weights](events, **kwargs)
 
         # Use the derived pdf weight producer to store all weights
@@ -198,14 +191,6 @@ def default_trig_weight(
             weight_down = 2 - hessian[:, i]
             events = ak.with_field(events, weight_up, f"pdf_hessian_{idx:03d}_weight_up")
             events = ak.with_field(events, weight_down, f"pdf_hessian_{idx:03d}_weight_down")
-
-        if self.dataset_inst.has_tag("ttbar"):
-            # Add top pt weight and variations
-            # We don't apply these weights and therefore set the nominal column to 1
-            # We symmetrize the up/down variations
-            events = self[top_pt_weight](events, **kwargs)
-            events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight_up))
-            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight_up)
 
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (

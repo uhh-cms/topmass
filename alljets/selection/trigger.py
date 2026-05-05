@@ -23,11 +23,9 @@ from columnflow.production.cms.pileup import pu_weight
 from columnflow.selection.cms.jets import jet_veto_map
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.scale import murmuf_weights
-from columnflow.production.cms.parton_shower import ps_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
-from columnflow.production.cms.top_pt_weight import top_pt_weight
 
 from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
@@ -57,7 +55,6 @@ hist = maybe_import("hist")
         pdf_weights,
         murmuf_weights,
         pu_weight,
-        ps_weights,
         "TrigObj*",
     },
     produces={
@@ -71,7 +68,6 @@ hist = maybe_import("hist")
         pdf_weights,
         murmuf_weights,
         pu_weight,
-        ps_weights,
         "trig_weight",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "trig_ht",
@@ -158,7 +154,6 @@ def trigger_eff(
         events = self[pdf_weights](events, **kwargs)
         events = self[murmuf_weights](events, **kwargs)
         events = self[pu_weight](events, **kwargs)
-        events = self[ps_weights](events, **kwargs)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
@@ -168,12 +163,6 @@ def trigger_eff(
             results.steps.HT
         )
         self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
-        # Add top pt weight and variations
-        # We don't apply these weights and therefore set the nominal column to 1
-        # We symmetrize the up/down variations
-        events = self[top_pt_weight](events, **kwargs)
-        events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight_up))
-        events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight_up)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)
@@ -232,7 +221,6 @@ def trigger_eff(
         pdf_weights,
         murmuf_weights,
         pu_weight,
-        ps_weights,
         trig_weights,
     },
     produces={
@@ -246,7 +234,6 @@ def trigger_eff(
         pdf_weights,
         murmuf_weights,
         pu_weight,
-        ps_weights,
         trig_weights,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
@@ -333,7 +320,6 @@ def trigger_eval(
         events = self[pdf_weights](events, **kwargs)
         events = self[murmuf_weights](events, **kwargs)
         events = self[pu_weight](events, **kwargs)
-        events = self[ps_weights](events, **kwargs)
         events = self[trig_weights](events, **kwargs)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         # Combined event selection for efficiency calculation, without b-tagging requirements
@@ -344,12 +330,6 @@ def trigger_eval(
             results.steps.HT
         )
         self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
-        # Add top pt weight and variations
-        # We don't apply these weights and therefore set the nominal column to 1
-        # We symmetrize the up/down variations
-        events = self[top_pt_weight](events, **kwargs)
-        events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight_up))
-        events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight_up)
 
     # add cutflow features, passing per-object masks
     events = self[cutflow_features](events, results.objects, **kwargs)

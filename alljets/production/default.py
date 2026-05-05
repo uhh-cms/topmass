@@ -34,6 +34,7 @@ from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.btag import btag_wp_weights
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.production.normalization import normalization_weights
+from columnflow.production.cms.top_pt_weight import top_pt_weight
 
 
 from alljets.production.KinFit import kinFit
@@ -311,6 +312,7 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
+        top_pt_weight,
         "Jet.*",
     },
     produces={
@@ -320,6 +322,7 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
+        top_pt_weight,
     },
     require_producers={"kinFitMatch"},
     # whether weight producers should be added and called
@@ -349,6 +352,14 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[normalization_weights](events, **kwargs)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
+        if self.dataset_inst.has_tag("ttbar"):
+            # Add top pt weight and variations
+            # We don't apply these weights and therefore set the nominal column to 1
+            # We symmetrize the up/down variations
+            events = self[top_pt_weight](events, **kwargs)
+            events = set_ak_column(events, "top_pt_weight_up", events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
 
     return events
 
@@ -360,6 +371,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         category_ids,
         btag_wp_weights,
         normalization_weights,
+        top_pt_weight,
         "Jet.*",
     },
     produces={
@@ -368,6 +380,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         category_ids,
         btag_wp_weights,
         normalization_weights,
+        top_pt_weight,
     },
     produce_weights=True,
 )
@@ -405,7 +418,14 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
-
+        if self.dataset_inst.has_tag("ttbar"):
+            # Add top pt weight and variations
+            # We don't apply these weights and therefore set the nominal column to 1
+            # We symmetrize the up/down variations
+            events = self[top_pt_weight](events, **kwargs)
+            events = set_ak_column(events, "top_pt_weight_up", events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
     return events
 
 
