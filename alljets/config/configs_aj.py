@@ -662,6 +662,11 @@ def add_config(
     cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal", "hdamp"})
     cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal", "hdamp"})
 
+    # Hdamp shifts based on DCTR reweighting
+    cfg.add_shift(name="hdamp_dctr_up", id=16, type="shape", tags="hdamp_dctr")
+    cfg.add_shift(name="hdamp_dctr_down", id=17, type="shape", tags="hdamp_dctr")
+    add_shift_aliases(cfg, "hdamp_dctr", {"hdamp_weight": "hdamp_weight_{direction}"})
+
     # fake jet energy correction shift, with aliases flaged as "selection_dependent", i.e. the aliases
     # affect columns that might change the output of the event selection
     # load jec sources
@@ -987,6 +992,7 @@ def add_config(
             "pu_weight": get_shifts("pu_weight_minbias_xs"),
             "fsr_weight": get_shifts("fsr"),
             "isr_weight": get_shifts("isr"),
+            "hdamp_weight": get_shifts("hdamp_dctr"),
         },
     )
 

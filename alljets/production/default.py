@@ -39,6 +39,7 @@ from columnflow.production.cms.top_pt_weight import top_pt_weight
 
 from alljets.production.KinFit import kinFit
 from alljets.scripts.default import combinationtype
+from alljets.production.dctr_hdamp import dctr_hdamp
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -312,6 +313,7 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
+        dctr_hdamp,
         top_pt_weight,
         "Jet.*",
     },
@@ -322,6 +324,7 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
+        dctr_hdamp,
         top_pt_weight,
     },
     require_producers={"kinFitMatch"},
@@ -352,6 +355,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[normalization_weights](events, **kwargs)
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
+        events = self[dctr_hdamp](events, **kwargs)
         if self.dataset_inst.has_tag("ttbar"):
             # Add top pt weight and variations
             # We don't apply these weights and therefore set the nominal column to 1
