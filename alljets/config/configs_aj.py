@@ -1030,6 +1030,9 @@ def add_config(
                 "category_ids",
                 "cutflow.*",
             },
+            "cf.ProduceColumns": {
+                ColumnCollection.ALL_FROM_PRODUCERS,
+            },
             "cf.UniteColumns": {
                 "*_weight",
                 "Jet.*",
