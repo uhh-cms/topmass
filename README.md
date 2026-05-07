@@ -177,6 +177,19 @@ law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
     --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching 
 ```
 
+### Inference
+
+To create the 1D data cards:
+```
+law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd   --version v1_Analysis  --configs 2017_v9  --selector-steps All,SignalOrBkgTrigger,HT,jet,BTag20,LeadingSix20BTag --workers 8 --tasks-per-job 10 
+```
+
+To create the 2D data card:
+```
+ law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling_2D   --version v1_Analysis  --configs 2017_v9  --selector-steps All,SignalOrBkgTrigger,HT,jet,BTag20,LeadingSix20BTag --workers 8 --tasks-per-job 10 --remove-output 0,a
+added config:2017_v9
+```
+
 ## Debugging
 
 The output path of the different task can be yielded by appending ```print-output <index>```. For the output of the main task the index is 0, e.g. where the plots of the ```cf.Plotvariables1D``` tasks are stored. We can increase the index number to follow the workflow tree top to bottom.

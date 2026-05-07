@@ -24,6 +24,19 @@ def default_2D(self: InferenceModel) -> None:
         mc_stats=[100, 1, 1],
         flow_strategy=FlowStrategy.remove,
     )
+    self.add_category(
+        "CR_2D_mtfit_W_mass_avg",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="bkg",
+                variable="fit_Top1_mass_percentile-reco_W_mass_avg_percentile",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
     #
     # processes
     #
