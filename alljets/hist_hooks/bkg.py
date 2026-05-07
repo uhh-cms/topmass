@@ -119,13 +119,12 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
 
         # shape TODO: this scaling factor only works, if over/underflow bins are present
         tt_hist = hists[config_inst.get_process("tt", default=None)]
-        for i in range(len(tt_hist.axes["category"])):
-            if tt_hist.axes["category"][i] == "sig":
-                tt_index = i
+        tt_cat_idx = tt_hist.axes["category"].index("sig")
+        tt_shift_idx = tt_hist.axes["shift"].index("nominal")
 
         for cat_index in range(cat_axis.size):
             if cat_axis.value(cat_index) == sig_category.name:
-                dif = data_hist[cat_index, ...].sum(flow=True).value - tt_hist[tt_index, ...].sum(flow=True).value
+                dif = data_hist[cat_index, ...].sum(flow=True).value - tt_hist[tt_cat_idx, tt_shift_idx, ...].sum(flow=True).value
                 factor = dif / get_hist(data_hist, "no_jets").sum(flow=True).value
 
         bkg_qcd = factor * no_jets_data  # here you can multiply your shape by a constant factor
