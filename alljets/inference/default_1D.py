@@ -9,11 +9,9 @@ from alljets.inference.helper import add_processes, add_parameters
 
 @inference_model
 def default_1D(self: InferenceModel) -> None:
-
     #
     # categories
     #
-
     self.add_category(
         "SR_top_mass",
         config_data={

@@ -23,11 +23,23 @@ def add_processes(im: InferenceModel) -> None:
                              "tt_sl_powheg",
                              "tt_dl_powheg"],
             )
-
             for config_inst in im.config_insts
         },
         is_signal=True,
     )
+    im.add_process(
+        "BKG",
+        config_data={
+            config_inst.name: im.process_config_spec(
+                process="qcd_est",
+                #mc_datasets=["data*"],
+            )
+            for config_inst in im.config_insts
+        },
+        is_signal=False,
+        is_dynamic= True,
+    )
+
 
 def add_parameters(im: InferenceModel) -> None:
     # groups
