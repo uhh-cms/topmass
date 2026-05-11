@@ -29,7 +29,6 @@ from columnflow.production.util import attach_coffea_behavior
 from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
 from columnflow.columnar_util import attach_coffea_behavior as attach_coffea_behavior_fn
 
-from columnflow.production.cms.muon import muon_weights
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.btag import btag_wp_weights
 from columnflow.production.cms.gen_particles import gen_top_lookup
