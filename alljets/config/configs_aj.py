@@ -1120,16 +1120,14 @@ def add_config(
     cfg.x.validate_dataset_lfns = False
 
     def get_dataset_lfns(dataset_inst, shift_inst, dataset_key):
-        base_path = "/pnfs/desy.de/cms/tier2/store/user/stadie/nanoaod_run2/v9_v2"
 
-        dataset_map = {
-            "tt_dl_powheg_17": "tt_dl_powheg_17",
-            "tt_sl_powheg_17": "tt_sl_powheg_17",
-            "tt_fh_powheg_17": "tt_fh_powheg_17",
-        }
+        info = dataset_inst.info.get("nominal")
+        aux = getattr(info, "aux", {})
 
-        if dataset_inst.name in dataset_map:
-            dataset_dir = os.path.join(base_path, dataset_map[dataset_inst.name])
+        if aux.get("lfn_source") == "pnfs":
+
+            base_path = "/pnfs/desy.de/cms/tier2/store/user/stadie/nanoaod_run2/v9_v2"
+            dataset_dir = os.path.join(base_path, aux["pnfs_dataset"])
 
             if not os.path.exists(dataset_dir):
                 raise Exception(f"Dataset directory not found: {dataset_dir}")
@@ -1147,9 +1145,13 @@ def add_config(
                 "tt_sl_powheg_17": ["nano_847.root"],
             }
 
-            if dataset_inst.name in skip_map:
-                skip_files = skip_map[dataset_inst.name]
-                files = [f for f in files if not any(sf in f for sf in skip_files)]
+            skip_files = skip_map.get(aux["pnfs_dataset"], [])
+
+            if skip_files:
+                files = [
+                    f for f in files
+                    if not any(sf in f for sf in skip_files)
+                ]
 
             return sorted(files)
 
