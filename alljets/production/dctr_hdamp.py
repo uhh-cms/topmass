@@ -14,14 +14,10 @@ from columnflow.columnar_util import set_ak_column
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
 
-
 logger = law.logger.get_logger(__name__)
 
 
 @producer(
-    uses={"weight.mlhdamp{_up,_down}"},
-    produces={"hdamp_weight{,_up,_down}"},
-    # only run on mc
     mc_only=True,
 )
 def dctr_hdamp(
@@ -30,24 +26,52 @@ def dctr_hdamp(
     **kwargs,
 ) -> ak.Array:
     """
-    Producer that reads out the DCTR weights for reweighting hdamp on an event-by-event basis.
+    Producer that reads out DCTR weights for hdamp reweighting.
+    Falls back gracefully if weights are missing.
     """
 
-    # setup nominal weights
-    ones = np.ones(len(events), dtype=np.float32)
+    n = len(events)
+    ones = np.ones(n, dtype=np.float32)
+
+    # always produce nominal
     events = set_ak_column(events, "hdamp_weight", ones)
 
-    up = getattr(events.weight, "mlhdamp_up", None)
-    down = getattr(events.weight, "mlhdamp_down", None)
+    # safely access nested weights
+    weight = getattr(events, "weight", None)
 
-    if up is None or down is None:
+    up = None
+    down = None
+
+    if weight is not None:
+        up = getattr(weight, "mlhdamp_up", None)
+        down = getattr(weight, "mlhdamp_down", None)
+
+    has_variations = (up is not None) and (down is not None)
+
+    if has_variations:
+        events = set_ak_column(events, "hdamp_weight_up", up)
+        events = set_ak_column(events, "hdamp_weight_down", down)
+    else:
         logger.warning(
-            f"Missing mlhdamp weights in {self.dataset_inst.name}, filling with 1",
+            f"[{self.dataset_inst.name}] Missing mlhdamp weights → only nominal produced",
         )
-        up = np.ones(len(events), dtype=np.float32)
-        down = np.ones(len(events), dtype=np.float32)
-
-    events = set_ak_column(events, "hdamp_weight_up", up)
-    events = set_ak_column(events, "hdamp_weight_down", down)
 
     return events
+
+
+@dctr_hdamp.init
+def dctr_hdamp_init(self: Producer, **kwargs) -> None:
+
+    self.produces.add("hdamp_weight")
+
+    task = kwargs.get("task", None)
+
+    shift = getattr(task, "global_shift_inst", None) if task else None
+    is_nominal = (shift is None) or (shift.name == "nominal")
+
+    if is_nominal:
+        self.uses.add("weight.mlhdamp_up")
+        self.uses.add("weight.mlhdamp_down")
+
+        self.produces.add("hdamp_weight_up")
+        self.produces.add("hdamp_weight_down")
