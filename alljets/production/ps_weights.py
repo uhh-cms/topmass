@@ -96,11 +96,10 @@ SETS = {
 
 
 @producer(
-    uses={"PSWeight"},
     # only run on mc
     mc_only=True,
     # Which set of variations to store, see SETS dict for available options
-    mode="default",
+    mode="decorrelated",
 )
 def ps_weights(
     self: Producer,
@@ -127,14 +126,10 @@ def ps_weights(
     ps_weights = events.PSWeight
 
     n_weights = ak.num(events.PSWeight, axis=1)
-    max_index = max(index_map.values())
 
-    if ak.any(n_weights <= max_index):
-        bad_frac = ak.mean(n_weights <= max_index)
-        raise ValueError(
-            f"PSWeight too short: need >= {max_index + 1} entries, "
-            f"but {bad_frac * 100:.1f}% of events are invalid",
-        )
+    # Case: reduced PS weights (only 4 entries)
+    if ak.all(n_weights == 4):
+        return events
 
     missing = [c for c in selected if c not in index_map]
     if missing:
@@ -153,17 +148,26 @@ def ps_weights(
 
 @ps_weights.init
 def ps_weights_init(self: Producer, **kwargs) -> None:
-    mode = self.mode  # comes from config
+    mode = self.mode
 
     if mode not in SETS:
         raise ValueError(f"Unknown mode '{mode}', available: {list(SETS.keys())}")
 
-    self.ps_columns = SETS[mode]
+    task = kwargs.get("task", None)
 
-    # nominal weights (always present)
+    shift = getattr(task, "global_shift_inst", None) if task else None
+    is_nominal = (shift is None) or (shift.name == "nominal")
+
+    # use the PSWeight
+    self.uses.add("PSWeight")
+
+    # always produce nominal weights
     self.produces.add("isr_weight")
     self.produces.add("fsr_weight")
 
-    # add all selected variation columns
-    for name in self.ps_columns:
-        self.produces.add(name)
+    if is_nominal:
+        self.ps_columns = SETS[mode]
+        for name in self.ps_columns:
+            self.produces.add(name)
+    else:
+        self.ps_columns = []
