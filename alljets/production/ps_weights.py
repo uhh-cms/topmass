@@ -14,48 +14,53 @@ ak = maybe_import("awkward")
 np = maybe_import("numpy")
 
 # Index map for the 44 PSWeight variations in samples
-# This mapping assumes the exact ordering of UncertaintyBands:List
-# as defined in the generator configuration
-# https://github.com/cms-sw/cmssw/blob/1d517cc3ed9bb410dc82614f9be4a20c9dea3f37/Configuration/Generator/python/PSweightsPythia/PythiaPSweightsSettings_cfi.py
+# The order of the weights has been extracted from the MiniAOD
 index_map = {
-    # --- reduced ---
-    "isr_weight_red_up": 0,
-    "fsr_weight_red_up": 1,
-    "isr_weight_red_down": 2,
-    "fsr_weight_red_down": 3,
 
-    # --- default ---
-    "isr_weight_up": 4,
-    "fsr_weight_up": 5,
-    "isr_weight_down": 6,
-    "fsr_weight_down": 7,
+    # --- FSR reduced ---
+    "fsr_weight_red_up": 0,
+    "fsr_weight_red_down": 1,
 
-    # --- conservative ---
-    "isr_weight_con_up": 8,
-    "fsr_weight_con_up": 9,
-    "isr_weight_con_down": 10,
-    "fsr_weight_con_down": 11,
+    # --- FSR default ---
+    "fsr_weight_up": 2,
+    "fsr_weight_down": 3,
 
-    # --- FSR decorrelated (12–27) ---
-    "fsr_weight_G2GG_muR_down": 12,
-    "fsr_weight_G2GG_muR_up": 13,
-    "fsr_weight_G2QQ_muR_down": 14,
-    "fsr_weight_G2QQ_muR_up": 15,
-    "fsr_weight_Q2QG_muR_down": 16,
-    "fsr_weight_Q2QG_muR_up": 17,
-    "fsr_weight_X2XG_muR_down": 18,
-    "fsr_weight_X2XG_muR_up": 19,
+    # --- FSR conservative ---
+    "fsr_weight_con_up": 4,
+    "fsr_weight_con_down": 5,
 
-    "fsr_weight_G2GG_cNS_down": 20,
-    "fsr_weight_G2GG_cNS_up": 21,
-    "fsr_weight_G2QQ_cNS_down": 22,
-    "fsr_weight_G2QQ_cNS_up": 23,
-    "fsr_weight_Q2QG_cNS_down": 24,
-    "fsr_weight_Q2QG_cNS_up": 25,
-    "fsr_weight_X2XG_cNS_down": 26,
-    "fsr_weight_X2XG_cNS_up": 27,
+    # --- FSR decorrelated ---
+    "fsr_weight_G2GG_muR_down": 6,
+    "fsr_weight_G2GG_muR_up": 7,
+    "fsr_weight_G2QQ_muR_down": 8,
+    "fsr_weight_G2QQ_muR_up": 9,
+    "fsr_weight_Q2QG_muR_down": 10,
+    "fsr_weight_Q2QG_muR_up": 11,
+    "fsr_weight_X2XG_muR_down": 12,
+    "fsr_weight_X2XG_muR_up": 13,
 
-    # --- ISR decorrelated (28–43) ---
+    "fsr_weight_G2GG_cNS_down": 14,
+    "fsr_weight_G2GG_cNS_up": 15,
+    "fsr_weight_G2QQ_cNS_down": 16,
+    "fsr_weight_G2QQ_cNS_up": 17,
+    "fsr_weight_Q2QG_cNS_down": 18,
+    "fsr_weight_Q2QG_cNS_up": 19,
+    "fsr_weight_X2XG_cNS_down": 20,
+    "fsr_weight_X2XG_cNS_up": 21,
+
+    # --- ISR reduced ---
+    "isr_weight_red_up": 22,
+    "isr_weight_red_down": 23,
+
+    # --- ISR default ---
+    "isr_weight_up": 24,
+    "isr_weight_down": 25,
+
+    # --- ISR conservative ---
+    "isr_weight_con_up": 26,
+    "isr_weight_con_down": 27,
+
+    # --- ISR decorrelated ---
     "isr_weight_G2GG_muR_down": 28,
     "isr_weight_G2GG_muR_up": 29,
     "isr_weight_G2QQ_muR_down": 30,
