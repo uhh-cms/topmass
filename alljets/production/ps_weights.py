@@ -95,7 +95,11 @@ SETS = {
         "isr_weight_con_down", "fsr_weight_con_down",
     ],
     "decorrelated": [
-        key for key, idx in index_map.items() if idx >= 12
+        key for key in index_map
+        if (
+            key.startswith("fsr_weight_") or key.startswith("isr_weight_")
+        )
+        and ("muR" in key or "cNS" in key)
     ],
 }
 
