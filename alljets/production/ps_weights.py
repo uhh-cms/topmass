@@ -98,8 +98,7 @@ SETS = {
         key for key in index_map
         if (
             key.startswith("fsr_weight_") or key.startswith("isr_weight_")
-        )
-        and ("muR" in key or "cNS" in key)
+        ) and ("muR" in key or "cNS" in key)
     ],
 }
 
