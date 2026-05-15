@@ -184,10 +184,6 @@ def add_config(
         "tt_sl_powheg",
         "tt_dl_powheg",
         "tt_fh_powheg",
-        # custom datsets
-        "tt_sl_powheg_17",
-        "tt_dl_powheg_17",
-        "tt_fh_powheg_17",
     ]
     for dataset_name in dataset_names:
         # skip when in sync mode and not exiting
@@ -219,9 +215,7 @@ def add_config(
     # DATASET GROUPS (for efficiency calculation)
     # ---------------------------------------------------------
     cfg.x.btag_wp_eff_groups = [
-        ["tt_*_powheg", "st_*"],
-        ["qcd_*"],
-        ["tt_*_powheg_17"],
+        ["tt_*"], ["st_*"], ["qcd_*"],
     ]
 
     # assign dataset tags based on these groups
@@ -1016,7 +1010,6 @@ def add_config(
                 "trig_ht",
                 "xb.*",
                 "weight.*",
-                "PSWeight",
                 "gen_top",
                 "gen_top.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
                 ColumnCollection.ALL_FROM_SELECTOR,
