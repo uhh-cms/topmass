@@ -5,6 +5,7 @@ Producers for storing parton shower weights.
 """
 
 from __future__ import annotations
+import law
 
 from columnflow.production import producer, Producer
 from columnflow.columnar_util import set_ak_column
@@ -154,17 +155,15 @@ def ps_weights(
     return events
 
 
-@ps_weights.init
-def ps_weights_init(self: Producer, **kwargs) -> None:
+@ps_weights.post_init
+def ps_weights_post_init(self: Producer, task: law.Task, **kwargs) -> None:
     mode = self.mode
 
     if mode not in SETS:
         raise ValueError(f"Unknown mode '{mode}', available: {list(SETS.keys())}")
 
-    task = kwargs.get("task", None)
-
-    shift = getattr(task, "global_shift_inst", None) if task else None
-    is_nominal = (shift is None) or (shift.name == "nominal")
+    shift = task.global_shift_inst
+    is_nominal = ((shift.name == "nominal") and self.dataset_inst.has_tag("tt"))
 
     # use the PSWeight
     self.uses.add("PSWeight")
