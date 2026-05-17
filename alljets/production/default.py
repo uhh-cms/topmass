@@ -31,19 +31,29 @@ from columnflow.columnar_util import attach_coffea_behavior as attach_coffea_beh
 
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.btag import btag_wp_weights
+from columnflow.production.cms.pdf import pdf_weights
+
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.production.normalization import normalization_weights
 from columnflow.production.cms.top_pt_weight import top_pt_weight
 
-
 from alljets.production.KinFit import kinFit
 from alljets.scripts.default import combinationtype
-from alljets.production.dctr_hdamp import dctr_hdamp
-from alljets.production.ps_weights import ps_weights
 
-ps_weights_decorrelated = ps_weights.derive("ps_weights_decorrelated",
-                                            cls_dict={"mode": "decorrelated"},
-                                            )
+
+from alljets.production.trig_cor_weight import trig_weights
+from alljets.production.weights import normalized_hdamp_weight
+from alljets.production.weights import normalized_ps_weights
+from alljets.production.weights import normalized_pdf_weights
+from alljets.production.weights import normalized_pdf_weight
+from alljets.production.weights import normalized_trig_weight
+from alljets.production.weights import normalized_pu_weights
+from alljets.production.weights import normalized_murmuf_weight
+
+
+pdf_all_weights = pdf_weights.derive("pdf_all_weights",
+                                     cls_dict={"store_all_weights": True, "store_split_sets": True},
+                                     )
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -317,10 +327,13 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
-        dctr_hdamp,
-        ps_weights,
-        ps_weights_decorrelated,
         top_pt_weight,
+        normalized_hdamp_weight,
+        normalized_ps_weights,
+        normalized_pdf_weights,
+        normalized_pu_weights,
+        normalized_murmuf_weight,
+        normalized_trig_weight,
         "Jet.*",
     },
     produces={
@@ -330,10 +343,13 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
-        dctr_hdamp,
-        ps_weights,
-        ps_weights_decorrelated,
         top_pt_weight,
+        normalized_hdamp_weight,
+        normalized_ps_weights,
+        normalized_pdf_weights,
+        normalized_pu_weights,
+        normalized_murmuf_weight,
+        normalized_trig_weight,
     },
     require_producers={"kinFitMatch"},
     # whether weight producers should be added and called
@@ -358,14 +374,24 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Compute category ids used by later stages
     events = self[category_ids](events, **kwargs)
 
-    # MC-only weights
     if self.dataset_inst.is_mc:
         events = self[normalization_weights](events, **kwargs)
+
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
-        events = self[dctr_hdamp](events, **kwargs)
-        events = self[ps_weights](events, **kwargs)
-        events = self[ps_weights_decorrelated](events, **kwargs)
+
+        events = self[normalized_murmuf_weight](events, **kwargs)
+
+        events = self[normalized_hdamp_weight](events, **kwargs)
+
+        events = self[normalized_ps_weights](events, **kwargs)
+
+        events = self[normalized_pdf_weights](events, **kwargs)
+
+        events = self[normalized_pu_weights](events, **kwargs)
+
+        events = self[normalized_trig_weight](events, **kwargs)
+
         if self.dataset_inst.has_tag("ttbar"):
             # Add top pt weight and variations
             # We don't apply these weights and therefore set the nominal column to 1
@@ -386,6 +412,11 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         btag_wp_weights,
         normalization_weights,
         top_pt_weight,
+        normalized_murmuf_weight,
+        normalized_hdamp_weight,
+        normalized_ps_weights,
+        normalized_pdf_weight,
+        normalized_pu_weights,
         "Jet.*",
     },
     produces={
@@ -395,10 +426,16 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         btag_wp_weights,
         normalization_weights,
         top_pt_weight,
+        normalized_murmuf_weight,
+        normalized_hdamp_weight,
+        normalized_ps_weights,
+        normalized_pdf_weight,
+        normalized_pu_weights,
     },
     produce_weights=True,
+    mode="production",
 )
-def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+def trigSF_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
     Variant pipeline used when normalization shouldn't be applied.
 
@@ -425,22 +462,68 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Category assignment and deterministic seeds
     events = self[category_ids](events, **kwargs)
 
-    # MC: set normalization and mc weights to 1 (placeholder)
     if self.dataset_inst.is_mc:
+
         events = self[normalization_weights](events, **kwargs)
+
         events = set_ak_column(events, "normalization_weight", np.ones(len(events)), value_type=np.float32)
-        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
+
+        events = self[normalized_murmuf_weight](events, **kwargs)
+
+        events = self[normalized_hdamp_weight](events, **kwargs)
+
+        events = self[normalized_ps_weights](events, **kwargs)
+
+        events = self[normalized_pdf_weight](events, **kwargs)
+
+        events = self[normalized_pu_weights](events, **kwargs)
+
+        if self.mode == "production":
+            events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
+            events = set_ak_column(events, "trig_weight_up", np.ones(len(events)), value_type=np.float32)
+            events = set_ak_column(events, "trig_weight_down", np.ones(len(events)), value_type=np.float32)
+
+            events = set_ak_column(events, "normalized_trig_weight", np.ones(len(events)), value_type=np.float32)
+            events = set_ak_column(events, "normalized_trig_weight_up", np.ones(len(events)), value_type=np.float32)
+            events = set_ak_column(events, "normalized_trig_weight_down", np.ones(len(events)), value_type=np.float32)
+
+        elif self.mode == "evaluation":
+            events = self[trig_weights](events, **kwargs)
+            events = set_ak_column(events, "normalized_trig_weight", events.trig_weight)
+            events = set_ak_column(events, "normalized_trig_weight_up", events.trig_weight_up)
+            events = set_ak_column(events, "normalized_trig_weight_down", events.trig_weight_down)
+
         if self.dataset_inst.has_tag("ttbar"):
-            # Add top pt weight and variations
-            # We don't apply these weights and therefore set the nominal column to 1
-            # We symmetrize the up/down variations
+
             events = self[top_pt_weight](events, **kwargs)
             events = set_ak_column(events, "top_pt_weight_up", events.top_pt_weight)
             events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight)
             events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
+
     return events
+
+
+@trigSF_prod.init
+def trigSF_prod_init(self: Producer, **kwargs) -> None:
+    if not self.dataset_inst.is_mc:
+        return
+
+    mode = self.mode
+
+    if mode == "production":
+        self.produces.add("trig_weight{,_up,_down}")
+        self.produces.add("normalized_trig_weight{,_up,_down}")
+
+    elif mode == "evaluation":
+        self.uses.add(trig_weights)
+        self.produces.add(trig_weights)
+        self.produces.add("normalized_trig_weight{,_up,_down}")
+
+
+trigSF_eval = trigSF_prod.derive("trigSF_eval", cls_dict={"mode": "evaluation"})
 
 
 @producer(
