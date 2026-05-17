@@ -76,7 +76,7 @@ def normalized_murmuf_weight(self: Producer, events: ak.Array, **kwargs) -> ak.A
 
 @normalized_murmuf_weight.post_init
 def normalized_murmuf_weight_post_init(self: Producer, task: law.Task, **kwargs) -> None:
-    
+
     # Collect all produced muR/muF weight columns dynamically.
     # For non-nominal global shifts, only keep the central weights
     # to avoid duplicating systematic variations.
