@@ -10,6 +10,7 @@ SelectionResult contains selection masks and object indices for downstream use.
 """
 
 from collections import defaultdict
+import law
 
 from columnflow.util import maybe_import, DotDict
 from columnflow.columnar_util import set_ak_column
@@ -19,7 +20,7 @@ from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
 
 from columnflow.production.cms.pdf import pdf_weights
-from columnflow.production.cms.pileup import pu_weight
+from columnflow.production.cms.pileup import pu_weights_from_columnflow
 from columnflow.selection.cms.jets import jet_veto_map
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.scale import murmuf_weights
@@ -30,7 +31,8 @@ from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
 from alljets.production.default import cutflow_features
-from alljets.production.trig_cor_weight import trig_weights
+from alljets.production.dctr_hdamp import dctr_hdamp
+from alljets.production.ps_weights import ps_weights
 
 
 np = maybe_import("numpy")
@@ -54,7 +56,9 @@ hist = maybe_import("hist")
         mc_weight,
         pdf_weights,
         murmuf_weights,
-        pu_weight,
+        pu_weights_from_columnflow,
+        dctr_hdamp,
+        ps_weights,
         "TrigObj*",
     },
     produces={
@@ -67,18 +71,20 @@ hist = maybe_import("hist")
         mc_weight,
         pdf_weights,
         murmuf_weights,
-        pu_weight,
-        "trig_weight",
+        pu_weights_from_columnflow,
+        dctr_hdamp,
+        ps_weights,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "trig_ht",
     },
     exposed=True,
 )
-def trigger_eff(
+def trigger(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
     hists: DotDict[str, hist.Hist],
+    task: law.Task,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """
@@ -134,9 +140,8 @@ def trigger_eff(
 
     # combined event selection after all steps: Choose one of the trigger efficiency selector steps
     results.event = (
-        results.steps.All &
-        results.steps.Lepton_Veto &
         results.steps.BaseTrigger &
+        results.steps.Lepton_Veto &
         results.steps.BTag &
         results.steps.HT
     )
@@ -145,23 +150,29 @@ def trigger_eff(
     events = self[process_ids](events, **kwargs)
     events = self[deterministic_seeds](events, **kwargs)
 
-    # Set default trigger weight to 1 (for data or MC without trigger weights)
-    events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
-
     # add the mc weight and other weights for MC datasets
     if self.dataset_inst.is_mc:
-        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
-        events = self[pdf_weights](events, **kwargs)
+        events = self[mc_weight](events, **kwargs)
+
         events = self[murmuf_weights](events, **kwargs)
-        events = self[pu_weight](events, **kwargs)
-        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
+
+        events = self[pu_weights_from_columnflow](events, **kwargs)
+
+        events = self[dctr_hdamp](events, **kwargs)
+
+        events = self[ps_weights](events, **kwargs)
+
+        events = self[pdf_weights](events, **kwargs)
+
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
-            results.steps.All &
-            results.steps.Lepton_Veto &
             results.steps.BaseTrigger &
-            results.steps.HT
+            results.steps.Lepton_Veto &
+            results.steps.HT &
+            results.steps.jet
         )
+
+        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
 
     # add cutflow features, passing per-object masks
@@ -174,196 +185,73 @@ def trigger_eff(
     }
     group_map = {}
     if self.dataset_inst.is_mc:
+        # when a shift was requested, skip all other systematic variations
+        skip_shifts = True
+
         weight_map = {
             **weight_map,
-            "sum_mc_weight": (events.mc_weight, Ellipsis),
-            "sum_mc_weight_selected": (events.mc_weight, results.event),
-            "sum_trig_weight": (events.trig_weight, Ellipsis),
-            "sum_trig_weight_selected": (events.trig_weight, results.event),
-        }
-        group_map = {
-            # per process
-            "process": {
-                "values": events.process_id,
-                "mask_fn": (lambda v: events.process_id == v),
-            },
-            # per jet multiplicity
-            "njet": {
-                "values": results.x.n_jets,
-                "mask_fn": (lambda v: results.x.n_jets == v),
-            },
-        }
-    events, results = self[increment_stats](
-        events,
-        results,
-        stats,
-        weight_map=weight_map,
-        group_map=group_map,
-        **kwargs,
-    )
 
-    return events, results
-
-
-@selector(
-    uses={
-        attach_coffea_behavior,
-        cutflow_features,
-        lepton_selection,
-        jet_selection,
-        jet_veto_map,
-        process_ids,
-        increment_stats,
-        deterministic_seeds,
-        fill_btag_wp_count_hists,
-        gen_top_lookup,
-        mc_weight,
-        pdf_weights,
-        murmuf_weights,
-        pu_weight,
-        trig_weights,
-    },
-    produces={
-        cutflow_features,
-        jet_selection,
-        jet_veto_map,
-        process_ids,
-        gen_top_lookup,
-        fill_btag_wp_count_hists,
-        mc_weight,
-        pdf_weights,
-        murmuf_weights,
-        pu_weight,
-        trig_weights,
-        "gen_top.*.{eta,phi,pt,mass,pdgId}",
-        "gen_top",
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-    },
-    exposed=True,
-)
-def trigger_eval(
-    self: Selector,
-    events: ak.Array,
-    stats: defaultdict,
-    hists: DotDict[str, hist.Hist],
-    **kwargs,
-) -> tuple[ak.Array, SelectionResult]:
-    """
-    Event selection pipeline with trigger weights.
-
-    This selector is similar to `default_trig_weight`
-    It ensures all relevant columns exist, applies muon and
-    jet selections, and computes weights for MC, including trigger weights.
-
-    This should be used for evaluating trigger efficiency on selected events.
-    Specifically, on the pt of the Jet used for the trigger SF and the HT of the event.
-
-    As we want to evaluate the trigger efficiency, we want to have Jets close to the trigger.
-
-    Returns:
-        events: The events array with new columns added.
-        SelectionResult: Contains selection masks and object indices.
-
-    Important Note: DO NOT use the returned selector step from the jet_veto_map selector
-              for the jet selection. This selector removes the event if one jet lies in the veto region.
-              Instead, we use the Jet.veto_map_mask in the jet selection to remove individual jets.
-    """
-
-    # ensure coffea behavior
-    events = self[attach_coffea_behavior](events, **kwargs)
-
-    # prepare the selection results that are updated at every step
-    results = SelectionResult()
-
-    # Produce gen_top_decay if available
-    if self.dataset_inst.has_tag("has_top"):
-        events = self[gen_top_lookup](events, **kwargs)
-    else:
-        events = set_ak_column(events, "gen_top", False)
-        events = set_ak_column(events, "GenPart.eta", False)
-
-    # ensure trigger columns exist
-    if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(
-            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
-        )
-    # Lepton selection
-    events, lepton_results = self[lepton_selection](events, **kwargs)
-    results += lepton_results
-
-    # jet veto map
-    events, veto_result = self[jet_veto_map](events, **kwargs)
-    results += veto_result
-
-    # jet selection, using the jet veto map mask and jet Id criteria
-    events, jet_results = self[jet_selection](events, mode="trigger", **kwargs)
-    results += jet_results
-
-    # combined event selection after all steps
-    results.event = (
-        results.steps.All &
-        results.steps.Lepton_Veto &
-        results.steps.jet &
-        results.steps.Trigger &
-        results.steps.BTag &
-        results.steps.HT
-    )
-
-    # create process ids and deterministic seeds
-    events = self[process_ids](events, **kwargs)
-    events = self[deterministic_seeds](events, **kwargs)
-
-    # add the mc weight and other weights for MC datasets
-    if self.dataset_inst.is_mc:
-        events = self[mc_weight](events, **kwargs)
-        events = self[process_ids](events, **kwargs)
-        events = self[pdf_weights](events, **kwargs)
-        events = self[murmuf_weights](events, **kwargs)
-        events = self[pu_weight](events, **kwargs)
-        events = self[trig_weights](events, **kwargs)
-        jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
-        # Combined event selection for efficiency calculation, without b-tagging requirements
-        results.event_eff = (
-            results.steps.All &
-            results.steps.Lepton_Veto &
-            results.steps.BaseTrigger &
-            results.steps.HT
-        )
-        self[fill_btag_wp_count_hists](events, results.event_eff, jet_mask, hists, **kwargs)
-
-    # add cutflow features, passing per-object masks
-    events = self[cutflow_features](events, results.objects, **kwargs)
-
-    # increment stats
-    weight_map = {
-        "num_events": Ellipsis,
-        "num_events_selected": results.event,
-    }
-    group_map = {}
-
-    if self.dataset_inst.is_mc:
-        weight_map = {
-            **weight_map,
             # mc weight for all events
             "sum_mc_weight": (events.mc_weight, Ellipsis),
             "sum_mc_weight_selected": (events.mc_weight, results.event),
-            # TODO: Add variations for shifts
-            "sum_mc_weight_pu_weight": (events.mc_weight * events.pu_weight, Ellipsis),
-            "sum_trig_weight": (events.trig_weight, Ellipsis),
-            "sum_trig_weight_selected": (events.trig_weight, results.event),
         }
+
+        # mur/muf nominal
+        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+            weight_map.update({
+                f"sum_murmuf_weight{v}": (events[f"murmuf_weight{v}"], Ellipsis),
+                f"sum_murmuf_weight{v}_selected": (events[f"murmuf_weight{v}"], results.event),
+            })
+
+        # pileup weights from columnflow
+        for v in (("",) if skip_shifts else ("", "_minbias_xs_up", "_minbias_xs_down")):
+            weight_map.update({
+                f"sum_pu_weight{v}": (events[f"pu_weight{v}"], Ellipsis),
+                f"sum_pu_weight{v}_selected": (events[f"pu_weight{v}"], results.event),
+            })
+
+        # dctr hdamp weights
+        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+            weight_map.update({
+                f"sum_hdamp_weight{v}": (events[f"hdamp_weight{v}"], Ellipsis),
+                f"sum_hdamp_weight{v}_selected": (events[f"hdamp_weight{v}"], results.event),
+            })
+
+        # PS weights (ISR and FSR with the decorrelated variations)
+        for weight_name in (field for field in events.fields
+        if (field.startswith(("isr_weight", "fsr_weight")) and
+            (not skip_shifts or field in {"isr_weight", "fsr_weight"})
+            )
+        ):
+            weight_map.update({
+                f"sum_{weight_name}": (events[weight_name], Ellipsis),
+                f"sum_{weight_name}_selected": (events[weight_name], results.event),
+            })
+
+        # PDF weights (alphas + hessian variations)
+        for weight_name in (
+            field for field in events.fields
+            if (
+                field == "pdf_weight" or
+                (
+                    field.startswith(("pdf_hessian_", "pdf_alphas_weight")) and
+                    (not skip_shifts or field in {"pdf_alphas_weight_up", "pdf_alphas_weight_down"})
+                )
+            )
+        ):
+            weight_map.update({
+                f"sum_{weight_name}": (events[weight_name], Ellipsis),
+                f"sum_{weight_name}_selected": (events[weight_name], results.event),
+            })
+
     group_map = {
         # per process
         "process": {
             "values": events.process_id,
             "mask_fn": (lambda v: events.process_id == v),
         },
-        # per jet multiplicity
-        "njet": {
-            "values": results.x.n_jets,
-            "mask_fn": (lambda v: results.x.n_jets == v),
-        },
     }
+
     events, results = self[increment_stats](
         events,
         results,
