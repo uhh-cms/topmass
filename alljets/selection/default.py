@@ -17,6 +17,7 @@ SelectionResult contains selection masks and object indices for downstream use.
 """
 
 from collections import defaultdict
+import law
 
 from columnflow.util import maybe_import, DotDict
 from columnflow.columnar_util import set_ak_column
@@ -29,7 +30,7 @@ from columnflow.columnar_util import IF_DATASET_HAS_TAG
 
 from columnflow.production.cms.pdf import pdf_weights
 from columnflow.selection.cms.jets import jet_veto_map
-from columnflow.production.cms.pileup import pu_weight
+from columnflow.production.cms.pileup import pu_weights_from_columnflow
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.scale import murmuf_weights
 from columnflow.production.cms.seeds import deterministic_seeds
@@ -40,6 +41,9 @@ from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
 from alljets.production.default import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights
+from alljets.production.dctr_hdamp import dctr_hdamp
+from alljets.production.ps_weights import ps_weights
+
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -72,11 +76,12 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         deterministic_seeds,
         incl_category_ids,
         mc_weight,
-        pdf_weights,
         pdf_all_weights,
         murmuf_weights,
-        pu_weight,
+        pu_weights_from_columnflow,
         trig_weights,
+        dctr_hdamp,
+        ps_weights,
     },
     produces={
         cutflow_features,
@@ -88,11 +93,12 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         fill_btag_wp_count_hists,
         incl_category_ids,
         mc_weight,
-        pdf_weights,
         pdf_all_weights,
         murmuf_weights,
-        pu_weight,
+        pu_weights_from_columnflow,
         trig_weights,
+        dctr_hdamp,
+        ps_weights,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
@@ -101,11 +107,12 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
     },
     exposed=True,
 )
-def default_trig_weight(
+def default(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
     hists: DotDict[str, hist.Hist],
+    task: law.Task,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """
@@ -156,8 +163,8 @@ def default_trig_weight(
 
     # combined event selection after all steps
     results.event = (
-        results.steps.Lepton_Veto &
         results.steps.SignalOrBkgTrigger &
+        results.steps.Lepton_Veto &
         results.steps.HT &
         results.steps.jet &
         results.steps.BTag20 &
@@ -172,15 +179,21 @@ def default_trig_weight(
     # add the mc weight and other weights for MC datasets
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
+
         events = self[process_ids](events, **kwargs)
-        events = self[pdf_weights](events, **kwargs)
 
         events = self[murmuf_weights](events, **kwargs)
-        events = self[pu_weight](events, **kwargs)
+
         events = self[trig_weights](events, **kwargs)
 
-        # Use the derived pdf weight producer to store all weights
-        # For the pdf hessian weights, store them in seperate columns for up/down variations as needed.
+        events = self[pu_weights_from_columnflow](events, **kwargs)
+
+        events = self[dctr_hdamp](events, **kwargs)
+
+        events = self[ps_weights](events, **kwargs)
+
+        # # Use the derived pdf weight producer to store all weights
+        # # For the pdf hessian weights, store them in seperate columns for up/down variations as needed.
         events = self[pdf_all_weights](events, **kwargs)
         events = set_ak_column(events, "pdf_alphas_weight_down", events.pdf_weights_alphas[:, 0])
         events = set_ak_column(events, "pdf_alphas_weight_up", events.pdf_weights_alphas[:, 1])
@@ -194,7 +207,8 @@ def default_trig_weight(
 
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
-            results.steps.SignalOrBkgTrigger &
+            results.steps.BaseTrigger &
+            results.steps.Lepton_Veto &
             results.steps.HT &
             results.steps.jet
         )
@@ -209,19 +223,73 @@ def default_trig_weight(
         "num_events": Ellipsis,
         "num_events_selected": results.event,
     }
-    group_map = {}
 
     if self.dataset_inst.is_mc:
+        # when a shift was requested, skip all other systematic variations
+        skip_shifts = task.global_shift_inst != "nominal" or not self.dataset_inst.has_tag("tt")
+
         weight_map = {
             **weight_map,
+
             # mc weight for all events
             "sum_mc_weight": (events.mc_weight, Ellipsis),
             "sum_mc_weight_selected": (events.mc_weight, results.event),
-            # TODO: Add variations for shifts
-            "sum_mc_weight_pu_weight": (events.mc_weight * events.pu_weight, Ellipsis),
-            "sum_trig_weight": (events.trig_weight, Ellipsis),
-            "sum_trig_weight_selected": (events.trig_weight, results.event),
         }
+
+        # mur/muf nominal
+        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+            weight_map.update({
+                f"sum_murmuf_weight{v}": (events[f"murmuf_weight{v}"], Ellipsis),
+                f"sum_murmuf_weight{v}_selected": (events[f"murmuf_weight{v}"], results.event),
+            })
+
+        # trigger weights
+        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+            weight_map.update({
+                f"sum_trig_weight{v}": (events[f"trig_weight{v}"], Ellipsis),
+                f"sum_trig_weight{v}_selected": (events[f"trig_weight{v}"], results.event),
+            })
+
+        # pileup weights from columnflow
+        for v in (("",) if skip_shifts else ("", "_minbias_xs_up", "_minbias_xs_down")):
+            weight_map.update({
+                f"sum_pu_weight{v}": (events[f"pu_weight{v}"], Ellipsis),
+                f"sum_pu_weight{v}_selected": (events[f"pu_weight{v}"], results.event),
+            })
+
+        # dctr hdamp weights
+        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+            weight_map.update({
+                f"sum_hdamp_weight{v}": (events[f"hdamp_weight{v}"], Ellipsis),
+                f"sum_hdamp_weight{v}_selected": (events[f"hdamp_weight{v}"], results.event),
+            })
+
+        # PS weights (ISR and FSR with the decorrelated variations)
+        for weight_name in (field for field in events.fields
+        if (field.startswith(
+            ("isr_weight", "fsr_weight")) and (not skip_shifts or field in {"isr_weight", "fsr_weight"})
+            )
+        ):
+            weight_map.update({
+                f"sum_{weight_name}": (events[weight_name], Ellipsis),
+                f"sum_{weight_name}_selected": (events[weight_name], results.event),
+            })
+
+        # PDF weights (alphas + hessian variations)
+        for weight_name in (
+            field for field in events.fields
+            if (
+                field == "pdf_weight" or
+                (
+                    field.startswith(("pdf_hessian_", "pdf_alphas_weight")) and
+                    (not skip_shifts or field in {"pdf_alphas_weight_up", "pdf_alphas_weight_down"})
+                )
+            )
+        ):
+            weight_map.update({
+                f"sum_{weight_name}": (events[weight_name], Ellipsis),
+                f"sum_{weight_name}_selected": (events[weight_name], results.event),
+            })
 
     group_map = {
         # per process
@@ -229,12 +297,8 @@ def default_trig_weight(
             "values": events.process_id,
             "mask_fn": (lambda v: events.process_id == v),
         },
-        # per jet multiplicity
-        "njet": {
-            "values": results.x.n_jets,
-            "mask_fn": (lambda v: results.x.n_jets == v),
-        },
     }
+
     events, results = self[increment_stats](
         events,
         results,
