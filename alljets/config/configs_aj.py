@@ -636,34 +636,42 @@ def add_config(
     cfg.add_shift(name="nominal", id=0)
 
     # top mass shifts of 1GeV
-    cfg.add_shift(name="mtop1_up", id=5, type="shape", tags={"disjoint_from_nominal", "mtop1"})
-    cfg.add_shift(name="mtop1_down", id=6, type="shape", tags={"disjoint_from_nominal", "mtop1"})
+    cfg.add_shift(name="mtop1_up", id=2, type="shape", tags={"disjoint_from_nominal", "mtop1"})
+    cfg.add_shift(name="mtop1_down", id=3, type="shape", tags={"disjoint_from_nominal", "mtop1"})
 
     # top mass shifts of 3 GeV
-    cfg.add_shift(name="mtop3_up", id=12, type="shape", tags={"disjoint_from_nominal", "mtop3"})
-    cfg.add_shift(name="mtop3_down", id=13, type="shape", tags={"disjoint_from_nominal", "mtop3"})
+    cfg.add_shift(name="mtop3_up", id=4, type="shape", tags={"disjoint_from_nominal", "mtop3"})
+    cfg.add_shift(name="mtop3_down", id=5, type="shape", tags={"disjoint_from_nominal", "mtop3"})
 
     # top mass shifts of 6 GeV
-    cfg.add_shift(name="mtop6_up", id=14, type="shape", tags={"disjoint_from_nominal", "mtop6"})
-    cfg.add_shift(name="mtop6_down", id=15, type="shape", tags={"disjoint_from_nominal", "mtop6"})
+    cfg.add_shift(name="mtop6_up", id=6, type="shape", tags={"disjoint_from_nominal", "mtop6"})
+    cfg.add_shift(name="mtop6_down", id=7, type="shape", tags={"disjoint_from_nominal", "mtop6"})
 
-    # tune shifts are covered by dedicated, varied datasets, so tag the shift as "disjoint_from_nominal"
-    # (this is currently used to decide whether ML evaluations are done on the full shifted dataset)
-    cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal", "tune"})
-    cfg.add_shift(name="tune_down", id=2, type="shape", tags={"disjoint_from_nominal", "tune"})
-    add_shift_aliases(cfg, "tune", {"tune": "tune_{direction}"})
+    # hdamp shifts
+    cfg.add_shift(name="hdamp_up", id=8, type="shape", tags={"disjoint_from_nominal", "hdamp"})
+    cfg.add_shift(name="hdamp_down", id=9, type="shape", tags={"disjoint_from_nominal", "hdamp"})
 
-    cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal", "hdamp"})
-    cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal", "hdamp"})
+    # tune shifts
+    cfg.add_shift(name="tune_up", id=10, type="shape", tags={"disjoint_from_nominal", "tune"})
+    cfg.add_shift(name="tune_down", id=11, type="shape", tags={"disjoint_from_nominal", "tune"})
 
-    # Hdamp shifts based on DCTR reweighting
-    cfg.add_shift(name="hdamp_dctr_up", id=16, type="shape", tags="hdamp_dctr")
-    cfg.add_shift(name="hdamp_dctr_down", id=17, type="shape", tags="hdamp_dctr")
-    add_shift_aliases(cfg, "hdamp_dctr", {"hdamp_weight": "hdamp_weight_{direction}"})
+    # Tune CR1 shift
+    cfg.add_shift(name="tune_cr1_up", id=12, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
+    cfg.add_shift(name="tune_cr1_down", id=13, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
 
-    # fake jet energy correction shift, with aliases flaged as "selection_dependent", i.e. the aliases
-    # affect columns that might change the output of the event selection
-    # load jec sources
+    # Tune CR2 shift
+    cfg.add_shift(name="tune_cr2_up", id=14, type="shape", tags={"disjoint_from_nominal", "tune_cr2"})
+    cfg.add_shift(name="tune_cr2_down", id=15, type="shape", tags={"disjoint_from_nominal", "tune_cr2"})
+
+    # Tune rtt shift
+    cfg.add_shift(name="tune_rtt_up", id=16, type="shape", tags={"disjoint_from_nominal", "tune_rtt"})
+    cfg.add_shift(name="tune_rtt_down", id=17, type="shape", tags={"disjoint_from_nominal", "tune_rtt"})
+
+    # Tune rtt shift
+    cfg.add_shift(name="tune_erdON_up", id=18, type="shape", tags={"disjoint_from_nominal", "tune_erdON"})
+    cfg.add_shift(name="tune_erdON_down", id=19, type="shape", tags={"disjoint_from_nominal", "tune_erdON"})
+
+    # JEC shifts
     with open(os.path.join(thisdir, "jec_sources.yaml"), "r") as f:
         all_jec_sources = yaml.load(f, yaml.Loader)["names"]
     for jec_source in cfg.x.jec.Jet.uncertainty_sources:
@@ -719,32 +727,15 @@ def add_config(
         },
     )
 
-    # event weights due to muon scale factors
-    cfg.add_shift(name="mu_up", id=10, type="shape")
-    cfg.add_shift(name="mu_down", id=11, type="shape")
-    add_shift_aliases(cfg, "mu", {"muon_weight": "muon_weight_{direction}"})
-
     # Renormalization and scale factor shifts
-    cfg.add_shift(name="murmuf_up", id=140, type="shape")
-    cfg.add_shift(name="murmuf_down", id=141, type="shape")
+    cfg.add_shift(name="murmuf_up", id=110, type="shape")
+    cfg.add_shift(name="murmuf_down", id=111, type="shape")
     add_shift_aliases(
         cfg,
         "murmuf",
         {
             "murmuf_weight": "murmuf_weight_{direction}",
             "normalized_murmuf_weight": "normalized_murmuf_weight_{direction}",
-        },
-    )
-
-    # Pdf shifts (up/down variations from CF)
-    cfg.add_shift(name="pdf_up", id=130, type="shape", tags="pdf")
-    cfg.add_shift(name="pdf_down", id=131, type="shape", tags="pdf")
-    add_shift_aliases(
-        cfg,
-        "pdf",
-        {
-            "pdf_weight": "pdf_weight_{direction}",
-            "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
         },
     )
 
@@ -756,45 +747,36 @@ def add_config(
         "trig",
         {
             "trig_weight": "trig_weight_{direction}",
+            "normalized_trig_weight": "normalized_trig_weight_{direction}",
         },
     )
 
     # Pile-up shifts
-    cfg.add_shift(name="pu_weight_minbias_xs_up", id=150, type="shape", tags="pu_weight")
-    cfg.add_shift(name="pu_weight_minbias_xs_down", id=151, type="shape", tags="pu_weight")
+    cfg.add_shift(name="pu_weight_minbias_xs_up", id=130, type="shape", tags="pu_weight")
+    cfg.add_shift(name="pu_weight_minbias_xs_down", id=131, type="shape", tags="pu_weight")
     add_shift_aliases(
         cfg,
         "pu_weight_minbias_xs",
         {
             "pu_weight": "pu_weight_minbias_xs_{direction}",
+            "normalized_pu_weight": "normalized_pu_weight_minbias_xs_{direction}",
         },
     )
 
-    # FSR shifts using the default global scale scheme
-    cfg.add_shift(name="fsr_up", id=152, type="shape", tags="fsr")
-    cfg.add_shift(name="fsr_down", id=153, type="shape", tags="fsr")
+    # Hdamp shifts based on DCTR reweighting
+    cfg.add_shift(name="hdamp_dctr_up", id=140, type="shape", tags="hdamp_dctr")
+    cfg.add_shift(name="hdamp_dctr_down", id=141, type="shape", tags="hdamp_dctr")
     add_shift_aliases(
         cfg,
-        "fsr",
-        {
-            "fsr_weight": "fsr_weight_{direction}",
-        },
-    )
-
-    # ISR shifts using the default global scale scheme
-    cfg.add_shift(name="isr_up", id=154, type="shape", tags="isr")
-    cfg.add_shift(name="isr_down", id=155, type="shape", tags="isr")
-    add_shift_aliases(
-        cfg,
-        "isr",
-        {
-            "isr_weight": "isr_weight_{direction}",
+        "hdamp_dctr", {
+            "hdamp_weight": "hdamp_weight_{direction}",
+            "normalized_hdamp_weight": "normalized_hdamp_weight_{direction}",
         },
     )
 
     # Top pt reweighting shifts
-    cfg.add_shift(name="top_pt_up", id=156, type="shape", tags="top_pt")
-    cfg.add_shift(name="top_pt_down", id=157, type="shape", tags="top_pt")
+    cfg.add_shift(name="top_pt_up", id=150, type="shape", tags="top_pt")
+    cfg.add_shift(name="top_pt_down", id=151, type="shape", tags="top_pt")
     add_shift_aliases(
         cfg,
         "top_pt",
@@ -803,14 +785,27 @@ def add_config(
         },
     )
 
+    # Pdf shifts (up/down variations from CF)
+    cfg.add_shift(name="pdf_up", id=160, type="shape", tags="pdf")
+    cfg.add_shift(name="pdf_down", id=161, type="shape", tags="pdf")
+    add_shift_aliases(
+        cfg,
+        "pdf",
+        {
+            "pdf_weight": "pdf_weight_{direction}",
+            "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
+        },
+    )
+
     # PDF shifts based on alpha_s variations
-    cfg.add_shift(name="alphas_up", id=158, type="shape", tags="alphas")
-    cfg.add_shift(name="alphas_down", id=159, type="shape", tags="alphas")
+    cfg.add_shift(name="alphas_up", id=170, type="shape", tags="alphas")
+    cfg.add_shift(name="alphas_down", id=171, type="shape", tags="alphas")
     add_shift_aliases(
         cfg,
         "alphas",
         {
             "pdf_weight": "pdf_alphas_weight_{direction}",
+            "normalized_pdf_weight": "normalized_pdf_alphas_weight_{direction}",
         },
     )
 
@@ -825,78 +820,211 @@ def add_config(
             name,
             {
                 "pdf_weight": f"pdf_hessian_{idx:03d}_weight_{{direction}}",
+                "normalized_pdf_weight": f"normalized_pdf_hessian_{idx:03d}_weight_{{direction}}",
             },
         )
 
-    # Tune CR1 shift
-    cfg.add_shift(name="tune_cr1_up", id=204, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
-    cfg.add_shift(name="tune_cr1_down", id=205, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
+    # ISR shifts using the default global scale scheme
+    cfg.add_shift(name="isr_up", id=1010, type="shape", tags="isr")
+    cfg.add_shift(name="isr_down", id=1011, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr",
+        {
+            "isr_weight": "isr_weight_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_{direction}",
+        },
+    )
 
     # ISR shifts for decorrelated variations
     cfg.add_shift(name="isr_G2GG_muR_up", id=1016, type="shape", tags="isr")
     cfg.add_shift(name="isr_G2GG_muR_down", id=1017, type="shape", tags="isr")
-    add_shift_aliases(cfg, "isr_G2GG_muR", {"isr_weight": "isr_weight_G2GG_muR_{direction}"})
+    add_shift_aliases(
+        cfg,
+        "isr_G2GG_muR",
+        {
+            "isr_weight": "isr_weight_G2GG_muR_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_G2GG_muR_{direction}",
+        },
+    )
 
     cfg.add_shift(name="isr_G2QQ_muR_up", id=1018, type="shape", tags="isr")
     cfg.add_shift(name="isr_G2QQ_muR_down", id=1019, type="shape", tags="isr")
-    add_shift_aliases(cfg, "isr_G2QQ_muR", {"isr_weight": "isr_weight_G2QQ_muR_{direction}"})
+    add_shift_aliases(
+        cfg,
+        "isr_G2QQ_muR",
+        {
+            "isr_weight": "isr_weight_G2QQ_muR_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_G2QQ_muR_{direction}",
+        },
+    )
 
     cfg.add_shift(name="isr_Q2QG_muR_up", id=1020, type="shape", tags="isr")
     cfg.add_shift(name="isr_Q2QG_muR_down", id=1021, type="shape", tags="isr")
-    add_shift_aliases(cfg, "isr_Q2QG_muR", {"isr_weight": "isr_weight_Q2QG_muR_{direction}"})
+    add_shift_aliases(
+        cfg,
+        "isr_Q2QG_muR",
+        {
+            "isr_weight": "isr_weight_Q2QG_muR_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_Q2QG_muR_{direction}",
+        },
+    )
 
     cfg.add_shift(name="isr_X2XG_muR_up", id=1022, type="shape", tags="isr")
     cfg.add_shift(name="isr_X2XG_muR_down", id=1023, type="shape", tags="isr")
-    add_shift_aliases(cfg, "isr_X2XG_muR", {"isr_weight": "isr_weight_X2XG_muR_{direction}"})
+    add_shift_aliases(
+        cfg,
+        "isr_X2XG_muR",
+        {
+            "isr_weight": "isr_weight_X2XG_muR_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_X2XG_muR_{direction}",
+        },
+    )
 
     cfg.add_shift(name="isr_G2GG_cNS_up", id=1024, type="shape", tags="isr")
     cfg.add_shift(name="isr_G2GG_cNS_down", id=1025, type="shape", tags="isr")
-    add_shift_aliases(cfg, "isr_G2GG_cNS", {"isr_weight": "isr_weight_G2GG_cNS_{direction}"})
+    add_shift_aliases(
+        cfg,
+        "isr_G2GG_cNS",
+        {
+            "isr_weight": "isr_weight_G2GG_cNS_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_G2GG_cNS_{direction}",
+        },
+    )
 
     cfg.add_shift(name="isr_G2QQ_cNS_up", id=1026, type="shape", tags="isr")
     cfg.add_shift(name="isr_G2QQ_cNS_down", id=1027, type="shape", tags="isr")
-    add_shift_aliases(cfg, "isr_G2QQ_cNS", {"isr_weight": "isr_weight_G2QQ_cNS_{direction}"})
+    add_shift_aliases(
+        cfg,
+        "isr_G2QQ_cNS",
+        {
+            "isr_weight": "isr_weight_G2QQ_cNS_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_G2QQ_cNS_{direction}",
+        },
+    )
 
     cfg.add_shift(name="isr_Q2QG_cNS_up", id=1028, type="shape", tags="isr")
     cfg.add_shift(name="isr_Q2QG_cNS_down", id=1029, type="shape", tags="isr")
-    add_shift_aliases(cfg, "isr_Q2QG_cNS", {"isr_weight": "isr_weight_Q2QG_cNS_{direction}"})
+    add_shift_aliases(
+        cfg,
+        "isr_Q2QG_cNS",
+        {
+            "isr_weight": "isr_weight_Q2QG_cNS_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_Q2QG_cNS_{direction}",
+        },
+    )
 
     cfg.add_shift(name="isr_X2XG_cNS_up", id=1030, type="shape", tags="isr")
     cfg.add_shift(name="isr_X2XG_cNS_down", id=1031, type="shape", tags="isr")
-    add_shift_aliases(cfg, "isr_X2XG_cNS", {"isr_weight": "isr_weight_X2XG_cNS_{direction}"})
+    add_shift_aliases(
+        cfg,
+        "isr_X2XG_cNS",
+        {
+            "isr_weight": "isr_weight_X2XG_cNS_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_X2XG_cNS_{direction}",
+        },
+    )
+
+    # FSR shifts using the default global scale scheme
+    cfg.add_shift(name="fsr_up", id=1110, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_down", id=1111, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr",
+        {
+            "fsr_weight": "fsr_weight_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_{direction}",
+        },
+    )
 
     # FSR shifts for decorrelated variations
     cfg.add_shift(name="fsr_G2GG_muR_up", id=1100, type="shape", tags="fsr")
     cfg.add_shift(name="fsr_G2GG_muR_down", id=1101, type="shape", tags="fsr")
-    add_shift_aliases(cfg, "fsr_G2GG_muR", {"fsr_weight": "fsr_weight_G2GG_muR_{direction}"})
+    add_shift_aliases(
+        cfg,
+        "fsr_G2GG_muR",
+        {
+            "fsr_weight": "fsr_weight_G2GG_muR_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_G2GG_muR_{direction}",
+        },
+    )
 
-    cfg.add_shift(name="fsr_G2QQ_muR_up", id=1102, type="shape", tags="fsr")
-    cfg.add_shift(name="fsr_G2QQ_muR_down", id=1103, type="shape", tags="fsr")
-    add_shift_aliases(cfg, "fsr_G2QQ_muR", {"fsr_weight": "fsr_weight_G2QQ_muR_{direction}"})
+    cfg.add_shift(name="fsr_G2QQ_muR_up", id=1116, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_G2QQ_muR_down", id=1117, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_G2QQ_muR",
+        {
+            "fsr_weight": "fsr_weight_G2QQ_muR_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_G2QQ_muR_{direction}",
+        },
+    )
 
-    cfg.add_shift(name="fsr_Q2QG_muR_up", id=1104, type="shape", tags="fsr")
-    cfg.add_shift(name="fsr_Q2QG_muR_down", id=1105, type="shape", tags="fsr")
-    add_shift_aliases(cfg, "fsr_Q2QG_muR", {"fsr_weight": "fsr_weight_Q2QG_muR_{direction}"})
+    cfg.add_shift(name="fsr_Q2QG_muR_up", id=1118, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_Q2QG_muR_down", id=1119, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_Q2QG_muR",
+        {
+            "fsr_weight": "fsr_weight_Q2QG_muR_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_Q2QG_muR_{direction}",
+        },
+    )
 
-    cfg.add_shift(name="fsr_X2XG_muR_up", id=1106, type="shape", tags="fsr")
-    cfg.add_shift(name="fsr_X2XG_muR_down", id=1107, type="shape", tags="fsr")
-    add_shift_aliases(cfg, "fsr_X2XG_muR", {"fsr_weight": "fsr_weight_X2XG_muR_{direction}"})
+    cfg.add_shift(name="fsr_X2XG_muR_up", id=1120, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_X2XG_muR_down", id=1121, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_X2XG_muR",
+        {
+            "fsr_weight": "fsr_weight_X2XG_muR_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_X2XG_muR_{direction}",
+        },
+    )
 
-    cfg.add_shift(name="fsr_G2GG_cNS_up", id=1108, type="shape", tags="fsr")
-    cfg.add_shift(name="fsr_G2GG_cNS_down", id=1109, type="shape", tags="fsr")
-    add_shift_aliases(cfg, "fsr_G2GG_cNS", {"fsr_weight": "fsr_weight_G2GG_cNS_{direction}"})
+    cfg.add_shift(name="fsr_G2GG_cNS_up", id=1122, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_G2GG_cNS_down", id=1123, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_G2GG_cNS",
+        {
+            "fsr_weight": "fsr_weight_G2GG_cNS_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_G2GG_cNS_{direction}",
+        },
+    )
 
-    cfg.add_shift(name="fsr_G2QQ_cNS_up", id=1110, type="shape", tags="fsr")
-    cfg.add_shift(name="fsr_G2QQ_cNS_down", id=1111, type="shape", tags="fsr")
-    add_shift_aliases(cfg, "fsr_G2QQ_cNS", {"fsr_weight": "fsr_weight_G2QQ_cNS_{direction}"})
+    cfg.add_shift(name="fsr_G2QQ_cNS_up", id=1124, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_G2QQ_cNS_down", id=1125, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_G2QQ_cNS",
+        {
+            "fsr_weight": "fsr_weight_G2QQ_cNS_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_G2QQ_cNS_{direction}",
+        },
+    )
 
-    cfg.add_shift(name="fsr_Q2QG_cNS_up", id=1112, type="shape", tags="fsr")
-    cfg.add_shift(name="fsr_Q2QG_cNS_down", id=1113, type="shape", tags="fsr")
-    add_shift_aliases(cfg, "fsr_Q2QG_cNS", {"fsr_weight": "fsr_weight_Q2QG_cNS_{direction}"})
+    cfg.add_shift(name="fsr_Q2QG_cNS_up", id=1126, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_Q2QG_cNS_down", id=1127, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_Q2QG_cNS",
+        {
+            "fsr_weight": "fsr_weight_Q2QG_cNS_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_Q2QG_cNS_{direction}",
+        },
+    )
 
-    cfg.add_shift(name="fsr_X2XG_cNS_up", id=1114, type="shape", tags="fsr")
-    cfg.add_shift(name="fsr_X2XG_cNS_down", id=1115, type="shape", tags="fsr")
-    add_shift_aliases(cfg, "fsr_X2XG_cNS", {"fsr_weight": "fsr_weight_X2XG_cNS_{direction}"})
+    cfg.add_shift(name="fsr_X2XG_cNS_up", id=1128, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_X2XG_cNS_down", id=1129, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_X2XG_cNS",
+        {
+            "fsr_weight": "fsr_weight_X2XG_cNS_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_X2XG_cNS_{direction}",
+        },
+    )
 
     ################################################################################################
     # external files
@@ -936,35 +1064,47 @@ def add_config(
             2018: ("/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json", "v1"),
         }[year],
     })
-    # pileup weight corrections
-    add_external(
-        "pu_sf", (
-            f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz",
-            "v1",
-        ),
 
-    )
-    # muon scale factors
+    # pileup weight corrections
+    # Using mc profile from CMSSW config and data profiles self-produced for corresponding years using BrilCalc)
     add_external(
-        "muon_sf", (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
+        "pu",
+        {
+            2017: {
+                "mc_profile": (
+                    "https://raw.githubusercontent.com/cms-sw/cmssw/refs/heads/master/"
+                    "SimGeneral/MixingModule/python/mix_2017_25ns_UltraLegacy_PoissonOOTPU_cfi.py",
+                    "v1",
+                ),
+                "data_profile": {
+                    "nominal": (
+                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/pileup_nominal.root",
+                        "v1",
+                    ),
+                    "minbias_xs_up": (
+                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/pileup_up.root",
+                        "v1",
+                    ),
+                    "minbias_xs_down": (
+                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/pileup_down.root",
+                        "v1",
+                    ),
+                },
+            },
+        }[year],
     )
+
     # jet energy correction
     add_external(
         "jet_jerc", (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
     )
+
     # WP based btag SF
     add_external(
         "btag_wp_sf_corr",
         (f"/afs/cern.ch/user/l/lgriesin/public/mTop/BTV_files/deepJet_{year}{corr_postfix}_merged.json.gz", "v1"),
     )
 
-    # electron scale factors
-    add_external(
-        "electron_sf", (
-            f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz",
-            "v1",
-        ),
-    )
     # jet veto map
     add_external("jet_veto_map", (cat_info.get_file("jme", "jetvetomaps.json.gz"), "v2"))
     ################################################################################################
@@ -983,8 +1123,8 @@ def add_config(
                 "luminosityBlock",
                 "event",
                 # object info
-                "Jet.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask}",
-                "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask}",
+                "Jet.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask,jetId,puId}",
+                "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask,jetId,puId}",
                 "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
                 "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
                 "Electron.{pt,eta,cutBased}",
@@ -1048,13 +1188,13 @@ def add_config(
         {
             "normalization_weight": [],
             "btag_weight": [],
-            "trig_weight": get_shifts("trig"),
-            "pdf_weight": get_shifts("pdf", "alphas", "hessian_*"),
-            "murmuf_weight": get_shifts("murmuf"),
-            "pu_weight": get_shifts("pu_weight_minbias_xs"),
-            "fsr_weight": get_shifts("fsr*"),
-            "isr_weight": get_shifts("isr*"),
-            "hdamp_weight": get_shifts("hdamp_dctr"),
+            "normalized_trig_weight": get_shifts("trig"),
+            "normalized_pdf_weight": get_shifts("pdf", "alphas", "hessian_*"),
+            "normalized_murmuf_weight": get_shifts("murmuf"),
+            "normalized_pu_weight": get_shifts("pu_weight_minbias_xs"),
+            "normalized_fsr_weight": get_shifts("fsr*"),
+            "normalized_isr_weight": get_shifts("isr*"),
+            "normalized_hdamp_weight": get_shifts("hdamp_dctr"),
         },
     )
 
@@ -1069,10 +1209,6 @@ def add_config(
     ################################################################################################
     # external configs: channels, categories, met filters, triggers, variables
     ################################################################################################
-
-    # names of muon correction sets and working points
-    # (used in the muon producer)
-    cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", f"{year}_UL")
     cfg.x.trigger = {
         "tt_fh": [
             "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
