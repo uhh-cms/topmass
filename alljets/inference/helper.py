@@ -6,12 +6,9 @@ Helper functions for inference models.
 
 from __future__ import annotations
 
-import re
-import abc
-import functools
-import dataclasses
 
-from columnflow.inference import InferenceModel, ParameterType, ParameterTransformation
+from columnflow.inference import InferenceModel, ParameterType
+
 
 def add_processes(im: InferenceModel) -> None:
     im.add_process(
@@ -32,12 +29,12 @@ def add_processes(im: InferenceModel) -> None:
         config_data={
             config_inst.name: im.process_config_spec(
                 process="qcd_est",
-                #mc_datasets=["data*"],
+                # mc_datasets=["data*"],
             )
             for config_inst in im.config_insts
         },
         is_signal=False,
-        is_dynamic= True,
+        is_dynamic=True,
     )
 
 
@@ -58,7 +55,6 @@ def add_parameters(im: InferenceModel) -> None:
         },
     )
 
-
     experimental = {
         "CMS_res_j_13TeV": "jer",
         "CMS_scale_j_FlavorPureBottom": "jec_FlavorPureBottom",
@@ -66,7 +62,7 @@ def add_parameters(im: InferenceModel) -> None:
         "CMS_scale_j_FlavorPureCharm": "jec_FlavorPureCharm",
         "CMS_scale_j_FlavorPureQuark": "jec_FlavorPureQuark",
         "CMS_pileup": "pu_weight_minbias_xs",
-        "CMS_trig_htsixjets2btag": "trig"
+        "CMS_trig_htsixjets2btag": "trig",
     }
 
     modelling = {
@@ -76,9 +72,8 @@ def add_parameters(im: InferenceModel) -> None:
         "pdf_alphas": "pdf",
         "underlying_event": "tune",
         "ps_CR1": "tune_cr1",
-        "QCD_scale_ttbar": "murmuf"
+        "QCD_scale_ttbar": "murmuf",
     }
-
 
     def add_source(nuisance_name, shift_name, group):
         im.add_parameter(
@@ -420,9 +415,6 @@ def add_parameters(im: InferenceModel) -> None:
     #     },
     # )
 
-
-
-
     # tune shift
 
     # im.add_parameter(
@@ -467,4 +459,3 @@ def add_parameters(im: InferenceModel) -> None:
     #         for config_inst in im.config_insts
     #     },
     # )
-

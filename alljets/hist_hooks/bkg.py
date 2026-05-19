@@ -124,7 +124,8 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
 
         for cat_index in range(cat_axis.size):
             if cat_axis.value(cat_index) == sig_category.name:
-                dif = data_hist[cat_index, ...].sum(flow=True).value - tt_hist[tt_cat_idx, tt_shift_idx, ...].sum(flow=True).value
+                dif = data_hist[cat_index, ...].sum(flow=True).value - tt_hist[tt_cat_idx, tt_shift_idx, ...].sum(
+                    flow=True).value
                 factor = dif / get_hist(data_hist, "no_jets").sum(flow=True).value
 
         bkg_qcd = factor * no_jets_data  # here you can multiply your shape by a constant factor
