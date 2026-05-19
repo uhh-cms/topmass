@@ -8,9 +8,9 @@ from columnflow.inference import InferenceModel, FlowStrategy, inference_model  
 
 from alljets.inference.helper import add_processes, add_parameters
 
+
 @inference_model
 def default_2D(self: InferenceModel) -> None:
-
     self.add_category(
         "SR_2D_mtfit_W_mass_avg",
         config_data={
