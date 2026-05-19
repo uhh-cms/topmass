@@ -57,6 +57,48 @@ def add_parameters(im: InferenceModel) -> None:
             for config_inst in im.config_insts
         },
     )
+
+
+    experimental = {
+        "CMS_res_j_13TeV": "jer",
+        "CMS_scale_j_FlavorPureBottom": "jec_FlavorPureBottom",
+        "CMS_scale_j_FlavorPureGluon": "jec_FlavorPureGluon",
+        "CMS_scale_j_FlavorPureCharm": "jec_FlavorPureCharm",
+        "CMS_scale_j_FlavorPureQuark": "jec_FlavorPureQuark",
+        "CMS_pileup": "pu_weight_minbias_xs",
+        "CMS_trig_htsixjets2btag": "trig"
+    }
+
+    modelling = {
+        "ps_isr": "isr",
+        "ps_fsr": "fsr",
+        "ps_hdamp": "hdamp",
+        "pdf_alphas": "pdf",
+        "underlying_event": "tune",
+        "ps_CR1": "tune_cr1",
+        "QCD_scale_ttbar": "murmuf"
+    }
+
+
+    def add_source(nuisance_name, shift_name, group):
+        im.add_parameter(
+            nuisance_name,
+            process=["TT"],
+            type=ParameterType.shape,
+            config_data={
+                config_inst.name: im.parameter_config_spec(
+                    shift_source=shift_name,
+                )
+                for config_inst in im.config_insts
+            },
+            group=group,
+        )
+
+    for nuis_name, shift_name in experimental.items():
+        add_source(nuis_name, shift_name, "experimental")
+
+    for nuis_name, shift_name in modelling.items():
+        add_source(nuis_name, shift_name, "modelling")
     # # # lumi
     # lumi = im.config_inst.x.luminosity
     # for unc_name in lumi.uncertainties:
@@ -78,19 +120,6 @@ def add_parameters(im: InferenceModel) -> None:
     #         for config_inst in im.config_insts
     #     },
     # )
-    # jet energy resolution
-    im.add_parameter(
-        "CMS_res_j_13TeV",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="jer",
-            )
-            for config_inst in im.config_insts
-        },
-        group="experimental",
-    )
     # jet energy correction uncertainties
 
     # im.add_parameter(
@@ -390,182 +419,10 @@ def add_parameters(im: InferenceModel) -> None:
     #         for config_inst in im.config_insts
     #     },
     # )
-    im.add_parameter(
-        "CMS_scale_j_FlavorPureBottom",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="jec_FlavorPureBottom",
-            )
-            for config_inst in im.config_insts
-        },
-        group="experimental",
-    )
-    im.add_parameter(
-        "CMS_scale_j_FlavorPureGluon",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="jec_FlavorPureGluon",
-            )
-            for config_inst in im.config_insts
-        },
-        group="experimental",
-    )
-    im.add_parameter(
-        "CMS_scale_j_FlavorPureQuark",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="jec_FlavorPureQuark",
-            )
-            for config_inst in im.config_insts
-        },
-        group="experimental",
-    )
-    im.add_parameter(
-        "CMS_scale_j_FlavorPureCharm",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="jec_FlavorPureCharm",
-            )
-            for config_inst in im.config_insts
-        },
-        group="experimental",
-    )
-    # im.add_parameter(
-    #     "jec_ZJetFlavour",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_FlavorZJet",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_PhotonJetFlavour",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_FlavorPhotonJet",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # parton shower shifts(isr/fsr)
-    im.add_parameter(
-        "ps_isr",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="isr",
-            )
-            for config_inst in im.config_insts
-        },
-        group="modelling",
-    )
-    im.add_parameter(
-        "ps_fsr",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="fsr",
-            )
-            for config_inst in im.config_insts
-        },
-        group="modelling",
-    )
-    # Hdamp
-    im.add_parameter(
-        "ps_hdamp",
-        process=["TT"],
-        type=ParameterType.shape,
-        transformations={ParameterTransformation.envelope, ParameterTransformation.normalize},
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="hdamp",
-            )
-            for config_inst in im.config_insts
-        },
-        group="modelling",
-    )
-    # pile-up weights
-    im.add_parameter(
-        "CMS_pileup",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="pu_weight_minbias_xs",
-            )
-            for config_inst in im.config_insts
-        },
-        group="experimental",
-    )
-    # pdf shift
-    im.add_parameter(
-        "pdf_alphas",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="pdf",
-            )
-            for config_inst in im.config_insts
-        },
-        group="modelling",
-    )
-    # trigger
-    im.add_parameter(
-        "CMS_trig_htsixjets2btag",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="trig",
-            )
-            for config_inst in im.config_insts
-        },
-        group="experimental",
-    )
-    # tune shift
-    im.add_parameter(
-        "underlying_event",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="tune",
-            )
-            for config_inst in im.config_insts
-        },
-        group="modelling",
-    )
-    # tune shift
 
-    im.add_parameter(
-        "ps_CR1",
-        process=["TT"],
-        type=ParameterType.shape,
-        transformations={ParameterTransformation.envelope},
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="tune_cr1",
-            )
-            for config_inst in im.config_insts
-        },
-        group="modelling",
-    )
+
+
+
     # tune shift
 
     # im.add_parameter(
@@ -610,31 +467,4 @@ def add_parameters(im: InferenceModel) -> None:
     #         for config_inst in im.config_insts
     #     },
     # )
-    # murmuf
-    im.add_parameter(
-        "QCDscale_ttbar",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="murmuf",
-            )
-            for config_inst in im.config_insts
-        },
-        group="modelling",
-    )
-#  # rate uncertainty
-# self.add_parameter(
-#     "rate",
-#     process=["TT"],
-#     type=ParameterType.rate_gauss,
-#     effect=(0.9,1.1),
-# )
-# # a custom asymmetric uncertainty that is converted from rate to shape
-# self.add_parameter(
-#     "QCDscale_ttbar",
-#     process="TT_FH",
-#     type=ParameterType.shape,
-#     transformations=[ParameterTransformation.effect_from_rate],
-#     effect=(0.5, 1.1),
-# )
+
