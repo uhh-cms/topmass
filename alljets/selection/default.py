@@ -20,13 +20,14 @@ from collections import defaultdict
 import law
 
 from columnflow.util import maybe_import, DotDict
-from columnflow.columnar_util import set_ak_column
+from columnflow.columnar_util import set_ak_column, full_like
 from columnflow.selection.stats import increment_stats
 from columnflow.production.processes import process_ids
 from columnflow.production.categories import category_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.columnar_util import IF_DATASET_HAS_TAG
+from columnflow.selection.cms.json_filter import json_filter
 
 from columnflow.production.cms.pdf import pdf_weights
 from columnflow.selection.cms.jets import jet_veto_map
@@ -67,6 +68,7 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         cutflow_features,
         lepton_selection,
         jet_veto_map,
+        json_filter,
         jet_selection,
         attach_coffea_behavior,
         fill_btag_wp_count_hists,
@@ -87,6 +89,7 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
     produces={
         cutflow_features,
         jet_veto_map,
+        json_filter,
         jet_selection,
         gen_top_lookup,
         process_ids,
@@ -152,6 +155,13 @@ def default(
             events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
 
+    # filter bad data events according to golden lumi mask
+    if self.dataset_inst.is_data:
+        events, json_filter_results = self[json_filter](events, **kwargs)
+        results += json_filter_results
+    else:
+        results += SelectionResult(steps={"json": full_like(events.event, True, dtype=bool)})
+
     events, lepton_results = self[lepton_selection](events, **kwargs)
     results += lepton_results
 
@@ -165,6 +175,7 @@ def default(
 
     # combined event selection after all steps
     results.event = (
+        results.steps.json &
         results.steps.SignalOrBkgTrigger &
         results.steps.Lepton_Veto &
         results.steps.HT &

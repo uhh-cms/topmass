@@ -13,7 +13,7 @@ from collections import defaultdict
 import law
 
 from columnflow.util import maybe_import, DotDict
-from columnflow.columnar_util import set_ak_column
+from columnflow.columnar_util import set_ak_column, full_like
 from columnflow.selection.stats import increment_stats
 from columnflow.production.processes import process_ids
 from columnflow.production.util import attach_coffea_behavior
@@ -27,6 +27,7 @@ from columnflow.production.cms.scale import murmuf_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
+from columnflow.selection.cms.json_filter import json_filter
 
 from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
@@ -48,6 +49,7 @@ hist = maybe_import("hist")
         lepton_selection,
         jet_selection,
         jet_veto_map,
+        json_filter,
         process_ids,
         increment_stats,
         deterministic_seeds,
@@ -65,6 +67,7 @@ hist = maybe_import("hist")
         cutflow_features,
         jet_selection,
         jet_veto_map,
+        json_filter,
         process_ids,
         gen_top_lookup,
         fill_btag_wp_count_hists,
@@ -125,6 +128,13 @@ def trigger(
         events = set_ak_column(
             events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
         )
+
+    # filter bad data events according to golden lumi mask
+    if self.dataset_inst.is_data:
+        events, json_filter_results = self[json_filter](events, **kwargs)
+        results += json_filter_results
+    else:
+        results += SelectionResult(steps={"json": full_like(events.event, True, dtype=bool)})
 
     # Lepton selection
     events, lepton_results = self[lepton_selection](events, **kwargs)
