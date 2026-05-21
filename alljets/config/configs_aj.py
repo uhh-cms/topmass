@@ -1031,9 +1031,13 @@ def add_config(
     ################################################################################################
 
     cfg.x.external_files = DotDict()
-    json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
-    year = 2017
-    corr_postfix = ""
+
+    central_mtop_dir = "/afs/cern.ch/user/l/lgriesin/public/mTop"
+
+    # For 2017 and 2018 don't need corr_postfix
+    # TODO corr_postfix for 2016
+    if year != 2016:
+        corr_postfix = ""
 
     # helper
     def add_external(name, value):
@@ -1046,7 +1050,7 @@ def add_config(
             run=2,
             era=f"{year}{corr_postfix}-UL",
             vnano=9,
-            snapshot=CATSnapshot(btv="latest", egm="latest", jme="latest", lum="latest", muo="latest", tau="latest"),
+            snapshot=CATSnapshot(btv="latest", egm="latest", jme="2025-04-11", lum="latest", muo="latest", tau="latest"),
         )
 
     # common files
@@ -1067,6 +1071,7 @@ def add_config(
 
     # pileup weight corrections
     # Using mc profile from CMSSW config and data profiles self-produced for corresponding years using BrilCalc)
+    # TODO: Adding 2018
     add_external(
         "pu",
         {
@@ -1095,18 +1100,18 @@ def add_config(
     )
 
     # jet energy correction
-    add_external(
-        "jet_jerc", (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
-    )
-
-    # WP based btag SF
-    add_external(
-        "btag_wp_sf_corr",
-        (f"/afs/cern.ch/user/l/lgriesin/public/mTop/BTV_files/deepJet_{year}{corr_postfix}_merged.json.gz", "v1"),
-    )
+    add_external("jet_jerc", (cat_info.get_file("jme", "jet_jerc.json.gz"), "v1"))
 
     # jet veto map
     add_external("jet_veto_map", (cat_info.get_file("jme", "jetvetomaps.json.gz"), "v2"))
+
+    # WP based btag SF
+    if year == 2017:
+        add_external(
+            "btag_wp_sf_corr",
+            (f"{central_mtop_dir}/BTV_files/deepJet_2017_merged.json.gz", "v1"),
+        )
+
     ################################################################################################
     # reductions
     ################################################################################################
