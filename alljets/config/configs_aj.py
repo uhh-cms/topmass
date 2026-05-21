@@ -786,16 +786,16 @@ def add_config(
     )
 
     # Pdf shifts (up/down variations from CF)
-    cfg.add_shift(name="pdf_up", id=160, type="shape", tags="pdf")
-    cfg.add_shift(name="pdf_down", id=161, type="shape", tags="pdf")
-    add_shift_aliases(
-        cfg,
-        "pdf",
-        {
-            "pdf_weight": "pdf_weight_{direction}",
-            "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
-        },
-    )
+    # cfg.add_shift(name="pdf_up", id=160, type="shape", tags="pdf")
+    # cfg.add_shift(name="pdf_down", id=161, type="shape", tags="pdf")
+    # add_shift_aliases(
+    #     cfg,
+    #     "pdf",
+    #     {
+    #         "pdf_weight": "pdf_weight_{direction}",
+    #         "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
+    #     },
+    # )
 
     # PDF shifts based on alpha_s variations
     cfg.add_shift(name="alphas_up", id=170, type="shape", tags="alphas")
@@ -825,16 +825,16 @@ def add_config(
         )
 
     # ISR shifts using the default global scale scheme
-    cfg.add_shift(name="isr_up", id=1010, type="shape", tags="isr")
-    cfg.add_shift(name="isr_down", id=1011, type="shape", tags="isr")
-    add_shift_aliases(
-        cfg,
-        "isr",
-        {
-            "isr_weight": "isr_weight_{direction}",
-            "normalized_isr_weight": "normalized_isr_weight_{direction}",
-        },
-    )
+    # cfg.add_shift(name="isr_up", id=1010, type="shape", tags="isr")
+    # cfg.add_shift(name="isr_down", id=1011, type="shape", tags="isr")
+    # add_shift_aliases(
+    #     cfg,
+    #     "isr",
+    #     {
+    #         "isr_weight": "isr_weight_{direction}",
+    #         "normalized_isr_weight": "normalized_isr_weight_{direction}",
+    #     },
+    # )
 
     # ISR shifts for decorrelated variations
     cfg.add_shift(name="isr_G2GG_muR_up", id=1016, type="shape", tags="isr")
@@ -926,16 +926,16 @@ def add_config(
     )
 
     # FSR shifts using the default global scale scheme
-    cfg.add_shift(name="fsr_up", id=1110, type="shape", tags="fsr")
-    cfg.add_shift(name="fsr_down", id=1111, type="shape", tags="fsr")
-    add_shift_aliases(
-        cfg,
-        "fsr",
-        {
-            "fsr_weight": "fsr_weight_{direction}",
-            "normalized_fsr_weight": "normalized_fsr_weight_{direction}",
-        },
-    )
+    # cfg.add_shift(name="fsr_up", id=1110, type="shape", tags="fsr")
+    # cfg.add_shift(name="fsr_down", id=1111, type="shape", tags="fsr")
+    # add_shift_aliases(
+    #     cfg,
+    #     "fsr",
+    #     {
+    #         "fsr_weight": "fsr_weight_{direction}",
+    #         "normalized_fsr_weight": "normalized_fsr_weight_{direction}",
+    #     },
+    # )
 
     # FSR shifts for decorrelated variations
     cfg.add_shift(name="fsr_G2GG_muR_up", id=1100, type="shape", tags="fsr")
