@@ -115,3 +115,12 @@ add_lazy_config(
     config_id=2017,
     add_limited=True,
 )
+
+# 2018,
+add_lazy_config(
+    campaign_module="cmsdb.campaigns.run2_2018_nano_v9",
+    campaign_attr="campaign_run2_2018_nano_v9",
+    config_name="2018_v9",
+    config_id=2018,
+    add_limited=True,
+)
