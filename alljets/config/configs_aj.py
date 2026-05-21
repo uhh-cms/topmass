@@ -1250,9 +1250,25 @@ def add_config(
 
     def get_dataset_lfns(dataset_inst, shift_inst, dataset_key):
 
-        info = dataset_inst.info.get("nominal")
+        # Get shift name, fallback to "nominal" if not found
+        shift_name = getattr(shift_inst, "name", None)
+
+        info = None
+        if shift_name is not None:
+            info = dataset_inst.info.get(shift_name)
+
+        if info is None:
+            info = dataset_inst.info.get("nominal")
+
+        if info is None:
+            raise Exception(
+                f"No dataset info found for shift='{shift_name}' or 'nominal' "
+                f"in dataset '{dataset_key}'",
+            )
+
         aux = getattr(info, "aux", {})
 
+        # Custom processed dataset handling
         if aux.get("lfn_source") == "pnfs":
 
             base_path = "/pnfs/desy.de/cms/tier2/store/user/stadie/nanoaod_run2/v9_v2"
@@ -1269,6 +1285,7 @@ def add_config(
             # convert PNFS → LFN
             files = [f.replace("/pnfs/desy.de/cms/tier2", "") for f in files]
 
+            # Skip specific files for certain datasets, corrupted / broken files identified during processing
             skip_map = {
                 "tt_fh_powheg_17": ["nano_2393.root", "nano_2355.root"],
                 "tt_sl_powheg_17": ["nano_847.root"],
@@ -1277,17 +1294,20 @@ def add_config(
             skip_files = skip_map.get(aux["pnfs_dataset"], [])
 
             if skip_files:
-                files = [
-                    f for f in files
-                    if not any(sf in f for sf in skip_files)
-                ]
+                files = [f for f in files if not any(sf in f for sf in skip_files)]
 
             return sorted(files)
 
+        # Fallback to DAS-based handling using GetDatasetLFNs
         from columnflow.tasks.external import GetDatasetLFNs
-        return GetDatasetLFNs.get_dataset_lfns_dasgoclient(
-            dataset_inst, shift_inst, dataset_key,
+
+        task = GetDatasetLFNs()
+        return task.get_dataset_lfns_dasgoclient(
+            dataset_inst,
+            shift_inst,
+            dataset_key,
         )
+
     cfg.x.get_dataset_lfns = get_dataset_lfns
 
     return cfg
