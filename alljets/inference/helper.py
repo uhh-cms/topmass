@@ -7,7 +7,7 @@ Helper functions for inference models.
 from __future__ import annotations
 
 
-from columnflow.inference import InferenceModel, ParameterType
+from columnflow.inference import InferenceModel, ParameterType, ParameterTransformation
 
 
 def add_processes(im: InferenceModel) -> None:
@@ -66,20 +66,33 @@ def add_parameters(im: InferenceModel) -> None:
     }
 
     modelling = {
-        "ps_isr": "isr",
-        "ps_fsr": "fsr",
         "ps_hdamp": "hdamp",
-        "pdf_alphas": "pdf",
+        "ps_hdamp_dctr": "hdamp_dctr",
+        "pdf_alphas": "alphas",
         "underlying_event": "tune",
-        "ps_CR1": "tune_cr1",
         "QCD_scale_ttbar": "murmuf",
+        "top_pt_reweighting": "top_pt",
     }
 
-    def add_source(nuisance_name, shift_name, group):
+    modelling_envelope = {
+        "ps_CR1": "tune_cr1",
+        "ps_CR2": "tune_cr2",
+        "ps_ERD": "tune_erdON",
+        "ps_Recoil": "tune_rtt",
+    }
+
+    splittings = ("G2GG", "G2QQ", "Q2QG", "X2XG")
+    for var in [f"{a}_{b}_{c}" for a in ["isr", "fsr"] for b in splittings for c in ["muR", "cNS"]]:
+        modelling["ps_" + var] = var
+    for i in range(100):
+        modelling[f"pdf_{i:02}"] = f"hessian_{i + 1:03d}"
+
+    def add_source(nuisance_name, shift_name, group, transformations=()):
         im.add_parameter(
             nuisance_name,
             process=["TT"],
             type=ParameterType.shape,
+            transformations=transformations,
             config_data={
                 config_inst.name: im.parameter_config_spec(
                     shift_source=shift_name,
@@ -94,368 +107,5 @@ def add_parameters(im: InferenceModel) -> None:
 
     for nuis_name, shift_name in modelling.items():
         add_source(nuis_name, shift_name, "modelling")
-    # # # lumi
-    # lumi = im.config_inst.x.luminosity
-    # for unc_name in lumi.uncertainties:
-    #     im.add_parameter(
-    #         unc_name,
-    #         type=ParameterType.rate_gauss,
-    #         effect=lumi.get(names=unc_name, direction=("down", "up"), factor=True),
-    #         transformations=[ParameterTransformation.symmetrize],
-    #     )
-
-    # im.add_parameter(
-    #     "jec_Total",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_Total",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # jet energy correction uncertainties
-
-    # im.add_parameter(
-    #     "jec_AbsoluteStat",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_AbsoluteStat",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_AbsoluteScale",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_AbsoluteScale",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_AbsoluteMPFBias",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_AbsoluteMPFBias",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_Fragmentation",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_Fragmentation",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_SinglePionECAL",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_SinglePionECAL",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_SinglePionHCAL",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_SinglePionHCAL",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativeJEREC1",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativeJEREC1",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativeJEREC2",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativeJEREC2",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativeJERHF",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativeJERHF",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativePtBB",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativePtBB",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativePtEC1",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativePtEC1",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativePtEC2",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativePtEC2",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativePtHF",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativePtHF",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativeBal",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativeBal",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativeSample",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativeSample",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativeFSR",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativeFSR",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativeStatFSR",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativeStatFSR",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativeStatEC",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativeStatEC",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_RelativeStatHF",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_RelativeStatHF",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_PileUpDataMC",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_PileUpDataMC",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_PileUpPtRef",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_PileUpPtRef",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_PileUpPtBB",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_PileUpPtBB",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_PileUpPtEC1",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_PileUpPtEC1",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_PileUpPtEC2",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_PileUpPtEC2",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_PileUpPtHF",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_PileUpPtHF",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_PileUpMuZero",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_PileUpMuZero",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # im.add_parameter(
-    #     "jec_PileUpEnvelope",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="jec_PileUpEnvelope",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-
-    # tune shift
-
-    # im.add_parameter(
-    #     "tune_cr2",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     transformations={ParameterTransformation.envelope,
-    #                      ParameterTransformation.normalize},
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="tune_cr2",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-    # tune shift
-
-    # im.add_parameter(
-    #     "tune_rtt",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     transformations={ParameterTransformation.envelope,
-    #                      ParameterTransformation.normalize},
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="tune_rtt",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
-
-    # im.add_parameter(
-    #     "tune_erdON",
-    #     process=["TT"],
-    #     type=ParameterType.shape,
-    #     transformations={ParameterTransformation.envelope,
-    #                      ParameterTransformation.normalize},
-    #     config_data={
-    #         config_inst.name: im.parameter_config_spec(
-    #             shift_source="tune_erdON",
-    #         )
-    #         for config_inst in im.config_insts
-    #     },
-    # )
+    for nuis_name, shift_name in modelling_envelope.items():
+        add_source(nuis_name, shift_name, "modelling", (ParameterTransformation.envelope,))

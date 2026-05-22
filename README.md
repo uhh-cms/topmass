@@ -181,14 +181,19 @@ law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
 
 To create the 1D data cards:
 ```
-law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd   --version v1_Analysis  --configs 2017_v9  --selector-steps All,SignalOrBkgTrigger,HT,jet,BTag20,LeadingSix20BTag --workers 8 --tasks-per-job 10 
+law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd   --version v1_Analysis  --configs 2017_v9  --selector default --workers 8 --tasks-per-job 10 
 ```
 
 To create the 2D data card:
 ```
- law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling_2D   --version v1_Analysis  --configs 2017_v9  --selector-steps All,SignalOrBkgTrigger,HT,jet,BTag20,LeadingSix20BTag --workers 8 --tasks-per-job 10 --remove-output 0,a
-added config:2017_v9
+ law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling_2D   --version v1_Analysis  --configs 2017_v9  --selector default --workers 8 --tasks-per-job 10
 ```
+
+Check for missing input files:
+```
+law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling_2D   --version v1_Analysis  --configs 2017_v9  --selector default --producer default,kinFitMatch --workers 8 --tasks-per-job 10 --print-status 4 | grep -A 4 "4 >" | grep -B 3 "absent"
+```
+
 
 ## Debugging
 
