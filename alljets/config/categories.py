@@ -36,6 +36,17 @@ def add_categories(cfg: od.Config) -> None:
     )
 
     # ========================================================================
+    # Final Selection
+    # ========================================================================
+
+    add_category(
+        cfg,
+        name="final_sel",
+        selection="final_sel",
+        label="final sel",
+    )
+
+    # ========================================================================
     # Jet multiplicity categories
     # ========================================================================
 
@@ -171,31 +182,31 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="gen_eta21_pt60",
         selection="gen_eta21_pt60",
-        label="GenParticle eta2.1+pt60 Cut",
+        label="gen cut",
     )
     add_category(
         cfg,
         name="gen_eta21_pt60_corr",
         selection="gen_eta21_pt60_corr",
-        label="GenParticle eta2.1+pt60 Cut + corr",
+        label="gen cut + corr",
     )
     add_category(
         cfg,
         name="gen_eta21_pt60_conv",
         selection="gen_eta21_pt60_conv",
-        label="GenParticle eta2.1+pt60 Cut + conv",
+        label="gen cut + conv",
     )
     add_category(
         cfg,
         name="gen_eta21_pt60_nconv",
         selection="gen_eta21_pt60_nconv",
-        label="GenParticle eta2.1+pt60 Cut + nconv",
+        label="gen cut + nconv",
     )
     add_category(
         cfg,
         name="gen_eta21_pt60_corrB",
         selection="gen_eta21_pt60_corrB",
-        label="GenParticle eta2.1+pt60 Cut + corr (B)",
+        label="gen cut + corr (B)",
     )
 
 # ----------------------------------------------------------------------------
@@ -208,6 +219,10 @@ def add_categories(cfg: od.Config) -> None:
         selection="deltaRmin08_t1",
         label="dRmin_t1 < 0.8",
     )
+
+# ----------------------------------------------------------------------------
+# Delta Rmin Cuts t1 + gen cut
+# ----------------------------------------------------------------------------
     add_category(
         cfg,
         name="gen_cut_deltaRmin08_t1",
@@ -250,10 +265,13 @@ def add_categories(cfg: od.Config) -> None:
         selection="gen_cut_deltaRmin08_inf_t1",
         label="gen cut + 0.8 < dRmin",
     )
+# ----------------------------------------------------------------------------
+# Delta Rmin Cuts t1 + gen cut + corr
+# ----------------------------------------------------------------------------
     add_category(
         cfg,
         name="gen_cut_corr_deltaRmin08_t1",
-        selection="gen_cut_deltaRmin08_inf_t1",
+        selection="gen_cut_corr_deltaRmin08_inf_t1",
         label="gen cut + corr + dRmin < 0.8",
     )
     add_category(
@@ -264,10 +282,65 @@ def add_categories(cfg: od.Config) -> None:
     )
     add_category(
         cfg,
+        name="gen_cut_corr_deltaRmin04_t1",
+        selection="gen_cut_corr_deltaRmin04_t1",
+        label="gen cut + corr + dRmin < 0.4",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_corr_deltaRmin06_08_t1",
+        selection="gen_cut_corr_deltaRmin06_08_t1",
+        label="gen cut + corr + 0.6 < dRmin < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_corr_deltaRmin04_06_t1",
+        selection="gen_cut_corr_deltaRmin04_06_t1",
+        label="gen cut + corr + 0.4 < dRmin < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_corr_deltaRmin08_inf_t1",
+        selection="gen_cut_corr_deltaRmin08_inf_t1",
+        label="gen cut + corr + 0.8 < dRmin",
+    )
+# ----------------------------------------------------------------------------
+# Delta Rmin Cuts t1 + gen cut + wrong
+# ----------------------------------------------------------------------------
+    add_category(
+        cfg,
         name="gen_cut_wrong_deltaRmin06_t1",
         selection="gen_cut_wrong_deltaRmin06_t1",
         label="gen cut + wrong + dRmin < 0.6",
     )
+# ----------------------------------------------------------------------------
+# Delta Rmin Cuts t1 + gen cut + final sel.
+# ----------------------------------------------------------------------------
+    add_category(
+        cfg,
+        name="final_sel_deltaRmin08_inf_t1",
+        selection="final_sel_deltaRmin08_inf_t1",
+        label="final sel.  + dRmin > 0.8",
+    )
+    add_category(
+        cfg,
+        name="final_sel_deltaRmin06_08_t1",
+        selection="final_sel_deltaRmin06_08_t1",
+        label="final sel.  + 0.6 < dRmin < 0.8",
+    )
+    add_category(
+        cfg,
+        name="final_sel_deltaRmin04_06_t1",
+        selection="final_sel_deltaRmin04_06_t1",
+        label="final sel.  + 0.4 < dRmin < 0.6",
+    )
+    add_category(
+        cfg,
+        name="final_sel_deltaRmin04_t1",
+        selection="final_sel_deltaRmin04_t1",
+        label="final sel.  + dRmin < 0.4",
+    )
+
 # ----------------------------------------------------------------------------
 # Delta R Jet to all other Jets
 # ----------------------------------------------------------------------------
@@ -369,11 +442,17 @@ def add_categories(cfg: od.Config) -> None:
         selection="gen_cut_deltaRgen04_06_q1q2",
         label=r"gen cut + 0.4 < $dR^{gen}_{q1q2}$ < 0.6",
     )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen05_06_q1q2",
+        selection="gen_cut_deltaRgen05_06_q1q2",
+        label=r"gen cut + 0.5 < $dR^{gen}_{q1q2}$ < 0.6",
+    )
 
     add_category(
         cfg,
         name="gen_cut_deltaRgen08_inf_q1q2_corr",
-        selection="gen_cut_deltaRgen04_06_q1q2_corr",
+        selection="gen_cut_deltaRgen08_inf_q1q2_corr",
         label=r"gen cut + corr + $dR^{gen}_{q1q2}$ > 0.8",
     )
     add_category(
@@ -425,6 +504,31 @@ def add_categories(cfg: od.Config) -> None:
         name="gen_cut_deltaRgen04_q1q2_corrB",
         selection="gen_cut_deltaRgen04_q1q2_corrB",
         label=r"gen cut + corr (B) + $dR^{gen}_{q1q2}$ < 0.4",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_inf_q3q4",
+        selection="gen_cut_deltaRgen08_inf_q3q4",
+        label=r"gen cut + $dR^{gen}_{q3q4}$ > 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_08_q3q4",
+        selection="gen_cut_deltaRgen06_08_q3q4",
+        label=r"gen cut + 0.6 < $dR^{gen}_{q3q4}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_06_q3q4",
+        selection="gen_cut_deltaRgen04_06_q3q4",
+        label=r"gen cut + 0.4 < $dR^{gen}_{q3q4}$ < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_q3q4",
+        selection="gen_cut_deltaRgen04_q3q4",
+        label=r"gen cut + $dR^{gen}_{q3q4}$ < 0.4",
     )
 # ----------------------------------------------------------------------------
 # Angular Distance GenParton to GenParton (no gen cut)
@@ -510,7 +614,7 @@ def add_categories(cfg: od.Config) -> None:
     )
 
 # ----------------------------------------------------------------------------
-# Angular Distance genParton to genParton (closet)
+# Angular Distance genParton to genParton (kinFit order)
 # ----------------------------------------------------------------------------
     add_category(
         cfg,
@@ -528,7 +632,26 @@ def add_categories(cfg: od.Config) -> None:
         cfg,
         name="gen_cut_deltaRgen04_q1q2_closest",
         selection="gen_cut_deltaRgen04_q1q2_closest",
-        label=r"gen cut  +  $dR^{gen}_{q1q2}$ < 0.4",
+        label=r"gen cut + $dR^{gen}_{q1q2}$ < 0.4",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_inf_q1q2_closest_conv",
+        selection="gen_cut_deltaRgen08_inf_q1q2_closest_conv",
+        label=r"gen cut  + conv + $dR^{gen}_{q1q2}$ > 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_08_q1q2_closest_conv",
+        selection="gen_cut_deltaRgen06_08_q1q2_closest_conv",
+        label=r"gen cut + conv  + 0.6 < $dR^{gen}_{q1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_06_q1q2_closest_conv",
+        selection="gen_cut_deltaRgen04_06_q1q2_closest_conv",
+        label=r"gen cut + conv  + 0.4 < $dR^{gen}_{q1q2}$ < 0.6",
     )
 
     add_category(
@@ -568,6 +691,56 @@ def add_categories(cfg: od.Config) -> None:
         selection="gen_cut_deltaRgen04_q1q2_closest_corr",
         label=r"gen cut + corr  +  $dR^{gen}_{q1q2}$ < 0.4",
     )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_inf_q1q2_closest_corr",
+        selection="gen_cut_deltaRgen08_inf_q1q2_closest_corr",
+        label=r"gen cut  + corr + $dR^{gen}_{q1q2}$ > 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_08_q1q2_closest_corr",
+        selection="gen_cut_deltaRgen06_08_q1q2_closest_corr",
+        label=r"gen cut + corr  + 0.6 <  $dR^{gen}_{q1q2}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_06_q1q2_closest_corr",
+        selection="gen_cut_deltaRgen04_06_q1q2_closest_corr",
+        label=r"gen cut + corr + 0.4 < $dR^{gen}_{q1q2}$ < 0.6",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen08_inf_q3q4_closest_corr",
+        selection="gen_cut_deltaRgen08_inf_q3q4_closest_corr",
+        label=r"gen cut + corr  + $dR^{gen}_{q3q4}$ > 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen06_08_q3q4_closest_corr",
+        selection="gen_cut_deltaRgen06_08_q3q4_closest_corr",
+        label=r"gen cut + corr  + 0.6 < $dR^{gen}_{q3q4}$ < 0.8",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_06_q3q4_closest_corr",
+        selection="gen_cut_deltaRgen04_06_q3q4_closest_corr",
+        label=r"gen cut + corr  + 0.4 < $dR^{gen}_{q3q4}$ < 0.6",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_q3q4_closest_conv",
+        selection="gen_cut_deltaRgen04_q3q4_closest_conv",
+        label=r"gen cut + conv  +  $dR^{gen}_{q3q4}$ < 0.4",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_deltaRgen04_q3q4_closest",
+        selection="gen_cut_deltaRgen04_q3q4_closest",
+        label=r"gen cut +  $dR^{gen}_{q3q4}$ < 0.4",
+    )
 # ----------------------------------------------------------------------------
 # Multiple matching Jets
 # ----------------------------------------------------------------------------
@@ -596,6 +769,149 @@ def add_categories(cfg: od.Config) -> None:
         label=r"gen cut + unmatched (fit) q1q2 ",
     )
 
+# ----------------------------------------------------------------------------
+# The distance between the b-quark and the closest light quark
+# ----------------------------------------------------------------------------
+    add_category(
+        cfg,
+        name="gen_cut_corr_dRbqq_min_04_06",
+        selection="gen_cut_corr_dRbqq_min_04_06",
+        label=r"gen cut + corr + $0.4 < dR_{b1q}^{min}< 0.6$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_corr_dRbqq_min_06_08",
+        selection="gen_cut_corr_dRbqq_min_06_08",
+        label=r"gen cut + corr + $0.6 < dR_{b1q}^{min}< 0.8$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_corr_dRbqq_min_08_inf",
+        selection="gen_cut_corr_dRbqq_min_08_inf",
+        label=r"gen cut + corr + $dR_{b1q}^{min}> 0.8$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_conv_dRbqq_min_04",
+        selection="gen_cut_conv_dRbqq_min_04",
+        label=r"gen cut + conv + $dR_{b1q}^{min}< 0.4$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_dRbqq_min_04",
+        selection="gen_cut_dRbqq_min_04",
+        label=r"gen cut + $dR_{b1q}^{min}< 0.4$",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_corr_dRbqq_min_t2_04_06",
+        selection="gen_cut_corr_dRbqq_min_t2_04_06",
+        label=r"gen cut + corr + $0.4 < dR_{b2q}^{min}< 0.6$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_corr_dRbqq_min_t2_06_08",
+        selection="gen_cut_corr_dRbqq_min_t2_06_08",
+        label=r"gen cut + corr + $0.6 < dR_{b2q}^{min}< 0.8$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_corr_dRbqq_min_t2_08_inf",
+        selection="gen_cut_corr_dRbqq_min_t2_08_inf",
+        label=r"gen cut + corr + $dR_{b2q}^{min}> 0.8$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_conv_dRbqq_min_t2_04",
+        selection="gen_cut_conv_dRbqq_min_t2_04",
+        label=r"gen cut + conv + $dR_{b2q}^{min}< 0.4$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_dRbqq_min_t2_04",
+        selection="gen_cut_dRbqq_min_t2_04",
+        label=r"gen cut + $dR_{b2q}^{min}< 0.4$",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_dRb2q_min04_06",
+        selection="gen_cut_dRb2q_min04_06",
+        label=r"gen cut + $0.4 < dR_{b2q}^{min}< 0.6$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_dRb2q_min06_08",
+        selection="gen_cut_dRb2q_min06_08",
+        label=r"gen cut + $0.6 < dR_{b2q}^{min}< 0.8$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_dRb2q_min08_inf",
+        selection="gen_cut_dRb2q_min08_inf",
+        label=r"gen cut  + $dR_{b2q}^{min}> 0.8$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_dRb2q_min04",
+        selection="gen_cut_dRb2q_min04",
+        label=r"gen cut  + $dR_{b2q}^{min}< 0.4$",
+    )
+
+    add_category(
+        cfg,
+        name="gen_cut_dRb1q_min04_06",
+        selection="gen_cut_dRb1q_min04_06",
+        label=r"gen cut + $0.4 < dR_{b1q}^{min}< 0.6$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_dRb1q_min06_08",
+        selection="gen_cut_dRb1q_min06_08",
+        label=r"gen cut + $0.6 < dR_{b1q}^{min}< 0.8$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_dRb1q_min08_inf",
+        selection="gen_cut_dRb1q_min08_inf",
+        label=r"gen cut  + $dR_{b1q}^{min}> 0.8$",
+    )
+    add_category(
+        cfg,
+        name="gen_cut_dRb1q_min04",
+        selection="gen_cut_dRb1q_min04",
+        label=r"gen cut  + $dR_{b1q}^{min}< 0.4$",
+    )
+
+# ----------------------------------------------------------------------------
+# Top p_T Cuts
+# ----------------------------------------------------------------------------
+
+    add_category(
+        cfg,
+        name="gen_top1_pt350",
+        selection="gen_top1_pt350",
+        label=r"$p_{T,t}$ > 350 GeV",
+    )
+    add_category(
+        cfg,
+        name="gen_top1_pt600",
+        selection="gen_top1_pt600",
+        label=r"$p_{T,t}$ > 600 GeV",
+    )
+    add_category(
+        cfg,
+        name="gen_top2_pt350",
+        selection="gen_top2_pt350",
+        label=r"$p_{T,\overline{t}}$ > 350 GeV",
+    )
+    add_category(
+        cfg,
+        name="gen_top2_pt600",
+        selection="gen_top2_pt600",
+        label=r"$p_{T,\overline{t}}$ > 600 GeV",
+    )
     # Uncomment to define orthogonal or overlapping category sets:
     #
     # main_categories = {
