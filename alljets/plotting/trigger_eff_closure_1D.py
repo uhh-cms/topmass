@@ -201,7 +201,8 @@ def plot_efficiencies(
     # color_list = ["b", "g", "r", "c", "m", "y"]
     trigger_ref = np.array(config_inst.x.ref_trigger["tt_fh"])
     triggers = np.array(config_inst.x.trigger["tt_fh"])
-    trigger_names = np.hstack((trigger_ref, triggers))
+    trigger_bkg = np.array(config_inst.x.bkg_trigger["tt_fh"])
+    trigger_names = np.hstack((trigger_ref, triggers, trigger_bkg))
 
     trig_alias = kwargs.get("alias", "None")
 
