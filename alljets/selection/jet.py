@@ -201,14 +201,14 @@ def jet_selection_init(self: Selector) -> None:
         self.jet_base_trigger = {
             2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
             2017: "PFHT350",
-            2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
+            2018: "PFHT350",
         }[year]
         self.uses.add(f"HLT.{self.jet_base_trigger}")
 
         self.alt_jet_trigger = {
             2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
             2017: "PFHT380_SixPFJet32",
-            2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
+            2018: "PFHT400_SixPFJet32",
         }[year]
         self.uses.add(f"HLT.{self.alt_jet_trigger}")
 
