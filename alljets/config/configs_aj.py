@@ -1071,7 +1071,7 @@ def add_config(
 
     # pileup weight corrections
     # Using mc profile from CMSSW config and data profiles self-produced for corresponding years using BrilCalc)
-    # TODO: Adding 2018
+    # TODO: Adding 2018 -> Need to produce data profiles for 2018
     add_external(
         "pu",
         {
@@ -1083,15 +1083,36 @@ def add_config(
                 ),
                 "data_profile": {
                     "nominal": (
-                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/pileup_nominal.root",
+                        f"/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/{year}/pileup_nominal.root",
                         "v1",
                     ),
                     "minbias_xs_up": (
-                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/pileup_up.root",
+                        f"/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/{year}/pileup_up.root",
                         "v1",
                     ),
                     "minbias_xs_down": (
-                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/pileup_down.root",
+                        f"/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/{year}/pileup_down.root",
+                        "v1",
+                    ),
+                },
+            },
+            2018: {
+                "mc_profile": (
+                    "https://github.com/cms-sw/cmssw/blob/master/"
+                    "SimGeneral/MixingModule/python/mix_2018_25ns_UltraLegacy_PoissonOOTPU_cfi.py",
+                    "v1",
+                ),
+                "data_profile": {
+                    "nominal": (
+                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/2017/pileup_nominal.root",
+                        "v1",
+                    ),
+                    "minbias_xs_up": (
+                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/2017/pileup_up.root",
+                        "v1",
+                    ),
+                    "minbias_xs_down": (
+                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/2017/pileup_down.root",
                         "v1",
                     ),
                 },
