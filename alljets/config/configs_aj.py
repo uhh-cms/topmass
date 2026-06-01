@@ -152,6 +152,13 @@ def add_config(
                 "data_jetht_d",
                 "data_jetht_e",
                 "data_jetht_f",
+                # single top
+                "st_tchannel_t_4f_powheg",
+                "st_tchannel_tbar_4f_powheg",
+                "st_twchannel_t_powheg",
+                "st_twchannel_tbar_powheg",
+                "st_schannel_lep_4f_amcatnlo",
+                "st_schannel_had_4f_amcatnlo",
             ],
         ),
         *if_era(
@@ -163,13 +170,6 @@ def add_config(
                 "data_jetht_d",
             ],
         ),
-        # single top
-        "st_tchannel_t_4f_powheg",
-        "st_tchannel_tbar_4f_powheg",
-        "st_twchannel_t_powheg",
-        "st_twchannel_tbar_powheg",
-        "st_schannel_lep_4f_amcatnlo",
-        "st_schannel_had_4f_amcatnlo",
         # qcd datasets
         # "qcd_ht50to100_madgraph",
         # "qcd_ht100to200_madgraph",
@@ -1160,7 +1160,7 @@ def add_config(
                 (
                     "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
                     "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,PFHT380_SixPFJet32,"
-                    "IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}"
+                    "IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890,PFHT*}"
                 ),
                 # columns added during selection
                 "deterministic_seed",
