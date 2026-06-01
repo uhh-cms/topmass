@@ -177,6 +177,27 @@ law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
     --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching 
 ```
 
+## CreateDatacards
+After the nominal workflow using the kinematic fit and the background estimation, datacards can be produced using the ```CreateDatacards``` task. The task takes an ```inference-model``` as input, of which we have two [```default_1D```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/inference/default_1D.py) and [```default_2D```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/inference/default_2D.py). 
+A [```helper```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/inference/helper.py) contains information about the processes and systematic uncertainties we want to write in the datacards.
+
+To create the 1D datacards:
+```
+law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd  --version v1_TopMass  --configs 2017_v9  --selector default --cf.MergeHistograms-workflow htcondor --cf.MergeHistograms-pilot --htcondor-memory 1700MB --htcondor-runtime 1h --workers 1000 --tasks-per-job 20 
+```
+
+To create the 2D datacards:
+```
+law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling_2D  --version v1_TopMass  --configs 2017_v9  --selector default --cf.MergeHistograms-workflow htcondor --cf.MergeHistograms-pilot --htcondor-memory 1700MB --htcondor-runtime 1h --workers 1000 --tasks-per-job 20
+```
+
+Check for missing input files:
+``
+law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling_2D   --version v1_Analysis  --configs 2017_v9  --selector default --producer default,kinFitMatch --workers 8 --tasks-per-job 10 --print-status 4 | grep -A 4 "4 >" | grep -B 3 "absent"
+```
+
+The produced datacard and shapes files can be copied and further processed using the combine tool in the corresponding repository: https://gitlab.cern.ch/cms-analysis/top/massrun2aj/datacards
+
 ## Debugging
 
 The output path of the different task can be yielded by appending ```print-output <index>```. For the output of the main task the index is 0, e.g. where the plots of the ```cf.Plotvariables1D``` tasks are stored. We can increase the index number to follow the workflow tree top to bottom.
