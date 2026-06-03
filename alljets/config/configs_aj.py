@@ -594,6 +594,17 @@ def add_config(
         pt_edges=(20, 30, 50, 70, 100, 140, 200, 300, 10_000),
         abs_eta_edges=(0.0, 0.4, 0.8, 1.2, 1.6, 2.5),
         wp_merging={},
+        systs={
+            "up_correlated_bc": "correlated_bc_up",
+            "down_correlated_bc": "correlated_bc_down",
+            "up_uncorrelated_bc": "uncorrelated_bc_up",
+            "down_uncorrelated_bc": "uncorrelated_bc_down",
+
+            "up_correlated_light": "correlated_light_up",
+            "down_correlated_light": "correlated_light_down",
+            "up_uncorrelated_light": "uncorrelated_light_up",
+            "down_uncorrelated_light": "uncorrelated_light_down",
+        },
     )
 
     ################################################################################################
