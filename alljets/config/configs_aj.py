@@ -1169,9 +1169,13 @@ def add_config(
                 "PV.{npvs,npvsGood}",
                 "GenPart.*",
                 (
-                    "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
-                    "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,PFHT380_SixPFJet32,"
-                    "IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890,PFHT*}"
+                    "HLT.{Mu50,Physics,IsoMu24,PFHT350,PFHT370,PFHT890,PFHT1050,"
+                    "PFHT380_SixPFJet32,PFHT400_SixPFJet32"
+                    "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,"
+                    "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
+                    "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
+                    "PFHT450_SixPFJet36_PFBTagDeepCSV_1p59",
+                    "}"
                 ),
                 # columns added during selection
                 "deterministic_seed",
