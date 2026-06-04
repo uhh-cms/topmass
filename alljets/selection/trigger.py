@@ -77,7 +77,11 @@ hist = maybe_import("hist")
         pu_weights_from_columnflow,
         dctr_hdamp,
         ps_weights,
+        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+        "HLT.PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
+        "HLT.PFHT380_SixPFJet32",
+        "HLT.PFHT400_SixPFJet32",
         "trig_ht",
     },
     exposed=True,
@@ -124,10 +128,20 @@ def trigger(
     events = set_ak_column(events, "trig_ht", trig_ht)
 
     # ensure trigger columns
+    if "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2" not in ak.fields(events.HLT):
+        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", False)
+
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(
-            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
-        )
+        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
+
+    if "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94" not in ak.fields(events.HLT):
+        events = set_ak_column(events, "HLT.PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94", False)
+
+    if "PFHT380_SixPFJet32" not in ak.fields(events.HLT):
+        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32", False)
+
+    if "PFHT400_SixPFJet32" not in ak.fields(events.HLT):
+        events = set_ak_column(events, "HLT.PFHT400_SixPFJet32", False)
 
     # filter bad data events according to golden lumi mask
     if self.dataset_inst.is_data:
