@@ -28,6 +28,7 @@ from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 from columnflow.selection.cms.json_filter import json_filter
+from columnflow.production.cms.top_pt_weight import top_pt_weight
 
 from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
@@ -61,6 +62,7 @@ hist = maybe_import("hist")
         pu_weights_from_columnflow,
         dctr_hdamp,
         ps_weights,
+        top_pt_weight,
         "TrigObj*",
     },
     produces={
@@ -77,6 +79,7 @@ hist = maybe_import("hist")
         pu_weights_from_columnflow,
         dctr_hdamp,
         ps_weights,
+        top_pt_weight,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         "HLT.PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
@@ -187,6 +190,15 @@ def trigger(
         events = self[ps_weights](events, **kwargs)
 
         events = self[pdf_weights](events, **kwargs)
+
+        if self.dataset_inst.has_tag("ttbar"):
+            # Add top pt weight and variations
+            # We don't apply these weights and therefore set the nominal column to 1
+            # We symmetrize the up/down variations
+            events = self[top_pt_weight](events, **kwargs)
+            events = set_ak_column(events, "top_pt_weight_up", events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
 
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (

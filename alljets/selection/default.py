@@ -37,12 +37,14 @@ from columnflow.production.cms.scale import murmuf_weights
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
+from columnflow.production.cms.top_pt_weight import top_pt_weight
 
 from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
 from alljets.production.default import cutflow_features
 from alljets.production.trig_cor_weight import trig_weights
 from alljets.production.dctr_hdamp import dctr_hdamp
+from alljets.production.dctr_rb import dctr_rb
 from alljets.production.ps_weights import ps_weights
 
 
@@ -81,10 +83,12 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         pdf_weights,
         pdf_all_weights,
         murmuf_weights,
+        top_pt_weight,
         pu_weights_from_columnflow,
         trig_weights,
         dctr_hdamp,
         ps_weights,
+        dctr_rb,
     },
     produces={
         cutflow_features,
@@ -100,10 +104,12 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         pdf_weights,
         pdf_all_weights,
         murmuf_weights,
+        top_pt_weight,
         pu_weights_from_columnflow,
         trig_weights,
         dctr_hdamp,
         ps_weights,
+        dctr_rb,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
@@ -205,9 +211,19 @@ def default(
 
         events = self[ps_weights](events, **kwargs)
 
+        events = self[dctr_rb](events, **kwargs)
+
         # # Use the derived pdf weight producer to store all weights
         # # For the pdf hessian weights, store them in seperate columns for up/down variations as needed.
         if self.dataset_inst.has_tag("ttbar"):
+            # Add top pt weight and variations
+            # We don't apply these weights and therefore set the nominal column to 1
+            # We symmetrize the up/down variations
+            events = self[top_pt_weight](events, **kwargs)
+            events = set_ak_column(events, "top_pt_weight_up", events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
+
             events = self[pdf_all_weights](events, **kwargs)
             events = set_ak_column(events, "pdf_alphas_weight_down", events.pdf_weights_alphas[:, 0])
             events = set_ak_column(events, "pdf_alphas_weight_up", events.pdf_weights_alphas[:, 1])
@@ -305,6 +321,20 @@ def default(
             weight_map.update({
                 f"sum_{weight_name}": (events[weight_name], Ellipsis),
                 f"sum_{weight_name}_selected": (events[weight_name], results.event),
+            })
+
+        # dctr rb weights
+        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+            weight_map.update({
+                f"sum_rb_weight{v}": (events[f"rb_weight{v}"], Ellipsis),
+                f"sum_rb_weight{v}_selected": (events[f"rb_weight{v}"], results.event),
+            })
+
+        # top pt weights
+        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+            weight_map.update({
+                f"sum_top_pt_weight{v}": (events[f"top_pt_weight{v}"], Ellipsis),
+                f"sum_top_pt_weight{v}_selected": (events[f"top_pt_weight{v}"], results.event),
             })
 
     group_map = {
