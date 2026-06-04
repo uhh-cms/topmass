@@ -238,3 +238,9 @@ def build_reco_R_bq(events):
 
     reco = events.FitJet.reco
     return (reco[:, 0].pt + reco[:, 1].pt) / (reco[:, 2].pt + reco[:, 3].pt + reco[:, 4].pt + reco[:, 5].pt)
+
+
+def build_xb_avg(events):
+    xb_top = events.xb.top
+    xb_antitop = events.xb.antitop
+    return 0.5 * (xb_top + xb_antitop)

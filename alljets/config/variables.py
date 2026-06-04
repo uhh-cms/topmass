@@ -36,6 +36,7 @@ from .jet_builder import (
     build_avg_w_mass,
     build_avg_reco_Top_mass,
     build_reco_R_bq,
+    build_xb_avg,
 )
 
 ak = maybe_import("awkward")
@@ -162,6 +163,50 @@ def add_variables(cfg: od.Config) -> None:
         null_value=EMPTY_FLOAT,
         binning=(20, 0.7, 1.4),
         x_title="top pt weight",
+    )
+    add_variable(
+        cfg,
+        name="rb_nominal",
+        expression="weight.rB_nominal",
+        null_value=EMPTY_FLOAT,
+        binning=(20, 0.5, 1.5),
+        x_title="rB weight (nominal)",
+    )
+    add_variable(
+        cfg,
+        name="rb_up",
+        expression="weight.rB_up",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.5, 2.5),
+        x_title="rB weight (up)",
+    )
+    add_variable(
+        cfg,
+        name="xb_top",
+        expression="xb.top",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 2.0),
+        aux={"overflow": False, "underflow": False},
+        x_title=r"$x_{b_t}$",
+    )
+    add_variable(
+        cfg,
+        name="xb_antitop",
+        expression="xb.antitop",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 2.0),
+        aux={"overflow": False, "underflow": False},
+        x_title=r"$x_{b_{\bar{t}}}$",
+    )
+    build_xb_avg.inputs = ["xb.top", "xb.antitop"]
+    add_variable(
+        cfg,
+        name="xb_avg",
+        expression=build_xb_avg,
+        aux={"inputs": build_xb_avg.inputs, "overflow": False, "underflow": False},
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 2.0),
+        x_title=r"$x_{b_{\mathrm{avg}}}$",
     )
     ###############################################################################
     #                            TriJet Kinematics                                #
