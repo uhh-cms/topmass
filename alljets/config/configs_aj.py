@@ -1173,8 +1173,7 @@ def add_config(
                     "PFHT380_SixPFJet32,PFHT400_SixPFJet32"
                     "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,"
                     "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
-                    "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94,"
-                    "PFHT450_SixPFJet36_PFBTagDeepCSV_1p59}"
+                    "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94}"
                 ),
                 # columns added during selection
                 "deterministic_seed",
