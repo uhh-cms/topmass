@@ -1283,7 +1283,7 @@ def add_config(
         if dataset.has_tag("ttbar"):
             dataset.x.event_weights = {
                 "normalized_top_pt_weight": get_shifts("top_pt"),
-                "normalized_rb_weight": get_shifts("rb"),
+                "normalized_rb_weight": get_shifts("rb_dctr"),
             }
 
     # define per-dataset event weights

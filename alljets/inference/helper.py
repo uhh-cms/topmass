@@ -73,7 +73,7 @@ def add_parameters(im: InferenceModel) -> None:
         "CMS_scale_j_Fragmentation": "jec_Fragmentation",
         "CMS_scale_j_SinglePionECAL": "jec_SinglePionECAL",
         "CMS_scale_j_SinglePionHCAL": "jec_SinglePionHCAL",
-        "CMS_scale_j_TimePtEta": "jec_TimePtEta",
+        # "CMS_scale_j_TimePtEta": "jec_TimePtEta",
 
         # Relative
         "CMS_scale_j_RelativeJEREC1": "jec_RelativeJEREC1",
@@ -103,6 +103,13 @@ def add_parameters(im: InferenceModel) -> None:
 
         "CMS_pileup": "pu_weight_minbias_xs",
         "CMS_trig_htsixjets2btag": "trig",
+
+        "CMS_btag_fixedWP_bc_correlated": "btag_heavy_cor",
+        "CMS_btag_fixedWP_bc_uncorrelated": "btag_heavy_uncor",
+
+        "CMS_btag_fixedWP_light_correlated": "btag_light_cor",
+        "CMS_btag_fixedWP_light_uncorrelated": "btag_light_uncor",
+
     }
 
     modelling = {
@@ -112,6 +119,7 @@ def add_parameters(im: InferenceModel) -> None:
         "underlying_event": "tune",
         "QCD_scale_ttbar": "murmuf",
         "top_pt_reweighting": "top_pt",
+        "fragmentation_dctr": "rb_dctr",
     }
 
     modelling_envelope = {
