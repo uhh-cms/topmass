@@ -793,6 +793,7 @@ def add_config(
         "top_pt",
         {
             "top_pt_weight": "top_pt_weight_{direction}",
+            "normalized_top_pt_weight": "normalized_top_pt_weight_{direction}",
         },
     )
 
@@ -1037,6 +1038,60 @@ def add_config(
         },
     )
 
+    # Fragmentation weights from DCRT reweighting
+    cfg.add_shift(name="rb_dctr_up", id=1200, type="shape")
+    cfg.add_shift(name="rb_dctr_down", id=1201, type="shape")
+    add_shift_aliases(
+        cfg,
+        "rb_dctr",
+        {
+            "rb_weight": "rb_weight{direction}",
+            "normalized_rb_weight": "normalized_rb_weight_{direction}",
+        },
+    )
+
+    # btag SF shifts for uncorrelated b/c uncertainties
+    cfg.add_shift(name="btag_heavy_uncor_up", id=1300, type="shape", tags="btag_sf")
+    cfg.add_shift(name="btag_heavy_uncor_down", id=1301, type="shape", tags="btag_sf")
+    add_shift_aliases(
+        cfg,
+        "btag_heavy_uncor",
+        {
+            "btag_weight": "btag_weight_uncorrelated_bc_{direction}",
+        },
+    )
+    # btag SF shifts for correlated b/c uncertainties
+    cfg.add_shift(name="btag_heavy_cor_up", id=1302, type="shape", tags="btag_sf")
+    cfg.add_shift(name="btag_heavy_cor_down", id=1303, type="shape", tags="btag_sf")
+    add_shift_aliases(
+        cfg,
+        "btag_heavy_cor",
+        {
+            "btag_weight": "btag_weight_correlated_bc_{direction}",
+        },
+    )
+
+    # btag SF shifts for uncorrelated light uncertainties
+    cfg.add_shift(name="btag_light_uncor_up", id=1304, type="shape", tags="btag_sf")
+    cfg.add_shift(name="btag_light_uncor_down", id=1305, type="shape", tags="btag_sf")
+    add_shift_aliases(
+        cfg,
+        "btag_light_uncor",
+        {
+            "btag_weight": "btag_weight_uncorrelated_light_{direction}",
+        },
+    )
+    # btag SF shifts for correlated light uncertainties
+    cfg.add_shift(name="btag_light_cor_up", id=1306, type="shape", tags="btag_sf")
+    cfg.add_shift(name="btag_light_cor_down", id=1307, type="shape", tags="btag_sf")
+    add_shift_aliases(
+        cfg,
+        "btag_light_cor",
+        {
+            "btag_weight": "btag_weight_correlated_light_{direction}",
+        },
+    )
+
     ################################################################################################
     # external files
     ################################################################################################
@@ -1168,7 +1223,7 @@ def add_config(
                 "GenPart.*",
                 (
                     "HLT.{Mu50,Physics,IsoMu24,PFHT350,PFHT370,PFHT890,PFHT1050,"
-                    "PFHT380_SixPFJet32,PFHT400_SixPFJet32"
+                    "PFHT380_SixPFJet32,PFHT400_SixPFJet32,"
                     "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,"
                     "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
                     "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94}"
@@ -1212,7 +1267,7 @@ def add_config(
     cfg.x.event_weights = DotDict(
         {
             "normalization_weight": [],
-            "btag_weight": [],
+            "btag_weight": get_shifts("btag_heavy_*", "btag_light_*"),
             "normalized_trig_weight": get_shifts("trig"),
             "normalized_pdf_weight": get_shifts("pdf", "alphas", "hessian_*"),
             "normalized_murmuf_weight": get_shifts("murmuf"),
@@ -1226,7 +1281,10 @@ def add_config(
     # # define per-dataset event weights
     for dataset in cfg.datasets:
         if dataset.has_tag("ttbar"):
-            dataset.x.event_weights = {"top_pt_weight": get_shifts("top_pt")}
+            dataset.x.event_weights = {
+                "normalized_top_pt_weight": get_shifts("top_pt"),
+                "normalized_rb_weight": get_shifts("rb"),
+            }
 
     # define per-dataset event weights
     cfg.x.shift_groups = {}

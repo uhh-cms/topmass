@@ -36,11 +36,13 @@ from columnflow.util import maybe_import, safe_div
 from columnflow.production import Producer, producer
 from columnflow.production.cms.pileup import pu_weights_from_columnflow
 from columnflow.production.cms.scale import murmuf_weights
+from columnflow.production.cms.top_pt_weight import top_pt_weight
 from columnflow.columnar_util import set_ak_column
 
 from alljets.production.dctr_hdamp import dctr_hdamp
 from alljets.production.ps_weights import ps_weights
 from alljets.production.trig_cor_weight import trig_weights
+from alljets.production.dctr_rb import dctr_rb
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -232,11 +234,7 @@ def normalized_hdamp_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Ar
 
         normalized = events[weight_name] / avg
 
-        events = set_ak_column_f32(
-            events,
-            f"normalized_{weight_name}",
-            normalized,
-        )
+        events = set_ak_column_f32(events, f"normalized_{weight_name}", normalized)
 
     return events
 
@@ -307,11 +305,7 @@ def normalized_ps_weights(self: Producer, events: ak.Array, **kwargs) -> ak.Arra
 
         normalized = events[weight_name] / avg
 
-        events = set_ak_column_f32(
-            events,
-            f"normalized_{weight_name}",
-            normalized,
-        )
+        events = set_ak_column_f32(events, f"normalized_{weight_name}", normalized)
 
     return events
 
@@ -383,11 +377,7 @@ def normalized_pdf_weight(self, events, **kwargs):
 
     normalized = events["pdf_weight"] / avg
 
-    events = set_ak_column_f32(
-        events,
-        "normalized_pdf_weight",
-        normalized,
-    )
+    events = set_ak_column_f32(events, "normalized_pdf_weight", normalized)
 
     return events
 
@@ -436,11 +426,7 @@ def normalized_pdf_weights(self, events, **kwargs):
 
         normalized = events[weight_name] / avg
 
-        events = set_ak_column_f32(
-            events,
-            f"normalized_{weight_name}",
-            normalized,
-        )
+        events = set_ak_column_f32(events, f"normalized_{weight_name}", normalized)
 
     return events
 
@@ -581,3 +567,145 @@ def normalized_pu_weights_setup(self, task, inputs, **kwargs):
             total_weight,
             total_events,
         ) if total_weight is not None else 1.0
+
+
+@producer(
+    uses={dctr_rb.PRODUCES},
+    mc_only=True,
+)
+def normalized_rb_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+
+    for weight_name in self.rb_weight_names:
+
+        avg = self.average_rb_weights.get(weight_name, 1.0)
+
+        normalized = events[weight_name] / avg
+
+        events = set_ak_column_f32(events, f"normalized_{weight_name}", normalized)
+
+    return events
+
+
+@normalized_rb_weight.post_init
+def normalized_rb_weight_post_init(self: Producer, task: law.Task, **kwargs) -> None:
+
+    self.rb_weight_names = {
+        str(weight_name)
+        for weight_name in self[dctr_rb].produced_columns
+        if (
+            str(weight_name).startswith("rb_weight") and
+            (
+                task.global_shift_inst.is_nominal or not
+                str(weight_name).endswith(("_up", "_down"))
+            )
+        )
+    }
+
+    self.uses.clear()
+    self.uses |= self.rb_weight_names
+
+    self.produces |= {f"normalized_{w}" for w in self.rb_weight_names}
+
+
+@normalized_rb_weight.requires
+def normalized_rb_weight_requires(self: Producer, task: law.Task, reqs: dict, **kwargs) -> None:
+    from columnflow.tasks.selection import MergeSelectionStats
+
+    reqs["selection_stats"] = MergeSelectionStats.req_different_branching(
+        task,
+        branch=-1 if task.is_workflow() else 0,
+    )
+
+
+@normalized_rb_weight.setup
+def normalized_rb_weight_setup(self: Producer, task: law.Task, inputs: dict, **kwargs) -> None:
+
+    stats = task.cached_value(
+        key="selection_stats",
+        func=lambda: inputs["selection_stats"]["stats"].load(formatter="json"),
+    )
+
+    self.average_rb_weights = {}
+
+    total_events = stats.get("num_events", 1.0)
+
+    for weight_name in self.rb_weight_names:
+
+        sum_key = f"sum_{weight_name}"
+
+        total_weight = stats.get(sum_key)
+
+        self.average_rb_weights[weight_name] = (
+            safe_div(total_weight, total_events) if total_weight is not None else 1.0
+        )
+
+
+@producer(
+    uses={top_pt_weight.PRODUCES},
+    mc_only=True,
+)
+def normalized_top_pt_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+
+    for weight_name in self.top_pt_weight_names:
+
+        avg = self.average_top_pt_weights.get(weight_name, 1.0)
+
+        normalized = events[weight_name] / avg
+
+        events = set_ak_column_f32(events, f"normalized_{weight_name}", normalized)
+
+    return events
+
+
+@normalized_top_pt_weight.post_init
+def normalized_top_pt_weight_post_init(self: Producer, task: law.Task, **kwargs) -> None:
+
+    self.top_pt_weight_names = {
+        str(weight_name)
+        for weight_name in self[top_pt_weight].produced_columns
+        if (
+            str(weight_name).startswith("top_pt_weight") and
+            (
+                task.global_shift_inst.is_nominal or not
+                str(weight_name).endswith(("_up", "_down"))
+            )
+        )
+    }
+
+    self.uses.clear()
+    self.uses |= self.top_pt_weight_names
+
+    self.produces |= {f"normalized_{w}" for w in self.top_pt_weight_names}
+
+
+@normalized_top_pt_weight.requires
+def normalized_top_pt_weight_requires(self: Producer, task: law.Task, reqs: dict, **kwargs) -> None:
+    from columnflow.tasks.selection import MergeSelectionStats
+
+    reqs["selection_stats"] = MergeSelectionStats.req_different_branching(
+        task,
+        branch=-1 if task.is_workflow() else 0,
+    )
+
+
+@normalized_top_pt_weight.setup
+def normalized_top_pt_weight_setup(self: Producer, task: law.Task, inputs: dict, **kwargs) -> None:
+
+    stats = task.cached_value(
+        key="selection_stats",
+        func=lambda: inputs["selection_stats"]["stats"].load(formatter="json"),
+    )
+
+    self.average_top_pt_weights = {}
+
+    total_events = stats.get("num_events", 1.0)
+
+    for weight_name in self.top_pt_weight_names:
+
+        sum_key = f"sum_{weight_name}"
+
+        total_weight = stats.get(sum_key)
+
+        self.average_top_pt_weights[weight_name] = (
+            safe_div(total_weight, total_events) if total_weight is not None else 1.0
+        )

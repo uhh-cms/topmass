@@ -35,7 +35,6 @@ from columnflow.production.cms.pdf import pdf_weights
 
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.production.normalization import normalization_weights
-from columnflow.production.cms.top_pt_weight import top_pt_weight
 
 from alljets.production.KinFit import kinFit
 from alljets.scripts.default import combinationtype
@@ -49,6 +48,8 @@ from alljets.production.weights import normalized_pdf_weight
 from alljets.production.weights import normalized_trig_weight
 from alljets.production.weights import normalized_pu_weights
 from alljets.production.weights import normalized_murmuf_weight
+from alljets.production.weights import normalized_rb_weight
+from alljets.production.weights import normalized_top_pt_weight
 
 
 pdf_all_weights = pdf_weights.derive("pdf_all_weights",
@@ -327,13 +328,14 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
-        top_pt_weight,
         normalized_hdamp_weight,
         normalized_ps_weights,
         normalized_pdf_weights,
         normalized_pu_weights,
         normalized_murmuf_weight,
         normalized_trig_weight,
+        normalized_rb_weight,
+        normalized_top_pt_weight,
         "Jet.*",
     },
     produces={
@@ -343,13 +345,14 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
-        top_pt_weight,
         normalized_hdamp_weight,
         normalized_ps_weights,
         normalized_pdf_weights,
         normalized_pu_weights,
         normalized_murmuf_weight,
         normalized_trig_weight,
+        normalized_rb_weight,
+        normalized_top_pt_weight,
     },
     require_producers={"kinFitMatch"},
     # whether weight producers should be added and called
@@ -392,14 +395,10 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
         events = self[normalized_trig_weight](events, **kwargs)
 
+        events = self[normalized_rb_weight](events, **kwargs)
+
         if self.dataset_inst.has_tag("ttbar"):
-            # Add top pt weight and variations
-            # We don't apply these weights and therefore set the nominal column to 1
-            # We symmetrize the up/down variations
-            events = self[top_pt_weight](events, **kwargs)
-            events = set_ak_column(events, "top_pt_weight_up", events.top_pt_weight)
-            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight)
-            events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
+            events = self[normalized_top_pt_weight](events, **kwargs)
 
     return events
 
@@ -411,7 +410,6 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         category_ids,
         btag_wp_weights,
         normalization_weights,
-        top_pt_weight,
         normalized_murmuf_weight,
         normalized_hdamp_weight,
         normalized_ps_weights,
@@ -425,7 +423,6 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         category_ids,
         btag_wp_weights,
         normalization_weights,
-        top_pt_weight,
         normalized_murmuf_weight,
         normalized_hdamp_weight,
         normalized_ps_weights,
@@ -481,6 +478,9 @@ def trigSF_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
         events = self[normalized_pu_weights](events, **kwargs)
 
+        if self.dataset_inst.has_tag("ttbar"):
+            events = self[normalized_top_pt_weight](events, **kwargs)
+
         if self.mode == "production":
             events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
             events = set_ak_column(events, "trig_weight_up", np.ones(len(events)), value_type=np.float32)
@@ -495,13 +495,6 @@ def trigSF_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             events = set_ak_column(events, "normalized_trig_weight", events.trig_weight)
             events = set_ak_column(events, "normalized_trig_weight_up", events.trig_weight_up)
             events = set_ak_column(events, "normalized_trig_weight_down", events.trig_weight_down)
-
-        if self.dataset_inst.has_tag("ttbar"):
-
-            events = self[top_pt_weight](events, **kwargs)
-            events = set_ak_column(events, "top_pt_weight_up", events.top_pt_weight)
-            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight)
-            events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
 
     return events
 
