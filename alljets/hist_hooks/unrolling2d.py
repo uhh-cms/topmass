@@ -37,17 +37,11 @@ def add_hooks(analysis_inst: od.Analysis) -> None:
                 shift_axis = h.axes["shift"]
 
                 # ---- Define rebin groups ----
-                # 8 → 6 (top)
-                top_groups = [
-                    [0], [1], [2], [3], [4], [5, 6, 7],
-                ]
+                # Top: 6 Bins
+                top_groups = [[0], [1], [2], [3], [4], [5]]
 
-                # 8 → 3 (W)
-                w_groups = [
-                    [0, 1, 2],
-                    [3, 4],
-                    [5, 6, 7],
-                ]
+                # W: 3 Bins
+                w_groups = [[0], [1], [2]]
 
                 n_unrolled = len(top_groups) * len(w_groups)
 

@@ -73,7 +73,6 @@ def add_parameters(im: InferenceModel) -> None:
         "CMS_scale_j_Fragmentation": "jec_Fragmentation",
         "CMS_scale_j_SinglePionECAL": "jec_SinglePionECAL",
         "CMS_scale_j_SinglePionHCAL": "jec_SinglePionHCAL",
-        # "CMS_scale_j_TimePtEta": "jec_TimePtEta",
 
         # Relative
         "CMS_scale_j_RelativeJEREC1": "jec_RelativeJEREC1",

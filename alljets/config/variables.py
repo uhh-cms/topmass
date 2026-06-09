@@ -1355,7 +1355,16 @@ def add_variables(cfg: od.Config) -> None:
         name="reco_W_mass_avg_percentile",
         expression=partial(build_avg_w_mass),
         aux={"inputs": build_avg_w_mass.inputs},
-        binning=[65.5, 76.3, 79.5, 82, 84.3, 86.6, 89.1, 92.3, 107],
+        binning=[65.5055, 76.4907, 79.5737, 81.9834, 84.1478, 86.3042, 88.6769, 91.7156, 107.03],
+        unit="GeV",
+        x_title=r"$m_{W_{avg}}^{reco}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_W_mass_avg_percentile_2D",
+        expression=partial(build_avg_w_mass),
+        aux={"inputs": build_avg_w_mass.inputs},
+        binning=[65.5055, 81.2154, 87.062, 107.03],
         unit="GeV",
         x_title=r"$m_{W_{avg}}^{reco}$",
     )
@@ -1442,7 +1451,16 @@ def add_variables(cfg: od.Config) -> None:
         name="fit_Top1_mass_percentile",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
-        binning=[99.9, 161, 167, 172, 178, 186, 224, 293, 1.38e+03],
+        binning=[102.968, 161.488, 167.407, 171.894, 176.49, 183.05, 216.393, 293.693, 1133.13],
+        unit="GeV",
+        x_title=r"$m_{t}^{fit}$",
+    )
+    add_variable(
+        cfg,
+        name="fit_Top1_mass_percentile_2D",
+        expression=partial(build_top1jet, which="mass"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=[102.968, 163.797, 170.435, 176.49, 187.135, 266.059, 1133.13],
         unit="GeV",
         x_title=r"$m_{t}^{fit}$",
     )
@@ -1461,7 +1479,7 @@ def add_variables(cfg: od.Config) -> None:
         name="reco_R_bq_percentile",
         expression=build_reco_R_bq,
         aux={"inputs": build_reco_R_bq.inputs},
-        binning=[0.0884, 0.333, 0.42, 0.501, 0.589, 0.69, 0.821, 1.03, 8.17],
+        binning=[0.0884285, 0.339041, 0.421465, 0.498023, 0.579106, 0.672588, 0.795516, 0.991731, 8.17397],
         unit="",
         x_title=r"$R_{bq}$",
     )

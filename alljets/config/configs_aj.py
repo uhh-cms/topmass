@@ -426,7 +426,7 @@ def add_config(
                             "SinglePionECAL",
                             "SinglePionHCAL",
                             # "FlavorQCD",
-                            "TimePtEta",
+                            # "TimePtEta",
                             "RelativeJEREC1",
                             "RelativeJEREC2",
                             "RelativeJERHF",
