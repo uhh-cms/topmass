@@ -89,6 +89,7 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         dctr_hdamp,
         ps_weights,
         dctr_rb,
+        "PV.npvsGood",
     },
     produces={
         cutflow_features,
@@ -168,6 +169,9 @@ def default(
     else:
         results += SelectionResult(steps={"json": full_like(events.event, True, dtype=bool)})
 
+    # Primary vertex selection
+    results += SelectionResult(steps={"pv": events.PV.npvsGood >= 1})
+
     events, lepton_results = self[lepton_selection](events, **kwargs)
     results += lepton_results
 
@@ -182,6 +186,7 @@ def default(
     # combined event selection after all steps
     results.event = (
         results.steps.json &
+        results.steps.pv &
         results.steps.SignalOrBkgTrigger &
         results.steps.Lepton_Veto &
         results.steps.HT &
@@ -239,6 +244,8 @@ def default(
 
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
+            results.steps.json &
+            results.steps.pv &
             results.steps.BaseTrigger &
             results.steps.Lepton_Veto &
             results.steps.HT &

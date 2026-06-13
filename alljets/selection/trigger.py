@@ -35,6 +35,7 @@ from alljets.selection.lepton import lepton_selection
 from alljets.production.default import cutflow_features
 from alljets.production.dctr_hdamp import dctr_hdamp
 from alljets.production.ps_weights import ps_weights
+from alljets.production.dctr_rb import dctr_rb
 
 
 np = maybe_import("numpy")
@@ -62,8 +63,10 @@ hist = maybe_import("hist")
         pu_weights_from_columnflow,
         dctr_hdamp,
         ps_weights,
+        dctr_rb,
         top_pt_weight,
         "TrigObj*",
+        "PV.npvsGood",
     },
     produces={
         cutflow_features,
@@ -78,6 +81,7 @@ hist = maybe_import("hist")
         murmuf_weights,
         pu_weights_from_columnflow,
         dctr_hdamp,
+        dctr_rb,
         ps_weights,
         top_pt_weight,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
@@ -153,6 +157,9 @@ def trigger(
     else:
         results += SelectionResult(steps={"json": full_like(events.event, True, dtype=bool)})
 
+    # Primary vertex selection
+    results += SelectionResult(steps={"pv": events.PV.npvsGood >= 1})
+
     # Lepton selection
     events, lepton_results = self[lepton_selection](events, **kwargs)
     results += lepton_results
@@ -167,6 +174,8 @@ def trigger(
 
     # combined event selection after all steps: Choose one of the trigger efficiency selector steps
     results.event = (
+        results.steps.json &
+        results.steps.pv &
         results.steps.BaseTrigger &
         results.steps.Lepton_Veto &
         results.steps.BTag &
@@ -191,6 +200,8 @@ def trigger(
 
         events = self[pdf_weights](events, **kwargs)
 
+        events = self[dctr_rb](events, **kwargs)
+
         if self.dataset_inst.has_tag("ttbar"):
             # Add top pt weight and variations
             # We don't apply these weights and therefore set the nominal column to 1
@@ -202,6 +213,8 @@ def trigger(
 
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
+            results.steps.json &
+            results.steps.pv &
             results.steps.BaseTrigger &
             results.steps.Lepton_Veto &
             results.steps.HT &
@@ -278,6 +291,20 @@ def trigger(
             weight_map.update({
                 f"sum_{weight_name}": (events[weight_name], Ellipsis),
                 f"sum_{weight_name}_selected": (events[weight_name], results.event),
+            })
+
+        # dctr rb weights
+        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+            weight_map.update({
+                f"sum_rb_weight{v}": (events[f"rb_weight{v}"], Ellipsis),
+                f"sum_rb_weight{v}_selected": (events[f"rb_weight{v}"], results.event),
+            })
+
+        # top pt weights
+        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+            weight_map.update({
+                f"sum_top_pt_weight{v}": (events[f"top_pt_weight{v}"], Ellipsis),
+                f"sum_top_pt_weight{v}_selected": (events[f"top_pt_weight{v}"], results.event),
             })
 
     group_map = {
