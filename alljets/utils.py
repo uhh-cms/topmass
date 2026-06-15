@@ -13,16 +13,19 @@ from columnflow.columnar_util import (  # noqa: F401
     ak_concatenate_safe,
 )
 from columnflow.util import maybe_import
-from columnflow.types import Any, Sequence
+from columnflow.types import Any
+
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
+
 
 @deferred_column
 def IF_RUN_2(self: ArrayFunction.DeferredColumn, func: ArrayFunction) -> Any | set[Any]:
     if func.config_inst.campaign.x.run == 2:
         return self.get()
     return None
+
 
 @deferred_column
 def IF_RUN_2_2016(self: ArrayFunction.DeferredColumn, func: ArrayFunction) -> Any | set[Any]:
