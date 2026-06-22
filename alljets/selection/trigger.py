@@ -36,7 +36,7 @@ from alljets.production.default import cutflow_features
 from alljets.production.dctr_hdamp import dctr_hdamp
 from alljets.production.ps_weights import ps_weights
 from alljets.production.dctr_rb import dctr_rb
-
+from alljets.utils import IF_RUN_2_2018
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -84,11 +84,10 @@ hist = maybe_import("hist")
         dctr_rb,
         ps_weights,
         top_pt_weight,
-        "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        "HLT.PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
-        "HLT.PFHT380_SixPFJet32",
-        "HLT.PFHT400_SixPFJet32",
+        IF_RUN_2_2018("HLT.PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94"),
+        IF_RUN_2_2018("HLT.PFHT380_SixPFJet32"),
+        IF_RUN_2_2018("HLT.PFHT400_SixPFJet32"),
         "trig_ht",
     },
     exposed=True,
@@ -135,9 +134,6 @@ def trigger(
     events = set_ak_column(events, "trig_ht", trig_ht)
 
     # ensure trigger columns
-    if "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagCSV_2p2", False)
-
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
         events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
 
