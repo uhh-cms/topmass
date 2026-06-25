@@ -133,9 +133,31 @@ def jet_selection(
     # Step 7: Trigger selection (skip for QCD MC)
     if not self.dataset_inst.name.startswith("qcd"):
         ones = ak.ones_like(jet_sel)
-        jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.jet_trigger]
-        alt_jet_trigger_sel = ones if not self.jet_trigger else events.HLT[self.alt_jet_trigger]
-        jet_base_trigger_sel = ones if not self.jet_base_trigger else events.HLT[self.jet_base_trigger]
+
+        # Signal trigger
+        if not self.jet_trigger:
+            jet_trigger_sel = ones
+        else:
+            jet_trigger_sel = ak.zeros_like(ones)
+            for trig in self.jet_trigger:
+                jet_trigger_sel = jet_trigger_sel | events.HLT[trig]
+
+        # Bkg trigger
+        if not self.alt_jet_trigger:
+            alt_jet_trigger_sel = ones
+        else:
+            alt_jet_trigger_sel = ak.zeros_like(ones)
+            for trig in self.alt_jet_trigger:
+                alt_jet_trigger_sel = alt_jet_trigger_sel | events.HLT[trig]
+
+        # Base trigger for trigger correction
+        if not self.jet_base_trigger:
+            jet_base_trigger_sel = ones
+        else:
+            jet_base_trigger_sel = ak.zeros_like(ones)
+            for trig in self.jet_base_trigger:
+                jet_base_trigger_sel = jet_base_trigger_sel | events.HLT[trig]
+
     else:
         ones = ak.ones_like(jet_sel)
         jet_trigger_sel = ones
@@ -191,26 +213,34 @@ def jet_selection_init(self: Selector) -> None:
 
         # Trigger choice based on year of data-taking (for now: only single trigger)
         self.jet_trigger = {
-            2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
-            2017: "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
-            2018: "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
+            2016: ["PFHT400_SixJet30_DoubleBTagCSV_p056"],
+            2017: ["PFHT380_SixPFJet32_DoublePFBTagCSV_2p2"],
+            2018: [
+                "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+                "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
+            ],
         }[year]
-        self.uses.add(f"HLT.{self.jet_trigger}")
+
+        for trig in self.jet_trigger:
+            self.uses.add(f"HLT.{trig}")
 
         # Trigger choice based on year of data-taking (for now: only single trigger)
         self.jet_base_trigger = {
-            2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
-            2017: "PFHT350",
-            2018: "PFHT350",
+            2016: ["PFHT350"],
+            2017: ["PFHT350"],
+            2018: ["PFHT350"],
         }[year]
-        self.uses.add(f"HLT.{self.jet_base_trigger}")
+        for trig in self.jet_base_trigger:
+            self.uses.add(f"HLT.{trig}")
 
+        # Bkg Trigger choice based on year of data-taking (for now: only single trigger)
         self.alt_jet_trigger = {
-            2016: "PFHT400_SixJet30_DoubleBTagCSV_p056",
-            2017: "PFHT380_SixPFJet32",
-            2018: "PFHT400_SixPFJet32",
+            2016: ["PFHT400_SixJet30"],
+            2017: ["PFHT380_SixPFJet32"],
+            2018: ["PFHT380_SixPFJet32", "PFHT400_SixPFJet32"],
         }[year]
-        self.uses.add(f"HLT.{self.alt_jet_trigger}")
+        for trig in self.alt_jet_trigger:
+            self.uses.add(f"HLT.{trig}")
 
 
 # ===================================================================
