@@ -152,13 +152,6 @@ def add_config(
                 "data_jetht_d",
                 "data_jetht_e",
                 "data_jetht_f",
-                # single top
-                "st_tchannel_t_4f_powheg",
-                "st_tchannel_tbar_4f_powheg",
-                "st_twchannel_t_powheg",
-                "st_twchannel_tbar_powheg",
-                "st_schannel_lep_4f_amcatnlo",
-                "st_schannel_had_4f_amcatnlo",
             ],
         ),
         *if_era(
@@ -180,6 +173,13 @@ def add_config(
         "qcd_ht1000to1500_madgraph",
         "qcd_ht1500to2000_madgraph",
         "qcd_ht2000toinf_madgraph",
+        # single top
+        "st_tchannel_t_4f_powheg",
+        "st_tchannel_tbar_4f_powheg",
+        "st_twchannel_t_powheg",
+        "st_twchannel_tbar_powheg",
+        "st_schannel_lep_4f_amcatnlo",
+        "st_schannel_had_4f_amcatnlo",
         # signals
         "tt_sl_powheg",
         "tt_dl_powheg",
@@ -369,8 +369,11 @@ def add_config(
             },
         )
     elif year == 2018:
+        # Updated the lumi value for 2018 based on the latest brilcalc results for the combined triggers, see
+        # /afs/cern.ch/user/l/lgriesin/eos/BrilCal/2018/ValuesFb/HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2.csv
+        # /afs/cern.ch/user/l/lgriesin/eos/BrilCal/2018/ValuesFb/HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94.csv
         cfg.x.luminosity = Number(
-            59_830,
+            59_557,
             {
                 "lumi_13TeV_2017": 0.015j,
                 "lumi_13TeV_1718": 0.002j,
@@ -1137,7 +1140,6 @@ def add_config(
 
     # pileup weight corrections
     # Using mc profile from CMSSW config and data profiles self-produced for corresponding years using BrilCalc)
-    # TODO: Adding 2018 -> Need to produce data profiles for 2018
     add_external(
         "pu",
         {
@@ -1149,36 +1151,36 @@ def add_config(
                 ),
                 "data_profile": {
                     "nominal": (
-                        f"/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/{year}/pileup_nominal.root",
+                        f"{central_mtop_dir}/pileup/{year}/pileup_nominal.root",
                         "v1",
                     ),
                     "minbias_xs_up": (
-                        f"/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/{year}/pileup_up.root",
+                        f"{central_mtop_dir}/pileup/{year}/pileup_up.root",
                         "v1",
                     ),
                     "minbias_xs_down": (
-                        f"/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/{year}/pileup_down.root",
+                        f"{central_mtop_dir}/pileup/{year}/pileup_down.root",
                         "v1",
                     ),
                 },
             },
             2018: {
                 "mc_profile": (
-                    "https://github.com/cms-sw/cmssw/blob/master/"
+                    "https://raw.githubusercontent.com/cms-sw/cmssw/refs/heads/master/"
                     "SimGeneral/MixingModule/python/mix_2018_25ns_UltraLegacy_PoissonOOTPU_cfi.py",
                     "v1",
                 ),
                 "data_profile": {
                     "nominal": (
-                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/2017/pileup_nominal.root",
+                        f"{central_mtop_dir}/pileup/{year}/pileup_nominal.root",
                         "v1",
                     ),
                     "minbias_xs_up": (
-                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/2017/pileup_up.root",
+                        f"{central_mtop_dir}/pileup/{year}/pileup_up.root",
                         "v1",
                     ),
                     "minbias_xs_down": (
-                        "/afs/cern.ch/user/l/lgriesin/public/mTop/pileup/2017/pileup_down.root",
+                        f"{central_mtop_dir}/pileup/{year}/pileup_down.root",
                         "v1",
                     ),
                 },
@@ -1192,12 +1194,9 @@ def add_config(
     # jet veto map
     add_external("jet_veto_map", (cat_info.get_file("jme", "jetvetomaps.json.gz"), "v2"))
 
-    # WP based btag SF
-    if year == 2017:
-        add_external(
-            "btag_wp_sf_corr",
-            (f"{central_mtop_dir}/BTV_files/deepJet_2017_merged.json.gz", "v1"),
-        )
+    # WP based btag SF -> Correctionlibs with the merged correction set
+    # Using the script Merge_BTV_correction_files.py provided from Marcel
+    add_external("btag_wp_sf_corr", (f"{central_mtop_dir}/BTV_files/deepJet_{year}_merged.json.gz", "v1"))
 
     ################################################################################################
     # reductions
@@ -1223,8 +1222,8 @@ def add_config(
                 "GenPart.*",
                 (
                     "HLT.{Mu50,Physics,IsoMu24,PFHT350,PFHT370,PFHT890,PFHT1050,"
-                    "PFHT380_SixPFJet32,PFHT400_SixPFJet32,"
-                    "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,"
+                    "PFHT380_SixPFJet32,PFHT400_SixPFJet32," +
+                    ("PFHT380_SixPFJet32_DoublePFBTagCSV_2p2," if year != 2018 else "") +
                     "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
                     "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94}"
                 ),
@@ -1292,19 +1291,44 @@ def add_config(
     ################################################################################################
     # external configs: channels, categories, met filters, triggers, variables
     ################################################################################################
+    # Trigger configurations
+
+    # Signal trigger
+    # For 2017, the first trigger PFHT380_SixPFJet32_DoublePFBTagCSV_2p2 is used
+    # For 2018, we use a logical OR of both
+    # Structure of the config stays the same and exceptions for 2018 are handled in corresponing parts of the code
+    # categorization for SR as an example, etc.
     cfg.x.trigger = {
-        "tt_fh": [
-            "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
-            "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        ],
+        "tt_fh": {
+            2017: [
+                "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
+                "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+            ],
+            2018: [
+                "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
+                "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+            ],
+        }[year],
     }
 
     cfg.x.ref_trigger = {
-        "tt_fh": ["PFHT350"],
+        "tt_fh": {
+            2017: ["PFHT350"],
+            2018: ["PFHT350"],
+        }[year],
     }
 
     cfg.x.bkg_trigger = {
-        "tt_fh": ["PFHT380_SixPFJet32"],
+        "tt_fh": {
+            2017: [
+                "PFHT380_SixPFJet32",
+                "PFHT380_SixPFJet32",
+            ],
+            2018: [
+                "PFHT400_SixPFJet32",
+                # "PFHT380_SixPFJet32"
+            ],
+        }[year],
     }
 
     # channels
@@ -1354,8 +1378,20 @@ def add_config(
         # Custom processed dataset handling
         if aux.get("lfn_source") == "pnfs":
 
-            base_path = "/pnfs/desy.de/cms/tier2/store/user/stadie/nanoaod_run2/v9_v2"
-            dataset_dir = os.path.join(base_path, aux["pnfs_dataset"])
+            pnfs_version = aux.get("pnfs_version")
+            pnfs_dataset = aux.get("pnfs_dataset")
+
+            if pnfs_version is None or pnfs_dataset is None:
+                raise Exception(
+                    f"Missing pnfs_version or pnfs_dataset in aux for dataset '{dataset_key}'",
+                )
+
+            base_path = (
+                "/pnfs/desy.de/cms/tier2/store/user/stadie/nanoaod_run2/"
+                f"{pnfs_version}"
+            )
+
+            dataset_dir = os.path.join(base_path, pnfs_dataset)
 
             if not os.path.exists(dataset_dir):
                 raise Exception(f"Dataset directory not found: {dataset_dir}")
@@ -1366,18 +1402,23 @@ def add_config(
                 raise Exception(f"No ROOT files found in: {dataset_dir}")
 
             # convert PNFS → LFN
-            files = [f.replace("/pnfs/desy.de/cms/tier2", "") for f in files]
+            files = [
+                f.replace("/pnfs/desy.de/cms/tier2", "")
+                for f in files
+            ]
 
-            # Skip specific files for certain datasets, corrupted / broken files identified during processing
             skip_map = {
                 "tt_fh_powheg_17": ["nano_2393.root", "nano_2355.root"],
                 "tt_sl_powheg_17": ["nano_847.root"],
             }
 
-            skip_files = skip_map.get(aux["pnfs_dataset"], [])
+            skip_files = skip_map.get(pnfs_dataset, [])
 
             if skip_files:
-                files = [f for f in files if not any(sf in f for sf in skip_files)]
+                files = [
+                    f for f in files
+                    if not any(sf in f for sf in skip_files)
+                ]
 
             return sorted(files)
 
