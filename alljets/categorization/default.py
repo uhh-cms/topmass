@@ -213,3 +213,50 @@ def cat_fit_unmatched(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak
     For MC validation: kinematic fit selected wrong jet combination or no match found.
     """
     return events, (events.fitCombinationType != 2)
+
+
+# ============================================================================
+#   Trigger categories
+# ============================================================================
+@categorizer(uses={"event"})
+def cat_tt_fh_pfht380_csv_2017(self, events: ak.Array, **kwargs):
+
+    if self.dataset_inst.is_data:
+        mask = (events.run >= 299368) & (events.run <= 306460)
+    else:
+        mask = ak.ones_like(events.event, dtype=bool)
+
+    return events, mask
+
+
+@categorizer(uses={"event"})
+def cat_tt_fh_pfht380_deepcsv_2017(self, events: ak.Array, **kwargs):
+
+    if self.dataset_inst.is_data:
+        mask = (events.run >= 302026) & (events.run <= 306460)
+    else:
+        mask = ak.ones_like(events.event, dtype=bool)
+
+    return events, mask
+
+
+@categorizer(uses={"event"})
+def cat_tt_fh_pfht380_deepcsv_2018(self, events: ak.Array, **kwargs):
+
+    if self.dataset_inst.is_data:
+        mask = (events.run >= 315252) & (events.run <= 317488)
+    else:
+        mask = ak.ones_like(events.event, dtype=bool)
+
+    return events, mask
+
+
+@categorizer(uses={"event"})
+def cat_tt_fh_pfht400_deepcsv_2018(self, events: ak.Array, **kwargs):
+
+    if self.dataset_inst.is_data:
+        mask = (events.run >= 317509) & (events.run <= 325175)
+    else:
+        mask = ak.ones_like(events.event, dtype=bool)
+
+    return events, mask
