@@ -415,6 +415,8 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         normalized_ps_weights,
         normalized_pdf_weight,
         normalized_pu_weights,
+        normalized_top_pt_weight,
+        normalized_rb_weight,
         "Jet.*",
     },
     produces={
@@ -428,6 +430,8 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         normalized_ps_weights,
         normalized_pdf_weight,
         normalized_pu_weights,
+        normalized_top_pt_weight,
+        normalized_rb_weight,
     },
     produce_weights=True,
     mode="production",
@@ -477,6 +481,8 @@ def trigSF_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[normalized_pdf_weight](events, **kwargs)
 
         events = self[normalized_pu_weights](events, **kwargs)
+
+        events = self[normalized_rb_weight](events, **kwargs)
 
         if self.dataset_inst.has_tag("ttbar"):
             events = self[normalized_top_pt_weight](events, **kwargs)

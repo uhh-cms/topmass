@@ -179,3 +179,38 @@ def add_categories(cfg: od.Config) -> None:
         label="wrong or umatched events",
         tags={"matched"},
     )
+    # ========================================================================
+    # Trigger categories
+    # ========================================================================
+    add_category(
+        cfg,
+        name="trig_2017_csv",
+        selection="cat_tt_fh_pfht380_csv_2017",
+        id=701,
+        label="",
+        tags={"trig"},
+    )
+    add_category(
+        cfg,
+        name="trig_2017_deepcsv",
+        selection="cat_tt_fh_pfht380_deepcsv_2017",
+        id=702,
+        label="",
+        tags={"trig"},
+    )
+    add_category(
+        cfg,
+        name="trig_2018_ht380",
+        selection="cat_tt_fh_pfht380_deepcsv_2018",
+        id=703,
+        label="",
+        tags={"trig"},
+    )
+    add_category(
+        cfg,
+        name="trig_2018_ht400",
+        selection="cat_tt_fh_pfht400_deepcsv_2018",
+        id=704,
+        label="",
+        tags={"trig"},
+    )
