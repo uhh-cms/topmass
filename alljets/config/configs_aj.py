@@ -269,10 +269,10 @@ def add_config(
     # selector step groups for conveniently looping over certain steps
     # (used in cutflow tasks)
     cfg.x.selector_step_groups = {
+        "cutflow_sig": ["json", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
         "default": [],
-        "default_bkg": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
-        "ht_trigger": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
-        "trigjet6_pt": ["All", "BaseTrigger", "BTag", "HT"],
+        "ht_trigger": ["json", "pv", "BaseTrigger", "Lepton_Veto", "jet", "SixJets", "BTag"],
+        "trigjet6_pt": ["json", "pv", "BaseTrigger", "Lepton_Veto", "HT", "BTag"],
         "trig_eff_bjet": ["All", "BaseTrigger", "jet", "HT"],
         "trig_eff_ht_pt": ["All", "BaseTrigger", "BTag"],
     }
