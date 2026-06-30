@@ -43,63 +43,21 @@ def add_parameters(im: InferenceModel) -> None:
     im.add_parameter_group("experimental")
     im.add_parameter_group("modelling")
 
-    im.add_parameter(
-        "mtop",
-        process=["TT"],
-        type=ParameterType.shape,
-        config_data={
-            config_inst.name: im.parameter_config_spec(
-                shift_source="mtop1",
-            )
-            for config_inst in im.config_insts
-        },
-    )
+    for s in ["mtop1"]:  # , "mtop3", "mtop6"]:
+        im.add_parameter(
+            s,
+            process=["TT"],
+            type=ParameterType.shape,
+            config_data={
+                config_inst.name: im.parameter_config_spec(
+                    shift_source=s,
+                )
+                for config_inst in im.config_insts
+            },
+        )
 
     experimental = {
         "CMS_res_j_13TeV": "jer",
-
-        # JES flavor
-        "CMS_scale_j_FlavorPureBottom": "jec_FlavorPureBottom",
-        "CMS_scale_j_FlavorPureGluon": "jec_FlavorPureGluon",
-        "CMS_scale_j_FlavorPureCharm": "jec_FlavorPureCharm",
-        "CMS_scale_j_FlavorPureQuark": "jec_FlavorPureQuark",
-
-        # JES absolute
-        "CMS_scale_j_AbsoluteStat": "jec_AbsoluteStat",
-        "CMS_scale_j_AbsoluteScale": "jec_AbsoluteScale",
-        "CMS_scale_j_AbsoluteMPFBias": "jec_AbsoluteMPFBias",
-
-        # JES modelling
-        "CMS_scale_j_Fragmentation": "jec_Fragmentation",
-        "CMS_scale_j_SinglePionECAL": "jec_SinglePionECAL",
-        "CMS_scale_j_SinglePionHCAL": "jec_SinglePionHCAL",
-
-        # Relative
-        "CMS_scale_j_RelativeJEREC1": "jec_RelativeJEREC1",
-        "CMS_scale_j_RelativeJEREC2": "jec_RelativeJEREC2",
-        "CMS_scale_j_RelativeJERHF": "jec_RelativeJERHF",
-
-        "CMS_scale_j_RelativePtBB": "jec_RelativePtBB",
-        "CMS_scale_j_RelativePtEC1": "jec_RelativePtEC1",
-        "CMS_scale_j_RelativePtEC2": "jec_RelativePtEC2",
-        "CMS_scale_j_RelativePtHF": "jec_RelativePtHF",
-
-        "CMS_scale_j_RelativeBal": "jec_RelativeBal",
-        "CMS_scale_j_RelativeSample": "jec_RelativeSample",
-
-        "CMS_scale_j_RelativeFSR": "jec_RelativeFSR",
-        "CMS_scale_j_RelativeStatFSR": "jec_RelativeStatFSR",
-        "CMS_scale_j_RelativeStatEC": "jec_RelativeStatEC",
-        "CMS_scale_j_RelativeStatHF": "jec_RelativeStatHF",
-
-        # Pileup
-        "CMS_scale_j_PileUpDataMC": "jec_PileUpDataMC",
-        "CMS_scale_j_PileUpPtRef": "jec_PileUpPtRef",
-        "CMS_scale_j_PileUpPtBB": "jec_PileUpPtBB",
-        "CMS_scale_j_PileUpPtEC1": "jec_PileUpPtEC1",
-        "CMS_scale_j_PileUpPtEC2": "jec_PileUpPtEC2",
-        "CMS_scale_j_PileUpPtHF": "jec_PileUpPtHF",
-
         "CMS_pileup": "pu_weight_minbias_xs",
         "CMS_trig_htsixjets2btag": "trig",
 
@@ -110,6 +68,9 @@ def add_parameters(im: InferenceModel) -> None:
         "CMS_btag_fixedWP_light_uncorrelated": "btag_light_uncor",
 
     }
+
+    for jec_unc in im.config_insts[0].x.jec.Jet.uncertainty_sources:
+        experimental["CMS_scale_j_" + jec_unc] = "jec_" + jec_unc
 
     modelling = {
         "ps_hdamp": "hdamp",

@@ -1368,6 +1368,15 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{W_{avg}}^{reco}$",
     )
+    add_variable(
+        cfg,
+        name="reco_W_mass_avg_percentile_2Dpeak",
+        expression=partial(build_avg_w_mass),
+        aux={"inputs": build_avg_w_mass.inputs},
+        binning=[65, 79.7101, 84.2415, 88.6869, 110],
+        unit="GeV",
+        x_title=r"$m_{W_{avg}}^{reco}$",
+    )
     build_w1jet.inputs = ["FitW1.{x,y,z,t}"]
     add_variable(
         cfg,
@@ -1461,6 +1470,24 @@ def add_variables(cfg: od.Config) -> None:
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
         binning=[102.968, 163.797, 170.435, 176.49, 187.135, 266.059, 1133.13],
+        unit="GeV",
+        x_title=r"$m_{t}^{fit}$",
+    )
+    add_variable(
+        cfg,
+        name="fit_Top1_mass_percentile_2Dpeak",
+        expression=partial(build_top1jet, which="mass"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=[100, 163.076, 169.474, 174.881, 182.071, 225],
+        unit="GeV",
+        x_title=r"$m_{t}^{fit}$",
+    )
+    add_variable(
+        cfg,
+        name="fit_Top1_mass_offpeak",
+        expression=partial(build_top1jet, which="mass"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=[250, 400],
         unit="GeV",
         x_title=r"$m_{t}^{fit}$",
     )
