@@ -1279,8 +1279,7 @@ def add_config(
 
     # # define per-dataset event weights
     for dataset in cfg.datasets:
-        # Hotfix for 2017 where shifts don't have the normalized top pt and fragmentation weights
-        if dataset.has_tag("ttbar") and od.Shift.name == "nominal":
+        if dataset.has_tag("ttbar"):
             dataset.x.event_weights = {
                 "normalized_top_pt_weight": get_shifts("top_pt"),
                 "normalized_rb_weight": get_shifts("rb_dctr"),
