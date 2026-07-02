@@ -183,12 +183,12 @@ A [```helper```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/in
 
 To create the 1D datacards:
 ```
-law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd  --version v1_TopMass  --configs 2017_v9  --selector default --cf.MergeHistograms-pilot --workers 10 --tasks-per-job 20 
+law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd,unrolling   --version v1_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3
 ```
 
 To create the 2D datacards:
 ```
-law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling  --version v1_TopMass  --configs 2017_v9  --selector default --cf.MergeHistograms-pilot --workers 10 --tasks-per-job 20
+law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling   --version v1_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3
 ```
 
 Check for missing input files:
