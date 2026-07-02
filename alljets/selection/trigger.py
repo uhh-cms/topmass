@@ -207,12 +207,9 @@ def trigger(
         events = self[dctr_rb](events, **kwargs)
 
         if self.dataset_inst.has_tag("ttbar"):
-            # Add top pt weight and variations
-            # We don't apply these weights and therefore set the nominal column to 1
-            # We symmetrize the up/down variations
             events = self[top_pt_weight](events, **kwargs)
             events = set_ak_column(events, "top_pt_weight_up", events.top_pt_weight)
-            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight_down", ak.ones_like(events.top_pt_weight))
             events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
 
         # Combined event selection for efficiency calculation, without b-tagging requirements

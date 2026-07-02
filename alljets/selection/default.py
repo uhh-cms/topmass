@@ -47,6 +47,7 @@ from alljets.production.trig_cor_weight import trig_weights
 from alljets.production.dctr_hdamp import dctr_hdamp
 from alljets.production.dctr_rb import dctr_rb
 from alljets.production.ps_weights import ps_weights
+from alljets.utils import IF_RUN_2_2018
 
 
 np = maybe_import("numpy")
@@ -119,6 +120,9 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         IF_DATASET_HAS_TAG("ttbar")("pdf_hessian_*_weight_{up,down}"),
         IF_DATASET_HAS_TAG("ttbar")("pdf_alphas_weight_{up,down}"),
+        IF_RUN_2_2018("HLT.PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94"),
+        IF_RUN_2_2018("HLT.PFHT380_SixPFJet32"),
+        IF_RUN_2_2018("HLT.PFHT400_SixPFJet32"),
     },
     exposed=True,
 )
@@ -161,9 +165,16 @@ def default(
 
     # ensure trigger columns exist
     if "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2" not in ak.fields(events.HLT):
-        events = set_ak_column(
-            events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False,
-        )
+        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2", False)
+
+    if "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94" not in ak.fields(events.HLT):
+        events = set_ak_column(events, "HLT.PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94", False)
+
+    if "PFHT380_SixPFJet32" not in ak.fields(events.HLT):
+        events = set_ak_column(events, "HLT.PFHT380_SixPFJet32", False)
+
+    if "PFHT400_SixPFJet32" not in ak.fields(events.HLT):
+        events = set_ak_column(events, "HLT.PFHT400_SixPFJet32", False)
 
     # filter bad data events according to golden lumi mask
     if self.dataset_inst.is_data:
@@ -232,10 +243,9 @@ def default(
         if self.dataset_inst.has_tag("ttbar"):
             # Add top pt weight and variations
             # We don't apply these weights and therefore set the nominal column to 1
-            # We symmetrize the up/down variations
             events = self[top_pt_weight](events, **kwargs)
             events = set_ak_column(events, "top_pt_weight_up", events.top_pt_weight)
-            events = set_ak_column(events, "top_pt_weight_down", 2.0 - events.top_pt_weight)
+            events = set_ak_column(events, "top_pt_weight_down", ak.ones_like(events.top_pt_weight))
             events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
 
             events = self[pdf_all_weights](events, **kwargs)
@@ -245,7 +255,7 @@ def default(
             for i in range(100):
                 idx = i + 1
                 weight_up = hessian[:, i]
-                weight_down = 2 - hessian[:, i]
+                weight_down = ak.ones_like(weight_up)
                 events = ak.with_field(events, weight_up, f"pdf_hessian_{idx:03d}_weight_up")
                 events = ak.with_field(events, weight_down, f"pdf_hessian_{idx:03d}_weight_down")
         else:
