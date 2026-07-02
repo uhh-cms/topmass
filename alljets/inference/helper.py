@@ -43,7 +43,7 @@ def add_parameters(im: InferenceModel) -> None:
     im.add_parameter_group("experimental")
     im.add_parameter_group("modelling")
 
-    for s in ["mtop1"]:  # , "mtop3", "mtop6"]:
+    for s in ["mtop1", "mtop3", "mtop6"]:
         im.add_parameter(
             s,
             process=["TT"],
