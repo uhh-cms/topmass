@@ -56,4 +56,4 @@ def stylize_processes(config: od.Config) -> None:
 
     if (p := config.get_process("qcd_est", default=None)):
         p.color1 = cfg.x.colors.bright_blue
-        p.label = r"Multijet est." 
+        p.label = r"Multijet est."
