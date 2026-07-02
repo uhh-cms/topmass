@@ -323,7 +323,7 @@ def cutflow_features(
 @producer(
     uses={
         features,
-        kinFitMatch,
+        # kinFitMatch,
         category_ids,
         btag_wp_weights,
         normalization_weights,
@@ -340,7 +340,7 @@ def cutflow_features(
     },
     produces={
         features,
-        kinFitMatch,
+        # kinFitMatch,
         category_ids,
         btag_wp_weights,
         normalization_weights,
@@ -395,10 +395,18 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
         events = self[normalized_trig_weight](events, **kwargs)
 
-        events = self[normalized_rb_weight](events, **kwargs)
+        shift = kwargs["task"].shift
 
-        if self.dataset_inst.has_tag("ttbar"):
+        if shift == "nominal":
+            events = self[normalized_rb_weight](events, **kwargs)
+        else:
+            events = set_ak_column(events, "normalized_rb_weight", np.ones(len(events)), value_type=np.float32)
+
+        if self.dataset_inst.has_tag("ttbar") and shift == "nominal":
             events = self[normalized_top_pt_weight](events, **kwargs)
+
+        elif self.dataset_inst.has_tag("ttbar") and shift != "nominal":
+            events = set_ak_column(events, "normalized_top_pt_weight", np.ones(len(events)), value_type=np.float32)
 
     return events
 
