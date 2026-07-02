@@ -101,23 +101,13 @@ def add_config(
     for process_name in process_names:
         # add the process
         if process_name == "qcd_est":
-            proc = cfg.add_process(name="qcd_est", id=30002)
+            cfg.add_process(name="qcd_est", id=30002)
         else:
-            proc = cfg.add_process(procs.get(process_name))
-
-        # configuration of colors, labels, etc. can happen here
-        if proc.is_mc:
-            if proc.name == "qcd_est":
-                proc.color1 = (244, 93, 244)
-            elif proc.name == "tt":
-                proc.color1 = (244, 182, 66)
-            else:
-                (244, 93, 66)
+            cfg.add_process(procs.get(process_name))
 
     # configure colors, labels, etc
-    # from aj.config.styles import stylize_processes
-
-    # stylize_processes(cfg)
+    from alljets.config.styles import stylize_processes
+    stylize_processes(cfg)
 
     ################################################################################################
     # datasets
