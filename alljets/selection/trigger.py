@@ -29,6 +29,7 @@ from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 from columnflow.selection.cms.json_filter import json_filter
 from columnflow.production.cms.top_pt_weight import top_pt_weight
+from columnflow.selection.cms.met_filters import met_filters
 
 from alljets.selection.jet import jet_selection
 from alljets.selection.lepton import lepton_selection
@@ -52,6 +53,7 @@ hist = maybe_import("hist")
         jet_selection,
         jet_veto_map,
         json_filter,
+        met_filters,
         process_ids,
         increment_stats,
         deterministic_seeds,
@@ -73,6 +75,7 @@ hist = maybe_import("hist")
         jet_selection,
         jet_veto_map,
         json_filter,
+        met_filters,
         process_ids,
         gen_top_lookup,
         fill_btag_wp_count_hists,
@@ -153,6 +156,10 @@ def trigger(
     else:
         results += SelectionResult(steps={"json": full_like(events.event, True, dtype=bool)})
 
+    # met filter selection
+    events, met_filter_results = self[met_filters](events, **kwargs)
+    results += met_filter_results
+
     # Primary vertex selection
     results += SelectionResult(steps={"pv": events.PV.npvsGood >= 1})
 
@@ -171,6 +178,7 @@ def trigger(
     # combined event selection after all steps: Choose one of the trigger efficiency selector steps
     results.event = (
         results.steps.json &
+        results.steps.met_filter &
         results.steps.pv &
         results.steps.BaseTrigger &
         results.steps.Lepton_Veto &
@@ -210,6 +218,7 @@ def trigger(
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
             results.steps.json &
+            results.steps.met_filter &
             results.steps.pv &
             results.steps.BaseTrigger &
             results.steps.Lepton_Veto &

@@ -28,6 +28,7 @@ from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.columnar_util import IF_DATASET_HAS_TAG
 from columnflow.selection.cms.json_filter import json_filter
+from columnflow.selection.cms.met_filters import met_filters
 
 from columnflow.production.cms.pdf import pdf_weights
 from columnflow.selection.cms.jets import jet_veto_map
@@ -71,6 +72,7 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         lepton_selection,
         jet_veto_map,
         json_filter,
+        met_filters,
         jet_selection,
         attach_coffea_behavior,
         fill_btag_wp_count_hists,
@@ -95,6 +97,7 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         cutflow_features,
         jet_veto_map,
         json_filter,
+        met_filters,
         jet_selection,
         gen_top_lookup,
         process_ids,
@@ -169,9 +172,14 @@ def default(
     else:
         results += SelectionResult(steps={"json": full_like(events.event, True, dtype=bool)})
 
+    # met filter selection
+    events, met_filter_results = self[met_filters](events, **kwargs)
+    results += met_filter_results
+
     # Primary vertex selection
     results += SelectionResult(steps={"pv": events.PV.npvsGood >= 1})
 
+    # Lepton Veto selection
     events, lepton_results = self[lepton_selection](events, **kwargs)
     results += lepton_results
 
@@ -186,6 +194,7 @@ def default(
     # combined event selection after all steps
     results.event = (
         results.steps.json &
+        results.steps.met_filter &
         results.steps.pv &
         results.steps.SignalOrBkgTrigger &
         results.steps.Lepton_Veto &
@@ -245,6 +254,7 @@ def default(
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
             results.steps.json &
+            results.steps.met_filter &
             results.steps.pv &
             results.steps.BaseTrigger &
             results.steps.Lepton_Veto &

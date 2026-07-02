@@ -1334,6 +1334,10 @@ def add_config(
 
     add_variables(cfg)
 
+    # add met filters
+    from alljets.config.met_filters import add_met_filters
+    add_met_filters(cfg)
+
     ################################################################################################
     # LFN settings
     ################################################################################################
