@@ -96,8 +96,10 @@ def trig_weights_requires(self: Producer, task: law.Task, reqs: dict) -> None:
     if ("external_files") in reqs:
         return
 
+    year = self.config_inst.campaign.x.year
+
     from alljets.tasks.ProduceTriggerWeights import ProduceTriggerWeight
-    pinned_version = get("versions", "cfg_2017_v9__task_cf.ProduceTriggerWeight")
+    pinned_version = get("versions", f"cfg_{year}_v9__task_cf.ProduceTriggerWeight")
     reqs["external_files"] = ProduceTriggerWeight(
         version=pinned_version,
         datasets="tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,data*",
