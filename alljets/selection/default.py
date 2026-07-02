@@ -47,6 +47,7 @@ from alljets.production.trig_cor_weight import trig_weights
 from alljets.production.dctr_hdamp import dctr_hdamp
 from alljets.production.dctr_rb import dctr_rb
 from alljets.production.ps_weights import ps_weights
+from alljets.production.bfrag_weights import bfrag_weights
 from alljets.utils import IF_RUN_2_2018
 
 
@@ -92,6 +93,7 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         dctr_hdamp,
         ps_weights,
         dctr_rb,
+        bfrag_weights,
         "PV.npvsGood",
     },
     produces={
@@ -115,6 +117,7 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         dctr_hdamp,
         ps_weights,
         dctr_rb,
+        bfrag_weights,
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
@@ -238,8 +241,8 @@ def default(
 
         events = self[dctr_rb](events, **kwargs)
 
-        # # Use the derived pdf weight producer to store all weights
-        # # For the pdf hessian weights, store them in seperate columns for up/down variations as needed.
+        events = self[bfrag_weights](events, **kwargs)
+
         if self.dataset_inst.has_tag("ttbar"):
             # Add top pt weight and variations
             # We don't apply these weights and therefore set the nominal column to 1
@@ -365,6 +368,22 @@ def default(
                     f"sum_top_pt_weight{v}_selected": (events[f"top_pt_weight{v}"], results.event),
                 })
 
+        # bfrag weights
+        weight_map.update({
+            "sum_bfrag_weight": (events.bfrag_weight, Ellipsis),
+            "sum_bfrag_weight_selected": (events.bfrag_weight, results.event),
+        })
+
+        if not skip_shifts:
+            for weight_name in (
+                "bfrag_weight_{up,down}", "bfrag_peterson_weight_{up,down}",
+                "bfrag_rel_weight_{up,down}", "bfrag_lund_weight_{up,down}",
+            ):
+                if weight_name in events.fields:
+                    weight_map.update({
+                        f"sum_{weight_name}": (events[weight_name], Ellipsis),
+                        f"sum_{weight_name}_selected": (events[weight_name], results.event),
+                    })
     group_map = {
         # per process
         "process": {
