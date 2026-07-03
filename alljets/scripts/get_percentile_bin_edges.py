@@ -197,7 +197,7 @@ def main(args):
 
     x_edges, y_edges = get_2d_edges(
         vars_dict["mtfit"],
-        vars_dict["avg_W_mass"],
+        vars_dict["reco_R_bq"],
         w,
         nx=args.nbins_x,
         ny=args.nbins_y,

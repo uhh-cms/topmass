@@ -1364,7 +1364,7 @@ def add_variables(cfg: od.Config) -> None:
         name="reco_W_mass_avg_percentile_2D",
         expression=partial(build_avg_w_mass),
         aux={"inputs": build_avg_w_mass.inputs},
-        binning=[65.5055, 81.2154, 87.062, 107.03],
+        binning=[65, 81.2154, 87.062, 110],
         unit="GeV",
         x_title=r"$m_{W_{avg}}^{reco}$",
     )
@@ -1373,7 +1373,7 @@ def add_variables(cfg: od.Config) -> None:
         name="reco_W_mass_avg_percentile_2Dpeak",
         expression=partial(build_avg_w_mass),
         aux={"inputs": build_avg_w_mass.inputs},
-        binning=[65, 79.7101, 84.2415, 88.6869, 110],
+        binning=[65, 81.3358, 87.0946, 105],
         unit="GeV",
         x_title=r"$m_{W_{avg}}^{reco}$",
     )
@@ -1478,7 +1478,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fit_Top1_mass_percentile_2Dpeak",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
-        binning=[100, 163.076, 169.474, 174.881, 182.071, 225],
+        binning=[125, 164.969, 172.148, 179.797, 225],
         unit="GeV",
         x_title=r"$m_{t}^{fit}$",
     )
@@ -1487,7 +1487,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fit_Top1_mass_offpeak",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
-        binning=[250, 400],
+        binning=[250, 2000],
         unit="GeV",
         x_title=r"$m_{t}^{fit}$",
     )
@@ -1507,6 +1507,15 @@ def add_variables(cfg: od.Config) -> None:
         expression=build_reco_R_bq,
         aux={"inputs": build_reco_R_bq.inputs},
         binning=[0.0884285, 0.339041, 0.421465, 0.498023, 0.579106, 0.672588, 0.795516, 0.991731, 8.17397],
+        unit="",
+        x_title=r"$R_{bq}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_percentile_3D",
+        expression=build_reco_R_bq,
+        aux={"inputs": build_reco_R_bq.inputs},
+        binning=[0, 0.572137, 4],
         unit="",
         x_title=r"$R_{bq}$",
     )

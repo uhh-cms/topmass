@@ -57,7 +57,6 @@ def add_parameters(im: InferenceModel) -> None:
         )
 
     experimental = {
-        "CMS_res_j_13TeV": "jer",
         "CMS_pileup": "pu_weight_minbias_xs",
         "CMS_trig_htsixjets2btag": "trig",
 
@@ -66,18 +65,19 @@ def add_parameters(im: InferenceModel) -> None:
 
         "CMS_btag_fixedWP_light_correlated": "btag_light_cor",
         "CMS_btag_fixedWP_light_uncorrelated": "btag_light_uncor",
+    }
 
+    experimental_symmetrize = {
+        "CMS_res_j_13TeV": "jer",
     }
 
     for jec_unc in im.config_insts[0].x.jec.Jet.uncertainty_sources:
-        experimental["CMS_scale_j_" + jec_unc] = "jec_" + jec_unc
+        experimental_symmetrize["CMS_scale_j_" + jec_unc] = "jec_" + jec_unc
 
     modelling = {
         "ps_hdamp": "hdamp",
         "ps_hdamp_dctr": "hdamp_dctr",
         "pdf_alphas": "alphas",
-        "underlying_event": "tune",
-        "QCD_scale_ttbar": "murmuf",
         "top_pt_reweighting": "top_pt",
         "fragmentation_dctr": "rb_dctr",
     }
@@ -88,6 +88,12 @@ def add_parameters(im: InferenceModel) -> None:
         "ps_ERD": "tune_erdON",
         "ps_Recoil": "tune_rtt",
     }
+
+    modelling_symmetrize = {
+        "QCD_scale_ttbar": "murmuf",
+        "underlying_event": "tune",
+    }
+
 
     splittings = ("G2GG", "G2QQ", "Q2QG", "X2XG")
     for var in [f"{a}_{b}_{c}" for a in ["isr", "fsr"] for b in splittings for c in ["muR", "cNS"]]:
@@ -112,8 +118,12 @@ def add_parameters(im: InferenceModel) -> None:
 
     for nuis_name, shift_name in experimental.items():
         add_source(nuis_name, shift_name, "experimental")
+    for nuis_name, shift_name in experimental_symmetrize.items():
+        add_source(nuis_name, shift_name, "experimental", (ParameterTransformation.symmetrize,))
 
     for nuis_name, shift_name in modelling.items():
         add_source(nuis_name, shift_name, "modelling")
     for nuis_name, shift_name in modelling_envelope.items():
         add_source(nuis_name, shift_name, "modelling", (ParameterTransformation.envelope,))
+    for nuis_name, shift_name in modelling_symmetrize.items():
+        add_source(nuis_name, shift_name, "modelling", (ParameterTransformation.symmetrize,))
