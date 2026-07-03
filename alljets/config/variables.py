@@ -766,6 +766,166 @@ def add_variables(cfg: od.Config) -> None:
         x_title=r"B-Tag scores of all Jets",
     )
     ###############################################################################
+    #                       KinFitJets Kinematics                                 #
+    #       Leading Six Jets within |eta| < 2.4 & pt >= 40 GeV                    #
+    ###############################################################################
+    add_variable(
+        cfg,
+        name="kinfitjet1_pt",
+        expression="KinFitJets.pt[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(50, 0.0, 500.0),
+        aux={"overflow": False, "underflow": False},
+        unit="GeV",
+        x_title=r"Jet 1 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet1_eta",
+        expression="KinFitJets.eta[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 1 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet1_phi",
+        expression="KinFitJets.phi[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 1 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet2_pt",
+        expression="KinFitJets.pt[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(50, 0.0, 500.0),
+        aux={"overflow": False, "underflow": False},
+        unit="GeV",
+        x_title=r"Jet 2 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet2_eta",
+        expression="KinFitJets.eta[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 2 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet2_phi",
+        expression="KinFitJets.phi[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 2 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet3_pt",
+        expression="KinFitJets.pt[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(50, 0.0, 500.0),
+        aux={"overflow": False, "underflow": False},
+        unit="GeV",
+        x_title=r"Jet 3 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet3_eta",
+        expression="KinFitJets.eta[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 3 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet3_phi",
+        expression="KinFitJets.phi[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 3 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet4_pt",
+        expression="KinFitJets.pt[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(50, 0.0, 500.0),
+        aux={"overflow": False, "underflow": False},
+        unit="GeV",
+        x_title=r"Jet 4 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet4_eta",
+        expression="KinFitJets.eta[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 4 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet4_phi",
+        expression="KinFitJets.phi[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 4 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet5_pt",
+        expression="KinFitJets.pt[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(50, 0.0, 500.0),
+        aux={"overflow": False, "underflow": False},
+        unit="GeV",
+        x_title=r"Jet 5 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet5_eta",
+        expression="KinFitJets.eta[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 5 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet5_phi",
+        expression="KinFitJets.phi[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 5 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet6_pt",
+        expression="KinFitJets.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(50, 0.0, 500.0),
+        aux={"overflow": False, "underflow": False},
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet6_eta",
+        expression="KinFitJets.eta[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(30, -3.0, 3.0),
+        x_title=r"Jet 6 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet6_phi",
+        expression="KinFitJets.phi[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(66, -3.3, 3.3),
+        x_title=r"Jet 6 $\phi$",
+    )
+    ###############################################################################
     #                           FitJet reco kinematics                            #
     #                Reco values of the six jets that entered the fit             #
     #  First two jets are b-jet candidates, then light quark jets for W1,then W2  #
