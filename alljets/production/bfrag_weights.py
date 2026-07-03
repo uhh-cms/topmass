@@ -17,6 +17,19 @@ np = maybe_import("numpy")
 logger = law.logger.get_logger(__name__)
 
 
+def _safe_ratio(num: ak.Array, den: ak.Array, fallback: float = 1.0) -> ak.Array:
+    """
+    Elementwise num / den, replacing any non-finite result (den == 0, NaN inputs, etc.)
+    with `fallback` so downstream finite-value checks don't choke.
+    """
+    ratio = num / ak.where(den == 0, 1.0, den)
+    bad = ~np.isfinite(np.asarray(ratio))
+    n_bad = int(np.sum(bad))
+    if n_bad:
+        logger.warning(f"replacing {n_bad} non-finite bfrag ratio value(s) with {fallback}")
+    return ak.where(bad, fallback, ratio)
+
+
 @producer(
     mc_only=True,
 )
@@ -60,8 +73,8 @@ def bfrag_weights(
         events = set_ak_column(events, "bfrag_peterson_weight_up", peterson)
         events = set_ak_column(events, "bfrag_peterson_weight_down", ones)
 
-        rel_up = up / nom
-        rel_down = down / nom
+        rel_up = _safe_ratio(up, nom)
+        rel_down = _safe_ratio(down, nom)
         events = set_ak_column(events, "bfrag_rel_weight_up", rel_up)
         events = set_ak_column(events, "bfrag_rel_weight_down", rel_down)
 
