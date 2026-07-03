@@ -22,9 +22,11 @@ def stylize_processes(config: od.Config) -> None:
     cfg.x.colors = DotDict(
         bright_blue="#3f90da",
         dark_blue="#011c87",
+        blue="#5790fc",
         purple="#832db6",
         aubergine="#964a8b",
         yellow="#f7c331",
+        bright_yellow="#ffff00",
         bright_orange="#ffa90e",
         dark_orange="#e76300",
         red="#bd1f01",
@@ -37,8 +39,9 @@ def stylize_processes(config: od.Config) -> None:
 
     cfg.x.color_names = [
         "dark_orange", "bright_blue", "dark_green", "red", "purple", "bright_orange", "dark_blue", "teal", "grey",
-        "brown", "green",
+        "brown", "green", "bright_yellow", "aubergine", "yellow", "blue",
     ]
+
     cfg.x.get_color_from_sequence = lambda i: cfg.x.colors[cfg.x.color_names[i % len(cfg.x.color_names)]]
 
     if not cfg.has_process("qcd_est"):
@@ -50,10 +53,12 @@ def stylize_processes(config: od.Config) -> None:
 
     if (p := config.get_process("st", default=None)):
         p.color1 = cfg.x.colors.dark_orange
+        p.label = r"Single $t$"
 
     if (p := config.get_process("qcd", default=None)):
-        p.color1 = cfg.x.colors.yellow
+        p.color1 = cfg.x.colors.bright_yellow
+        p.label = r"QCD Multijet"
 
     if (p := config.get_process("qcd_est", default=None)):
-        p.color1 = cfg.x.colors.bright_blue
+        p.color1 = cfg.x.colors.blue
         p.label = r"Multijet est."
