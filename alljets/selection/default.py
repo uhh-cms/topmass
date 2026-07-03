@@ -30,7 +30,7 @@ from columnflow.columnar_util import IF_DATASET_HAS_TAG
 from columnflow.selection.cms.json_filter import json_filter
 from columnflow.selection.cms.met_filters import met_filters
 
-from columnflow.production.cms.pdf import pdf_weights
+from columnflow.production.cms.pdf import pdf_weights, pdf_weights_raw
 from columnflow.selection.cms.jets import jet_veto_map
 from columnflow.production.cms.pileup import pu_weights_from_columnflow
 from columnflow.production.cms.mc_weight import mc_weight
@@ -63,11 +63,6 @@ incl_category_ids = category_ids.derive("incl_category_ids",
                                         )
 
 
-pdf_all_weights = pdf_weights.derive("pdf_all_weights",
-                                     cls_dict={"store_all_weights": True, "store_split_sets": True},
-                                     )
-
-
 @selector(
     uses={
         cutflow_features,
@@ -85,7 +80,7 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         incl_category_ids,
         mc_weight,
         pdf_weights,
-        pdf_all_weights,
+        pdf_weights_raw,
         murmuf_weights,
         top_pt_weight,
         pu_weights_from_columnflow,
@@ -109,7 +104,7 @@ pdf_all_weights = pdf_weights.derive("pdf_all_weights",
         incl_category_ids,
         mc_weight,
         pdf_weights,
-        pdf_all_weights,
+        pdf_weights_raw,
         murmuf_weights,
         top_pt_weight,
         pu_weights_from_columnflow,
@@ -251,7 +246,7 @@ def default(
             events = set_ak_column(events, "top_pt_weight_down", ak.ones_like(events.top_pt_weight))
             events = set_ak_column(events, "top_pt_weight", ak.ones_like(events.top_pt_weight))
 
-            events = self[pdf_all_weights](events, **kwargs)
+            events = self[pdf_weights_raw](events, **kwargs)
             events = set_ak_column(events, "pdf_alphas_weight_down", events.pdf_weights_alphas[:, 0])
             events = set_ak_column(events, "pdf_alphas_weight_up", events.pdf_weights_alphas[:, 1])
             hessian = events.pdf_weights_hessian
