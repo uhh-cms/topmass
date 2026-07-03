@@ -16,7 +16,7 @@ def peak_2D(self: InferenceModel) -> None:
         config_data={
             config_inst.name: self.category_config_spec(
                 category="sig",
-                variable="fit_Top1_mass_percentile_2Dpeak-reco_W_mass_avg_percentile_2Dpeak",
+                variable="reco_W_mass_avg_percentile_2Dpeak-fit_Top1_mass_percentile_2Dpeak",
                 data_datasets=["data_jetht*"],
             )
             for config_inst in self.config_insts
