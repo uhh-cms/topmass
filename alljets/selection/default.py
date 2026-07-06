@@ -370,15 +370,14 @@ def default(
         })
 
         if not skip_shifts:
-            for weight_name in (
-                "bfrag_weight_{up,down}", "bfrag_peterson_weight_{up,down}",
-                "bfrag_rel_weight_{up,down}", "bfrag_lund_weight_{up,down}",
-            ):
-                if weight_name in events.fields:
-                    weight_map.update({
-                        f"sum_{weight_name}": (events[weight_name], Ellipsis),
-                        f"sum_{weight_name}_selected": (events[weight_name], results.event),
-                    })
+            for v in ("_up", "_down"):
+                for weight_name in events.fields:
+                    if weight_name.startswith("bfrag_") and weight_name.endswith(v):
+                        weight_map.update({
+                            f"sum_{weight_name}": (events[weight_name], Ellipsis),
+                            f"sum_{weight_name}_selected": (events[weight_name], results.event),
+                        })
+
     group_map = {
         # per process
         "process": {
