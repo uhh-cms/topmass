@@ -51,7 +51,7 @@ def dctr_rb(
     if has_variations:
         # Symmetrize around 1.0: up variation is the provided weight, down variation is 2 - up
         events = set_ak_column(events, "rb_weight_up", nom)
-        events = set_ak_column(events, "rb_weight_down", 2 - nom)
+        events = set_ak_column(events, "rb_weight_down", ones)
     else:
         logger.warning(
             f"[{self.dataset_inst.name}] Missing rb weights → only nominal produced",
