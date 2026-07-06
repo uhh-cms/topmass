@@ -51,7 +51,7 @@ def aj_trighist_create_hist(
 
 
 @aj_trighist.fill_hist
-def aj_trighist_fill_hist(self: HistProducer, h: hist.Histogram, data: dict[str, Any], task: law.Task) -> None:
+def aj_trighist_fill_hist(self: HistProducer, h: hist.Histogram, data: dict[str, Any], task: law.Task, **kwargs) -> None:
     """
     Fill the histogram with the data.
     """
