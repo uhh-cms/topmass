@@ -238,6 +238,8 @@ def default(
 
         events = self[bfrag_weights](events, **kwargs)
 
+        events = self[pdf_weights](events, **kwargs)
+
         if self.dataset_inst.has_tag("ttbar"):
             # Add top pt weight and variations
             # We don't apply these weights and therefore set the nominal column to 1
@@ -256,8 +258,6 @@ def default(
                 weight_down = ak.ones_like(weight_up)
                 events = ak.with_field(events, weight_up, f"pdf_hessian_{idx:03d}_weight_up")
                 events = ak.with_field(events, weight_down, f"pdf_hessian_{idx:03d}_weight_down")
-        else:
-            events = self[pdf_weights](events, **kwargs)
 
         # Combined event selection for efficiency calculation, without b-tagging requirements
         results.event_eff = (
