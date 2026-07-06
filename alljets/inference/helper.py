@@ -72,6 +72,8 @@ def add_parameters(im: InferenceModel) -> None:
     }
 
     for jec_unc in im.config_insts[0].x.jec.Jet.uncertainty_sources:
+        if jec_unc == "PileUpMuZero" or jec_unc == "PileUpEnvelope":
+            continue
         experimental_symmetrize["CMS_scale_j_" + jec_unc] = "jec_" + jec_unc
 
     modelling = {
