@@ -625,7 +625,8 @@ def trigger_prod_init(self: Producer) -> None:
         for trigger in self.config_inst.x.trigger[channel]:
             self.uses.add(f"HLT.{trigger}")
         self.uses.add(f"HLT{self.config_inst.x.ref_trigger[channel]}")
-        self.uses.add(f"HLT{self.config_inst.x.bkg_trigger[channel]}")
+        for bkg_trigger in self.config_inst.x.bkg_trigger[channel]:
+            self.uses.add(f"HLT.{bkg_trigger}")
 
 
 # producers for single channels
