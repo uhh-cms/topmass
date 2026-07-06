@@ -259,7 +259,7 @@ def add_config(
     # selector step groups for conveniently looping over certain steps
     # (used in cutflow tasks)
     cfg.x.selector_step_groups = {
-        "cutflow_sig": ["json", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
+        "cutflow_sig": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
         "default": [],
         "ht_trigger": ["json", "pv", "BaseTrigger", "Lepton_Veto", "jet", "SixJets", "BTag"],
         "trigjet6_pt": ["json", "pv", "BaseTrigger", "Lepton_Veto", "HT", "BTag"],
@@ -1312,11 +1312,10 @@ def add_config(
         "tt_fh": {
             2017: [
                 "PFHT380_SixPFJet32",
-                "PFHT380_SixPFJet32",
             ],
             2018: [
                 "PFHT400_SixPFJet32",
-                # "PFHT380_SixPFJet32"
+                "PFHT380_SixPFJet32",
             ],
         }[year],
     }
