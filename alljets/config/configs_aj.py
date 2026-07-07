@@ -261,8 +261,8 @@ def add_config(
     cfg.x.selector_step_groups = {
         "cutflow_sig": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
         "default": [],
-        "ht_trigger": ["json", "pv", "BaseTrigger", "Lepton_Veto", "jet", "SixJets", "BTag"],
-        "trigjet6_pt": ["json", "pv", "BaseTrigger", "Lepton_Veto", "HT", "BTag"],
+        "ht_trigger": ["json", "met_filter", "pv", "BaseTrigger", "Lepton_Veto", "jet", "SixJets", "BTag"],
+        "trigjet6_pt": ["json", "met_filter", "pv", "BaseTrigger", "Lepton_Veto", "HT", "BTag"],
         "trig_eff_bjet": ["All", "BaseTrigger", "jet", "HT"],
         "trig_eff_ht_pt": ["All", "BaseTrigger", "BTag"],
     }
@@ -439,8 +439,8 @@ def add_config(
                             "PileUpPtEC1",
                             "PileUpPtEC2",
                             "PileUpPtHF",
-                            "PileUpMuZero",
-                            "PileUpEnvelope",
+                            # "PileUpMuZero",
+                            # "PileUpEnvelope",
                             # "SubTotalPileUp",
                             # "SubTotalRelative",
                             # "SubTotalPt",
@@ -1400,10 +1400,7 @@ def add_config(
                 for f in files
             ]
 
-            skip_map = {
-                "tt_fh_powheg_17": ["nano_2393.root", "nano_2355.root"],
-                "tt_sl_powheg_17": ["nano_847.root"],
-            }
+            skip_map = {}
 
             skip_files = skip_map.get(pnfs_dataset, [])
 
