@@ -31,7 +31,6 @@ from columnflow.columnar_util import attach_coffea_behavior as attach_coffea_beh
 
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.btag import btag_wp_weights
-from columnflow.production.cms.pdf import pdf_weights
 
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.production.normalization import normalization_weights
@@ -50,11 +49,8 @@ from alljets.production.weights import normalized_pu_weights
 from alljets.production.weights import normalized_murmuf_weight
 from alljets.production.weights import normalized_rb_weight
 from alljets.production.weights import normalized_top_pt_weight
+from alljets.production.weights import normalized_bfrag_weight
 
-
-pdf_all_weights = pdf_weights.derive("pdf_all_weights",
-                                     cls_dict={"store_all_weights": True, "store_split_sets": True},
-                                     )
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -336,6 +332,7 @@ def cutflow_features(
         normalized_trig_weight,
         normalized_rb_weight,
         normalized_top_pt_weight,
+        normalized_bfrag_weight,
         "Jet.*",
     },
     produces={
@@ -353,6 +350,7 @@ def cutflow_features(
         normalized_trig_weight,
         normalized_rb_weight,
         normalized_top_pt_weight,
+        normalized_bfrag_weight,
     },
     require_producers={"kinFitMatch"},
     # whether weight producers should be added and called
@@ -394,6 +392,8 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[normalized_pu_weights](events, **kwargs)
 
         events = self[normalized_trig_weight](events, **kwargs)
+
+        events = self[normalized_bfrag_weight](events, **kwargs)
 
         shift = kwargs["task"].shift
 

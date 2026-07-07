@@ -43,6 +43,7 @@ from alljets.production.dctr_hdamp import dctr_hdamp
 from alljets.production.ps_weights import ps_weights
 from alljets.production.trig_cor_weight import trig_weights
 from alljets.production.dctr_rb import dctr_rb
+from alljets.production.bfrag_weights import bfrag_weights
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -707,5 +708,76 @@ def normalized_top_pt_weight_setup(self: Producer, task: law.Task, inputs: dict,
         total_weight = stats.get(sum_key)
 
         self.average_top_pt_weights[weight_name] = (
+            safe_div(total_weight, total_events) if total_weight is not None else 1.0
+        )
+
+
+@producer(
+    uses={bfrag_weights.PRODUCES},
+    mc_only=True,
+)
+def normalized_bfrag_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+
+    for weight_name in self.bfrag_weight_names:
+
+        avg = self.average_bfrag_weights.get(weight_name, 1.0)
+
+        normalized = events[weight_name] / avg
+
+        events = set_ak_column_f32(events, f"normalized_{weight_name}", normalized)
+
+    return events
+
+
+@normalized_bfrag_weight.post_init
+def normalized_bfrag_weight_post_init(self: Producer, task: law.Task, **kwargs) -> None:
+
+    self.bfrag_weight_names = {
+        str(weight_name)
+        for weight_name in self[bfrag_weights].produced_columns
+        if (
+            str(weight_name).startswith("bfrag_") and "weight" in str(weight_name) and
+            (
+                task.global_shift_inst.is_nominal or not
+                str(weight_name).endswith(("_up", "_down"))
+            )
+        )
+    }
+
+    self.uses.clear()
+    self.uses |= self.bfrag_weight_names
+
+    self.produces |= {f"normalized_{w}" for w in self.bfrag_weight_names}
+
+
+@normalized_bfrag_weight.requires
+def normalized_bfrag_weight_requires(self: Producer, task: law.Task, reqs: dict, **kwargs) -> None:
+    from columnflow.tasks.selection import MergeSelectionStats
+
+    reqs["selection_stats"] = MergeSelectionStats.req_different_branching(
+        task,
+        branch=-1 if task.is_workflow() else 0,
+    )
+
+
+@normalized_bfrag_weight.setup
+def normalized_bfrag_weight_setup(self: Producer, task: law.Task, inputs: dict, **kwargs) -> None:
+
+    stats = task.cached_value(
+        key="selection_stats",
+        func=lambda: inputs["selection_stats"]["stats"].load(formatter="json"),
+    )
+
+    self.average_bfrag_weights = {}
+
+    total_events = stats.get("num_events", 1.0)
+
+    for weight_name in self.bfrag_weight_names:
+
+        sum_key = f"sum_{weight_name}"
+
+        total_weight = stats.get(sum_key)
+
+        self.average_bfrag_weights[weight_name] = (
             safe_div(total_weight, total_events) if total_weight is not None else 1.0
         )

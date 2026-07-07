@@ -1085,6 +1085,53 @@ def add_config(
         },
     )
 
+    # bfrag weight shifts (application as uncertainty)
+    cfg.add_shift(name="bfrag_up", id=1308, type="shape")
+    cfg.add_shift(name="bfrag_down", id=1309, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag",
+        {
+            "bfrag_weight": "bfrag_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_weight_{direction}",
+        },
+    )
+
+    # bfrag Lund plane weight shifts (application as uncertainty)
+    cfg.add_shift(name="bfrag_lund_up", id=1310, type="shape")
+    cfg.add_shift(name="bfrag_lund_down", id=1311, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag_lund",
+        {
+            "bfrag_weight": "bfrag_lund_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_lund_weight_{direction}",
+        },
+    )
+
+    # bfrag Peterson (application as uncertainty)
+    cfg.add_shift(name="bfrag_peterson_up", id=1312, type="shape")
+    cfg.add_shift(name="bfrag_peterson_down", id=1313, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag_peterson",
+        {
+            "bfrag_weight": "bfrag_peterson_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_peterson_weight_{direction}",
+        },
+    )
+
+    # bfrag rel (up / down shifts from bfrag Producer divided by nominal)
+    cfg.add_shift(name="bfrag_rel_up", id=1314, type="shape")
+    cfg.add_shift(name="bfrag_rel_down", id=1315, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag_rel",
+        {
+            "bfrag_weight": "bfrag_rel_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_rel_weight_{direction}",
+        },
+    )
     ################################################################################################
     # external files
     ################################################################################################
@@ -1264,6 +1311,8 @@ def add_config(
             "normalized_fsr_weight": get_shifts("fsr*"),
             "normalized_isr_weight": get_shifts("isr*"),
             "normalized_hdamp_weight": get_shifts("hdamp_dctr"),
+            "normalized_rb_weight": get_shifts("rb_dctr"),
+            "normalized_bfrag_weight": get_shifts("bfrag*"),
         },
     )
 
@@ -1272,7 +1321,6 @@ def add_config(
         if dataset.has_tag("ttbar"):
             dataset.x.event_weights = {
                 "normalized_top_pt_weight": get_shifts("top_pt"),
-                "normalized_rb_weight": get_shifts("rb_dctr"),
             }
 
     # define per-dataset event weights
