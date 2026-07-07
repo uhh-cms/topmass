@@ -402,7 +402,7 @@ def add_config(
             "Jet": {
                 "campaign": jec_campaign,
                 "version": jec_version,
-                "data_per_era": True,
+                "data_per_era": False,
                 "jet_type": jet_type,
                 "levels": ["L1FastJet", "L2Relative", "L2L3Residual", "L3Absolute"],
                 "levels_for_type1_met": ["L1FastJet"],
@@ -1156,7 +1156,7 @@ def add_config(
             run=2,
             era=f"{year}{corr_postfix}-UL",
             vnano=9,
-            snapshot=CATSnapshot(btv="latest", egm="latest", jme="2025-04-11", lum="latest", muo="latest", tau="latest"),
+            snapshot=CATSnapshot(btv="latest", egm="latest", jme="2026-04-22", lum="latest", muo="latest", tau="latest"),
         )
 
     # common files
