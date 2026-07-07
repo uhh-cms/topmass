@@ -188,12 +188,12 @@ law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd  --vers
 
 To create the 2D datacards:
 ```
-law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling_2D  --version v1_TopMass  --configs 2017_v9  --selector default --cf.MergeHistograms-workflow htcondor --cf.MergeHistograms-pilot --htcondor-memory 1700MB --htcondor-runtime 1h --workers 1000 --tasks-per-job 20
+law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling  --version v1_TopMass  --configs 2017_v9  --selector default --cf.MergeHistograms-workflow htcondor --cf.MergeHistograms-pilot --htcondor-memory 1700MB --htcondor-runtime 1h --workers 1000 --tasks-per-job 20
 ```
 
 Check for missing input files:
 ```
-law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling_2D   --version v1_Analysis  --configs 2017_v9  --selector default --producer default,kinFitMatch --workers 8 --tasks-per-job 10 --print-status 4 | grep -A 4 "4 >" | grep -B 3 "absent"
+law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling   --version v1_Analysis  --configs 2017_v9  --selector default --producer default,kinFitMatch --workers 8 --tasks-per-job 10 --print-status 4 | grep -A 4 "4 >" | grep -B 3 "absent"
 ```
 
 The produced datacard and shapes files can be copied and further processed using the combine tool in the corresponding repository: https://gitlab.cern.ch/cms-analysis/top/massrun2aj/datacards
