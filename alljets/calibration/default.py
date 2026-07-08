@@ -10,9 +10,6 @@ from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column, optional_column as optional
 from columnflow.calibration.cms.jets import jec, jer
 from columnflow.production.cms.mc_weight import mc_weight
-from columnflow.production.cms.seeds import (
-    deterministic_event_seeds, deterministic_jet_seeds, deterministic_seeds,
-)
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -20,48 +17,11 @@ ak = maybe_import("awkward")
 
 @calibrator(
     uses={
-        deterministic_seeds,
-        "Jet.pt", "Jet.mass", "Jet.eta", "Jet.phi",
-    },
-    produces={
-        deterministic_seeds,
-        "Jet.pt", "Jet.mass",
-        "Jet.pt_jec_up", "Jet.mass_jec_up",
-        "Jet.pt_jec_down", "Jet.mass_jec_down",
-    },
-)
-def fake(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
-    # a) "correct" Jet.pt by scaling four momenta by 1.1 (pt<30) or 0.9 (pt<=30)
-    # b) add 4 new columns faking the effect of JEC variations
-
-    # add deterministic seeds that could (e.g.) be used for smearings
-    events = self[deterministic_seeds](events, **kwargs)
-
-    # a)
-    pt_mask = ak.flatten(events.Jet.pt < 30)
-    n_jet_pt = np.asarray(ak.flatten(events.Jet.pt))
-    n_jet_mass = np.asarray(ak.flatten(events.Jet.mass))
-    n_jet_pt[pt_mask] *= 1.1
-    n_jet_pt[~pt_mask] *= 0.9
-    n_jet_mass[pt_mask] *= 1.1
-    n_jet_mass[~pt_mask] *= 0.9
-
-    # b)
-    events = set_ak_column(events, "Jet.pt_jec_up", events.Jet.pt * 1.05)
-    events = set_ak_column(events, "Jet.mass_jec_up", events.Jet.mass * 1.05)
-    events = set_ak_column(events, "Jet.pt_jec_down", events.Jet.pt * 0.95)
-    events = set_ak_column(events, "Jet.mass_jec_down", events.Jet.mass * 0.95)
-
-    return events
-
-
-@calibrator(
-    uses={
-        mc_weight, # deterministic_event_seeds, deterministic_jet_seeds,
+        mc_weight,
         optional("Jet.hadronFlavour"), optional("Jet.partonFlavour"),
     },
     produces={
-        mc_weight, # deterministic_event_seeds, deterministic_jet_seeds,
+        mc_weight,
     },
 )
 def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
@@ -69,12 +29,6 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
 
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
-
-    # seed producers
-    # !! as this is the first step, the object collections should still be pt-sorted,
-    # !! so no manual sorting needed here (but necessary if, e.g., jec is applied before)
-    # events = self[deterministic_event_seeds](events, **kwargs)
-    # events = self[deterministic_jet_seeds](events, **kwargs)
 
     # data/mc specific calibrations
     if self.dataset_inst.is_data:
@@ -88,12 +42,10 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
             # full jec and jer
             events = self[self.jec_full_cls](events, **kwargs)
             events = self[self.jer_jec_full_cls](events, **kwargs)
-            # events = self[self.deterministic_jer_jec_full_cls](events, **kwargs)
-
         else:
             # nominal jec and jer
             events = self[self.jec_nominal_cls](events, **kwargs)
-            events = self[self.deterministic_jec_jec_nominal_cls](
+            events = self[self.jer_jec_nominal_cls](
                 events, **kwargs)
 
     # apply flavour corrections only to the correct columns
