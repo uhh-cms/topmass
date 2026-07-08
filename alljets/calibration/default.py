@@ -57,11 +57,11 @@ def fake(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
 
 @calibrator(
     uses={
-        mc_weight, deterministic_event_seeds, deterministic_jet_seeds,
+        mc_weight, # deterministic_event_seeds, deterministic_jet_seeds,
         optional("Jet.hadronFlavour"), optional("Jet.partonFlavour"),
     },
     produces={
-        mc_weight, deterministic_event_seeds, deterministic_jet_seeds,
+        mc_weight, # deterministic_event_seeds, deterministic_jet_seeds,
     },
 )
 def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
@@ -73,8 +73,8 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     # seed producers
     # !! as this is the first step, the object collections should still be pt-sorted,
     # !! so no manual sorting needed here (but necessary if, e.g., jec is applied before)
-    events = self[deterministic_event_seeds](events, **kwargs)
-    events = self[deterministic_jet_seeds](events, **kwargs)
+    # events = self[deterministic_event_seeds](events, **kwargs)
+    # events = self[deterministic_jet_seeds](events, **kwargs)
 
     # data/mc specific calibrations
     if self.dataset_inst.is_data:
@@ -87,8 +87,9 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
         if task.global_shift_inst.is_nominal:
             # full jec and jer
             events = self[self.jec_full_cls](events, **kwargs)
-            events = self[self.deterministic_jer_jec_full_cls](
-                events, **kwargs)
+            events = self[self.jer_jec_full_cls](events, **kwargs)
+            # events = self[self.deterministic_jer_jec_full_cls](events, **kwargs)
+
         else:
             # nominal jec and jer
             events = self[self.jec_nominal_cls](events, **kwargs)
@@ -165,12 +166,10 @@ def default_init(self: Calibrator, **kwargs) -> None:
             "raw_met_name": raw_met_name,
         })
         # versions of jer that use the first random number from deterministic_seeds
-        add_calib_cls("deterministic_jer_jec_full", jer, cls_dict={
-            "deterministic_seed_index": 0,
+        add_calib_cls("jer_jec_full", jer, cls_dict={
             "met_name": met_name,
         })
-        add_calib_cls("deterministic_jec_jec_nominal", jer, cls_dict={
-            "deterministic_seed_index": 0,
+        add_calib_cls("jer_jec_nominal", jer, cls_dict={
             "met_name": met_name,
             "jec_uncertainty_sources": [],
         })
@@ -181,15 +180,15 @@ def default_init(self: Calibrator, **kwargs) -> None:
     # store references to classes
     self.jec_full_cls = self.config_inst.x.calib_jec_full_cls
     self.jec_nominal_cls = self.config_inst.x.calib_jec_nominal_cls
-    self.deterministic_jer_jec_full_cls = self.config_inst.x.calib_deterministic_jer_jec_full_cls
-    self.deterministic_jec_jec_nominal_cls = self.config_inst.x.calib_deterministic_jec_jec_nominal_cls
+    self.jer_jec_full_cls = self.config_inst.x.calib_jer_jec_full_cls
+    self.jer_jec_nominal_cls = self.config_inst.x.calib_jer_jec_nominal_cls
 
     # collect derived calibrators and add them to the calibrator uses and produces
     derived_calibrators = {
         self.jec_full_cls,
         self.jec_nominal_cls,
-        self.deterministic_jer_jec_full_cls,
-        self.deterministic_jec_jec_nominal_cls,
+        self.jer_jec_full_cls,
+        self.jer_jec_nominal_cls,
     }
     self.uses |= derived_calibrators
     self.produces |= derived_calibrators

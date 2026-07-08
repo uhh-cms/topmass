@@ -476,6 +476,7 @@ def add_config(
                 "campaign": jer_campaign,
                 "version": jer_version,
                 "jet_type": jet_type,
+                "use_jer_tool": True,
             },
         },
     )
@@ -1235,6 +1236,8 @@ def add_config(
     # Using the script Merge_BTV_correction_files.py provided from Marcel
     add_external("btag_wp_sf_corr", (f"{central_mtop_dir}/BTV_files/deepJet_{year}_merged.json.gz", "v1"))
 
+    # JER smearing file
+    add_external("jer_tool", (f"{central_mtop_dir}/JER/jer_smear.json.gz", "v1"))
     ################################################################################################
     # reductions
     ################################################################################################
