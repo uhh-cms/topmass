@@ -58,8 +58,11 @@ def add_parameters(im: InferenceModel) -> None:
     for config_inst in im.config_insts:
         lumi = config_inst.x.luminosity
         for unc_name in lumi.uncertainties:
+            name = unc_name
+            if name.startswith("lumi_13TeV_20"):
+                name = name.replace("_13TeV", "")
             im.add_parameter(
-                unc_name,
+                name,
                 type=ParameterType.rate_gauss,
                 effect=lumi.get(names=unc_name, direction=("down", "up"), factor=True),
                 process=["TT"],
@@ -69,6 +72,7 @@ def add_parameters(im: InferenceModel) -> None:
     experimental = {
         "CMS_btag_fixedWP_bc_correlated": "btag_heavy_cor",
         "CMS_btag_fixedWP_light_correlated": "btag_light_cor",
+        "CMS_res_j_13TeV": "jer",
     }
 
     experimental_uncor = {
@@ -76,7 +80,6 @@ def add_parameters(im: InferenceModel) -> None:
         "CMS_trig_htsixjets2btag": "trig",
         "CMS_btag_fixedWP_bc_uncorrelated": "btag_heavy_uncor",
         "CMS_btag_fixedWP_light_uncorrelated": "btag_light_uncor",
-        "CMS_res_j_13TeV": "jer",
     }
 
     for jec_unc in im.config_insts[0].x.jec.Jet.uncertainty_sources:
