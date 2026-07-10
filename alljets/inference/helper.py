@@ -108,8 +108,6 @@ def add_parameters(im: InferenceModel) -> None:
         "ps_Recoil": "tune_rtt",
     }
 
-
-
     splittings = ("G2GG", "G2QQ", "Q2QG", "X2XG")
     for var in [f"{a}_{b}_{c}" for a in ["isr", "fsr"] for b in splittings for c in ["muR", "cNS"]]:
         modelling["ps_" + var] = var
@@ -141,7 +139,7 @@ def add_parameters(im: InferenceModel) -> None:
                 config_data={
                     config_inst.name: im.parameter_config_spec(
                         shift_source=shift_name,
-                    )
+                    ),
                 },
                 group=group,
             )
