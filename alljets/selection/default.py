@@ -26,7 +26,6 @@ from columnflow.production.processes import process_ids
 from columnflow.production.categories import category_ids
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.selection import SelectionResult, Selector, selector
-from columnflow.columnar_util import IF_DATASET_HAS_TAG
 from columnflow.selection.cms.json_filter import json_filter
 from columnflow.selection.cms.met_filters import met_filters
 
@@ -35,7 +34,6 @@ from columnflow.selection.cms.jets import jet_veto_map
 from columnflow.production.cms.pileup import pu_weights_from_columnflow
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.scale import murmuf_weights
-from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 from columnflow.production.cms.top_pt_weight import top_pt_weight
@@ -76,7 +74,6 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         gen_top_lookup,
         process_ids,
         increment_stats,
-        deterministic_seeds,
         incl_category_ids,
         mc_weight,
         pdf_weights,
@@ -99,7 +96,6 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         jet_selection,
         gen_top_lookup,
         process_ids,
-        deterministic_seeds,
         fill_btag_wp_count_hists,
         incl_category_ids,
         mc_weight,
@@ -116,8 +112,6 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         "gen_top.*.{eta,phi,pt,mass,pdgId}",
         "gen_top",
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        IF_DATASET_HAS_TAG("ttbar")("pdf_hessian_*_weight_{up,down}"),
-        IF_DATASET_HAS_TAG("ttbar")("pdf_alphas_weight_{up,down}"),
         IF_RUN_2_2018("HLT.PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94"),
         IF_RUN_2_2018("HLT.PFHT380_SixPFJet32"),
         IF_RUN_2_2018("HLT.PFHT400_SixPFJet32"),
@@ -213,9 +207,8 @@ def default(
         results.steps.LeadingSix20BTag
     )
 
-    # create process ids, deterministic seeds, and inclusive category ids for cutflow
+    # create process ids and inclusive category ids for cutflow
     events = self[process_ids](events, **kwargs)
-    events = self[deterministic_seeds](events, **kwargs)
     events = self[incl_category_ids](events, **kwargs)
 
     # add the mc weight and other weights for MC datasets
@@ -294,11 +287,12 @@ def default(
         }
 
         # mur/muf nominal
-        for v in (("",) if skip_shifts else ("", "_up", "_down")):
-            weight_map.update({
-                f"sum_murmuf_weight{v}": (events[f"murmuf_weight{v}"], Ellipsis),
-                f"sum_murmuf_weight{v}_selected": (events[f"murmuf_weight{v}"], results.event),
-            })
+        for name in ("murmuf_weight", "mur_weight", "muf_weight"):
+            for v in (("",) if skip_shifts else ("", "_up", "_down")):
+                weight_map.update({
+                    f"sum_{name}{v}": (events[f"{name}{v}"], Ellipsis),
+                    f"sum_{name}{v}_selected": (events[f"{name}{v}"], results.event),
+                })
 
         # trigger weights
         for v in (("",) if skip_shifts else ("", "_up", "_down")):
@@ -396,3 +390,14 @@ def default(
     )
 
     return events, results
+
+
+@default.post_init
+def default_post_init(self: Selector, task: law.Task, **kwargs) -> None:
+
+    shift = task.global_shift_inst
+    is_nominal = ((shift.name == "nominal") and self.dataset_inst.has_tag("tt"))
+
+    if is_nominal:
+        self.produces.add("pdf_hessian_*_weight_{up,down}")
+        self.produces.add("pdf_alphas_weight_{up,down}")

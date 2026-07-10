@@ -24,7 +24,6 @@ from columnflow.production.cms.pileup import pu_weights_from_columnflow
 from columnflow.selection.cms.jets import jet_veto_map
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.scale import murmuf_weights
-from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 from columnflow.selection.cms.json_filter import json_filter
@@ -56,7 +55,6 @@ hist = maybe_import("hist")
         met_filters,
         process_ids,
         increment_stats,
-        deterministic_seeds,
         fill_btag_wp_count_hists,
         gen_top_lookup,
         mc_weight,
@@ -188,7 +186,6 @@ def trigger(
 
     # create process ids and deterministic seeds
     events = self[process_ids](events, **kwargs)
-    events = self[deterministic_seeds](events, **kwargs)
 
     # add the mc weight and other weights for MC datasets
     if self.dataset_inst.is_mc:
@@ -248,11 +245,12 @@ def trigger(
         }
 
         # mur/muf nominal
-        for v in (("",) if skip_shifts else ("", "_up", "_down")):
-            weight_map.update({
-                f"sum_murmuf_weight{v}": (events[f"murmuf_weight{v}"], Ellipsis),
-                f"sum_murmuf_weight{v}_selected": (events[f"murmuf_weight{v}"], results.event),
-            })
+        for name in ("murmuf_weight", "mur_weight", "muf_weight"):
+            for v in (("",) if skip_shifts else ("", "_up", "_down")):
+                weight_map.update({
+                    f"sum_{name}{v}": (events[f"{name}{v}"], Ellipsis),
+                    f"sum_{name}{v}_selected": (events[f"{name}{v}"], results.event),
+                })
 
         # pileup weights from columnflow
         for v in (("",) if skip_shifts else ("", "_minbias_xs_up", "_minbias_xs_down")):
