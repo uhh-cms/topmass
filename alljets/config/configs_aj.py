@@ -502,54 +502,8 @@ def add_config(
             "tight": {"2016APV": 0.8819, "2016": 0.8767, "2017": 0.7738, "2018": 0.7665}[btag_key],
         },
     })
-    # JEC uncertainty sources propagated to btag scale factors
-    # (names derived from contents in BTV correctionlib file)
-    cfg.x.btag_sf_jec_sources = [
-        "",  # same as "Total"
-        "Absolute",
-        "AbsoluteMPFBias",
-        "AbsoluteScale",
-        "AbsoluteStat",
-        f"Absolute_{year}",
-        "BBEC1",
-        f"BBEC1_{year}",
-        "EC2",
-        f"EC2_{year}",
-        "FlavorQCD",
-        "Fragmentation",
-        "HF",
-        f"HF_{year}",
-        "PileUpDataMC",
-        "PileUpPtBB",
-        "PileUpPtEC1",
-        "PileUpPtEC2",
-        "PileUpPtHF",
-        "PileUpPtRef",
-        "RelativeBal",
-        "RelativeFSR",
-        "RelativeJEREC1",
-        "RelativeJEREC2",
-        "RelativeJERHF",
-        "RelativePtBB",
-        "RelativePtEC1",
-        "RelativePtEC2",
-        "RelativePtHF",
-        "RelativeSample",
-        f"RelativeSample_{year}",
-        "RelativeStatEC",
-        "RelativeStatFSR",
-        "RelativeStatHF",
-        "SinglePionECAL",
-        "SinglePionHCAL",
-        "TimePtEta",
-    ]
 
     # https://btv-wiki.docs.cern.ch/PerformanceCalibration/SFUncertaintiesAndCorrelations/#ak4-working-point-based-sfs-fixedwp-sfs
-    # name of the btag_sf correction set and jec uncertainties to propagate through
-    # For the b/c jets consider deepJets_comb (QCD + ttbar enriched)
-    # For the light jets SF, should use deepJet_incl
-
-    cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
     # ---------------------------------------------------------
     # BTag WP COUNT CONFIG
     # ---------------------------------------------------------
@@ -705,18 +659,6 @@ def add_config(
                 f"{cfg.x.met_name}.phi": f"{cfg.x.met_name}.phi_{{name}}",
             },
         )
-        # TODO: check the JEC de/correlation across years and the interplay with btag weights
-        if ("" if jec_source == "Total" else jec_source) in cfg.x.btag_sf_jec_sources:
-            add_shift_aliases(
-                cfg,
-                f"jec_{jec_source}",
-                {
-                    "normalized_btag_deepjet_weight": "normalized_btag_deepjet_weight_{name}",
-                    "normalized_njet_btag_deepjet_weight": "normalized_njet_btag_deepjet_weight_{name}",
-                    "normalized_btag_pnet_weight": "normalized_btag_pnet_weight_{name}",
-                    "normalized_njet_btag_pnet_weight": "normalized_njet_btag_pnet_weight_{name}",
-                },
-            )
 
     # JER shift
     cfg.add_shift(name="jer_up", id=6000, type="shape", tags={"jer"})
@@ -830,18 +772,6 @@ def add_config(
             },
         )
 
-    # ISR shifts using the default global scale scheme
-    # cfg.add_shift(name="isr_up", id=1010, type="shape", tags="isr")
-    # cfg.add_shift(name="isr_down", id=1011, type="shape", tags="isr")
-    # add_shift_aliases(
-    #     cfg,
-    #     "isr",
-    #     {
-    #         "isr_weight": "isr_weight_{direction}",
-    #         "normalized_isr_weight": "normalized_isr_weight_{direction}",
-    #     },
-    # )
-
     # ISR shifts for decorrelated variations
     cfg.add_shift(name="isr_G2GG_muR_up", id=1016, type="shape", tags="isr")
     cfg.add_shift(name="isr_G2GG_muR_down", id=1017, type="shape", tags="isr")
@@ -930,18 +860,6 @@ def add_config(
             "normalized_isr_weight": "normalized_isr_weight_X2XG_cNS_{direction}",
         },
     )
-
-    # FSR shifts using the default global scale scheme
-    # cfg.add_shift(name="fsr_up", id=1110, type="shape", tags="fsr")
-    # cfg.add_shift(name="fsr_down", id=1111, type="shape", tags="fsr")
-    # add_shift_aliases(
-    #     cfg,
-    #     "fsr",
-    #     {
-    #         "fsr_weight": "fsr_weight_{direction}",
-    #         "normalized_fsr_weight": "normalized_fsr_weight_{direction}",
-    #     },
-    # )
 
     # FSR shifts for decorrelated variations
     cfg.add_shift(name="fsr_G2GG_muR_up", id=1100, type="shape", tags="fsr")
