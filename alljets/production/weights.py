@@ -88,7 +88,7 @@ def normalized_murmuf_weight_post_init(self: Producer, task: law.Task, **kwargs)
         str(weight_name)
         for weight_name in self[murmuf_weights].produced_columns
         if (
-            str(weight_name).startswith("murmuf_weight") and
+            str(weight_name).startswith(("mur_weight", "muf_weight", "murmuf_weight")) and
             (
                 task.global_shift_inst.is_nominal or not str(weight_name).endswith(("_up", "_down"))
             )
