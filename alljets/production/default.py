@@ -492,6 +492,8 @@ def trigSF_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
         events = self[normalized_rb_weight](events, **kwargs)
 
+        events = self[normalized_bfrag_weight](events, **kwargs)
+
         if self.dataset_inst.has_tag("ttbar"):
             events = self[normalized_top_pt_weight](events, **kwargs)
 
