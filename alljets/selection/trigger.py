@@ -36,6 +36,7 @@ from alljets.production.default import cutflow_features
 from alljets.production.dctr_hdamp import dctr_hdamp
 from alljets.production.ps_weights import ps_weights
 from alljets.production.dctr_rb import dctr_rb
+from alljets.production.bfrag_weights import bfrag_weights
 from alljets.utils import IF_RUN_2_2018
 
 np = maybe_import("numpy")
@@ -64,6 +65,7 @@ hist = maybe_import("hist")
         dctr_hdamp,
         ps_weights,
         dctr_rb,
+        bfrag_weights,
         top_pt_weight,
         "TrigObj*",
         "PV.npvsGood",
@@ -84,6 +86,7 @@ hist = maybe_import("hist")
         dctr_hdamp,
         dctr_rb,
         ps_weights,
+        bfrag_weights,
         top_pt_weight,
         "HLT.PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
         IF_RUN_2_2018("HLT.PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94"),
@@ -202,6 +205,8 @@ def trigger(
         events = self[pdf_weights](events, **kwargs)
 
         events = self[dctr_rb](events, **kwargs)
+
+        events = self[bfrag_weights](events, **kwargs)
 
         if self.dataset_inst.has_tag("ttbar"):
             events = self[top_pt_weight](events, **kwargs)

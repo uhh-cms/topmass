@@ -425,6 +425,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         normalized_pu_weights,
         normalized_top_pt_weight,
         normalized_rb_weight,
+        normalized_bfrag_weight,
         "Jet.*",
     },
     produces={
@@ -440,6 +441,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         normalized_pu_weights,
         normalized_top_pt_weight,
         normalized_rb_weight,
+        normalized_bfrag_weight,
     },
     produce_weights=True,
     mode="production",
