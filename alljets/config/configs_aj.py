@@ -260,7 +260,8 @@ def add_config(
     # (used in cutflow tasks)
     cfg.x.selector_step_groups = {
         "cutflow_sig": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
-        "default": [],
+        "default": ["json", "met_filter", "pv", "SingalOrBkgTrigger",
+                    "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
         "ht_trigger": ["json", "met_filter", "pv", "BaseTrigger", "Lepton_Veto", "jet", "SixJets", "BTag"],
         "trigjet6_pt": ["json", "met_filter", "pv", "BaseTrigger", "Lepton_Veto", "HT", "BTag"],
         "trig_eff_bjet": ["All", "BaseTrigger", "jet", "HT"],
