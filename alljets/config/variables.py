@@ -1728,8 +1728,8 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="seljet1_pt_coarse",
-        expression="SelectedJets.pt[:,0]",
+        name="kinfitjet1_pt_coarse",
+        expression="KinFitJets.pt[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(15, 50.0, 340.0),
         unit="GeV",
@@ -1737,16 +1737,16 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="seljet1_eta_coarse",
-        expression="SelectedJets.eta[:,0]",
+        name="kinfitjet1_eta_coarse",
+        expression="KinFitJets.eta[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 1 $\eta$",
     )
     add_variable(
         cfg,
-        name="seljet2_pt_coarse",
-        expression="SelectedJets.pt[:,1]",
+        name="kinfitjet2_pt_coarse",
+        expression="KinFitJets.pt[:,1]",
         null_value=EMPTY_FLOAT,
         binning=(20, 50.0, 500.0),
         unit="GeV",
@@ -1754,16 +1754,16 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="seljet2_eta_coarse",
-        expression="SelectedJets.eta[:,1]",
+        name="kinfitjet2_eta_coarse",
+        expression="KinFitJets.eta[:,1]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 2 $\eta$",
     )
     add_variable(
         cfg,
-        name="seljet3_pt_coarse",
-        expression="SelectedJets.pt[:,2]",
+        name="kinfitjet3_pt_coarse",
+        expression="KinFitJets.pt[:,2]",
         null_value=EMPTY_FLOAT,
         binning=(15, 40.0, 190),
         unit="GeV",
@@ -1771,16 +1771,16 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="seljet3_eta_coarse",
-        expression="SelectedJets.eta[:,2]",
+        name="kinfitjet3_eta_coarse",
+        expression="KinFitJets.eta[:,2]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 3 $\eta$",
     )
     add_variable(
         cfg,
-        name="seljet4_pt_coarse",
-        expression="SelectedJets.pt[:,3]",
+        name="kinfitjet4_pt_coarse",
+        expression="KinFitJets.pt[:,3]",
         null_value=EMPTY_FLOAT,
         binning=(15, 40.0, 140.0),
         unit="GeV",
@@ -1788,16 +1788,16 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="seljet4_eta_coarse",
-        expression="SelectedJets.eta[:,3]",
+        name="kinfitjet4_eta_coarse",
+        expression="KinFitJets.eta[:,3]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 4 $\eta$",
     )
     add_variable(
         cfg,
-        name="seljet5_pt_coarse",
-        expression="SelectedJets.pt[:,4]",
+        name="kinfitjet5_pt_coarse",
+        expression="KinFitJets.pt[:,4]",
         null_value=EMPTY_FLOAT,
         binning=(16, 35.0, 115.0),
         unit="GeV",
@@ -1805,16 +1805,16 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="seljet5_eta_coarse",
-        expression="SelectedJets.eta[:,4]",
+        name="kinfitjet5_eta_coarse",
+        expression="KinFitJets.eta[:,4]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 5 $\eta$",
     )
     add_variable(
         cfg,
-        name="seljet6_pt_coarse",
-        expression="SelectedJets.pt[:,5]",
+        name="kinfitjet6_pt_coarse",
+        expression="KinFitJets.pt[:,5]",
         null_value=EMPTY_FLOAT,
         binning=(17, 37.5, 80.0),
         unit="GeV",
@@ -1822,8 +1822,8 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
-        name="seljet6_eta_coarse",
-        expression="SelectedJets.eta[:,5]",
+        name="kinfitjet6_eta_coarse",
+        expression="KinFitJets.eta[:,5]",
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 6 $\eta$",
