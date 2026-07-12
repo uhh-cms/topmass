@@ -687,6 +687,30 @@ def add_config(
         },
     )
 
+    # Renormalization shift
+    cfg.add_shift(name="mur_up", id=112, type="shape")
+    cfg.add_shift(name="mur_down", id=113, type="shape")
+    add_shift_aliases(
+        cfg,
+        "mur",
+        {
+            "mur_weight": "mur_weight_{direction}",
+            "normalized_mur_weight": "normalized_mur_weight_{direction}",
+        },
+    )
+
+    # Renormalization and scale factor shifts
+    cfg.add_shift(name="muf_up", id=114, type="shape")
+    cfg.add_shift(name="muf_down", id=115, type="shape")
+    add_shift_aliases(
+        cfg,
+        "muf",
+        {
+            "muf_weight": "muf_weight_{direction}",
+            "normalized_muf_weight": "normalized_muf_weight_{direction}",
+        },
+    )
+
     # Trigger shifts
     cfg.add_shift(name="trig_up", id=120, type="shape", tags="trig")
     cfg.add_shift(name="trig_down", id=121, type="shape", tags="trig")
@@ -1229,6 +1253,8 @@ def add_config(
             "normalized_trig_weight": get_shifts("trig"),
             "normalized_pdf_weight": get_shifts("pdf", "alphas", "hessian_*"),
             "normalized_murmuf_weight": get_shifts("murmuf"),
+            "normalized_mur_weight": get_shifts("mur"),
+            "normalized_muf_weight": get_shifts("muf"),
             "normalized_pu_weight": get_shifts("pu_weight_minbias_xs"),
             "normalized_fsr_weight": get_shifts("fsr*"),
             "normalized_isr_weight": get_shifts("isr*"),
