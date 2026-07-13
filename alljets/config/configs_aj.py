@@ -478,10 +478,19 @@ def add_config(
                 "version": jer_version,
                 "jet_type": jet_type,
                 "use_jer_tool": True,
+                "uncertainty_regions": {
+                    # |eta| < 1.93, single pt bin (0, inf)
+                    "EtaLow": (
+                        lambda jets: abs(jets.eta) < 1.93
+                    ),
+                    # 1.93 <= |eta| < 2.5, single pt bin (0, inf)
+                    "EtaHigh": (
+                        lambda jets: (abs(jets.eta) >= 1.93) & (abs(jets.eta) < 2.5)
+                    ),
+                },
             },
         },
     )
-
     ################################################################################################
     # b tagging
     ################################################################################################
@@ -661,12 +670,40 @@ def add_config(
             },
         )
 
-    # JER shift
-    cfg.add_shift(name="jer_up", id=6000, type="shape", tags={"jer"})
-    cfg.add_shift(name="jer_down", id=6001, type="shape", tags={"jer"})
+    # # JER shift
+    # cfg.add_shift(name="jer_up", id=6000, type="shape", tags={"jer"})
+    # cfg.add_shift(name="jer_down", id=6001, type="shape", tags={"jer"})
+    # add_shift_aliases(
+    #     cfg,
+    #     "jer",
+    #     {
+    #         "Jet.pt": "Jet.pt_{name}",
+    #         "Jet.mass": "Jet.mass_{name}",
+    #         f"{cfg.x.met_name}.pt": f"{cfg.x.met_name}.pt_{{name}}",
+    #         f"{cfg.x.met_name}.phi": f"{cfg.x.met_name}.phi_{{name}}",
+    #     },
+    # )
+
+    # JER shift for |eta| < 1.93
+    cfg.add_shift(name="jer_EtaLow_up", id=6000, type="shape", tags={"jer"})
+    cfg.add_shift(name="jer_EtaLow_down", id=6001, type="shape", tags={"jer"})
     add_shift_aliases(
         cfg,
-        "jer",
+        "jer_EtaLow",
+        {
+            "Jet.pt": "Jet.pt_{name}",
+            "Jet.mass": "Jet.mass_{name}",
+            f"{cfg.x.met_name}.pt": f"{cfg.x.met_name}.pt_{{name}}",
+            f"{cfg.x.met_name}.phi": f"{cfg.x.met_name}.phi_{{name}}",
+        },
+    )
+
+    # JER shift for 1.93 <= |eta| < 2.5
+    cfg.add_shift(name="jer_EtaHigh_up", id=6002, type="shape", tags={"jer"})
+    cfg.add_shift(name="jer_EtaHigh_down", id=6003, type="shape", tags={"jer"})
+    add_shift_aliases(
+        cfg,
+        "jer_EtaHigh",
         {
             "Jet.pt": "Jet.pt_{name}",
             "Jet.mass": "Jet.mass_{name}",

@@ -72,7 +72,8 @@ def add_parameters(im: InferenceModel) -> None:
     experimental = {
         "CMS_btag_fixedWP_bc_correlated": "btag_heavy_cor",
         "CMS_btag_fixedWP_light_correlated": "btag_light_cor",
-        "CMS_res_j_13TeV": "jer",
+        "CMS_res_j_etaLT1p93_13TeV": "jer_EtaLow",
+        "CMS_res_j_etaGE1p93_13TeV": "jer_EtaHigh",
     }
 
     experimental_uncor = {
@@ -83,6 +84,8 @@ def add_parameters(im: InferenceModel) -> None:
     }
 
     for jec_unc in im.config_insts[0].x.jec.Jet.uncertainty_sources:
+        if jec_unc == "PileUpMuZero" or jec_unc == "PileUpEnvelope":
+            continue
         if jec_unc in ["AbsoluteStat", "RelativeJEREC1", "RelativeJEREC2", "RelativePtEC1", "RelativePtEC2",
                        "RelativeSample", "RelativeStatEC", "RelativeStatFSR", "RelativeStatHF", "TimePtEta"]:
             experimental_uncor["CMS_scale_j_" + jec_unc] = "jec_" + jec_unc
@@ -95,7 +98,8 @@ def add_parameters(im: InferenceModel) -> None:
         "pdf_alphas": "alphas",
         "top_pt_reweighting": "top_pt",
         "ps_fragmentation_dctr": "rb_dctr",
-        "QCDscale_ttbar": "murmuf",
+        "QCDscale_ren_ttbar": "mur",
+        "QCDscale_fac_ttbar": "muf",
         "underlying_event": "tune",
     }
 
