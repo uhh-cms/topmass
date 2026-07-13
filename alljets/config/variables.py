@@ -1537,15 +1537,6 @@ def add_variables(cfg: od.Config) -> None:
         unit="GeV",
         x_title=r"$m_{W_{avg}}^{reco}$",
     )
-    add_variable(
-        cfg,
-        name="reco_W_mass_avg_percentile_2D",
-        expression=partial(build_avg_w_mass),
-        aux={"inputs": build_avg_w_mass.inputs},
-        binning=[65.5055, 81.2154, 87.062, 107.03],
-        unit="GeV",
-        x_title=r"$m_{W_{avg}}^{reco}$",
-    )
     build_w1jet.inputs = ["FitW1.{x,y,z,t}"]
     add_variable(
         cfg,
