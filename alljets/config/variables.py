@@ -103,7 +103,7 @@ def add_variables(cfg: od.Config) -> None:
         cfg,
         name="trig_bits",
         expression="trig_bits",
-        binning=(4, -0.5, 3.5),
+        binning=(5, -0.5, 4.5),
         x_title=r"trig bits",
     )
     ###############################################################################
