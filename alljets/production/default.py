@@ -63,6 +63,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         attach_coffea_behavior,
         "TrigJets.{pt,eta,phi,mass,btagDeepFlavB}",
         "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB}",
+        "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB}",
         "event",
         "HLT.*",
 
@@ -110,10 +111,10 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                            ak.sum((events.SelectedJets.btagDeepFlavB >= wp_tight), axis=1), value_type=np.int32)
 
     # Extract max and second max b-tag scores among the SelectedJets (pT >= 40 GeV, |eta| < 2.4)
-    events = set_ak_column(events, "maxbtag", (ak.max(events.SelectedJets.btagDeepFlavB, axis=1)))
+    events = set_ak_column(events, "maxbtag", (ak.max(events.KinFitJets.btagDeepFlavB, axis=1)))
 
     # Insert dummy value for one jet events
-    secmax = ak.sort(events.SelectedJets.btagDeepFlavB, axis=1, ascending=False)
+    secmax = ak.sort(events.KinFitJets.btagDeepFlavB, axis=1, ascending=False)
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
     events = set_ak_column(events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1]))
     return events
