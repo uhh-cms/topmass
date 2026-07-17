@@ -58,11 +58,8 @@ def add_parameters(im: InferenceModel) -> None:
     for config_inst in im.config_insts:
         lumi = config_inst.x.luminosity
         for unc_name in lumi.uncertainties:
-            name = unc_name
-            if name.startswith("lumi_13TeV_20"):
-                name = name.replace("_13TeV", "")
             im.add_parameter(
-                name,
+                unc_name,
                 type=ParameterType.rate_gauss,
                 effect=lumi.get(names=unc_name, direction=("down", "up"), factor=True),
                 process=["TT"],
@@ -93,8 +90,8 @@ def add_parameters(im: InferenceModel) -> None:
             experimental["CMS_scale_j_" + jec_unc] = "jec_" + jec_unc
 
     modelling = {
-        "ps_hdamp": "hdamp",
-        "ps_hdamp_dctr": "hdamp_dctr",
+        "ps_hdamp_sample": "hdamp",
+        "ps_hdamp": "hdamp_dctr",
         "pdf_alphas": "alphas",
         "top_pt_reweighting": "top_pt",
         "ps_fragmentation_dctr": "rb_dctr",
