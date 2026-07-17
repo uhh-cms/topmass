@@ -332,7 +332,8 @@ def add_config(
     # https://cms-talk.web.cern.ch/t/luminosity-in-run2023c/116859/2
     # Run3 Lumis can be calculated with brilcalc tool https://twiki.cern.ch/twiki/bin/view/CMS/BrilcalcQuickStart?rev=15
     # CClub computed this already: https://gitlab.cern.ch/cclubbtautau/AnalysisCore/-/issues/49
-    # Using the new correlation scheme from https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiRecommendationsRun2?extralog=-%20caching%20topic#Luminosity_for_pp_13_TeV_data_20
+    # Using the new correlation scheme from
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiRecommendationsRun2?extralog=-%20caching%20topic#Luminosity_for_pp_13_TeV_data_20
     if year == 2016 and campaign.has_tag("HIPM"):
         cfg.x.luminosity = Number(
             19_500,
@@ -357,7 +358,7 @@ def add_config(
         cfg.x.luminosity = Number(
             37_186,
             {
-                "lumi_13TeV_151617" : 0.0055j,
+                "lumi_13TeV_151617": 0.0055j,
                 "lumi_13TeV_15161718": 0.0061j,
             },
         )
