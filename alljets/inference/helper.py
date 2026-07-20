@@ -95,10 +95,8 @@ def add_parameters(im: InferenceModel) -> None:
         "pdf_alphas": "alphas",
         "top_pt_reweighting": "top_pt",
         "ps_fragmentation_dctr": "rb_dctr",
-        "ps_fragmentation": "bfrag",
-        "ps_fragmentation_lund": "bfrag_lund",
-        "ps_fragmentation_peterson": "bfrag_peterson",
-        "ps_fragmentation_relative": "bfrag_rel",
+        #"ps_fragmentation": "bfrag",
+        "ps_fragmentation": "bfrag_rel",
         "QCDscale_ren_ttbar": "mur",
         "QCDscale_fac_ttbar": "muf",
         "underlying_event": "tune",
@@ -109,6 +107,8 @@ def add_parameters(im: InferenceModel) -> None:
         "ps_CR2": "tune_cr2",
         "ps_ERD": "tune_erdON",
         "ps_Recoil": "tune_rtt",
+        "ps_fragmentation_lund": "bfrag_lund",
+        "ps_fragmentation_peterson": "bfrag_peterson",
     }
 
     splittings = ("G2GG", "G2QQ", "Q2QG", "X2XG")
