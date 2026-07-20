@@ -15,7 +15,6 @@ from columnflow.ml import MLModel
 from columnflow.util import maybe_import, dev_sandbox
 from columnflow.columnar_util import Route, set_ak_column
 
-
 ak = maybe_import("awkward")
 tf = maybe_import("tensorflow")
 
@@ -23,7 +22,6 @@ law.contrib.load("tensorflow")
 
 
 class ExampleModel(MLModel):
-
     # mark the model as accepting only a single config
     single_config = True
 
@@ -63,10 +61,10 @@ class ExampleModel(MLModel):
         return target.load(formatter="tf_keras_model")
 
     def train(
-        self,
-        task: law.Task,
-        input: dict[str, list[dict[str, law.FileSystemFileTarget]]],
-        output: law.FileSystemDirectoryTarget,
+            self,
+            task: law.Task,
+            input: dict[str, list[dict[str, law.FileSystemFileTarget]]],
+            output: law.FileSystemDirectoryTarget,
     ) -> None:
         # define a dummy NN
         x = tf.keras.Input(shape=(2,))
@@ -78,12 +76,12 @@ class ExampleModel(MLModel):
         output.dump(model, formatter="tf_keras_model")
 
     def evaluate(
-        self,
-        task: law.Task,
-        events: ak.Array,
-        models: list[Any],
-        fold_indices: ak.Array,
-        events_used_in_training: bool = False,
+            self,
+            task: law.Task,
+            events: ak.Array,
+            models: list[Any],
+            fold_indices: ak.Array,
+            events_used_in_training: bool = False,
     ) -> ak.Array:
         # fake evaluation
         events = set_ak_column(events, f"{self.cls_name}.output", 0.5)
