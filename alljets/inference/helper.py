@@ -93,7 +93,6 @@ def add_parameters(im: InferenceModel) -> None:
         "ps_hdamp_sample": "hdamp",
         "ps_hdamp": "hdamp_dctr",
         "pdf_alphas": "alphas",
-        "top_pt_reweighting": "top_pt",
         "ps_fragmentation_dctr": "rb_dctr",
         #"ps_fragmentation": "bfrag",
         "ps_fragmentation": "bfrag_rel",
@@ -103,6 +102,7 @@ def add_parameters(im: InferenceModel) -> None:
     }
 
     modelling_envelope = {
+        "top_pt_reweighting": "top_pt",
         "ps_CR1": "tune_cr1",
         "ps_CR2": "tune_cr2",
         "ps_ERD": "tune_erdON",
