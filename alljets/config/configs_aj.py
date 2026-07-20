@@ -366,7 +366,7 @@ def add_config(
         cfg.x.luminosity = Number(
             59_557,
             {
-                "lumi_13TeV_2017": 0.015j,
+                "lumi_13TeV_2018": 0.015j,
                 "lumi_13TeV_1718": 0.002j,
                 "lumi_13TeV_correlated": 0.02j,
             },
@@ -1234,12 +1234,29 @@ def add_config(
                 "luminosityBlock",
                 "event",
                 # object info
+
+                # Jets with pt > 32 GeV and |eta| < 2.6
                 "Jet.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask,jetId,puId}",
+
+                # Jets with |eta| < 2.6
                 "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask,jetId,puId}",
+
+                # Jets with pt > 40 GeV and |eta| < 2.4
                 "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
+
+                # Six Leading Jets sorted by pt with pt > 40 GeV and |eta| < 2.4
                 "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
+
+                # Primary Vertices
                 "PV.{npvs,npvsGood}",
-                "GenPart.*",
+
+                # Columns for Pileup
+                "Pileup.nTrueInt",
+
+                # FixedGridRho columns
+                "fixedGridRho*",
+
+                # HLT Columns
                 (
                     "HLT.{Mu50,Physics,IsoMu24,PFHT350,PFHT370,PFHT890,PFHT1050,"
                     "PFHT380_SixPFJet32,PFHT400_SixPFJet32," +
@@ -1247,10 +1264,19 @@ def add_config(
                     "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
                     "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94}"
                 ),
-                # columns added during selection
+
+                # photons (for L1 prefiring)
+                "Photon.pt", "Photon.eta", "Photon.phi", "Photon.mass",
+                "Photon.jetIdx",
+
+                # Ht from trigger objects
                 "trig_ht",
                 "xb.*",
+
+                # Generator info
                 "gen_top.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
+                "GenPart.*",
+
                 ColumnCollection.ALL_FROM_SELECTOR,
                 skip_column("pdf_weights_alphas*"),
                 skip_column("pdf_weights_hessian*"),
