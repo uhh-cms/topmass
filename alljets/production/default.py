@@ -50,6 +50,7 @@ from alljets.production.weights import normalized_murmuf_weight
 from alljets.production.weights import normalized_rb_weight
 from alljets.production.weights import normalized_top_pt_weight
 from alljets.production.weights import normalized_bfrag_weight
+from alljets.production.L1Prefire import l1_prefiring
 
 
 np = maybe_import("numpy")
@@ -334,6 +335,7 @@ def cutflow_features(
         normalized_rb_weight,
         normalized_top_pt_weight,
         normalized_bfrag_weight,
+        l1_prefiring,
         "Jet.*",
     },
     produces={
@@ -352,6 +354,7 @@ def cutflow_features(
         normalized_rb_weight,
         normalized_top_pt_weight,
         normalized_bfrag_weight,
+        l1_prefiring,
     },
     require_producers={"kinFitMatch"},
     # whether weight producers should be added and called
@@ -396,18 +399,12 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
         events = self[normalized_bfrag_weight](events, **kwargs)
 
-        shift = kwargs["task"].shift
+        events = self[normalized_rb_weight](events, **kwargs)
 
-        if shift == "nominal":
-            events = self[normalized_rb_weight](events, **kwargs)
-        else:
-            events = set_ak_column(events, "normalized_rb_weight", np.ones(len(events)), value_type=np.float32)
-
-        if self.dataset_inst.has_tag("ttbar") and shift == "nominal":
+        if self.dataset_inst.has_tag("ttbar"):
             events = self[normalized_top_pt_weight](events, **kwargs)
 
-        elif self.dataset_inst.has_tag("ttbar") and shift != "nominal":
-            events = set_ak_column(events, "normalized_top_pt_weight", np.ones(len(events)), value_type=np.float32)
+        events = self[l1_prefiring](events, **kwargs)
 
     return events
 
@@ -427,6 +424,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         normalized_top_pt_weight,
         normalized_rb_weight,
         normalized_bfrag_weight,
+        l1_prefiring,
         "Jet.*",
     },
     produces={
@@ -443,6 +441,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         normalized_top_pt_weight,
         normalized_rb_weight,
         normalized_bfrag_weight,
+        l1_prefiring,
     },
     produce_weights=True,
     mode="production",
@@ -496,6 +495,8 @@ def trigSF_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[normalized_rb_weight](events, **kwargs)
 
         events = self[normalized_bfrag_weight](events, **kwargs)
+
+        events = self[l1_prefiring](events, **kwargs)
 
         if self.dataset_inst.has_tag("ttbar"):
             events = self[normalized_top_pt_weight](events, **kwargs)

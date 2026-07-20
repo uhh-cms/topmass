@@ -1114,6 +1114,17 @@ def add_config(
             "normalized_bfrag_weight": "normalized_bfrag_rel_weight_{direction}",
         },
     )
+
+    # L1Prefire weight shifts
+    cfg.add_shift(name="l1prefire_up", id=1316, type="shape")
+    cfg.add_shift(name="l1prefire_down", id=1317, type="shape")
+    add_shift_aliases(
+        cfg,
+        "l1prefire",
+        {
+            "l1_prefiring_weight": "l1_prefiring_weight{direction}",
+        },
+    )
     ################################################################################################
     # external files
     ################################################################################################
@@ -1266,9 +1277,8 @@ def add_config(
                     "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94}"
                 ),
 
-                # photons (for L1 prefiring)
-                "Photon.pt", "Photon.eta", "Photon.phi", "Photon.mass",
-                "Photon.jetIdx",
+                # L1 Prefire Weights
+                "L1PreFiringWeight.*",
 
                 # Ht from trigger objects
                 "trig_ht",
@@ -1325,6 +1335,7 @@ def add_config(
             "normalized_hdamp_weight": get_shifts("hdamp_dctr"),
             "normalized_rb_weight": get_shifts("rb_dctr"),
             "normalized_bfrag_weight": get_shifts("bfrag*"),
+            "l1_prefiring_weight": get_shifts("l1prefire"),
         },
     )
 
