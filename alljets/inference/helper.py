@@ -39,17 +39,17 @@ def add_processes(im: InferenceModel) -> None:
 
 
 def add_parameters(im: InferenceModel) -> None:
-    im.add_parameter(
-        "r_TT",
-        process=["TT"],
-        type=ParameterType.rate_unconstrained,
-    )
-    for config_inst in im.config_insts:
-        im.add_parameter(
-            f"r_BKG_{config_inst.campaign.x.year}{config_inst.campaign.x.postfix}",
-            process=["BKG"],
-            type=ParameterType.rate_unconstrained,
-        )
+    # im.add_parameter(
+    #     "r_TT",
+    #     process=["TT"],
+    #     type=ParameterType.rate_unconstrained,
+    # )
+    # for config_inst in im.config_insts:
+    #     im.add_parameter(
+    #         f"r_BKG_{config_inst.campaign.x.year}{config_inst.campaign.x.postfix}",
+    #         process=["BKG"],
+    #         type=ParameterType.rate_unconstrained,
+    #     )
     # groups
     im.add_parameter_group("experimental")
     im.add_parameter_group("modelling")
@@ -105,7 +105,7 @@ def add_parameters(im: InferenceModel) -> None:
         "ps_hdamp": "hdamp_dctr",
         "pdf_alphas": "alphas",
         "ps_fragmentation_dctr": "rb_dctr",
-        #"ps_fragmentation": "bfrag",
+        # "ps_fragmentation": "bfrag",
         "ps_fragmentation": "bfrag_rel",
         "QCDscale_ren_ttbar": "mur",
         "QCDscale_fac_ttbar": "muf",
