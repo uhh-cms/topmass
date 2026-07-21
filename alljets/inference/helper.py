@@ -115,7 +115,7 @@ def add_parameters(im: InferenceModel) -> None:
     for var in [f"{a}_{b}_{c}" for a in ["isr", "fsr"] for b in splittings for c in ["muR", "cNS"]]:
         modelling["ps_" + var] = var
     for i in range(100):
-        modelling[f"pdf_{i:02}"] = f"hessian_{i + 1:03d}"
+        modelling_envelope[f"pdf_{i:02}"] = f"hessian_{i + 1:03d}"
 
     def add_source(nuisance_name, shift_name, group, transformations=()):
         im.add_parameter(
