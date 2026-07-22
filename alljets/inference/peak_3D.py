@@ -12,7 +12,7 @@ from alljets.inference.helper import add_processes, add_parameters
 @inference_model
 def peak_3D(self: InferenceModel) -> None:
     self.add_category(
-        "SR_2D_peak",
+        "SR_3D_peak",
         config_data={
             config_inst.name: self.category_config_spec(
                 category="sig",
@@ -25,7 +25,7 @@ def peak_3D(self: InferenceModel) -> None:
         flow_strategy=FlowStrategy.remove,
     )
     self.add_category(
-        "CR_2D_mtfit",
+        "CR_3D_mtfit",
         config_data={
             config_inst.name: self.category_config_spec(
                 category="sig",
