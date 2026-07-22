@@ -125,10 +125,17 @@ def quantile_edges(x, w, n):
     return weighted_quantile(x, w, qs)
 
 
-def get_2d_edges(x, y, w, nx=6, ny=3):
+def get_2d_edges(x, y, w, nx=6, ny=3, range_x=[0, 2000], range_y=[0, 2000]):
     x = ak.to_numpy(x)
     y = ak.to_numpy(y)
     w = ak.to_numpy(w)
+
+    selected = (x >= range_x[0]) & (x <= range_x[1]) & (y >= range_y[0]) & (y <= range_y[1])
+    print(np.sum(selected), len(x))
+
+    x = x[selected]
+    y = y[selected]
+    w = w[selected]
 
     x_edges = quantile_edges(x, w, nx)
     y_edges = quantile_edges(y, w, ny)
@@ -190,10 +197,12 @@ def main(args):
 
     x_edges, y_edges = get_2d_edges(
         vars_dict["mtfit"],
-        vars_dict["avg_W_mass"],
+        vars_dict["reco_R_bq"],
         w,
         nx=args.nbins_x,
         ny=args.nbins_y,
+        range_x=[float(x) for x in args.range_x.split(",")],
+        range_y=[float(y) for y in args.range_y.split(",")],
     )
 
     logger.info(f"nx × ny  : {args.nbins_x} × {args.nbins_y}")
@@ -214,6 +223,10 @@ if __name__ == "__main__":
     parser.add_argument("--nbins-x", type=int, default=6, help="mtfit bins for 2D")
 
     parser.add_argument("--nbins-y", type=int, default=3, help="avg_W bins for 2D")
+
+    parser.add_argument("--range-x", type=str, default="0,2000", help="mtfit range for 2D")
+
+    parser.add_argument("--range-y", type=str, default="0,2000", help="avg_W range for 2D")
 
     args = parser.parse_args()
     main(args)
