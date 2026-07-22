@@ -39,6 +39,17 @@ def add_processes(im: InferenceModel) -> None:
 
 
 def add_parameters(im: InferenceModel) -> None:
+    # im.add_parameter(
+    #     "r_TT",
+    #     process=["TT"],
+    #     type=ParameterType.rate_unconstrained,
+    # )
+    # for config_inst in im.config_insts:
+    #     im.add_parameter(
+    #         f"r_BKG_{config_inst.campaign.x.year}{config_inst.campaign.x.postfix}",
+    #         process=["BKG"],
+    #         type=ParameterType.rate_unconstrained,
+    #     )
     # groups
     im.add_parameter_group("experimental")
     im.add_parameter_group("modelling")
@@ -58,11 +69,8 @@ def add_parameters(im: InferenceModel) -> None:
     for config_inst in im.config_insts:
         lumi = config_inst.x.luminosity
         for unc_name in lumi.uncertainties:
-            name = unc_name
-            if name.startswith("lumi_13TeV_20"):
-                name = name.replace("_13TeV", "")
             im.add_parameter(
-                name,
+                unc_name,
                 type=ParameterType.rate_gauss,
                 effect=lumi.get(names=unc_name, direction=("down", "up"), factor=True),
                 process=["TT"],
@@ -93,32 +101,32 @@ def add_parameters(im: InferenceModel) -> None:
             experimental["CMS_scale_j_" + jec_unc] = "jec_" + jec_unc
 
     modelling = {
-        "ps_hdamp": "hdamp",
-        "ps_hdamp_dctr": "hdamp_dctr",
+        "ps_hdamp_sample": "hdamp",
+        "ps_hdamp": "hdamp_dctr",
         "pdf_alphas": "alphas",
-        "top_pt_reweighting": "top_pt",
         "ps_fragmentation_dctr": "rb_dctr",
-        "ps_fragmentation": "bfrag",
-        "ps_fragmentation_lund": "bfrag_lund",
-        "ps_fragmentation_peterson": "bfrag_peterson",
-        "ps_fragmentation_relative": "bfrag_rel",
+        # "ps_fragmentation": "bfrag",
+        "ps_fragmentation": "bfrag_rel",
         "QCDscale_ren_ttbar": "mur",
         "QCDscale_fac_ttbar": "muf",
         "underlying_event": "tune",
     }
 
     modelling_envelope = {
+        "top_pt_reweighting": "top_pt",
         "ps_CR1": "tune_cr1",
         "ps_CR2": "tune_cr2",
         "ps_ERD": "tune_erdON",
         "ps_Recoil": "tune_rtt",
+        "ps_fragmentation_lund": "bfrag_lund",
+        "ps_fragmentation_peterson": "bfrag_peterson",
     }
 
     splittings = ("G2GG", "G2QQ", "Q2QG", "X2XG")
     for var in [f"{a}_{b}_{c}" for a in ["isr", "fsr"] for b in splittings for c in ["muR", "cNS"]]:
         modelling["ps_" + var] = var
     for i in range(100):
-        modelling[f"pdf_{i:02}"] = f"hessian_{i + 1:03d}"
+        modelling_envelope[f"pdf_{i:02}"] = f"hessian_{i + 1:03d}"
 
     def add_source(nuisance_name, shift_name, group, transformations=()):
         im.add_parameter(
