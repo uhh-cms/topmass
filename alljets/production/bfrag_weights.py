@@ -50,36 +50,50 @@ def bfrag_weights(
 
     # safely access nested weights
     bfragweight = getattr(events, "bfragweight", None)
-
+    bdecayweight = getattr(events, "bdecayweight", None)
     up = None
     down = None
     peterson = None
     nom = None
+    bdecay_up = None
+    bdecay_down = None
 
     if bfragweight is not None:
         up = getattr(bfragweight, "up", None)
         down = getattr(bfragweight, "down", None)
         peterson = getattr(bfragweight, "peterson", None)
         nom = getattr(bfragweight, "nominal", None)
+        bdecay_up = getattr(bdecayweight, "up", None)
+        bdecay_down = getattr(bdecayweight, "down", None)
 
     # Conditionally produce up/down variations if both nominal and up weights are available
     has_variations = (up is not None) and (down is not None) and (peterson is not None) and (nom is not None)
 
     if has_variations:
-        # Symmetrize around 1.0: up variation is the provided weight, down variation is 2 - up
+
+        # Columns where nominal is applied
         events = set_ak_column(events, "bfrag_weight_up", nom)
         events = set_ak_column(events, "bfrag_weight_down", ones)
 
+        # Columns for lund weights
+        events = set_ak_column(events, "bfrag_lund_weight_up", up)
+        events = set_ak_column(events, "bfrag_lund_weight_down", down)
+
+        # Columns for Peterson
         events = set_ak_column(events, "bfrag_peterson_weight_up", peterson)
         events = set_ak_column(events, "bfrag_peterson_weight_down", ones)
 
         rel_up = _safe_ratio(up, nom)
         rel_down = _safe_ratio(down, nom)
+
+        # Columns for relative Lund weights
         events = set_ak_column(events, "bfrag_rel_weight_up", rel_up)
         events = set_ak_column(events, "bfrag_rel_weight_down", rel_down)
 
-        events = set_ak_column(events, "bfrag_lund_weight_up", up)
-        events = set_ak_column(events, "bfrag_lund_weight_down", down)
+        # Columns for bdecay weights
+        events = set_ak_column(events, "bfrag_bdecay_weight_up", bdecay_up)
+        events = set_ak_column(events, "bfrag_bdecay_weight_down", bdecay_down)
+
     else:
         logger.warning(
             f"[{self.dataset_inst.name}] Missing bfrag weights → only nominal produced",
@@ -96,14 +110,16 @@ def bfrag_weights_post_init(self: Producer, task: law.Task, **kwargs) -> None:
     is_nominal = ((shift.name == "nominal") and self.dataset_inst.has_tag("tt"))
 
     if is_nominal:
-        self.uses.add("bfragweight.nominal")
-        self.uses.add("bfragweight.down")
-        self.uses.add("bfragweight.up")
-        self.uses.add("bfragweight.peterson")
+        self.uses.add("bfragweight.{up,down,peterson,nominal}")
+        self.uses.add("bdecayweight.{up,down}")
 
         # Columns where nominal is applied and symmetrized
         self.produces.add("bfrag_weight_up")
         self.produces.add("bfrag_weight_down")
+
+        # Columns for lund weights
+        self.produces.add("bfrag_lund_weight_up")
+        self.produces.add("bfrag_lund_weight_down")
 
         # Columns for Peterson
         self.produces.add("bfrag_peterson_weight_up")
@@ -113,6 +129,6 @@ def bfrag_weights_post_init(self: Producer, task: law.Task, **kwargs) -> None:
         self.produces.add("bfrag_rel_weight_up")
         self.produces.add("bfrag_rel_weight_down")
 
-        # Columns for lund weights
-        self.produces.add("bfrag_lund_weight_up")
-        self.produces.add("bfrag_lund_weight_down")
+        # Columns for bdecay weights
+        self.produces.add("bfrag_bdecay_weight_up")
+        self.produces.add("bfrag_bdecay_weight_down")
