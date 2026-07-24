@@ -111,8 +111,14 @@ def qcd_mc_vs_est(
 
     # setup style config
     default_style_config = prepare_style_config(
-        config_inst, category_inst, variable_inst, density, shape_norm, yscale,
+        config_inst=config_inst,
+        category_inst=category_inst,
+        variable_inst=variable_inst,
+        density=density,
+        shape_norm=shape_norm,
+        yscale=yscale,
     )
+
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = r"$\Delta N / N$"
     # default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
@@ -209,8 +215,14 @@ def qcd_sig_vs_bkg_sel(
 
     # setup style config
     default_style_config = prepare_style_config(
-        config_inst, category_inst, variable_inst, density, shape_norm, yscale,
+        config_inst=config_inst,
+        category_inst=category_inst,
+        variable_inst=variable_inst,
+        density=density,
+        shape_norm=shape_norm,
+        yscale=yscale,
     )
+
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = r"$\Delta N / N$"
     # default_style_config["legend_cfg"]["title"] = trigger_names[eff_bin]
