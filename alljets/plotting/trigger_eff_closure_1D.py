@@ -384,7 +384,14 @@ def plot_efficiencies(
 
     # setup style config
     # Start from the shared style template and then apply trigger-efficiency specific tweaks.
-    default_style_config = prepare_style_config(config_inst, category_inst, variable_inst, density, shape_norm, yscale)
+    default_style_config = prepare_style_config(
+        config_inst=config_inst,
+        category_inst=category_inst,
+        variable_inst=variable_inst,
+        density=density,
+        shape_norm=shape_norm,
+        yscale=yscale,
+    )
 
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
@@ -641,7 +648,14 @@ def plot_efficiencies_with_uncert(
 
     # setup style config
     # Keep the visual language aligned with the other efficiency plots.
-    default_style_config = prepare_style_config(config_inst, category_inst, variable_inst, density, shape_norm, yscale)
+    default_style_config = prepare_style_config(
+        config_inst=config_inst,
+        category_inst=category_inst,
+        variable_inst=variable_inst,
+        density=density,
+        shape_norm=shape_norm,
+        yscale=yscale,
+    )
 
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
@@ -907,7 +921,14 @@ def produce_trig_weight(
     )
 
     # setup style config
-    default_style_config = prepare_style_config(config_inst, category_inst, variable_inst, density, shape_norm, yscale)
+    default_style_config = prepare_style_config(
+        config_inst=config_inst,
+        category_inst=category_inst,
+        variable_inst=variable_inst,
+        density=density,
+        shape_norm=shape_norm,
+        yscale=yscale,
+    )
 
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"

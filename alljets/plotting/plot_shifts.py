@@ -152,12 +152,12 @@ def plot_shifted_variable(
         yscale = "log" if variable_inst.log_y else "linear"
 
     default_style_config = prepare_style_config(
-        config_inst,
-        category_inst,
-        variable_inst,
-        density,
-        shape_norm,
-        yscale,
+        config_inst=config_inst,
+        category_inst=category_inst,
+        variable_inst=variable_inst,
+        density=density,
+        shape_norm=shape_norm,
+        yscale=yscale,
     )
     nominal_hist = h_sum[{"shift": hist.loc("nominal")}]
     n = nominal_hist.values()

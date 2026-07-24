@@ -219,7 +219,12 @@ def plot_hist_matching_combined(
 
     # --- style config ---
     default_style_config = prepare_style_config(
-        config_inst, category_inst, variable_inst, density, shape_norm, yscale,
+        config_inst=config_inst,
+        category_inst=category_inst,
+        variable_inst=variable_inst,
+        density=density,
+        shape_norm=shape_norm,
+        yscale=yscale,
     )
 
     tt_split_labels = [f"{tt_label} {c}" for c in ("correct", "wrong", "unmatched")] if tt_entry is not None else []

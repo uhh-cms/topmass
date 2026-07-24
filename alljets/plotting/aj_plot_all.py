@@ -470,13 +470,13 @@ def draw_vspan(
                **defaults)
 
 
-import matplotlib.pyplot as plt
-from matplotlib.axes import Axes
+plt = maybe_import("matplotlib.pyplot")
+maybe_import("matplotlib.axes", "Axes")
 from typing import Literal
 
 
 def hatch_vregion(
-    ax: Axes,
+    ax: plt.Axes,
     x: float,
     side: Literal["left", "right"] = "right",
     xmin: float | None = None,
