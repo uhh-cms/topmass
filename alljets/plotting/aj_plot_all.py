@@ -154,7 +154,7 @@ def draw_efficiency_x(
     yerrors = np.concatenate((yerror_low.reshape(yerror_low.shape[0], 1),
                              yerror_high.reshape(yerror_high.shape[0], 1)), axis=1)
     yerrors = yerrors.T
-
+    yerrors[yerrors < 0] = 0
     defaults = {
         "x": h.axes[0].centers,
         "y": values,
@@ -174,7 +174,7 @@ def draw_efficiency_x(
     xerrors = np.concatenate((xerror_low.reshape(xerror_low.shape[0], 1),
                              xerror_high.reshape(xerror_high.shape[0], 1)), axis=1)
     xerrors = xerrors.T
-
+    xerrors[xerrors < 0] = 0
     defaults.update({"xerr": xerrors})
 
     ax.errorbar(**defaults)
