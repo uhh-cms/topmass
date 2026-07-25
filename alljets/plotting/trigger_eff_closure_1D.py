@@ -371,7 +371,7 @@ def plot_efficiencies(
         plot_config["cut_region"] = {
             "method": "draw_vspan",
             "kwargs": {
-                "x_start": 30 if variable_inst == "trigjet6_pt" else 250,
+                "x_start": 15 if variable_inst == "trigjet6_pt" else 250,
                 "x_end": 40 if variable_inst == "trigjet6_pt" else 450,
                 "ymin": 0.0,
                 "ymax": 0.7,
@@ -397,7 +397,7 @@ def plot_efficiencies(
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
 
     if variable_inst == "trigjet6_pt":
-        default_style_config["ax_cfg"]["xlim"] = (30, 100)
+        default_style_config["ax_cfg"]["xlim"] = (15, 100)
 
     # Show a stacked legend title that reflects the merged trigger pair.
     if combine_triggers is not None:
@@ -635,7 +635,7 @@ def plot_efficiencies_with_uncert(
         plot_config["cut_region"] = {
             "method": "draw_vspan",
             "kwargs": {
-                "x_start": 30 if variable_inst == "trigjet6_pt" else 250,
+                "x_start": 15 if variable_inst == "trigjet6_pt" else 250,
                 "x_end": 40 if variable_inst == "trigjet6_pt" else 450,
                 "ymin": 0.0,
                 "ymax": 0.7,
@@ -660,7 +660,7 @@ def plot_efficiencies_with_uncert(
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
     if variable_inst == "trigjet6_pt":
-        default_style_config["ax_cfg"]["xlim"] = (30, 100)
+        default_style_config["ax_cfg"]["xlim"] = (15, 100)
 
     # Show a stacked legend title that reflects the merged trigger pair.
     if combine_triggers is not None:
@@ -869,7 +869,7 @@ def produce_trig_weight(
         plot_config["cut_region"] = {
             "method": "draw_vspan",
             "kwargs": {
-                "x_start": 30 if variable_inst == "trigjet6_pt" else 250,
+                "x_start": 15 if variable_inst == "trigjet6_pt" else 250,
                 "x_end": 40 if variable_inst == "trigjet6_pt" else 450,
                 "ymin": 0.0,
                 "ymax": 0.7,
@@ -933,7 +933,7 @@ def produce_trig_weight(
     # plot-function specific changes
     default_style_config["ax_cfg"]["ylabel"] = "Efficiency"
     if variable_inst == "trigjet6_pt":
-        default_style_config["ax_cfg"]["xlim"] = (30, 100)
+        default_style_config["ax_cfg"]["xlim"] = (15, 100)
 
     # Show a stacked legend title that reflects the merged trigger pair.
     if combine_triggers is not None:
