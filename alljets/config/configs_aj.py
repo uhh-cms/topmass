@@ -303,18 +303,31 @@ def add_config(
         "shift_plots_mtop": {
             "ax_cfg": {
                 "xlim": (50, 400),
-                "ylabel": "Entries/BinWidth",
+                "ylabel": "Events / BinWidth",
+            },
+        },
+        "shift_plots_mtopPeak": {
+            "ax_cfg": {
+                "xlim": (100, 250),
+                "ylabel": "Events / BinWidth",
             },
         },
         "shift_plots_mwreco": {
             "ax_cfg": {
-                "ylabel": "Entries/BinWidth",
+                "xlim": (60, 110),
+                "ylabel": "Events / BinWidth",
             },
         },
         "shift_plots_rbq": {
             "ax_cfg": {
-                "xlim": (0, 2),
-                "ylabel": "Entries/BinWidth",
+                "xlim": (0, 10),
+                "ylabel": "Events / BinWidth",
+            },
+        },
+        "shift_plots_rbq3D": {
+            "ax_cfg": {
+                "xlim": (-0.5, 4.5),
+                "ylabel": "Events / BinWidth",
             },
         },
     }
@@ -669,20 +682,6 @@ def add_config(
             },
         )
 
-    # # JER shift
-    # cfg.add_shift(name="jer_up", id=6000, type="shape", tags={"jer"})
-    # cfg.add_shift(name="jer_down", id=6001, type="shape", tags={"jer"})
-    # add_shift_aliases(
-    #     cfg,
-    #     "jer",
-    #     {
-    #         "Jet.pt": "Jet.pt_{name}",
-    #         "Jet.mass": "Jet.mass_{name}",
-    #         f"{cfg.x.met_name}.pt": f"{cfg.x.met_name}.pt_{{name}}",
-    #         f"{cfg.x.met_name}.phi": f"{cfg.x.met_name}.phi_{{name}}",
-    #     },
-    # )
-
     # JER shift for |eta| < 1.93
     cfg.add_shift(name="jer_EtaLow_up", id=6000, type="shape", tags={"jer"})
     cfg.add_shift(name="jer_EtaLow_down", id=6001, type="shape", tags={"jer"})
@@ -793,18 +792,6 @@ def add_config(
             "normalized_top_pt_weight": "normalized_top_pt_weight_{direction}",
         },
     )
-
-    # Pdf shifts (up/down variations from CF)
-    # cfg.add_shift(name="pdf_up", id=160, type="shape", tags="pdf")
-    # cfg.add_shift(name="pdf_down", id=161, type="shape", tags="pdf")
-    # add_shift_aliases(
-    #     cfg,
-    #     "pdf",
-    #     {
-    #         "pdf_weight": "pdf_weight_{direction}",
-    #         "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
-    #     },
-    # )
 
     # PDF shifts based on alpha_s variations
     cfg.add_shift(name="alphas_up", id=170, type="shape", tags="alphas")
@@ -1077,7 +1064,7 @@ def add_config(
         },
     )
 
-    # bfrag Lund plane weight shifts (application as uncertainty)
+    # bfrag Lund plane weight shifts
     cfg.add_shift(name="bfrag_lund_up", id=1310, type="shape")
     cfg.add_shift(name="bfrag_lund_down", id=1311, type="shape")
     add_shift_aliases(
@@ -1121,6 +1108,18 @@ def add_config(
         "l1prefire",
         {
             "l1_prefiring_weight": "l1_prefiring_weight{direction}",
+        },
+    )
+
+    # bfrag bdecay weight shifts
+    cfg.add_shift(name="bfrag_bdecay_up", id=1318, type="shape")
+    cfg.add_shift(name="bfrag_bdecay_down", id=1319, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag_bdecay",
+        {
+            "bfrag_weight": "bfrag_bdecay_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_bdecay_weight_{direction}",
         },
     )
     ################################################################################################
