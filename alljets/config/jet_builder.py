@@ -240,6 +240,17 @@ def build_reco_R_bq(events):
     return (reco[:, 0].pt + reco[:, 1].pt) / (reco[:, 2].pt + reco[:, 3].pt + reco[:, 4].pt + reco[:, 5].pt)
 
 
+def build_avg_R_bq(events):
+    events = attach_coffea_behavior(events, {"FitJet.reco": default_coffea_collections["Jet"]})
+
+    reco = events.FitJet.reco
+
+    R_bq_top1 = reco[:, 0].pt / (reco[:, 2].pt + reco[:, 3].pt)
+    R_bq_top2 = reco[:, 1].pt / (reco[:, 4].pt + reco[:, 5].pt)
+
+    return (R_bq_top1 + R_bq_top2) / 2
+
+
 def build_xb_avg(events):
     xb_top = events.xb.top
     xb_antitop = events.xb.antitop
