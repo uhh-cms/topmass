@@ -101,12 +101,13 @@ def add_parameters(im: InferenceModel) -> None:
             experimental["CMS_scale_j_" + jec_unc] = "jec_" + jec_unc
 
     modelling = {
-        "ps_hdamp_sample": "hdamp",
+        # "ps_hdamp_sample": "hdamp",
         "ps_hdamp": "hdamp_dctr",
         "pdf_alphas": "alphas",
-        "ps_fragmentation_dctr": "rb_dctr",
+        # "ps_fragmentation_dctr": "rb_dctr",
         # "ps_fragmentation": "bfrag",
         "ps_fragmentation": "bfrag_rel",
+        "ps_fragmentation_bdecay": "bfrag_bdecay",
         "QCDscale_ren_ttbar": "mur",
         "QCDscale_fac_ttbar": "muf",
         "underlying_event": "tune",
