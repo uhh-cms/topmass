@@ -37,6 +37,7 @@ from .jet_builder import (
     build_avg_w_mass,
     build_avg_reco_Top_mass,
     build_reco_R_bq,
+    build_avg_R_bq,
     build_xb_avg,
 )
 
@@ -460,7 +461,7 @@ def add_variables(cfg: od.Config) -> None:
         name="n_bjet",
         expression="n_bjet",
         binning=(6, -0.5, 5.5),
-        x_title="Number of Bjets",
+        x_title="Number of b-tagged jets",
     )
     add_variable(
         cfg,
@@ -775,7 +776,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet1_pt",
         expression="KinFitJets.pt[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(50, 0.0, 500.0),
+        binning=(70, 0.0, 700.0),
         aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"Jet 1 $p_{T}$",
@@ -793,7 +794,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet1_phi",
         expression="KinFitJets.phi[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"Jet 1 $\phi$",
     )
     add_variable(
@@ -819,7 +820,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet2_phi",
         expression="KinFitJets.phi[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"Jet 2 $\phi$",
     )
     add_variable(
@@ -827,7 +828,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet3_pt",
         expression="KinFitJets.pt[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=(50, 0.0, 500.0),
+        binning=(60, 0.0, 300.0),
         aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"Jet 3 $p_{T}$",
@@ -845,7 +846,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet3_phi",
         expression="KinFitJets.phi[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"Jet 3 $\phi$",
     )
     add_variable(
@@ -853,7 +854,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet4_pt",
         expression="KinFitJets.pt[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=(50, 0.0, 500.0),
+        binning=(50, 0.0, 250.0),
         aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"Jet 4 $p_{T}$",
@@ -871,7 +872,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet4_phi",
         expression="KinFitJets.phi[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"Jet 4 $\phi$",
     )
     add_variable(
@@ -879,7 +880,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet5_pt",
         expression="KinFitJets.pt[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=(50, 0.0, 500.0),
+        binning=(50, 0.0, 150.0),
         aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"Jet 5 $p_{T}$",
@@ -897,7 +898,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet5_phi",
         expression="KinFitJets.phi[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"Jet 5 $\phi$",
     )
     add_variable(
@@ -905,7 +906,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet6_pt",
         expression="KinFitJets.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(50, 0.0, 500.0),
+        binning=(50, 0.0, 100.0),
         aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"Jet 6 $p_{T}$",
@@ -923,7 +924,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet6_phi",
         expression="KinFitJets.phi[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"Jet 6 $\phi$",
     )
     add_variable(
@@ -937,7 +938,7 @@ def add_variables(cfg: od.Config) -> None:
         cfg,
         name="kinfitjets_phi",
         expression="KinFitJets.phi",
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         aux={"overflow": False, "underflow": False},
         x_title=r"$\phi$ of all jets",
     )
@@ -968,7 +969,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco1_phi",
         expression="FitJet.reco.phi[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{b_1\,\mathrm{reco}}$",
     )
     add_variable(
@@ -993,7 +994,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco2_phi",
         expression="FitJet.reco.phi[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{b_2\,\mathrm{reco}}$",
     )
     add_variable(
@@ -1018,7 +1019,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco3_phi",
         expression="FitJet.reco.phi[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{q_1\,\mathrm{reco}}$",
     )
     add_variable(
@@ -1043,7 +1044,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco4_phi",
         expression="FitJet.reco.phi[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{q_2\,\mathrm{reco}}$",
     )
     add_variable(
@@ -1068,7 +1069,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco5_phi",
         expression="FitJet.reco.phi[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{q_3\,\mathrm{reco}}$",
     )
     add_variable(
@@ -1093,7 +1094,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco6_phi",
         expression="FitJet.reco.phi[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{q_4\,\mathrm{reco}}$",
     )
     # Variables for both b-jet canditates
@@ -1119,7 +1120,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco_B_phi",
         expression="FitJet.reco.phi[:,0:2]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{\mathrm{reco}}$ of b-jet candidates",
     )
     # Variables for light quark jet candidates of W1
@@ -1145,7 +1146,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco_W1_phi",
         expression="FitJet.reco.phi[:,2:4]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{\mathrm{reco}}$ of jet candidates for W1",
     )
     # Variables for light quark jet candidates of W2
@@ -1171,7 +1172,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco_W2_phi",
         expression="FitJet.reco.phi[:,4:6]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{\mathrm{reco}}$ of jet candidates for W2",
     )
     # Variables for all light quark jet candidates
@@ -1197,7 +1198,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco_light_phi",
         expression="FitJet.reco.phi[:,2:6]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{\mathrm{reco}}$ of light quark jet candidates",
     )
     ###############################################################################
@@ -1675,7 +1676,7 @@ def add_variables(cfg: od.Config) -> None:
         aux={"inputs": build_reco_R_bq.inputs},
         binning=(50, 0, 10),
         unit="",
-        x_title=r"$R_{bq}$",
+        x_title=r"$R^{reco}_{bq}$",
     )
     add_variable(
         cfg,
@@ -1684,7 +1685,7 @@ def add_variables(cfg: od.Config) -> None:
         aux={"inputs": build_reco_R_bq.inputs},
         binning=[0.0884285, 0.339041, 0.421465, 0.498023, 0.579106, 0.672588, 0.795516, 0.991731, 8.17397],
         unit="",
-        x_title=r"$R_{bq}$",
+        x_title=r"$R^{reco}_{bq}$",
     )
     add_variable(
         cfg,
@@ -1693,7 +1694,17 @@ def add_variables(cfg: od.Config) -> None:
         aux={"inputs": build_reco_R_bq.inputs},
         binning=[0, 0.572137, 4],
         unit="",
-        x_title=r"$R_{bq}$",
+        x_title=r"$R^{reco}_{bq}$",
+    )
+    build_avg_R_bq.inputs = ["FitJet.reco.{pt,eta,phi,mass}"]
+    add_variable(
+        cfg,
+        name="reco_R_bq_avg",
+        expression=build_avg_R_bq,
+        aux={"inputs": build_avg_R_bq.inputs},
+        binning=(50, 0, 10),
+        unit="",
+        x_title=r"$R^{reco}_{bq_{avg}}$",
     )
     ###############################################################################
     #                            Features with coarse binning                     #
@@ -2095,6 +2106,7 @@ def add_variables(cfg: od.Config) -> None:
 # helper to add a variable to the config with some defaults
 def add_variable(config: od.Config, *args, **kwargs) -> od.Variable:
     kwargs.setdefault("null_value", EMPTY_FLOAT)
+    kwargs.setdefault("y_title", "Events")
 
     # create the variable
     variable = config.add_variable(*args, **kwargs)
