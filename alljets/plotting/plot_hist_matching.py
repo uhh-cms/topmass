@@ -27,7 +27,7 @@ from collections import OrderedDict
 import law
 from columnflow.plotting.plot_util import (apply_density, apply_variable_settings, prepare_style_config)
 from columnflow.util import maybe_import
-from alljets.plotting.aj_plot_all import aj_plot_all
+from modules.columnflow.columnflow.plotting.plot_all import plot_all
 from modules.columnflow.columnflow.plotting.plot_util import get_cms_label
 
 hist = maybe_import("hist")
@@ -227,6 +227,12 @@ def plot_hist_matching_combined(
         yscale=yscale,
     )
 
+    default_style_config["ax_cfg"]["ylabel"] = variable_inst.get_full_y_title(
+        bin_width=None,
+        unit=None,
+        unit_format="{title} / {unit}",
+    )
+
     tt_split_labels = [f"{tt_label} {c}" for c in ("correct", "wrong", "unmatched")] if tt_entry is not None else []
     block_extra_labels = [info["label"] for info in list(block_hists.values()) + list(extra_hists.values())]
     use_two_col = bool(tt_split_labels) and bool(block_extra_labels)
@@ -244,4 +250,4 @@ def plot_hist_matching_combined(
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
-    return aj_plot_all(plot_config, style_config, **kwargs)
+    return plot_all(plot_config, style_config, **kwargs)
