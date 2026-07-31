@@ -1323,7 +1323,7 @@ def add_config(
         {
             "normalization_weight": [],
             "btag_weight": get_shifts("btag_heavy_*", "btag_light_*"),
-            "normalized_trig_weight": get_shifts("trig"),
+            "trig_weight": get_shifts("trig"),
             "normalized_pdf_weight": get_shifts("pdf", "alphas", "hessian_*"),
             "normalized_murmuf_weight": get_shifts("murmuf"),
             "normalized_mur_weight": get_shifts("mur"),
