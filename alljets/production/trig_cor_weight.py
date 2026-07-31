@@ -52,42 +52,34 @@ def trig_weights(
 
     Systematic variations are modeled as a symmetric ±50% deviation from
     unity around the nominal weight.
-
-    For datasets without top quarks, all trigger weights are set to unity.
     """
 
-    if self.dataset_inst.has_tag("has_top"):
-        # Determine the pT of the 6th leading jet within |eta| < 2.6. If fewer than 6 jets are present, set to 0.
-        jet6_pt = ak.where(
-            ak.num(events.Jet[(abs(events.Jet.eta) < 2.6)], axis=1) > 5,
-            ak.sort(events.Jet[(abs(events.Jet.eta) < 2.6)].pt[:], ascending=False, axis=1),
-            np.zeros((len(events), 6)))[:, 5]
+    jet6_pt = ak.where(
+        ak.num(events.Jet[(abs(events.Jet.eta) < 2.6)], axis=1) > 5,
+        ak.sort(events.Jet[(abs(events.Jet.eta) < 2.6)].pt[:], ascending=False, axis=1),
+        np.zeros((len(events), 6)))[:, 5]
 
-        # Compute HT: scalar sum of jet pT for jets passing the trigger-like selection
-        ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) & (abs(events.Jet.eta) < 2.6)], axis=1)
+    # Compute HT: scalar sum of jet pT for jets passing the trigger-like selection
+    ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) & (abs(events.Jet.eta) < 2.6)], axis=1)
 
-        # Evaluate trigger scale factor using the configured variable
-        if self.config_inst.x.trigger_sf_variable.startswith("trigjet6_pt"):
-            # Apply the correction as a function of the 6th jet pT. Events with fewer than 6 jets receive weight = 0.
-            weight = ak.where(jet6_pt == 0, np.zeros((len(events))), self.trig_sf_corrector(jet6_pt))
+    # Evaluate trigger scale factor using the configured variable
+    if self.config_inst.x.trigger_sf_variable.startswith("trigjet6_pt"):
+        # Apply the correction as a function of the 6th jet pT. Events with fewer than 6 jets receive weight = 0.
+        weight = ak.where(jet6_pt == 0, np.zeros((len(events))), self.trig_sf_corrector(jet6_pt))
 
-        if self.config_inst.x.trigger_sf_variable.startswith("ht"):
-            # Apply the correction as a function of HT.
-            weight = self.trig_sf_corrector(ht)
+    if self.config_inst.x.trigger_sf_variable.startswith("ht"):
+        # Apply the correction as a function of HT.
+        weight = self.trig_sf_corrector(ht)
 
-        # Define systematic variations around the nominal weight, corresponds to ±50% of the deviation from unity.
-        weight_up = weight + abs(1 - weight) * 0.5
-        weight_down = ak.where((weight - abs(1 - weight) * 0.5) > 0, (weight - abs(1 - weight) * 0.5), 0)
+    # Define systematic variations around the nominal weight, corresponds to ±50% of the deviation from unity.
+    weight_up = weight + abs(1 - weight) * 0.5
+    weight_down = ak.where((weight - abs(1 - weight) * 0.5) > 0, (weight - abs(1 - weight) * 0.5), 0)
 
-        # Store the nominal and varied weights as event-level columns
-        events = set_ak_column(events, "trig_weight", weight, value_type=np.float32)
-        events = set_ak_column(events, "trig_weight_up", weight_up, value_type=np.float32)
-        events = set_ak_column(events, "trig_weight_down", weight_down, value_type=np.float32)
-    else:
-        # For datasets without top quarks, no trigger correction is applied and all weights default to unity.
-        events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
-        events = set_ak_column(events, "trig_weight_up", np.ones(len(events)), value_type=np.float32)
-        events = set_ak_column(events, "trig_weight_down", np.ones(len(events)), value_type=np.float32)
+    # Store the nominal and varied weights as event-level columns
+    events = set_ak_column(events, "trig_weight", weight, value_type=np.float32)
+    events = set_ak_column(events, "trig_weight_up", weight_up, value_type=np.float32)
+    events = set_ak_column(events, "trig_weight_down", weight_down, value_type=np.float32)
+
     return events
 
 
