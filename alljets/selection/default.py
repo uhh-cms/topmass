@@ -276,7 +276,7 @@ def default(
 
     if self.dataset_inst.is_mc:
         # when a shift was requested, skip all other systematic variations
-        skip_shifts = task.global_shift_inst != "nominal" or not self.dataset_inst.has_tag("tt")
+        skip_shifts = task.global_shift_inst != "nominal"  # or not self.dataset_inst.has_tag("tt")
 
         weight_map = {
             **weight_map,
@@ -309,7 +309,7 @@ def default(
             })
 
         # dctr hdamp weights
-        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+        for v in (("",) if skip_shifts or not self.dataset_inst.has_tag("ttbar") else ("", "_up", "_down")):
             weight_map.update({
                 f"sum_hdamp_weight{v}": (events[f"hdamp_weight{v}"], Ellipsis),
                 f"sum_hdamp_weight{v}_selected": (events[f"hdamp_weight{v}"], results.event),
@@ -343,7 +343,7 @@ def default(
             })
 
         # dctr rb weights
-        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+        for v in (("",) if skip_shifts or not self.dataset_inst.has_tag("ttbar") else ("", "_up", "_down")):
             weight_map.update({
                 f"sum_rb_weight{v}": (events[f"rb_weight{v}"], Ellipsis),
                 f"sum_rb_weight{v}_selected": (events[f"rb_weight{v}"], results.event),
