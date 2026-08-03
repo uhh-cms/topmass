@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = []
 
 from columnflow.columnar_util import (  # noqa: F401
-    IF_DATA, IF_MC, IF_DATASET_HAS_TAG, IF_DATASET_NOT_HAS_TAG, EMPTY_FLOAT, ArrayFunction, deferred_column,
+    IF_DATA, IF_MC, IF_DATASET_HAS_TAG, EMPTY_FLOAT, ArrayFunction, deferred_column,
     ak_concatenate_safe,
 )
 from columnflow.util import maybe_import
