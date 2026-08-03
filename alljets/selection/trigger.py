@@ -306,11 +306,12 @@ def trigger(
             })
 
         # top pt weights
-        for v in (("",) if skip_shifts else ("", "_up", "_down")):
-            weight_map.update({
-                f"sum_top_pt_weight{v}": (events[f"top_pt_weight{v}"], Ellipsis),
-                f"sum_top_pt_weight{v}_selected": (events[f"top_pt_weight{v}"], results.event),
-            })
+        if self.dataset_inst.has_tag("ttbar"):
+            for v in (("",) if skip_shifts else ("", "_up", "_down")):
+                weight_map.update({
+                    f"sum_top_pt_weight{v}": (events[f"top_pt_weight{v}"], Ellipsis),
+                    f"sum_top_pt_weight{v}_selected": (events[f"top_pt_weight{v}"], results.event),
+                })
 
     group_map = {
         # per process
