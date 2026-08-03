@@ -337,7 +337,7 @@ def plot_efficiencies(
             "color": "r",
             "linestyle": "none",
             "norm": norm_hist_1,
-            "label": r"$t\bar{t}$",
+            "label": r"$t\bar{t}$" if list(hists[0].keys())[1].name == "tt" else list(hists[0].keys())[1].name,
             "capsize": 3,
         },
     }
