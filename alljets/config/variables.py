@@ -395,7 +395,7 @@ def add_variables(cfg: od.Config) -> None:
         cfg,
         name="ht",
         expression="ht",
-        binning=(20, 0, 2000.0),
+        binning=(40, 0, 2000.0),
         unit="GeV",
         x_title="$H_T$",
     )
@@ -939,6 +939,122 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjets_phi",
         expression="KinFitJets.phi",
         binning=(34, -3.4, 3.4),
+        aux={"overflow": False, "underflow": False},
+        x_title=r"$\phi$ of all jets",
+    )
+    ###############################################################################
+    #                       KinFitJets Kinematics                                 #
+    #       Leading Six Jets within |eta| < 2.4 & pt >= 40 GeV                    #
+    #                       For JVM plotting only                                 #
+    ###############################################################################
+    add_variable(
+        cfg,
+        name="kinfitjet1_eta_jvm",
+        expression="KinFitJets.eta[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_eta_binning,
+        x_title=r"Jet 1 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet1_phi_jvm",
+        expression="KinFitJets.phi[:,0]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_phi_binning,
+        x_title=r"Jet 1 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet2_eta_jvm",
+        expression="KinFitJets.eta[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_eta_binning,
+        x_title=r"Jet 2 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet2_phi_jvm",
+        expression="KinFitJets.phi[:,1]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_phi_binning,
+        x_title=r"Jet 2 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet3_eta_jvm",
+        expression="KinFitJets.eta[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_eta_binning,
+        x_title=r"Jet 3 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet3_phi_jvm",
+        expression="KinFitJets.phi[:,2]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_phi_binning,
+        x_title=r"Jet 3 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet4_eta_jvm",
+        expression="KinFitJets.eta[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_eta_binning,
+        x_title=r"Jet 4 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet4_phi_jvm",
+        expression="KinFitJets.phi[:,3]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_phi_binning,
+        x_title=r"Jet 4 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet5_eta_jvm",
+        expression="KinFitJets.eta[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_eta_binning,
+        x_title=r"Jet 5 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet5_phi_jvm",
+        expression="KinFitJets.phi[:,4]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_phi_binning,
+        x_title=r"Jet 5 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet6_eta_jvm",
+        expression="KinFitJets.eta[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_eta_binning,
+        x_title=r"Jet 6 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjet6_phi_jvm",
+        expression="KinFitJets.phi[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=jvm_phi_binning,
+        x_title=r"Jet 6 $\phi$",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjets_eta_jvm",
+        expression="KinFitJets.eta",
+        binning=jvm_eta_binning,
+        x_title=r"$\eta$ of all jets",
+    )
+    add_variable(
+        cfg,
+        name="kinfitjets_phi_jvm",
+        expression="KinFitJets.phi",
+        binning=jvm_phi_binning,
         aux={"overflow": False, "underflow": False},
         x_title=r"$\phi$ of all jets",
     )
@@ -2101,6 +2217,32 @@ def add_variables(cfg: od.Config) -> None:
         binning=(4, -1.5, 2.5),
         x_title=r"Combination types: -1: NA 0: unmatched, 1: wrong, 2: correct",
     )
+
+
+jvm_eta_binning = [
+    -2.4, -2.172, -2.043, -1.93, -1.83, -1.74, -1.653, -1.566, -1.479, -1.392, -1.305, -1.218,
+    -1.131, -1.044, -0.957, -0.879, -0.783, -0.696, -0.609, -0.522, -0.435, -0.348, -0.261, -0.174,
+    -0.087, 0.0, 0.087, 0.174, 0.261, 0.348, 0.435, 0.522, 0.609, 0.696, 0.783, 0.879, 0.957, 1.044,
+    1.131, 1.218, 1.305, 1.392, 1.479, 1.566, 1.653, 1.74, 1.83, 1.93, 2.043, 2.172, 2.4,
+]
+
+jvm_phi_binning = [
+    -3.1415926536, -3.0543261909902775, -2.9670597283905553, -2.879793265790833, -2.792526803191111,
+    -2.705260340591389, -2.6179938779916667, -2.5307274153919446, -2.443460952792222, -2.3561944901925,
+    -2.2689280275927777, -2.1816615649930555, -2.0943951023933334, -2.0071286397936112, -1.9198621771938889,
+    -1.8325957145941667, -1.7453292519944443, -1.6580627893947222, -1.570796326795, -1.4835298641952777,
+    -1.3962634015955555, -1.3089969389958334, -1.221730476396111, -1.1344640137963888, -1.0471975511966667,
+    -0.9599310885969444, -0.8726646259972222, -0.7853981633975, -0.6981317007977778, -0.6108652381980555,
+    -0.5235987755983333, -0.4363323129986111, -0.3490658503988889, -0.26179938779916667, -0.174532925199444,
+    -0.08726646259972222, 0.0, 0.08726646259972222, 0.17453292519944444, 0.26179938779916667,
+    0.3490658503988889, 0.4363323129986111, 0.5235987755983333, 0.6108652381980555, 0.6981317007977778,
+    0.7853981633975, 0.8726646259972222, 0.9599310885969444, 1.0471975511966667, 1.1344640137963888,
+    1.221730476396111, 1.3089969389958334, 1.3962634015955555, 1.4835298641952777, 1.570796326795,
+    1.6580627893947222, 1.7453292519944443, 1.8325957145941667, 1.9198621771938889, 2.0071286397936112,
+    2.0943951023933334, 2.1816615649930555, 2.2689280275927777, 2.3561944901925, 2.443460952792222,
+    2.5307274153919446, 2.6179938779916667, 2.705260340591389, 2.792526803191111, 2.879793265790833,
+    2.9670597283905553, 3.0543261909902775, 3.1415926536,
+]
 
 
 # helper to add a variable to the config with some defaults
