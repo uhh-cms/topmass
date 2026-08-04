@@ -46,6 +46,13 @@ class _PlotBtagEfficiencyBase(
     # Mark as configurable via command line
     single_config = True
 
+    # Add plot_suffix parameter
+    plot_suffix = law.CSVParameter(
+        default=[],
+        description="suffix to append to plot output filenames; pass multiple values to create multiple variants",
+        brace_expand=True,
+    )
+
 
 class PlotBtagEfficiency(_PlotBtagEfficiencyBase):
     """
@@ -154,21 +161,22 @@ class PlotBtagEfficiency(_PlotBtagEfficiencyBase):
     def output(self) -> Dict[str, law.target.BaseTarget]:
         """
         Define output targets for this task.
-
-        Returns:
-            Dictionary containing:
-            - eff_hists: Pickle file with combined histograms
-            - plots_{flavor}: PDF files with efficiency plots for each flavor
         """
+        # Build suffix string
+        suffix_str = ""
+        if self.plot_suffix:
+            # If plot_suffix is a list, join with underscore
+            suffix_str = "_" + "_".join(self.plot_suffix)
+
         outputs = {
             "eff_hists": self.target(self.EFF_HISTS_FILENAME),
         }
 
-        # Create output targets for each flavor
+        # Create output targets for each flavor with suffix
         for flavor in self.PLOT_FLAVORS:
             flavor_name = self._get_flavor_name(flavor)
             outputs[f"plots_{flavor}"] = self.target(
-                f"{self.OUTPUT_BASE}_{flavor_name}.pdf",
+                f"{self.OUTPUT_BASE}_{flavor_name}{suffix_str}.pdf",
             )
 
         return outputs
@@ -247,6 +255,9 @@ class PlotBtagEfficiency(_PlotBtagEfficiencyBase):
         """
         # Get base parameters from parent class
         plot_params = self.get_plot_parameters()
+        # Add plot suffix to parameters if it should affect the plot
+        if hasattr(self, "plot_suffix") and self.plot_suffix:
+            plot_params["plot_suffix"] = "_".join(self.plot_suffix)
 
         # Override specific parameters for b-tag efficiency plots
         plot_params.update({
