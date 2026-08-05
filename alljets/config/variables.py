@@ -1058,6 +1058,21 @@ def add_variables(cfg: od.Config) -> None:
         aux={"overflow": False, "underflow": False},
         x_title=r"$\phi$ of all jets",
     )
+    add_variable(
+        cfg,
+        name="seljets_eta_jvm",
+        expression="SelectedJets.eta",
+        binning=jvm_eta_binning,
+        x_title=r"$\eta$ of all jets",
+    )
+    add_variable(
+        cfg,
+        name="seljets_phi_jvm",
+        expression="SelectedJets.phi",
+        binning=jvm_phi_binning,
+        aux={"overflow": False, "underflow": False},
+        x_title=r"$\phi$ of all jets",
+    )
     ###############################################################################
     #                           FitJet reco kinematics                            #
     #                Reco values of the six jets that entered the fit             #
