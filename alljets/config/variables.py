@@ -952,7 +952,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet1_eta_jvm",
         expression="KinFitJets.eta[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_eta_binning,
+        binning=(48, -2.4, 2.4),
         x_title=r"Jet 1 $\eta$",
     )
     add_variable(
@@ -960,7 +960,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet1_phi_jvm",
         expression="KinFitJets.phi[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_phi_binning,
+        binning=(62, -math.pi, math.pi),
         x_title=r"Jet 1 $\phi$",
     )
     add_variable(
@@ -968,7 +968,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet2_eta_jvm",
         expression="KinFitJets.eta[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_eta_binning,
+        binning=(48, -2.4, 2.4),
         x_title=r"Jet 2 $\eta$",
     )
     add_variable(
@@ -976,7 +976,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet2_phi_jvm",
         expression="KinFitJets.phi[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_phi_binning,
+        binning=(62, -math.pi, math.pi),
         x_title=r"Jet 2 $\phi$",
     )
     add_variable(
@@ -984,7 +984,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet3_eta_jvm",
         expression="KinFitJets.eta[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_eta_binning,
+        binning=(48, -2.4, 2.4),
         x_title=r"Jet 3 $\eta$",
     )
     add_variable(
@@ -992,7 +992,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet3_phi_jvm",
         expression="KinFitJets.phi[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_phi_binning,
+        binning=(62, -math.pi, math.pi),
         x_title=r"Jet 3 $\phi$",
     )
     add_variable(
@@ -1000,7 +1000,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet4_eta_jvm",
         expression="KinFitJets.eta[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_eta_binning,
+        binning=(48, -2.4, 2.4),
         x_title=r"Jet 4 $\eta$",
     )
     add_variable(
@@ -1008,7 +1008,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet4_phi_jvm",
         expression="KinFitJets.phi[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_phi_binning,
+        binning=(62, -math.pi, math.pi),
         x_title=r"Jet 4 $\phi$",
     )
     add_variable(
@@ -1016,7 +1016,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet5_eta_jvm",
         expression="KinFitJets.eta[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_eta_binning,
+        binning=(48, -2.4, 2.4),
         x_title=r"Jet 5 $\eta$",
     )
     add_variable(
@@ -1024,7 +1024,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet5_phi_jvm",
         expression="KinFitJets.phi[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_phi_binning,
+        binning=(62, -math.pi, math.pi),
         x_title=r"Jet 5 $\phi$",
     )
     add_variable(
@@ -1032,7 +1032,7 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet6_eta_jvm",
         expression="KinFitJets.eta[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_eta_binning,
+        binning=(48, -2.4, 2.4),
         x_title=r"Jet 6 $\eta$",
     )
     add_variable(
@@ -1040,38 +1040,36 @@ def add_variables(cfg: od.Config) -> None:
         name="kinfitjet6_phi_jvm",
         expression="KinFitJets.phi[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=jvm_phi_binning,
+        binning=(62, -math.pi, math.pi),
         x_title=r"Jet 6 $\phi$",
     )
     add_variable(
         cfg,
         name="kinfitjets_eta_jvm",
         expression="KinFitJets.eta",
-        binning=jvm_eta_binning,
-        x_title=r"$\eta$ of all jets",
+        binning=(48, -2.4, 2.4),
+        x_title=r"Jet $\eta$",
     )
     add_variable(
         cfg,
         name="kinfitjets_phi_jvm",
         expression="KinFitJets.phi",
-        binning=jvm_phi_binning,
-        aux={"overflow": False, "underflow": False},
-        x_title=r"$\phi$ of all jets",
+        binning=(62, -math.pi, math.pi),
+        x_title=r"Jet $\phi$",
     )
     add_variable(
         cfg,
         name="seljets_eta_jvm",
         expression="SelectedJets.eta",
-        binning=jvm_eta_binning,
-        x_title=r"$\eta$ of all jets",
+        binning=(48, -2.4, 2.4),
+        x_title=r"Jet $\eta$",
     )
     add_variable(
         cfg,
         name="seljets_phi_jvm",
         expression="SelectedJets.phi",
-        binning=jvm_phi_binning,
-        aux={"overflow": False, "underflow": False},
-        x_title=r"$\phi$ of all jets",
+        binning=(50, -math.pi, math.pi),
+        x_title=r"Jet $\phi$",
     )
     ###############################################################################
     #                           FitJet reco kinematics                            #
