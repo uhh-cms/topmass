@@ -117,6 +117,7 @@ incl_category_ids = category_ids.derive("incl_category_ids",
         IF_RUN_2_2018("HLT.PFHT400_SixPFJet32"),
     },
     exposed=True,
+    jet_selection_mode="analysis",
 )
 def default(
     self: Selector,
@@ -191,7 +192,7 @@ def default(
     results += veto_result
 
     # jet selection, using the jet veto map mask and jet Id criteria
-    events, jet_results = self[jet_selection](events, mode="analysis", **kwargs)
+    events, jet_results = self[jet_selection](events, mode=self.jet_selection_mode, **kwargs)
     results += jet_results
 
     # combined event selection after all steps
@@ -401,3 +402,6 @@ def default_post_init(self: Selector, task: law.Task, **kwargs) -> None:
     if is_nominal:
         self.produces.add("pdf_hessian_*_weight_{up,down}")
         self.produces.add("pdf_alphas_weight_{up,down}")
+
+
+default_NoJVM = default.derive("default_NoJVM", cls_dict={"jet_selection_mode": "trigger"})
