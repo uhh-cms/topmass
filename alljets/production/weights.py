@@ -188,37 +188,41 @@ def normalized_trig_weight_post_init(self: Producer, task: law.Task, **kwargs) -
 def normalized_trig_weight_requires(self: Producer, task: law.Task, reqs: dict, **kwargs) -> None:
     from columnflow.tasks.selection import MergeSelectionStats
 
-    reqs["selection_stats"] = MergeSelectionStats.req_different_branching(
-        task,
-        branch=-1 if task.is_workflow() else 0,
-    )
+    # find datasets sharing the same prefix
+    prefix = task.dataset_inst.name.split("_")[0]
+    datasets = [d for d in task.config_inst.datasets if d.name.startswith(f"{prefix}_")]
+
+    reqs["selection_stats"] = {
+        d.name: MergeSelectionStats.req_different_branching(
+            task,
+            dataset=d.name,
+            branch=-1 if task.is_workflow() else 0,
+        )
+        for d in datasets
+    }
 
 
 @normalized_trig_weight.setup
 def normalized_trig_weight_setup(self: Producer, task: law.Task, inputs: dict, **kwargs) -> None:
 
-    stats = task.cached_value(
-        key="selection_stats",
-        func=lambda: inputs["selection_stats"]["stats"].load(formatter="json"),
-    )
+    total_events = 0.0
+    sum_weights = {name: 0.0 for name in self.trig_weight_names}
 
-    # Store the average nominal trigger weight separately since
-    # all trigger variations are normalized relative to it.
+    for dataset_name, stats_input in inputs["selection_stats"].items():
+        stats = stats_input["stats"].load(formatter="json")
+        n_sel = stats.get("num_events_selected", 0.0)
+        total_events += n_sel
+
+        for weight_name in self.trig_weight_names:
+            w_sel = stats.get(f"sum_{weight_name}_selected", 0.0)
+            sum_weights[weight_name] += w_sel
+
     self.nominal_trig_average = None
     self.average_trig_weights = {}
 
-    total_events = stats.get("num_events_selected", 1.0)
-
-    # Trigger-weight averages are computed after event selection,
-    # matching the phase space where trigger scale factors are applied.
-
     for weight_name in self.trig_weight_names:
-        sum_key = f"sum_{weight_name}_selected"
-        total_weight = stats.get(sum_key)
-
-        avg = safe_div(total_weight, total_events) if total_weight is not None else 1.0
+        avg = safe_div(sum_weights[weight_name], total_events)
         self.average_trig_weights[weight_name] = avg
-
         if weight_name == "trig_weight":
             self.nominal_trig_average = avg
 
