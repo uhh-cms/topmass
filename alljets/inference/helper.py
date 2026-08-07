@@ -8,6 +8,21 @@ from __future__ import annotations
 
 
 from columnflow.inference import InferenceModel, ParameterType, ParameterTransformation
+from columnflow.inference.cms.datacard import DatacardWriter
+
+# --- workaround for a columnflow bug: plain shape-type parameters (no transformations)
+# --- are constructed with effect=None, which DatacardWriter.write() cannot encode.
+# --- see: https://github.com/columnflow/columnflow/blob/master/columnflow/inference/cms/datacard.py
+_orig_modify_parameter_effect = DatacardWriter.modify_parameter_effect
+
+
+def _modify_parameter_effect(self, cat_obj, proc_obj, param_obj, effect):
+    if effect is None and param_obj.type.is_shape:
+        effect = 1.0
+    return _orig_modify_parameter_effect(self, cat_obj, proc_obj, param_obj, effect)
+
+
+DatacardWriter.modify_parameter_effect = _modify_parameter_effect
 
 
 def add_processes(im: InferenceModel) -> None:
