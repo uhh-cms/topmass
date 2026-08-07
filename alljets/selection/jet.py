@@ -130,39 +130,32 @@ def jet_selection(
     # Combine
     sel_bjet_2or0_leading6 = leading6_2BTag_sel | leading6_0BTag_sel
 
-    # Step 7: Trigger selection (skip for QCD MC)
-    if not self.dataset_inst.name.startswith("qcd"):
-        ones = ak.ones_like(jet_sel)
+    # Step 7: Trigger selection
+    ones = ak.ones_like(jet_sel)
 
-        # Signal trigger
-        if not self.jet_trigger:
-            jet_trigger_sel = ones
-        else:
-            jet_trigger_sel = ak.zeros_like(ones)
-            for trig in self.jet_trigger:
-                jet_trigger_sel = jet_trigger_sel | events.HLT[trig]
-
-        # Bkg trigger
-        if not self.alt_jet_trigger:
-            alt_jet_trigger_sel = ones
-        else:
-            alt_jet_trigger_sel = ak.zeros_like(ones)
-            for trig in self.alt_jet_trigger:
-                alt_jet_trigger_sel = alt_jet_trigger_sel | events.HLT[trig]
-
-        # Base trigger for trigger correction
-        if not self.jet_base_trigger:
-            jet_base_trigger_sel = ones
-        else:
-            jet_base_trigger_sel = ak.zeros_like(ones)
-            for trig in self.jet_base_trigger:
-                jet_base_trigger_sel = jet_base_trigger_sel | events.HLT[trig]
-
-    else:
-        ones = ak.ones_like(jet_sel)
+    # Signal trigger
+    if not self.jet_trigger:
         jet_trigger_sel = ones
+    else:
+        jet_trigger_sel = ak.zeros_like(ones)
+        for trig in self.jet_trigger:
+            jet_trigger_sel = jet_trigger_sel | events.HLT[trig]
+
+    # Bkg trigger
+    if not self.alt_jet_trigger:
         alt_jet_trigger_sel = ones
+    else:
+        alt_jet_trigger_sel = ak.zeros_like(ones)
+        for trig in self.alt_jet_trigger:
+            alt_jet_trigger_sel = alt_jet_trigger_sel | events.HLT[trig]
+
+    # Base trigger for trigger correction
+    if not self.jet_base_trigger:
         jet_base_trigger_sel = ones
+    else:
+        jet_base_trigger_sel = ak.zeros_like(ones)
+        for trig in self.jet_base_trigger:
+            jet_base_trigger_sel = jet_base_trigger_sel | events.HLT[trig]
 
     signal_or_bkg_trigger = jet_trigger_sel | alt_jet_trigger_sel
 
