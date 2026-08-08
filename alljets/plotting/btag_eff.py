@@ -270,6 +270,22 @@ def btag_efficiency(
     if "exp" in cms_kwargs:
         default_style_config["cms_label_cfg"]["exp"] = cms_kwargs["exp"]
 
+    levels = np.arange(0.0, 1.1, 0.1)
+
+    cmap = plt.get_cmap("viridis", len(levels) - 1)
+    norm = mpl.colors.BoundaryNorm(levels, cmap.N)
+
+    style_config = law.util.merge_dicts(
+        default_style_config,
+        {
+            "plot2d_cfg": {
+                "cmap": cmap,
+                "norm": norm,
+            },
+        },
+        deep=True,
+    )
+
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
     fig, axes = plot_2d(
