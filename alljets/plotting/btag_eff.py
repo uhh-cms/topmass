@@ -223,11 +223,6 @@ def btag_efficiency(
     pt_edges = pt_variable_inst.binning
     flavor_label = FLAVOR_LABELS.get(flavor, str(flavor))
 
-    process_labels = [
-        p.label if isinstance(p, od.Process) else str(p)
-        for p in resolved_procs
-    ]
-
     base_style_config = prepare_style_config(
         config_inst=config_inst,
         category_inst=category_inst,
