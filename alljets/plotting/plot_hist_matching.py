@@ -91,12 +91,11 @@ def plot_hist_matching_combined(
     Process-adaptive matching-type plot. Handles any combination of tt, st, qcd/qcd_est
     and data that is passed in via `--processes`,
     """
+
     variable_inst = variable_insts[0]
-
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
-    hists = apply_density(hists, density)
-
-    h = hists[0]  # process_inst -> hist
+    h = hists[0]
+    h = apply_density(h, density)
 
     tt_entry = None
     block_hists = OrderedDict()

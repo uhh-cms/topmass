@@ -190,10 +190,14 @@ def btag_efficiency(
     )
 
     combined_h = None
+
     for group_name, hist_obj in hists.items():
-        h = hist_obj
+        # Remove the (20, 30) GeV pT bin
+        h = hist_obj[pt_slice]
+
         if flavor_axis is not None:
             h = h[{flavor_axis: hist.loc(flavor)}]
+
         combined_h = h if combined_h is None else combined_h + h
 
     eff_h, total_cat, wp_cat = _efficiency_hist(combined_h, wp_axis, wp_label)
@@ -218,12 +222,6 @@ def btag_efficiency(
 
     pt_edges = pt_variable_inst.binning
     flavor_label = FLAVOR_LABELS.get(flavor, str(flavor))
-
-    process_labels = [
-        p.label if isinstance(p, od.Process) else str(p)
-        for p in resolved_procs
-    ]
-    process_labels_joined = ", ".join(process_labels)
 
     base_style_config = prepare_style_config(
         config_inst=config_inst,
@@ -250,7 +248,7 @@ def btag_efficiency(
                 "title_fontsize": 24,
                 "handles": [mpl.lines.Line2D([0], [0], lw=0)],
                 "fontsize": 24,
-                "labels": [process_labels_joined],
+                # "labels": [process_labels_joined],
                 "ncol": 1,
                 "loc": "upper left",
                 "handlelength": 0,
@@ -305,7 +303,38 @@ def btag_efficiency(
         **kwargs,
     )
 
+    # Convert bin edges to numpy arrays
+    pt_edges = np.asarray(pt_variable_inst.binning, dtype=float)
+    eta_edges = np.asarray(eta_variable_inst.binning, dtype=float)
+
+    # Set x-axis range and annotate efficiency values
     for ax in axes:
         ax.set_xlim(pt_edges[0], pt_edges[-1])
+
+        # Geometric bin centers for logarithmic pT axis
+        pt_centers = np.sqrt(pt_edges[:-1] * pt_edges[1:])
+
+        # Arithmetic bin centers for linear eta axis
+        eta_centers = 0.5 * (eta_edges[:-1] + eta_edges[1:])
+
+        # Add efficiency values to the center of each bin
+        for ix, pt_center in enumerate(pt_centers):
+            for iy, eta_center in enumerate(eta_centers):
+                value = eff_h.values()[ix, iy]
+                if flavor == 0:
+                    display_value = value * 1e2
+                    text = f"${display_value:.2f}$\n$\\times$\n$10^{{-2}}$"
+                else:
+                    text = f"{value:.2f}"
+                if np.isfinite(value):
+                    ax.text(
+                        pt_center,
+                        eta_center - 0.05 if flavor == 0 else eta_center,
+                        text,
+                        ha="center",
+                        va="center",
+                        color="white",
+                        fontsize=14 if flavor != 0 else 12,
+                    )
 
     return fig, axes
