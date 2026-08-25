@@ -270,16 +270,17 @@ def add_config(
     cfg.x.default_selector_steps = "default"
 
     cfg.x.custom_style_config_groups = {
-        "default": {
+        "DEFAULT": {
             "legend_cfg": {
                 "ncols": 2,
-                "fontsize": 16,
+                "columnspacing": 0.5,
+                "fontsize": 20,
                 "bbox_to_anchor": (0., 0., 1., 1.),
             },
             "annotate_cfg": {
                 "xy": (0.05, 0.95),
                 "xycoords": "axes fraction",
-                "fontsize": 16,
+                "fontsize": 20,
             },
         },
         "default_rax10": {
@@ -292,7 +293,7 @@ def add_config(
             #     "ylim": (-10, 10),
             # },
             "rax_cfg": {
-                "ylim": (0.9, 1.1),
+                "ylim": (0.85, 1.15),
             },
             # "annotate_cfg": {
             #     "xy": (0.05, 0.95),
