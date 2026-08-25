@@ -17,13 +17,13 @@ logger = logging.getLogger("topmass")
 # Loading data
 BASE_PATH = (
     "/data/dust/user/griesinl/aj_store/analysis_aj/cf.ProduceColumns/2017_v9/"
-    "tt_*_powheg/nominal/calib__default/sel__default/"
+    "tt_*_powheg/nominal/calib__default/sel__default__steps_json_met_filter_pv_67b7c17ff4/"
     "red__cf_default/prod__kinFitMatch/{version}/columns_*.parquet"
 )
 
 BASE_PATH_CAT = (
     "/data/dust/user/griesinl/aj_store/analysis_aj/cf.ProduceColumns/2017_v9/"
-    "tt_*_powheg/nominal/calib__default/sel__default/"
+    "tt_*_powheg/nominal/calib__default/sel__default__steps_json_met_filter_pv_67b7c17ff4/"
     "red__cf_default/prod__default/{version}/columns_*.parquet"
 )
 
@@ -214,7 +214,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--version", type=str, default="v1_TopMass")
+    parser.add_argument("--version", type=str, default="v2_TopMass")
 
     parser.add_argument("--vars", type=str, default="all")
 
