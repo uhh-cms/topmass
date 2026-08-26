@@ -39,6 +39,7 @@ from .jet_builder import (
     build_reco_R_bq,
     build_avg_R_bq,
     build_xb_avg,
+    build_R_bq,
 )
 
 ak = maybe_import("awkward")
@@ -1834,6 +1835,91 @@ def add_variables(cfg: od.Config) -> None:
         binning=(40, 0, 4),
         unit="",
         x_title=r"$R^{reco}_{bq_{avg}}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_avg_percentile",
+        expression=build_avg_R_bq,
+        aux={"inputs": build_avg_R_bq.inputs, "overflow": False, "underflow": False},
+        binning=[0.0890251, 0.349272, 0.439582, 0.525528, 0.618005, 0.725864, 0.86593, 1.08058, 8.28784],
+        unit="",
+        x_title=r"$R^{reco}_{bq_{avg}}$",
+    )
+    ###############################################################################
+    #                    Vectorial B vs Q system pt comparisons                   #
+    ###############################################################################
+    build_R_bq.inputs = ["FitJet.reco.{pt,eta,phi,mass}"]
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec",
+        expression=partial(build_R_bq, which="ratio", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=(50, 0, 10),
+        unit="",
+        x_title=r"$R_{bq}^{\mathrm{vec}}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_percentile",
+        expression=partial(build_R_bq, which="ratio", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=[0.00131277, 0.426814, 0.603943, 0.74341, 0.872158, 1.01512, 1.2153, 1.63236, 814.056],
+        unit="",
+        x_title=r"$R_{bq}^{\mathrm{vec}}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_diff",
+        expression=partial(build_R_bq, which="diff", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=(100, -300, 300),
+        unit="GeV",
+        x_title=r"$\vec{p}_T^{\,b} - \vec{p}_T^{\,q}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_diff_percentile",
+        expression=partial(build_R_bq, which="diff", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=[-493.378, -62.6503, -38.7841, -23.3966, -10.8704, 1.18921, 14.7319, 34.1872, 464.147],
+        unit="GeV",
+        x_title=r"$\vec{p}_T^{\,b} - \vec{p}_T^{\,q}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_rel_diff_sum",
+        expression=partial(build_R_bq, which="rel_diff_sum", vectorial=True),
+        aux={"inputs": build_R_bq.inputs, "overflow": False, "underflow": False},
+        binning=(50, -1, 1),
+        unit="",
+        x_title=r"$(\vec{p}_T^{\,b} - \vec{p}_T^{\,q}) / (\vec{p}_T^{\,b} + \vec{p}_T^{\,q})$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_rel_diff_sum_percentile",
+        expression=partial(build_R_bq, which="rel_diff_sum", vectorial=True),
+        aux={"inputs": build_R_bq.inputs, "overflow": False, "underflow": False},
+        binning=[-0.997378, -0.401724, -0.246927, -0.147177, -0.0682861, 0.00750142, 0.0971866, 0.240225, 0.997546],
+        unit="",
+        x_title=r"$(\vec{p}_T^{\,b} - \vec{p}_T^{\,q}) / (\vec{p}_T^{\,b} + \vec{p}_T^{\,q})$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_rel_diff_q",
+        expression=partial(build_R_bq, which="rel_diff_q", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=(50, -2, 5),
+        unit="",
+        x_title=r"$(\vec{p}_T^{\,b} - \vec{p}_T^{\,q}) / \vec{p}_T^{\,q}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_rel_diff_q_percentile",
+        expression=partial(build_R_bq, which="rel_diff_q", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=[-0.998687, -0.573186, -0.396057, -0.25659, -0.127842, 0.0151162, 0.215297, 0.632358, 813.056],
+        unit="",
+        x_title=r"$(\vec{p}_T^{\,b} - \vec{p}_T^{\,q}) / \vec{p}_T^{\,q}$",
     )
     ###############################################################################
     #                            Features with coarse binning                     #
