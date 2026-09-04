@@ -1,0 +1,12 @@
+# version 1
+awkward==2.8.1
+uproot==5.6.0
+pyarrow==19.0.1
+dask-awkward==2025.3.0
+coffea==2024.11.0
+awkward_cpp
+h5py
+numpy
+onnx
+onnxruntime
+# the rest is pulled by spanet
