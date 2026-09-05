@@ -1764,6 +1764,15 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
+        name="fit_Top1_mass_peak_percentile",
+        expression=partial(build_top1jet, which="mass"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=[102.968, 161.264, 167.125, 171.509, 175.872, 181.669, 202.565, 273.82, 399.945],
+        unit="GeV",
+        x_title=r"$m_{t}^{fit}$",
+    )
+    add_variable(
+        cfg,
         name="fit_Top1_mass_percentile",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
@@ -1814,6 +1823,15 @@ def add_variables(cfg: od.Config) -> None:
         expression=build_reco_R_bq,
         aux={"inputs": build_reco_R_bq.inputs},
         binning=[0.0884285, 0.339041, 0.421465, 0.498023, 0.579106, 0.672588, 0.795516, 0.991731, 8.17397],
+        unit="",
+        x_title=r"$R^{reco}_{bq}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_peak_percentile",
+        expression=build_reco_R_bq,
+        aux={"inputs": build_reco_R_bq.inputs},
+        binning=[0.0890864, 0.337762, 0.419616, 0.495674, 0.575975, 0.668508, 0.789883, 0.983505, 3.99],
         unit="",
         x_title=r"$R^{reco}_{bq}$",
     )
@@ -1984,7 +2002,7 @@ def add_variables(cfg: od.Config) -> None:
         name="reco_W_mass_avg_coarse",
         expression=partial(build_avg_w_mass),
         aux={"inputs": build_avg_w_mass.inputs},
-        binning=(15, 60, 120),
+        binning=(15, 60, 110),
         unit="GeV",
         x_title=r"$m_{W_{avg}}^{reco}$",
     )
@@ -1993,8 +2011,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fit_deltaRbb_coarse",
         expression="FitRbb",
         null_value=EMPTY_FLOAT,
-        binning=(16, 2, 5.2),
-        x_title=r"$\Delta R_{b}$ ",
+        binning=(15, 2, 5),
+        x_title=r"$\Delta R_{b\bar{b}}$ ",
     )
     add_variable(
         cfg,
@@ -2105,6 +2123,15 @@ def add_variables(cfg: od.Config) -> None:
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 6 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_coarse",
+        expression=build_reco_R_bq,
+        aux={"inputs": build_reco_R_bq.inputs, "overflow": False, "underflow": False},
+        binning=(16, 0, 4),
+        unit="",
+        x_title=r"$R^{reco}_{bq}$",
     )
 ############################################################
 #              Observables for b tagging efficiency        #
