@@ -382,7 +382,7 @@ def plot_shifted_variable(
             # Nominal ratio is exactly 1.0 with zero uncertainty
             plot_cfg["ratio_kwargs"]["yerr"] = False
 
-        elif not shift_inst.has_tag("disjoint_from_nominal"):
+        elif not (shift_inst.has_tag("disjoint_from_nominal") or shift_inst.name.startswith(("jec", "jer"))):
             # Correlated shift: compute systematic uncertainty
             syst_err = _weight_variation_yerr(h, nominal_hist)
 
