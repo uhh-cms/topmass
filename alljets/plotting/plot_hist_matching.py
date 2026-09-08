@@ -27,7 +27,7 @@ from collections import OrderedDict
 import law
 from columnflow.plotting.plot_util import (apply_density, apply_variable_settings, prepare_style_config)
 from columnflow.util import maybe_import
-from modules.columnflow.columnflow.plotting.plot_all import plot_all
+from alljets.plotting.aj_plot_all import aj_plot_all
 from modules.columnflow.columnflow.plotting.plot_util import get_cms_label
 
 hist = maybe_import("hist")
@@ -91,7 +91,7 @@ def plot_hist_matching_combined(
     Process-adaptive matching-type plot. Handles any combination of tt, st, qcd/qcd_est
     and data that is passed in via `--processes`,
     """
-
+    cut_vis = kwargs.get("cut_vis", None)
     variable_inst = variable_insts[0]
     hists = apply_variable_settings(hists, variable_insts, variable_settings)
     h = hists[0]
@@ -216,6 +216,18 @@ def plot_hist_matching_combined(
             "ratio_kwargs": {"norm": total_mc.values() if total_mc is not None else None},
         }
 
+    if cut_vis == "vline":
+        plot_config["cut_region"] = {
+            "method": "draw_vline",
+            "kwargs": {
+                "x": 6.3 if variable_inst == "fitchi2" else 2,
+                "ymin": 0.0,
+                "ymax": 0.7,
+                "zorder": 10,
+                "color": "black",
+                "linestyle": "--",
+            },
+        }
     # --- style config ---
     default_style_config = prepare_style_config(
         config_inst=config_inst,
@@ -249,4 +261,4 @@ def plot_hist_matching_combined(
 
     style_config = law.util.merge_dicts(default_style_config, style_config, deep=True)
 
-    return plot_all(plot_config, style_config, **kwargs)
+    return aj_plot_all(plot_config, style_config, **kwargs)

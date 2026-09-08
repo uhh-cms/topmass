@@ -190,15 +190,15 @@ def _draw_block_separators(main_ax, rax, sep_positions):
     """Draw vertical separator lines between blocks in unrolled histograms."""
     # Outer separators: dashed black lines
     for pos in sep_positions["outer"]:
-        main_ax.axvline(pos, color="black", linestyle="--", linewidth=1.0, alpha=0.7, zorder=10)
+        main_ax.axvline(pos, color="black", linestyle="--", linewidth=1.0, alpha=0.8, zorder=10)
         if rax is not None:
-            rax.axvline(pos, color="black", linestyle="--", linewidth=1.0, alpha=0.7, zorder=10)
+            rax.axvline(pos, color="black", linestyle="--", linewidth=1.0, alpha=0.8, zorder=10)
 
     # Middle separators: dotted gray lines
     for pos in sep_positions["middle"]:
-        main_ax.axvline(pos, color="gray", linestyle=":", linewidth=0.8, alpha=0.5, zorder=9)
+        main_ax.axvline(pos, color="black", linestyle="-.", linewidth=1.0, alpha=0.8, zorder=9)
         if rax is not None:
-            rax.axvline(pos, color="gray", linestyle=":", linewidth=0.8, alpha=0.5, zorder=9)
+            rax.axvline(pos, color="black", linestyle="-.", linewidth=1.0, alpha=0.8, zorder=9)
 
 
 # Shift Label and Configuration Helpers
