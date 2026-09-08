@@ -309,7 +309,7 @@ def add_config(
         },
         "shift_plots_mtopPeak": {
             "ax_cfg": {
-                "xlim": (100, 250),
+                "xlim": (90, 250),
                 "ylabel": "Events / BinWidth",
             },
         },
@@ -321,7 +321,7 @@ def add_config(
         },
         "shift_plots_rbq": {
             "ax_cfg": {
-                "xlim": (0, 4),
+                "xlim": (-0.5, 4.5),
                 "ylabel": "Events / BinWidth",
             },
         },
