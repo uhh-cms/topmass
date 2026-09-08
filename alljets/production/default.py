@@ -31,6 +31,7 @@ from columnflow.columnar_util import attach_coffea_behavior as attach_coffea_beh
 
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.btag import btag_wp_weights
+from columnflow.production.cms.seeds import deterministic_seeds
 
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.production.normalization import normalization_weights
@@ -147,6 +148,9 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "RecoTop1.*",
         "RecoTop2.*",
         "fitCombinationType",
+        "FitTopMass",
+        "RecoWAvgMass",
+        "RecoRbq",
     },
 )
 def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -264,6 +268,16 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "FitTop1", Top1)
     events = set_ak_column(events, "FitTop2", Top2)
 
+    # Additional derived quantities (used for percentle binning)
+    FitTopMass = 0.5 * (Top1.mass + Top2.mass)
+    RecoWAvgMass = 0.5 * (RecoW1.mass + RecoW2.mass)
+    reco = events.FitJet.reco
+    RecoRbq = (reco[:, 0].pt + reco[:, 1].pt) / ak.sum(reco[:, 2:6].pt, axis=1)
+
+    events = set_ak_column(events, "FitTopMass", FitTopMass)
+    events = set_ak_column(events, "RecoWAvgMass", RecoWAvgMass)
+    events = set_ak_column(events, "RecoRbq", RecoRbq)
+
     return events
 
 
@@ -326,6 +340,7 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
+        deterministic_seeds,
         normalized_hdamp_weight,
         normalized_ps_weights,
         normalized_pdf_weights,
@@ -345,6 +360,7 @@ def cutflow_features(
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
+        deterministic_seeds,
         normalized_hdamp_weight,
         normalized_ps_weights,
         normalized_pdf_weights,
@@ -378,6 +394,7 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # Compute category ids used by later stages
     events = self[category_ids](events, **kwargs)
+    events = self[deterministic_seeds](events, **kwargs)
 
     if self.dataset_inst.is_mc:
         events = self[normalization_weights](events, **kwargs)
