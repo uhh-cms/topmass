@@ -205,7 +205,7 @@ def add_config(
     # DATASET GROUPS (for efficiency calculation)
     # ---------------------------------------------------------
     cfg.x.btag_wp_eff_groups = [
-        ["tt_*"], ["st_*"], ["qcd_*"],
+        ["tt_*", "st_*"], ["qcd_*"],
     ]
 
     # assign dataset tags based on these groups
@@ -260,6 +260,7 @@ def add_config(
     # (used in cutflow tasks)
     cfg.x.selector_step_groups = {
         "cutflow_sig": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
+        "spanet": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag"],
         "default": ["json", "met_filter", "pv", "SignalOrBkgTrigger",
                     "Lepton_Veto", "HT", "jet", "BTag20", "LeadingSix20BTag"],
         "ht_trigger": ["json", "met_filter", "pv", "BaseTrigger", "Lepton_Veto", "jet", "SixJets", "BTag"],
