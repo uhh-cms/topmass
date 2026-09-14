@@ -124,6 +124,33 @@ law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
     --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching_MC
 ```
 
+### SPANet
+
+Create trainings data files:
+```
+law run cf.MLTraining --ml-model spanet --version v2_Spanet  --configs 2018_v9  --selector-steps spanet  --branch 1
+```
+(Somehow I do not get any output files without the ```--branch 1``` option.)
+
+Run training on interactive GPU batch node (started with `condor_submit -i interactive_gpu.jdl`) :
+```
+. software/venvs/spanet_96371da6/bin/activate
+python -m spanet.train -of spanet_training.json --gpus 1 
+```
+
+
+Convert network to onnx:
+```
+. software/venvs/spanet_96371da6/bin/activate
+python -m spanet.export ./spanet_output/version_XX spanet.onnx```
+
+
+Evaluate netwerk:
+```
+law run cf.MLEvaluationWrapper --ml-model spanet --version v2_Spanet  --configs 2018_v9  --dataset tt_fh_powheg
+```
+
+
 ### Data Driven Background Estimation
 The phase space region of the fully hadronic decay channel is dominated by the QCD multijet background. However, the MC simulation for this background suffers from large cross sections and large event weights. This leads to jagged distribution when using the MC samples for the QCD background. Thus, a data-driven background estimation is used.
 
@@ -181,7 +208,9 @@ law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
 After the nominal workflow using the kinematic fit and the background estimation, datacards can be produced using the ```CreateDatacards``` task. The task takes an ```inference-model``` as input, of which we have two [```default_1D```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/inference/default_1D.py) and [```default_2D```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/inference/default_2D.py). 
 A [```helper```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/inference/helper.py) contains information about the processes and systematic uncertainties we want to write in the datacards.
 
-To create all datacards:
+To create the 1D datacards:
+```
+law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd  --version v1_TopMass  --configs 2017_v9  --selector default --cf.MergeHistograms-workflow htcondor --cf.MergeHistograms-pilot --htcondor-memory 1700MB --htcondor-runtime 1h --workers 1000 --tasks-per-job 20 
 ```
 law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd   --version v2_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3
 law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling   --version v2_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3

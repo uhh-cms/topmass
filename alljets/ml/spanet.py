@@ -25,6 +25,7 @@ onnxruntime = maybe_import("onnxruntime")
 prediction_selection = maybe_import("spanet.network.prediction_selection")
 extract_predictions = getattr(prediction_selection, "extract_predictions", None)
 
+
 class SpaNetModel(MLModel):
     def __init__(self, *args, folds: int | None = None, **kwargs, ):
         # mark the model as accepting only a single config
@@ -36,6 +37,8 @@ class SpaNetModel(MLModel):
         # (before being set, self.folds refers to a class-level attribute)
         self.folds = folds or self.folds
         self.max_njets = 10
+        self.max_njets = getattr(self.parameters, "max_njets", 10)
+        self.onnx_file = getattr(self.parameters, "onnx_file", "./spanet.onnx")
         self.matches = ["b1", "w1q1", "w1q2", "b2", "w2q1", "w2q2"]
 
     def setup(self):
@@ -48,7 +51,7 @@ class SpaNetModel(MLModel):
                     binning=(20, -1.0, self.max_njets),
                     x_title=f"{self.cls_name} SPANet {name}",
                 )
-        for name in ["prob1", "prob2"]:
+        for name in ["prob1", "prob2", "complete", "partial"]:
             if f"{self.cls_name}.{name}" not in self.config_inst.variables:
                 self.config_inst.add_variable(
                     name=f"{self.cls_name}.{name}",
@@ -121,49 +124,26 @@ class SpaNetModel(MLModel):
         h5_target_t2b = fout.create_dataset("TARGETS/t2/b", (1000,), dtype='i', maxshape=(None,), chunks=1000)
         h5_target_t2q1 = fout.create_dataset("TARGETS/t2/q1", (1000,), dtype='i', maxshape=(None,), chunks=1000)
         h5_target_t2q2 = fout.create_dataset("TARGETS/t2/q2", (1000,), dtype='i', maxshape=(None,), chunks=1000)
+        h5_class_complete = fout.create_dataset("CLASSIFICATIONS/EVENT/complete", (1000,), dtype='int64',
+                                                maxshape=(None,),
+                                                chunks=1000)
+        h5_class_partial = fout.create_dataset("CLASSIFICATIONS/EVENT/partial", (1000,), dtype='int64',
+                                               maxshape=(None,),
+                                               chunks=1000)
 
         datasets = [h5_jet_eta, h5_jet_phi, h5_jet_pt, h5_jet_mass, h5_jet_px, h5_jet_py, h5_jet_pz, h5_jet_energy,
                     h5_jet_btag, h5_jet_mask, h5_target_t1b, h5_target_t1q1, h5_target_t1q2, h5_target_t2b,
-                    h5_target_t2q1, h5_target_t2q2]
+                    h5_target_t2q1, h5_target_t2q2, h5_class_complete, h5_class_partial]
         # fill datasets
         index = 0
         complete = 0
         t1_comp = 0
         t2_comp = 0
-        cat = self.config_inst.get_category("2btj")
+
         for dataset, files in input["events"][self.config_inst.name].items():
             for inp in files:
                 events = ak.from_parquet(get_path(inp["mlevents"]))
-                mask = ak.any(events.category_ids == cat.id, axis=1)
-                events = events[mask]
-                events = attach_coffea_behavior(events, {
-                    "SelectedJets": {
-                        "type_name": "Jet",
-                        "check_attr": "metric_table",
-                        "skip_fields": "*Idx*G",
-                    }, })
-                gen_top = attach_coffea_behavior(
-                    events.gen_top,
-                    collections={
-                        "b": {
-                            "type_name": "GenParticle",
-                            "check_attr": "metric_table",
-                            "skip_fields": "*Idx*G",
-                        },
-                        "w_children": {
-                            "type_name": "GenParticle",
-                            "check_attr": "metric_table",
-                            "skip_fields": "*Idx*G",
-                        },
-                    },
-                )
-
-                # Compute delta_eta and delta_phi between b quarks and jets
-                matches = np.empty((len(events), 6), dtype=int)
-                for i, p in enumerate([gen_top.b[:, 0], gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1],
-                                       gen_top.b[:, 1], gen_top.w_children[:, 1, 0], gen_top.w_children[:, 1, 1]]):
-                    best_match_idxs, _ = delta_r_match(p, events.SelectedJets[:, 0:self.max_njets], max_dr=0.4, as_index=True)
-                    matches[:, i] = ak.fill_none(best_match_idxs[:, 0], -1).to_numpy()
+                matches = self.get_matches(events)
 
                 for i in range(self.max_njets):
                     has_val = matches == i
@@ -193,6 +173,9 @@ class SpaNetModel(MLModel):
                 h5_target_t2b[index: index + nentries,] = matches[:, 3]
                 h5_target_t2q1[index: index + nentries,] = matches[:, 4]
                 h5_target_t2q2[index: index + nentries,] = matches[:, 5]
+                h5_class_complete[index: index + nentries,] = np.sum(matches >= 0, axis=1) == 6
+                h5_class_partial[index: index + nentries,] = ((np.sum(matches >= 0, axis=1) == 3) |
+                                                              (np.sum(matches[:, 3:6] >= 0, axis=1) == 3))
                 index += nentries
                 complete += np.sum(np.sum(matches >= 0, axis=1) == 6)
                 t1_comp += np.sum(np.sum(matches[:, 0:3] >= 0, axis=1) == 3)
@@ -206,6 +189,38 @@ class SpaNetModel(MLModel):
 
         fout.close()
 
+    def get_matches(self, events) -> Any:
+        events = attach_coffea_behavior(events, {
+            "SelectedJets": {
+                "type_name": "Jet",
+                "check_attr": "metric_table",
+                "skip_fields": "*Idx*G",
+            }, })
+        gen_top = attach_coffea_behavior(
+            events.gen_top,
+            collections={
+                "b": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+                "w_children": {
+                    "type_name": "GenParticle",
+                    "check_attr": "metric_table",
+                    "skip_fields": "*Idx*G",
+                },
+            },
+        )
+
+        # Compute delta_eta and delta_phi between b quarks and jets
+        matches = np.empty((len(events), 6), dtype=int)
+        for i, p in enumerate([gen_top.b[:, 0], gen_top.w_children[:, 0, 0], gen_top.w_children[:, 0, 1],
+                               gen_top.b[:, 1], gen_top.w_children[:, 1, 0], gen_top.w_children[:, 1, 1]]):
+            best_match_idxs, _ = delta_r_match(p, events.SelectedJets[:, 0:self.max_njets], max_dr=0.4,
+                                               as_index=True)
+            matches[:, i] = ak.fill_none(best_match_idxs[:, 0], -1).to_numpy()
+        return matches
+
     def evaluate(
             self,
             task: law.Task,
@@ -214,15 +229,22 @@ class SpaNetModel(MLModel):
             fold_indices: ak.Array,
             events_used_in_training: bool = False,
     ) -> ak.Array:
-        session = onnxruntime.InferenceSession(
-            "./spanet.onnx",
-            providers=['CUDAExecutionProvider', 'CPUExecutionProvider']
-        )
+        events = attach_coffea_behavior(events, {
+            "SelectedJets": {
+                "type_name": "Jet",
+                "check_attr": "metric_table",
+                "skip_fields": "*Idx*G",
+            }, })
+
         jets = ak.pad_none(events.SelectedJets, self.max_njets, axis=1, clip=True)
         feat_list = [
             ak.fill_none(np.log(1 + jets.pt), 0),
             ak.fill_none(jets.eta, 0),
             ak.fill_none(jets.phi, 0),
+            ak.fill_none(np.log(1 + jets.mass), 0),
+            # ak.fill_none(jets.px, 0),
+            # ak.fill_none(jets.py, 0),
+            # ak.fill_none(jets.pz, 0),
             ak.fill_none(np.log(1 + np.sqrt(jets.mass ** 2 + (jets.pt * np.cosh(jets.eta)) ** 2)), 0),
             ak.fill_none(jets.btagDeepFlavB, 0),
         ]
@@ -232,18 +254,60 @@ class SpaNetModel(MLModel):
         # mask: True where jet exists (same as saved h5 mask)
         jets_mask = ak.to_numpy(~ak.is_none(jets.eta, axis=1)).astype(np.bool_)
 
+        session = onnxruntime.InferenceSession(
+            self.onnx_file,
+            providers=['CUDAExecutionProvider', 'CPUExecutionProvider']
+        )
         outputs = session.run(None, {"Jets_data": jets_data, "Jets_mask": jets_mask})
         # ensure numpy float32 and contiguous layout
         preds = [np.ascontiguousarray(o.astype(np.float32)) for o in outputs[0:2]]
 
         # extract_predictions returns one array per prediction: shape (batch, partons)
         results = extract_predictions(preds)
+        class_complete = np.exp(outputs[4] - outputs[4].max(axis=-1, keepdims=True))
+        class_partial = np.exp(outputs[5] - outputs[5].max(axis=-1, keepdims=True))
 
+        cat = self.config_inst.get_category("2btj")
+        mask = ak.any(events.category_ids == cat.id, axis=1)
+        matches = self.get_matches(events)
+        gent1 = matches[:, 0:3]
+        gent2 = matches[:, 3:6]
+        unmatched1 = ak.any(gent1 == -1, axis=1)
+        unmatched2 = ak.any(gent2 == -1, axis=1)
+        correct1 = np.all(np.equal(gent1, results[0]), axis=1) | np.all(np.equal(gent1, results[1]), axis=1)
+        correct1 |= np.all(np.equal(gent1[:, [0, 2, 1]], results[0]), axis=1) | np.all(
+            np.equal(gent1[:, [0, 2, 1]], results[1]), axis=1)
+        correct2 = np.all(np.equal(gent2, results[0]), axis=1) | np.all(np.equal(gent2, results[1]), axis=1)
+        correct2 |= np.all(np.equal(gent2[:, [0, 2, 1]], results[0]), axis=1) | np.all(
+            np.equal(gent2[:, [0, 2, 1]], results[1]), axis=1)
+        gent1 = gent1[mask]
+        gent2 = gent2[mask]
+        unmatched1 = unmatched1[mask]
+        unmatched2 = unmatched2[mask]
+        correct1 = correct1[mask]
+        correct2 = correct2[mask]
+        matches = matches[mask]
+        print("t1:", len(gent1), np.sum(unmatched1), np.sum(correct1), np.sum(~unmatched1 & ~correct1))
+        print("t2:", len(gent2), np.sum(unmatched2), np.sum(correct2), np.sum(~unmatched2 & ~correct2))
+        print("comb.:", len(gent1), np.sum(unmatched1 | unmatched2), np.sum(correct1 & correct2),
+              np.sum(~(unmatched1 | unmatched2)) - np.sum(correct1 & correct2),
+              np.mean(outputs[2][mask]), np.mean(outputs[2][mask][correct1 & correct2]),
+              np.mean(outputs[3][mask]), np.mean(outputs[3][mask][correct1 & correct2]))
+        match1 = np.sum(matches[:, 0:3] >= 0, axis=1) == 3
+        match2 = np.sum(matches[:, 3:6] >= 0, axis=1) == 3
+
+        print("complete:", np.mean(class_complete[mask]), np.mean(class_complete[mask][(match1) & (match2)]))
+        print("partial:", np.mean(class_partial[mask]), np.mean(class_partial[mask][(match1) | (match2)]),
+              np.mean(class_partial[mask][(match1) ^ (match2)]), np.mean(class_partial[mask][(match1) & (match2)]))
+        # for i in range(20):
+        #    print(gent1[i], results[0][i], results[1][i], unmatched1[i], correct1[i])
         for i, name in enumerate(self.matches):
-            events = set_ak_column(events, f"{self.cls_name}.{name}", results[i//3][:,i%3])
+            events = set_ak_column(events, f"{self.cls_name}.{name}", results[i // 3][:, i % 3])
         for i, name in enumerate(["prob1", "prob2"]):
-            events = set_ak_column(events, f"{self.cls_name}.{name}", outputs[2+i])
+            events = set_ak_column(events, f"{self.cls_name}.{name}", outputs[2 + i])
 
+        events = set_ak_column(events, f"{self.cls_name}.complete", class_complete)
+        events = set_ak_column(events, f"{self.cls_name}.partial", class_partial)
 
         print(events[self.cls_name])
         return events
