@@ -54,6 +54,71 @@ def default_1D(self: InferenceModel) -> None:
         mc_stats=[100, 1, 1],
         flow_strategy=FlowStrategy.remove,
     )
+    self.add_category(
+        "SR_reco_R_bq_avg",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="sig",
+                variable="reco_R_bq_avg_percentile",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
+    self.add_category(
+        "SR_reco_R_bq_vec",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="sig",
+                variable="reco_R_bq_vec_percentile",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
+    self.add_category(
+        "SR_reco_R_bq_vec_diff",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="sig",
+                variable="reco_R_bq_vec_diff_percentile",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
+    self.add_category(
+        "SR_reco_R_bq_vec_rel_diff_sum",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="sig",
+                variable="reco_R_bq_vec_rel_diff_sum_percentile",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
+    self.add_category(
+        "SR_reco_R_bq_vec_rel_diff_q",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="sig",
+                variable="reco_R_bq_vec_rel_diff_q_percentile",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
     #
     # processes
     #

@@ -255,3 +255,48 @@ def build_xb_avg(events):
     xb_top = events.xb.top
     xb_antitop = events.xb.antitop
     return 0.5 * (xb_top + xb_antitop)
+
+
+def _get_b_q_pt(events, vectorial=False):
+    """Return (pt_b, pt_q) for the b-jet-candidate system and light-jet system,
+    either as scalar pt sums or as pt of the vector-summed 4-momenta."""
+    fit_jet = attach_coffea_behavior(
+        events.FitJet,
+        {"reco": default_coffea_collections["Jet"]},
+    )
+    reco = fit_jet.reco
+
+    if vectorial:
+        b_system = reco[:, 0].add(reco[:, 1])
+        q_system = reco[:, 2].add(reco[:, 3]).add(reco[:, 4]).add(reco[:, 5])
+        return b_system.pt, q_system.pt
+    else:
+        pt_b = reco[:, 0].pt + reco[:, 1].pt
+        pt_q = reco[:, 2].pt + reco[:, 3].pt + reco[:, 4].pt + reco[:, 5].pt
+        return pt_b, pt_q
+
+
+def build_R_bq(events, which="ratio", vectorial=False):
+    """
+    Build various b-vs-q pt comparison observables.
+
+    which:
+      - "ratio":        pt_b / pt_q
+      - "diff":         pt_b - pt_q
+      - "rel_diff_sum": (pt_b - pt_q) / (pt_b + pt_q)
+      - "rel_diff_q":   (pt_b - pt_q) / pt_q
+    vectorial:
+      - False: pt_b, pt_q are scalar sums of individual jet pt's
+      - True:  pt_b, pt_q are pt of the vector-summed 4-momenta
+    """
+    pt_b, pt_q = _get_b_q_pt(events, vectorial=vectorial)
+    if which == "ratio":
+        return pt_b / pt_q
+    if which == "diff":
+        return pt_b - pt_q
+    if which == "rel_diff_sum":
+        return (pt_b - pt_q) / (pt_b + pt_q)
+    if which == "rel_diff_q":
+        return (pt_b - pt_q) / pt_q
+
+    raise ValueError(f"Unknown which: {which}")

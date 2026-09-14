@@ -205,7 +205,7 @@ def add_config(
     # DATASET GROUPS (for efficiency calculation)
     # ---------------------------------------------------------
     cfg.x.btag_wp_eff_groups = [
-        ["tt_*"], ["st_*"], ["qcd_*"],
+        ["tt_*", "st_*"], ["qcd_*"],
     ]
 
     # assign dataset tags based on these groups
@@ -260,6 +260,7 @@ def add_config(
     # (used in cutflow tasks)
     cfg.x.selector_step_groups = {
         "cutflow_sig": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
+        "spanet": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag"],
         "default": ["json", "met_filter", "pv", "SignalOrBkgTrigger",
                     "Lepton_Veto", "HT", "jet", "BTag20", "LeadingSix20BTag"],
         "ht_trigger": ["json", "met_filter", "pv", "BaseTrigger", "Lepton_Veto", "jet", "SixJets", "BTag"],
@@ -270,16 +271,17 @@ def add_config(
     cfg.x.default_selector_steps = "default"
 
     cfg.x.custom_style_config_groups = {
-        "default": {
+        "DEFAULT": {
             "legend_cfg": {
                 "ncols": 2,
-                "fontsize": 16,
+                "columnspacing": 0.5,
+                "fontsize": 20,
                 "bbox_to_anchor": (0., 0., 1., 1.),
             },
             "annotate_cfg": {
                 "xy": (0.05, 0.95),
                 "xycoords": "axes fraction",
-                "fontsize": 16,
+                "fontsize": 20,
             },
         },
         "default_rax10": {
@@ -292,7 +294,7 @@ def add_config(
             #     "ylim": (-10, 10),
             # },
             "rax_cfg": {
-                "ylim": (0.9, 1.1),
+                "ylim": (0.85, 1.15),
             },
             # "annotate_cfg": {
             #     "xy": (0.05, 0.95),
@@ -302,13 +304,13 @@ def add_config(
         },
         "shift_plots_mtop": {
             "ax_cfg": {
-                "xlim": (50, 400),
+                "xlim": (90, 410),
                 "ylabel": "Events / BinWidth",
             },
         },
         "shift_plots_mtopPeak": {
             "ax_cfg": {
-                "xlim": (100, 250),
+                "xlim": (90, 250),
                 "ylabel": "Events / BinWidth",
             },
         },
@@ -320,7 +322,7 @@ def add_config(
         },
         "shift_plots_rbq": {
             "ax_cfg": {
-                "xlim": (0, 10),
+                "xlim": (-0.5, 4.5),
                 "ylabel": "Events / BinWidth",
             },
         },
@@ -345,8 +347,6 @@ def add_config(
     # https://cms-talk.web.cern.ch/t/luminosity-in-run2023c/116859/2
     # Run3 Lumis can be calculated with brilcalc tool https://twiki.cern.ch/twiki/bin/view/CMS/BrilcalcQuickStart?rev=15
     # CClub computed this already: https://gitlab.cern.ch/cclubbtautau/AnalysisCore/-/issues/49
-    # Using the new correlation scheme from
-    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiRecommendationsRun2?extralog=-%20caching%20topic#Luminosity_for_pp_13_TeV_data_20
     if year == 2016 and campaign.has_tag("HIPM"):
         cfg.x.luminosity = Number(
             19_500,

@@ -39,6 +39,7 @@ from .jet_builder import (
     build_reco_R_bq,
     build_avg_R_bq,
     build_xb_avg,
+    build_R_bq,
 )
 
 ak = maybe_import("awkward")
@@ -1763,6 +1764,15 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
+        name="fit_Top1_mass_peak_percentile",
+        expression=partial(build_top1jet, which="mass"),
+        aux={"inputs": build_top1jet.inputs},
+        binning=[102.968, 161.264, 167.125, 171.509, 175.872, 181.669, 202.565, 273.82, 399.945],
+        unit="GeV",
+        x_title=r"$m_{t}^{fit}$",
+    )
+    add_variable(
+        cfg,
         name="fit_Top1_mass_percentile",
         expression=partial(build_top1jet, which="mass"),
         aux={"inputs": build_top1jet.inputs},
@@ -1818,6 +1828,15 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
+        name="reco_R_bq_peak_percentile",
+        expression=build_reco_R_bq,
+        aux={"inputs": build_reco_R_bq.inputs},
+        binning=[0.0890864, 0.337762, 0.419616, 0.495674, 0.575975, 0.668508, 0.789883, 0.983505, 3.99],
+        unit="",
+        x_title=r"$R^{reco}_{bq}$",
+    )
+    add_variable(
+        cfg,
         name="reco_R_bq_percentile_3D",
         expression=build_reco_R_bq,
         aux={"inputs": build_reco_R_bq.inputs},
@@ -1834,6 +1853,91 @@ def add_variables(cfg: od.Config) -> None:
         binning=(40, 0, 4),
         unit="",
         x_title=r"$R^{reco}_{bq_{avg}}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_avg_percentile",
+        expression=build_avg_R_bq,
+        aux={"inputs": build_avg_R_bq.inputs, "overflow": False, "underflow": False},
+        binning=[0.0890251, 0.349272, 0.439582, 0.525528, 0.618005, 0.725864, 0.86593, 1.08058, 8.28784],
+        unit="",
+        x_title=r"$R^{reco}_{bq_{avg}}$",
+    )
+    ###############################################################################
+    #                    Vectorial B vs Q system pt comparisons                   #
+    ###############################################################################
+    build_R_bq.inputs = ["FitJet.reco.{pt,eta,phi,mass}"]
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec",
+        expression=partial(build_R_bq, which="ratio", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=(50, 0, 10),
+        unit="",
+        x_title=r"$R_{bq}^{\mathrm{vec}}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_percentile",
+        expression=partial(build_R_bq, which="ratio", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=[0.00131277, 0.426814, 0.603943, 0.74341, 0.872158, 1.01512, 1.2153, 1.63236, 814.056],
+        unit="",
+        x_title=r"$R_{bq}^{\mathrm{vec}}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_diff",
+        expression=partial(build_R_bq, which="diff", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=(100, -300, 300),
+        unit="GeV",
+        x_title=r"$\vec{p}_T^{\,b} - \vec{p}_T^{\,q}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_diff_percentile",
+        expression=partial(build_R_bq, which="diff", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=[-493.378, -62.6503, -38.7841, -23.3966, -10.8704, 1.18921, 14.7319, 34.1872, 464.147],
+        unit="GeV",
+        x_title=r"$\vec{p}_T^{\,b} - \vec{p}_T^{\,q}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_rel_diff_sum",
+        expression=partial(build_R_bq, which="rel_diff_sum", vectorial=True),
+        aux={"inputs": build_R_bq.inputs, "overflow": False, "underflow": False},
+        binning=(50, -1, 1),
+        unit="",
+        x_title=r"$(\vec{p}_T^{\,b} - \vec{p}_T^{\,q}) / (\vec{p}_T^{\,b} + \vec{p}_T^{\,q})$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_rel_diff_sum_percentile",
+        expression=partial(build_R_bq, which="rel_diff_sum", vectorial=True),
+        aux={"inputs": build_R_bq.inputs, "overflow": False, "underflow": False},
+        binning=[-0.997378, -0.401724, -0.246927, -0.147177, -0.0682861, 0.00750142, 0.0971866, 0.240225, 0.997546],
+        unit="",
+        x_title=r"$(\vec{p}_T^{\,b} - \vec{p}_T^{\,q}) / (\vec{p}_T^{\,b} + \vec{p}_T^{\,q})$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_rel_diff_q",
+        expression=partial(build_R_bq, which="rel_diff_q", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=(50, -2, 5),
+        unit="",
+        x_title=r"$(\vec{p}_T^{\,b} - \vec{p}_T^{\,q}) / \vec{p}_T^{\,q}$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_vec_rel_diff_q_percentile",
+        expression=partial(build_R_bq, which="rel_diff_q", vectorial=True),
+        aux={"inputs": build_R_bq.inputs},
+        binning=[-0.998687, -0.573186, -0.396057, -0.25659, -0.127842, 0.0151162, 0.215297, 0.632358, 813.056],
+        unit="",
+        x_title=r"$(\vec{p}_T^{\,b} - \vec{p}_T^{\,q}) / \vec{p}_T^{\,q}$",
     )
     ###############################################################################
     #                            Features with coarse binning                     #
@@ -1898,7 +2002,7 @@ def add_variables(cfg: od.Config) -> None:
         name="reco_W_mass_avg_coarse",
         expression=partial(build_avg_w_mass),
         aux={"inputs": build_avg_w_mass.inputs},
-        binning=(15, 60, 120),
+        binning=(15, 60, 110),
         unit="GeV",
         x_title=r"$m_{W_{avg}}^{reco}$",
     )
@@ -1907,8 +2011,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fit_deltaRbb_coarse",
         expression="FitRbb",
         null_value=EMPTY_FLOAT,
-        binning=(16, 2, 5.2),
-        x_title=r"$\Delta R_{b}$ ",
+        binning=(15, 2, 5),
+        x_title=r"$\Delta R_{b\bar{b}}$ ",
     )
     add_variable(
         cfg,
@@ -2019,6 +2123,15 @@ def add_variables(cfg: od.Config) -> None:
         null_value=EMPTY_FLOAT,
         binning=(18, -2.7, 2.7),
         x_title=r"Jet 6 $\eta$",
+    )
+    add_variable(
+        cfg,
+        name="reco_R_bq_coarse",
+        expression=build_reco_R_bq,
+        aux={"inputs": build_reco_R_bq.inputs, "overflow": False, "underflow": False},
+        binning=(16, 0, 4),
+        unit="",
+        x_title=r"$R^{reco}_{bq}$",
     )
 ############################################################
 #              Observables for b tagging efficiency        #

@@ -296,7 +296,7 @@ def default(
                 })
 
         # trigger weights
-        for v in (("",) if skip_shifts else ("", "_up", "_down")):
+        for v in (("",) if skip_shifts else ("", "_up", "_down", "_full_up", "_full_down")):
             weight_map.update({
                 f"sum_trig_weight{v}": (events[f"trig_weight{v}"], Ellipsis),
                 f"sum_trig_weight{v}_selected": (events[f"trig_weight{v}"], results.event),
