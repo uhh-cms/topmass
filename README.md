@@ -143,7 +143,7 @@ Convert network to onnx:
 ```
 . software/venvs/spanet_96371da6/bin/activate
 python -m spanet.export ./spanet_output/version_XX spanet.onnx```
-
+```
 
 Evaluate netwerk:
 ```
@@ -209,8 +209,6 @@ After the nominal workflow using the kinematic fit and the background estimation
 A [```helper```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/inference/helper.py) contains information about the processes and systematic uncertainties we want to write in the datacards.
 
 To create the 1D datacards:
-```
-law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd  --version v1_TopMass  --configs 2017_v9  --selector default --cf.MergeHistograms-workflow htcondor --cf.MergeHistograms-pilot --htcondor-memory 1700MB --htcondor-runtime 1h --workers 1000 --tasks-per-job 20 
 ```
 law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd   --version v2_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3
 law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling   --version v2_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3
