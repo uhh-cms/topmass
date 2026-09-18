@@ -28,6 +28,20 @@ def default_1D(self: InferenceModel) -> None:
     )
 
     self.add_category(
+        "SR_top_mass_peak",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="sig",
+                variable="fit_Top1_mass_peak_percentile",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
+
+    self.add_category(
         "SR_reco_W_avg",
         config_data={
             config_inst.name: self.category_config_spec(
@@ -47,6 +61,20 @@ def default_1D(self: InferenceModel) -> None:
             config_inst.name: self.category_config_spec(
                 category="sig",
                 variable="reco_R_bq_percentile",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
+
+    self.add_category(
+        "SR_reco_R_bq_peak",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="sig",
+                variable="reco_R_bq_peak_percentile",
                 data_datasets=["data_jetht*"],
             )
             for config_inst in self.config_insts
