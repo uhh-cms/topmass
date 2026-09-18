@@ -404,4 +404,4 @@ def default_post_init(self: Selector, task: law.Task, **kwargs) -> None:
         self.produces.add("pdf_alphas_weight_{up,down}")
 
 
-default_NoJVM = default.derive("default_NoJVM", cls_dict={"jet_selection_mode": "trigger"})
+default_NoJVM = default.derive("default_NoJVM", cls_dict={"jet_selection_mode": "ids_only"})

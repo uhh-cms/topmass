@@ -83,6 +83,8 @@ def jet_selection(
         ak4_mask = jetid_mask
     elif mode == "puid_only":
         ak4_mask = pu_mask
+    elif mode == "ids_only":
+        ak4_mask = jetid_mask & pu_mask
     elif mode == "analysis":
         ak4_mask = jetid_mask & veto_mask & pu_mask
     else:
