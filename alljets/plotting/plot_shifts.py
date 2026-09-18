@@ -24,6 +24,7 @@ from modules.columnflow.columnflow.plotting.plot_util import (
     remove_negative_contributions,
 )
 from columnflow.hist_util import add_missing_shifts, sum_hists
+from types import SimpleNamespace
 
 hist = maybe_import("hist")
 np = maybe_import("numpy")
@@ -325,11 +326,35 @@ def plot_shifted_variable(
     colors = {"nominal": "black", "up": "red", "down": "blue"}
     shift_order = {"up": 0, "nominal": 1, "down": 2}
 
+    def _shift_inst(config_inst, shift_name):
+        """Resolve a shift/nuisance name to a Shift-like object. Uses the real
+        registered Shift when config_inst knows it, otherwise infers direction
+        from the name suffix (e.g. plotting-only nuisances like top_pt_reweighting)."""
+        try:
+            return config_inst.get_shift(shift_name)
+        except ValueError:
+            is_nominal = shift_name == "nominal"
+            direction = (
+                "nominal" if is_nominal else
+                "up" if shift_name.endswith("_up") else
+                "down" if shift_name.endswith("_down") else
+                "nominal"
+            )
+            return SimpleNamespace(
+                name=shift_name,
+                label=shift_name,
+                direction=direction,
+                is_nominal=is_nominal,
+                has_tag=lambda tag: False,
+            )
+
     # Sort shifts: up first, then nominal, then down
     sorted_shifts = sorted(
         h_sum.axes["shift"],
-        key=lambda s: shift_order.get(config_inst.get_shift(s).direction, 99),
+        key=lambda s: shift_order.get(_shift_inst(config_inst, s).direction, 99),
     )
+
+    # Check for special shift types for label formatting
 
     # Check for special shift types for label formatting
     has_mtop_shifts = any("mtop" in shift_name for shift_name in h_sum.axes["shift"])
@@ -344,7 +369,7 @@ def plot_shifted_variable(
 
     # Loop over each shift and create plot config entries
     for shift_name in sorted_shifts:
-        shift_inst = config_inst.get_shift(shift_name)
+        shift_inst = _shift_inst(config_inst, shift_name)
         h = h_sum[{"shift": hist.loc(shift_name)}]
         diff = sum(h.values()) / nominal_sum - 1
 
