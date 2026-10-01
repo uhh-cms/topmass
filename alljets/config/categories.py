@@ -90,7 +90,7 @@ def add_categories(cfg: od.Config) -> None:
         name="fit_conv",
         selection="cat_fit_conv",
         id=302,
-        label="kinfit converged",
+        label="inclusive",
     )
 
     # ========================================================================

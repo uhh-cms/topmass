@@ -205,7 +205,7 @@ def add_config(
     # DATASET GROUPS (for efficiency calculation)
     # ---------------------------------------------------------
     cfg.x.btag_wp_eff_groups = [
-        ["tt_*", "st_*"], ["qcd_*"],
+        ["tt_*"], ["st_*"], ["qcd_*"],
     ]
 
     # assign dataset tags based on these groups
