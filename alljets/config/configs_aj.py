@@ -536,7 +536,7 @@ def add_config(
     cfg.x.btag_wp_count_config = BTagWPCountConfig(
         jet_name="Jet",
         btag_column="btagDeepFlavB",
-        btag_wps={"tight": cfg.x.btag_working_points.deepjet.tight},
+        btag_wps={"medium": cfg.x.btag_working_points.deepjet.medium},
         pt_edges=(20, 30, 50, 70, 100, 140, 200, 300, 600, 10_000),
         abs_eta_edges=(0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.5),
     )
@@ -561,7 +561,7 @@ def add_config(
         jet_name="Jet",
         btag_column="btagDeepFlavB",
         correction_set="deepJet_merged",
-        btag_wps={"tight": cfg.x.btag_working_points.deepjet.tight},
+        btag_wps={"medium": cfg.x.btag_working_points.deepjet.medium},
         dataset_groups=dataset_groups,
         pt_edges=(20, 30, 50, 70, 100, 140, 200, 300, 10_000),
         abs_eta_edges=(0.0, 0.4, 0.8, 1.2, 1.6, 2.5),

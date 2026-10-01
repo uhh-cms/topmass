@@ -79,8 +79,8 @@ def cat_0btj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, a
     Select events with 0 b-tagged jets (tight WP).
     Requires: pT >= 40 GeV, |eta| < 2.4, DeepJet b-tag < tight WP.
     """
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    bjet_mask = (events.SelectedJets.btagDeepFlavB >= wp_tight)
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    bjet_mask = (events.SelectedJets.btagDeepFlavB >= wp_medium)
     return events, (ak.sum(bjet_mask, axis=1) == 0)
 
 
@@ -90,8 +90,8 @@ def cat_2btj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, a
     Select events with >= 2 b-tagged jets (tight WP).
     Requires: pT >= 40 GeV, |eta| < 2.4, DeepJet b-tag >= tight WP.
     """
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    bjet_mask = (events.SelectedJets.btagDeepFlavB >= wp_tight)
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    bjet_mask = (events.SelectedJets.btagDeepFlavB >= wp_medium)
     return events, (ak.sum(bjet_mask, axis=1) >= 2)
 
 # ============================================================================
@@ -163,10 +163,10 @@ def cat_FitPgof_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.A
     Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
     """
     pgofcut = self.config_inst.x.fitpgofcut
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
     signal_trigger = _get_trigger_mask(events, self.config_inst, "trigger")
     signal_region = (signal_trigger & (events.FitPgof > pgofcut) &
-                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_tight), axis=1) == 2))
+                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_medium), axis=1) == 2))
     return events, signal_region
 
 
@@ -176,10 +176,10 @@ def cat_Rbb_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array
     Signal region: == 2 b-tagged jets among LeadingSix Jets (KinFitJets) + signal trigger + good fit quality.
     Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
     """
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
     signal_trigger = _get_trigger_mask(events, self.config_inst, "trigger")
     signal_region = (signal_trigger & (events.FitRbb > 2.0) &
-                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_tight), axis=1) == 2))
+                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_medium), axis=1) == 2))
     return events, signal_region
 
 
@@ -190,10 +190,10 @@ def cat_2btj_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arra
     Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
     """
     pgofcut = self.config_inst.x.fitpgofcut
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
     signal_trigger = _get_trigger_mask(events, self.config_inst, "trigger")
     signal_region = (signal_trigger & (events.FitPgof > pgofcut) & (events.FitRbb > 2.0) &
-                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_tight), axis=1) == 2))
+                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_medium), axis=1) == 2))
     return events, signal_region
 
 

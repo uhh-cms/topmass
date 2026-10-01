@@ -95,10 +95,10 @@ def kinFit(
     # Sorting logic needed for the kinematic fit.
     # The fitter expects the first two jets to be the b-jet candidates.
 
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
     sorted_indices = ak.where(
-        ak.sum(events.KinFitJets.btagDeepFlavB >= wp_tight, axis=1) == 2,
-        ak.argsort(ak.where(events.KinFitJets.btagDeepFlavB >= wp_tight, events.KinFitJets.pt, -999), ascending=False),
+        ak.sum(events.KinFitJets.btagDeepFlavB >= wp_medium, axis=1) == 2,
+        ak.argsort(ak.where(events.KinFitJets.btagDeepFlavB >= wp_medium, events.KinFitJets.pt, -999), ascending=False),
         random_indices,
     )
 

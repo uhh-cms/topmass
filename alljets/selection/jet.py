@@ -105,9 +105,9 @@ def jet_selection(
     jet_sel = ak.sum(jet_mask2, axis=1) >= 6
 
     # Step 3: Identify b-tagged and light jets
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    light_jet = (jet_mask2) & (events.Jet.btagDeepFlavB < wp_tight)
-    bjet_mask = (jet_mask2) & (events.Jet.btagDeepFlavB >= wp_tight)
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    light_jet = (jet_mask2) & (events.Jet.btagDeepFlavB < wp_medium)
+    bjet_mask = (jet_mask2) & (events.Jet.btagDeepFlavB >= wp_medium)
 
     # Step 4: Event selection based on b-jet and light jet multiplicity
     bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2))
@@ -126,7 +126,7 @@ def jet_selection(
     leading6_jets = events.Jet[leading6_idx]
 
     # Tight: exactly 2 b-tags; Loose: exactly 0 b-tags among the leading 6 jets
-    leading6_2BTag_sel = ak.sum(leading6_jets.btagDeepFlavB >= wp_tight, axis=1) == 2
+    leading6_2BTag_sel = ak.sum(leading6_jets.btagDeepFlavB >= wp_medium, axis=1) == 2
     leading6_0BTag_sel = ak.sum(leading6_jets.btagDeepFlavB >= wp_loose, axis=1) == 0
 
     # Combine

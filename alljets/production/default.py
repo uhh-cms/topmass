@@ -107,10 +107,10 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Compute jet multiplicity for the main jet collection (pT >= 40 GeV, |eta| < 2.4)
     events = set_ak_column(events, "n_jet", ak.num(events.SelectedJets.pt, axis=1), value_type=np.int32)
 
-    # Compute b-jet multiplicity using the tight working point on the SelectedJets collection
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    # Compute b-jet multiplicity using the medium working point on the SelectedJets collection
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
     events = set_ak_column(events, "n_bjet",
-                           ak.sum((events.SelectedJets.btagDeepFlavB >= wp_tight), axis=1), value_type=np.int32)
+                           ak.sum((events.SelectedJets.btagDeepFlavB >= wp_medium), axis=1), value_type=np.int32)
 
     # Extract max and second max b-tag scores among the SelectedJets (pT >= 40 GeV, |eta| < 2.4)
     events = set_ak_column(events, "maxbtag", (ak.max(events.KinFitJets.btagDeepFlavB, axis=1)))
@@ -326,8 +326,8 @@ def cutflow_features(
     events = set_ak_column(events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT))
     events = set_ak_column(events, "cutflow.jet6_pt", Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT))
 
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    events = set_ak_column(events, "cutflow.n_bjet", ak.sum((events.Jet.btagDeepFlavB >= wp_tight), axis=1))
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    events = set_ak_column(events, "cutflow.n_bjet", ak.sum((events.Jet.btagDeepFlavB >= wp_medium), axis=1))
 
     return events
 
