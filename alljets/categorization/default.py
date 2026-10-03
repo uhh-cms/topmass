@@ -73,25 +73,25 @@ def cat_7j(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.
 # ============================================================================
 
 
-@categorizer(uses={"SelectedJets.pt", "SelectedJets.btagDeepFlavB", "SelectedJets.eta"})
+@categorizer(uses={"SelectedJets.pt", "SelectedJets.btagUParTAK4B", "SelectedJets.eta"})
 def cat_0btj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
-    Select events with 0 b-tagged jets (tight WP).
-    Requires: pT >= 40 GeV, |eta| < 2.4, DeepJet b-tag < tight WP.
+    Select events with 0 b-tagged jets (medium WP).
+    Requires: pT >= 40 GeV, |eta| < 2.4, upart b-tag < medium WP.
     """
-    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
-    bjet_mask = (events.SelectedJets.btagDeepFlavB >= wp_medium)
+    wp_medium = self.config_inst.x.btag_working_points.upart.medium
+    bjet_mask = (events.SelectedJets.btagUParTAK4B >= wp_medium)
     return events, (ak.sum(bjet_mask, axis=1) == 0)
 
 
-@categorizer(uses={"SelectedJets.pt", "SelectedJets.btagDeepFlavB", "SelectedJets.eta"})
+@categorizer(uses={"SelectedJets.pt", "SelectedJets.btagUParTAK4B", "SelectedJets.eta"})
 def cat_2btj(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
-    Select events with >= 2 b-tagged jets (tight WP).
-    Requires: pT >= 40 GeV, |eta| < 2.4, DeepJet b-tag >= tight WP.
+    Select events with >= 2 b-tagged jets (medium WP).
+    Requires: pT >= 40 GeV, |eta| < 2.4, upart b-tag >= medium WP.
     """
-    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
-    bjet_mask = (events.SelectedJets.btagDeepFlavB >= wp_medium)
+    wp_medium = self.config_inst.x.btag_working_points.upart.medium
+    bjet_mask = (events.SelectedJets.btagUParTAK4B >= wp_medium)
     return events, (ak.sum(bjet_mask, axis=1) >= 2)
 
 # ============================================================================
@@ -156,58 +156,58 @@ def cat_fit_nconv(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Arr
 # ============================================================================
 
 
-@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagDeepFlavB", "KinFitJets.eta", "HLT.*", "FitPgof"})
+@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagUParTAK4B", "KinFitJets.eta", "HLT.*", "FitPgof"})
 def cat_FitPgof_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Signal region: == 2 b-tagged jets among LeadingSix Jets (KinFitJets) + signal trigger + good fit quality.
-    Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (medium WP).
     """
     pgofcut = self.config_inst.x.fitpgofcut
-    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    wp_medium = self.config_inst.x.btag_working_points.upart.medium
     signal_trigger = _get_trigger_mask(events, self.config_inst, "trigger")
     signal_region = (signal_trigger & (events.FitPgof > pgofcut) &
-                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_medium), axis=1) == 2))
+                     (ak.sum((events.KinFitJets.btagUParTAK4B >= wp_medium), axis=1) == 2))
     return events, signal_region
 
 
-@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagDeepFlavB", "KinFitJets.eta", "HLT.*", "FitRbb"})
+@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagUParTAK4B", "KinFitJets.eta", "HLT.*", "FitRbb"})
 def cat_Rbb_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Signal region: == 2 b-tagged jets among LeadingSix Jets (KinFitJets) + signal trigger + good fit quality.
-    Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (medium WP).
     """
-    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    wp_medium = self.config_inst.x.btag_working_points.upart.medium
     signal_trigger = _get_trigger_mask(events, self.config_inst, "trigger")
     signal_region = (signal_trigger & (events.FitRbb > 2.0) &
-                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_medium), axis=1) == 2))
+                     (ak.sum((events.KinFitJets.btagUParTAK4B >= wp_medium), axis=1) == 2))
     return events, signal_region
 
 
-@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagDeepFlavB", "KinFitJets.eta", "HLT.*", "FitPgof", "FitRbb"})
+@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagUParTAK4B", "KinFitJets.eta", "HLT.*", "FitPgof", "FitRbb"})
 def cat_2btj_sig(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Signal region: == 2 b-tagged jets among LeadingSix Jets (KinFitJets) + signal trigger + good fit quality.
-    Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (tight WP).
+    Requires: signal trigger fired, FitChi2 <= config threshold, >= 2 b-tags (medium WP).
     """
     pgofcut = self.config_inst.x.fitpgofcut
-    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    wp_medium = self.config_inst.x.btag_working_points.upart.medium
     signal_trigger = _get_trigger_mask(events, self.config_inst, "trigger")
     signal_region = (signal_trigger & (events.FitPgof > pgofcut) & (events.FitRbb > 2.0) &
-                     (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_medium), axis=1) == 2))
+                     (ak.sum((events.KinFitJets.btagUParTAK4B >= wp_medium), axis=1) == 2))
     return events, signal_region
 
 
-@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagDeepFlavB", "KinFitJets.eta", "HLT.*", "FitPgof", "FitRbb"})
+@categorizer(uses={"KinFitJets.pt", "KinFitJets.btagUParTAK4B", "KinFitJets.eta", "HLT.*", "FitPgof", "FitRbb"})
 def cat_0btj_bkg(self: Categorizer, events: ak.Array, **kwargs) -> tuple[ak.Array, ak.Array]:
     """
     Background region: 0 b-tagged jets + background trigger + good fit quality.
     Requires: background trigger fired, FitChi2 <= config threshold, 0 b-tags (loose WP veto).
     """
     pgofcut = self.config_inst.x.fitpgofcut
-    wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
+    wp_loose = self.config_inst.x.btag_working_points.upart.loose
     bkg_trigger = _get_trigger_mask(events, self.config_inst, "bkg_trigger")
     bkg_region = (bkg_trigger & (events.FitPgof > pgofcut) & (events.FitRbb > 2.0) &
-                  (ak.sum((events.KinFitJets.btagDeepFlavB >= wp_loose), axis=1) == 0))
+                  (ak.sum((events.KinFitJets.btagUParTAK4B >= wp_loose), axis=1) == 0))
     return events, bkg_region
 
 # ============================================================================

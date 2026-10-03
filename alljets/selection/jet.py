@@ -20,7 +20,8 @@ ak = maybe_import("awkward")
 @selector(
     uses={
         attach_coffea_behavior,
-        "Jet.{pt,eta,btagDeepFlavB,jetId,puId,phi,mass,veto_map_mask}",
+        "Jet.{pt,eta,btagUParTAK4B,phi,mass,veto_map_mask,"
+        "chHEF,neHEF,chEmEF,neEmEF,muEF,chMultiplicity,neMultiplicity}",
         "HLT.*",
         "gen_top",
         "GenPart.*",
@@ -64,12 +65,15 @@ def jet_selection(
     https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD?rev=100#Jets
     """
 
-    # Ensure that the Jets we use are passing the tight + tightLepVeto jet Id
-    # and are not vetoed by the jet veto map
+    # Ensure that the Jets we use are passing the tightLepVeto jet Id
+    # For NanoAODv15, we need to compute the PUPPI jet Id from the jet variables
 
-    jetid_mask = (events.Jet.jetId >= 6)
+    jetid_mask = compute_puppi_jet_id(events.Jet, year=self.config_inst.campaign.x.year, lepton_veto=True)
+
+    # Apply the veto mask to remove jets
     veto_mask = (events.Jet.veto_map_mask)
 
+    # pileup jetId mask => Needs to be revised, no WP available for PUPPI jets in NanoAODv15
     pu_mask = ak.ones_like(events.Jet.pt, dtype=bool)
     if self.config_inst.campaign.x.run == 2:
         pu_mask = ((events.Jet.pt >= 50.0) | (events.Jet.puId == 7))
@@ -105,17 +109,17 @@ def jet_selection(
     jet_sel = ak.sum(jet_mask2, axis=1) >= 6
 
     # Step 3: Identify b-tagged and light jets
-    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
-    light_jet = (jet_mask2) & (events.Jet.btagDeepFlavB < wp_medium)
-    bjet_mask = (jet_mask2) & (events.Jet.btagDeepFlavB >= wp_medium)
+    wp_medium = self.config_inst.x.btag_working_points.upart.medium
+    light_jet = (jet_mask2) & (events.Jet.btagUParTAK4B < wp_medium)
+    bjet_mask = (jet_mask2) & (events.Jet.btagUParTAK4B >= wp_medium)
 
     # Step 4: Event selection based on b-jet and light jet multiplicity
     bjet_sel = ((ak.sum(bjet_mask, axis=1) >= 2))
     sixjets_sel = (bjet_sel & (ak.sum(light_jet, axis=1) >= 4))
 
     # Step 5: Background estimation (b-jet veto)
-    wp_loose = self.config_inst.x.btag_working_points.deepjet.loose
-    loose_bjet_mask = (events.Jet.btagDeepFlavB >= wp_loose)
+    wp_loose = self.config_inst.x.btag_working_points.upart.loose
+    loose_bjet_mask = (events.Jet.btagUParTAK4B >= wp_loose)
     bjet_rej = (ak.sum(((jet_mask2) & loose_bjet_mask), axis=1) == 0)
     sel_bjet_2or0 = bjet_sel | bjet_rej
 
@@ -126,8 +130,8 @@ def jet_selection(
     leading6_jets = events.Jet[leading6_idx]
 
     # Tight: exactly 2 b-tags; Loose: exactly 0 b-tags among the leading 6 jets
-    leading6_2BTag_sel = ak.sum(leading6_jets.btagDeepFlavB >= wp_medium, axis=1) == 2
-    leading6_0BTag_sel = ak.sum(leading6_jets.btagDeepFlavB >= wp_loose, axis=1) == 0
+    leading6_2BTag_sel = ak.sum(leading6_jets.btagUParTAK4B >= wp_medium, axis=1) == 2
+    leading6_0BTag_sel = ak.sum(leading6_jets.btagUParTAK4B >= wp_loose, axis=1) == 0
 
     # Combine
     sel_bjet_2or0_leading6 = leading6_2BTag_sel | leading6_0BTag_sel
@@ -261,3 +265,91 @@ def jet_selection_init(self: Selector) -> None:
 # 2016: ""PFHT400_SixJet30" or "HLT_PFHT450_SixJet40"
 # 2017: "PFHT380_SixPFJet32" or "PFHT430_SixPFJet40"
 # 2018: "PFHT400_SixPFJet32" or "HLT_PFHT450_SixPFJet36"
+
+
+def compute_puppi_jet_id(jets, year, lepton_veto=True):
+    """
+    Compute the Run-2 PUPPI Jet ID from NanoAOD Jet variables.
+
+    Parameters
+    ----------
+    jets : ak.Array
+        NanoAOD Jet collection.
+
+    year : int
+        Data-taking year. Supported: 2016, 2017, 2018.
+
+    lepton_veto : bool
+        If True, apply the TightLeptonVeto requirements.
+        If False, apply the Tight requirements.
+
+    Returns
+    -------
+    ak.Array
+        Boolean mask with one entry per jet.
+    """
+
+    abs_eta = abs(jets.eta)
+
+    multiplicity = (jets.chMultiplicity + jets.neMultiplicity)
+
+    # 2017 / 2018
+    if year in (2017, 2018):
+        # |eta| <= 2.6
+        central = (
+            (abs_eta <= 2.6) & (jets.neHEF < 0.90) &
+            (jets.neEmEF < 0.90) & (multiplicity > 1) &
+            (jets.chHEF > 0.0) & (jets.chMultiplicity > 0)
+        )
+
+        if lepton_veto:
+            central = (central & (jets.muEF < 0.80) & (jets.chEmEF < 0.80))
+
+        # 2.6 < |eta| <= 2.7
+        transition = (
+            (abs_eta > 2.6) & (abs_eta <= 2.7) & (jets.neHEF < 0.90) & (jets.neEmEF < 0.99))
+
+        if lepton_veto:
+            transition = (transition & (jets.muEF < 0.80))
+
+        # 2.7 < |eta| <= 3.0
+        forward_central = ((abs_eta > 2.7) & (abs_eta <= 3.0) & (jets.neHEF < 0.9999))
+
+        # 3.0 < |eta| <= 5.0
+        forward = ((abs_eta > 3.0) & (abs_eta <= 5.0) & (jets.neEmEF < 0.90) & (jets.neMultiplicity > 2))
+
+        return (central | transition | forward_central | forward)
+
+    # 2016
+    elif year == 2016:
+
+        # |eta| <= 2.4
+        central = (
+            (abs_eta <= 2.4) & (jets.neHEF < 0.90) & (jets.neEmEF < 0.90) &
+            (multiplicity > 1) & (jets.chHEF > 0.0) & (jets.chMultiplicity > 0)
+        )
+
+        if lepton_veto:
+            central = (central & (jets.muEF < 0.80) & (jets.chEmEF < 0.80))
+
+        # 2.4 < |eta| <= 2.7
+        transition = (
+            (abs_eta > 2.4) & (abs_eta <= 2.7) & (jets.neHEF < 0.98) & (jets.neEmEF < 0.99)
+        )
+
+        # 2.7 < |eta| <= 3.0
+        forward_central = (
+            (abs_eta > 2.7) & (abs_eta <= 3.0) & (jets.neMultiplicity >= 1)
+        )
+
+        # 3.0 < |eta| <= 5.0
+        forward = (
+            (abs_eta > 3.0) & (abs_eta <= 5.0) & (jets.neEmEF < 0.90) & (jets.neMultiplicity > 2)
+        )
+
+        return (central | transition | forward_central | forward)
+
+    else:
+        raise ValueError(
+            f"Unsupported year for Run-2 PUPPI Jet ID: {year}",
+        )

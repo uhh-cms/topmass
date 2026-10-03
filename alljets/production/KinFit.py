@@ -30,7 +30,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "KinFitJets.eta",
         "KinFitJets.phi",
         "KinFitJets.mass",
-        "KinFitJets.btagDeepFlavB",
+        "KinFitJets.btagUParTAK4B",
         "event",
         "run",
         "luminosityBlock",
@@ -73,7 +73,7 @@ def kinFit(
     -----
     The fitter (`pyKinFit.setBestCombi`) requires a choice of b-jet candidates:
 
-    1. If the event has 2 b-tagged jets (using the tight deepjet working point),
+    1. If the event has 2 b-tagged jets (using the tight upart working point),
        they are chosen as b-jet candidates.
 
     2. If fewer than 2 b-tagged jets are available, the six leading jets are randomly permuted
@@ -95,10 +95,10 @@ def kinFit(
     # Sorting logic needed for the kinematic fit.
     # The fitter expects the first two jets to be the b-jet candidates.
 
-    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    wp_medium = self.config_inst.x.btag_working_points.upart.medium
     sorted_indices = ak.where(
-        ak.sum(events.KinFitJets.btagDeepFlavB >= wp_medium, axis=1) == 2,
-        ak.argsort(ak.where(events.KinFitJets.btagDeepFlavB >= wp_medium, events.KinFitJets.pt, -999), ascending=False),
+        ak.sum(events.KinFitJets.btagUParTAK4B >= wp_medium, axis=1) == 2,
+        ak.argsort(ak.where(events.KinFitJets.btagUParTAK4B >= wp_medium, events.KinFitJets.pt, -999), ascending=False),
         random_indices,
     )
 

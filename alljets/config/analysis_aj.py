@@ -13,7 +13,7 @@ import os
 
 import law
 import order as od
-from alljets.config.configs_aj import add_config
+from alljets.config.configs_aj_v15 import add_config as add_config
 from columnflow.util import DotDict, maybe_import
 from typing import Optional
 
@@ -107,20 +107,11 @@ def add_lazy_config(
         )
 
 
-# 2017,
+# 2018 using nanoAOD v15 campaign
 add_lazy_config(
-    campaign_module="cmsdb.campaigns.run2_2017_nano_v9",
-    campaign_attr="campaign_run2_2017_nano_v9",
-    config_name="2017_v9",
-    config_id=2017,
-    add_limited=True,
-)
-
-# 2018,
-add_lazy_config(
-    campaign_module="cmsdb.campaigns.run2_2018_nano_v9",
-    campaign_attr="campaign_run2_2018_nano_v9",
-    config_name="2018_v9",
+    campaign_module="cmsdb.campaigns.run2_2018_nano_v15",
+    campaign_attr="campaign_run2_2018_nano_v15",
+    config_name="2018_v15",
     config_id=2018,
     add_limited=True,
 )

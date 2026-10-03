@@ -442,7 +442,7 @@ def add_variables(cfg: od.Config) -> None:
         name="secmaxbtag_type",
         expression="secmaxbtag",
         null_value=EMPTY_FLOAT,
-        binning=[0, cfg.x.btag_working_points.deepjet.tight, 1],
+        binning=[0, cfg.x.btag_working_points.upart.medium, 1],
         x_title=r"Second highest B-Tag score",
     )
     ###############################################################################

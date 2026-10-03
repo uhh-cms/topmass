@@ -63,9 +63,9 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 @producer(
     uses={
         attach_coffea_behavior,
-        "TrigJets.{pt,eta,phi,mass,btagDeepFlavB}",
-        "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB}",
-        "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB}",
+        "TrigJets.{pt,eta,phi,mass,btagUParTAK4B}",
+        "SelectedJets.{pt,eta,phi,mass,btagUParTAK4B}",
+        "KinFitJets.{pt,eta,phi,mass,btagUParTAK4B}",
         "event",
         "HLT.*",
 
@@ -108,15 +108,15 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "n_jet", ak.num(events.SelectedJets.pt, axis=1), value_type=np.int32)
 
     # Compute b-jet multiplicity using the medium working point on the SelectedJets collection
-    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    wp_medium = self.config_inst.x.btag_working_points.upart.medium
     events = set_ak_column(events, "n_bjet",
-                           ak.sum((events.SelectedJets.btagDeepFlavB >= wp_medium), axis=1), value_type=np.int32)
+                           ak.sum((events.SelectedJets.btagUParTAK4B >= wp_medium), axis=1), value_type=np.int32)
 
     # Extract max and second max b-tag scores among the SelectedJets (pT >= 40 GeV, |eta| < 2.4)
-    events = set_ak_column(events, "maxbtag", (ak.max(events.KinFitJets.btagDeepFlavB, axis=1)))
+    events = set_ak_column(events, "maxbtag", (ak.max(events.KinFitJets.btagUParTAK4B, axis=1)))
 
     # Insert dummy value for one jet events
-    secmax = ak.sort(events.KinFitJets.btagDeepFlavB, axis=1, ascending=False)
+    secmax = ak.sort(events.KinFitJets.btagUParTAK4B, axis=1, ascending=False)
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
     events = set_ak_column(events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1]))
     return events
@@ -132,7 +132,7 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "KinFitJets.phi",
         "KinFitJets.eta",
         "KinFitJets.mass",
-        "KinFitJets.btagDeepFlavB",
+        "KinFitJets.btagUParTAK4B",
     },
     produces={
         kinFit,
@@ -289,7 +289,7 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "Jet.pt",
         "Jet.eta",
         "Jet.phi",
-        "Jet.btagDeepFlavB",
+        "Jet.btagUParTAK4B",
     },
     produces={
         mc_weight,
@@ -326,8 +326,8 @@ def cutflow_features(
     events = set_ak_column(events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT))
     events = set_ak_column(events, "cutflow.jet6_pt", Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT))
 
-    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
-    events = set_ak_column(events, "cutflow.n_bjet", ak.sum((events.Jet.btagDeepFlavB >= wp_medium), axis=1))
+    wp_medium = self.config_inst.x.btag_working_points.upart.medium
+    events = set_ak_column(events, "cutflow.n_bjet", ak.sum((events.Jet.btagUParTAK4B >= wp_medium), axis=1))
 
     return events
 
