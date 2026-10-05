@@ -75,8 +75,8 @@ def jet_selection(
 
     # pileup jetId mask => Needs to be revised, no WP available for PUPPI jets in NanoAODv15
     pu_mask = ak.ones_like(events.Jet.pt, dtype=bool)
-    if self.config_inst.campaign.x.run == 2:
-        pu_mask = ((events.Jet.pt >= 50.0) | (events.Jet.puId == 7))
+    # if self.config_inst.campaign.x.run == 2:
+    #    pu_mask = ((events.Jet.pt >= 50.0) | (events.Jet.puId == 7))
 
     # Mode logic
     if mode == "trigger":
@@ -90,7 +90,7 @@ def jet_selection(
     elif mode == "ids_only":
         ak4_mask = jetid_mask & pu_mask
     elif mode == "analysis":
-        ak4_mask = jetid_mask & veto_mask & pu_mask
+        ak4_mask = jetid_mask & veto_mask   # & pu_mask
     else:
         raise ValueError(f"Unknown jet_selection mode: {mode}")
 

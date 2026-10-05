@@ -64,7 +64,7 @@ def dctr_hdamp_post_init(self: Producer, task: law.Task, **kwargs) -> None:
     self.produces.add("hdamp_weight")
 
     shift = task.global_shift_inst
-    is_nominal = ((shift.name == "nominal") and self.dataset_inst.has_tag("tt"))
+    is_nominal = ((shift.name == "nominal") and self.dataset_inst.has_tag("tt")) and self.config_inst.name.endswith("v9")
 
     if is_nominal:
         self.uses.add("weight.mlhdamp_up")

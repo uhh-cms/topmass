@@ -163,7 +163,7 @@ def ps_weights_post_init(self: Producer, task: law.Task, **kwargs) -> None:
         raise ValueError(f"Unknown mode '{mode}', available: {list(SETS.keys())}")
 
     shift = task.global_shift_inst
-    is_nominal = ((shift.name == "nominal") and self.dataset_inst.has_tag("tt"))
+    is_nominal = ((shift.name == "nominal") and self.dataset_inst.has_tag("tt")) and self.config_inst.name.endswith("v9")
 
     # use the PSWeight
     self.uses.add("PSWeight")

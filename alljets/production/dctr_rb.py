@@ -65,7 +65,8 @@ def dctr_rb_post_init(self: Producer, task: law.Task, **kwargs) -> None:
     self.produces.add("rb_weight")
 
     shift = task.global_shift_inst
-    is_nominal = ((shift.name == "nominal") and self.dataset_inst.has_tag("tt"))
+    # from IPython import embed; embed()  # BREAKPOINT
+    is_nominal = ((shift.name == "nominal") and self.dataset_inst.has_tag("tt")) and self.config_inst.name.endswith("v9")
 
     if is_nominal:
         self.uses.add("weight.rB_nominal")
