@@ -277,7 +277,7 @@ def default(
 
     if self.dataset_inst.is_mc:
         # when a shift was requested, skip all other systematic variations
-        skip_shifts = task.global_shift_inst != "nominal"  # or not self.dataset_inst.has_tag("tt")
+        skip_shifts = True   # task.global_shift_inst != "nominal"  # or not self.dataset_inst.has_tag("tt")
 
         weight_map = {
             **weight_map,
@@ -296,7 +296,7 @@ def default(
                 })
 
         # trigger weights
-        for v in (("",) if skip_shifts else ("", "_up", "_down", "_full_up", "_full_down")):
+        for v in ("", "_up", "_down", "_full_up", "_full_down"):    # (("",) if skip_shifts else 
             weight_map.update({
                 f"sum_trig_weight{v}": (events[f"trig_weight{v}"], Ellipsis),
                 f"sum_trig_weight{v}_selected": (events[f"trig_weight{v}"], results.event),
