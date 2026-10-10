@@ -38,3 +38,5 @@ topmass_alljets.code-workspace
 .__afs*
 sandboxes/
 **/.ipynb_checkpoints/**
+# SPANet training output (checkpoints, tensorboard logs)
+spanet_output/
