@@ -12,9 +12,17 @@ action() {
     export CF_SANDBOX_FILE="${CF_SANDBOX_FILE:-${this_file}}"
     export CF_VENV_NAME="$( basename "${this_file%.sh}" )"
     export CF_VENV_REQUIREMENTS="${this_dir}/spanet.txt"
-    source "${CF_BASE}/sandboxes/_setup_venv.sh" "$@"
+    source "${CF_BASE}/sandboxes/_setup_venv.sh" "$@" || return "$?"
+
+    # remote jobs use the bundled venv, which already contains SPANet
+    [ "${CF_REMOTE_ENV}" = "true" ] && return 0
+
     local spanet_dir=${CF_SOFTWARE_BASE}/SPANet
-    [[ ! -d "$spanet_dir" ]] && git clone -b v2.3-fixes https://github.com/jolange/SPANet.git ${spanet_dir} && python -m pip install -e ${spanet_dir} --no-cache-dir
+    # install SPANet into the venv (not editable, so that it is part of the bundle for remote jobs)
+    if ! python -c "import spanet" &> /dev/null; then
+        [[ ! -d "$spanet_dir" ]] && git clone -b v2.3-fixes https://github.com/jolange/SPANet.git ${spanet_dir}
+        python -m pip install ${spanet_dir} --no-cache-dir || return "$?"
+    fi
     return 0
 }
 action "$@"

@@ -1,4 +1,4 @@
-# version 1
+# version 3
 awkward==2.8.1
 uproot==5.6.0
 pyarrow==19.0.1
@@ -9,4 +9,5 @@ h5py
 numpy
 onnx
 onnxruntime
+tbb>=2021.6
 # the rest is pulled by spanet
