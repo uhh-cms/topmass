@@ -102,7 +102,24 @@ def patch_shifted_variables_from_model_dashed_variables():
 
 
 @memoize
+def patch_workflow_scheduler_messages():
+    """
+    luigi attaches ``scheduler_messages`` to the task instance it runs, but the remote workflow
+    polling of law can end up on an instance without it (seen for cf.MLEvaluation), which raises an
+    AttributeError in BaseWorkflow._handle_scheduler_messages. A class-level default of None makes
+    the polling skip scheduler messages in that case instead of failing.
+    """
+    from law.workflow.base import BaseWorkflow
+
+    if not hasattr(BaseWorkflow, "scheduler_messages"):
+        BaseWorkflow.scheduler_messages = None
+
+    logger.debug("patched scheduler_messages default of law.BaseWorkflow")
+
+
+@memoize
 def patch_all():
     patch_bundle_repo_exclude_files()
     patch_selector_steps_names()
     patch_shifted_variables_from_model_dashed_variables()
+    patch_workflow_scheduler_messages()
