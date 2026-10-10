@@ -63,13 +63,13 @@ If you choose to start with the selector ```default```, this task is automatical
 
 But first, the trigger efficiency curves, which can be obtained via the command, e.g. for the variable ```trigjet6_pt```
 ```
-law run cf.PlotVariables1D --version v1 --configs 2017_v9 \ 
+law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
     --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*' \
-    --selector trigger\
-    --selector-steps BaseTrigger,BTag,HT \   
-    --producers trigSF_prod,trigger_prod \ 
+    --selector trigger \
+    --selector-steps BaseTrigger,BTag,HT \
+    --producers trigSF_prod,trigger_prod \
     --variables trigjet6_pt-trig_bits \
-    --hist-producer trig_all_weights \ 
+    --hist-producer trig_all_weights \
     --processes data,tt \
     --categories incl \
     --plot-function alljets.plotting.trigger_eff_closure_1D.plot_efficiencies \
@@ -80,14 +80,14 @@ Note that for the variable ```ht_trigger```, we would change the selector-steps 
 Now, to produce the correction weight, we can call the ```ProduceTriggerWeight``` task via
 ```
 law run cf.ProduceTriggerWeight --version v1 --configs 2017_v9 \
-    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*' \ 
-    --selector trigger \ 
+    --datasets tt_fh_powheg,tt_dl_powheg,tt_sl_powheg,'data*' \
+    --selector trigger \
     --selector-steps BaseTrigger,BTag,HT \
     --producers trigSF_prod,trigger_prod \
     --variables trigjet6_pt-trig_bits \
     --hist-producer trig_all_weights \
     --categories incl \
-    --general-settings "bin_sel=1,unweighted=0
+    --general-settings "bin_sel=1,unweighted=0"
 ```
 
 To check the effect of this trigger correction weight, we can plot the variables once again. For this, we have to change the producer from ```trigSF_prod``` to ```trigSF_eval``` as there the trigger correction weight is passed. The command to obtain the plots with the applied correction and an estimated uncertainty is, e.g.
@@ -98,14 +98,14 @@ law run cf.PlotShiftedVariables1D --version v1 --configs 2017_v9 \
     --selector trigger \
     --selector-steps BaseTrigger,BTag,HT \
     --producers trigSF_eval,trigger_prod \
-    --variables trigjet6_pt-trig_bits \ 
+    --variables trigjet6_pt-trig_bits \
     --hist-producer trig_all_weights \
     --processes data,tt \
     --categories incl \
     --plot-function alljets.plotting.trigger_eff_closure_1D.plot_efficiencies_with_uncert \
     --general-settings "bin_sel=1" \
-    --shift-sources trig 
-``` 
+    --shift-sources trig
+```
 It should be noted that for these plots the ```--hist-producer trig_all_weight``` is needed and can be ignored in the following.
 
 ### Kinematic Fit
@@ -121,14 +121,19 @@ law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
     --producers default,kinFitMatch \
     --variables fit_Top1_mass-fit_combination_type \
     --categories sig \
-    --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching_MC
+    --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching_combined
 ```
 
 ### SPANet
 
 Create trainings data files:
 ```
-law run cf.MLTraining --ml-model spanet --version v2_Spanet  --configs 2018_v9  --selector-steps spanet  --branch 1
+law run cf.MLTraining \
+    --ml-model spanet \
+    --version v2_Spanet \
+    --configs 2018_v9 \
+    --selector-steps spanet \
+    --branch 1
 ```
 (Somehow I do not get any output files without the ```--branch 1``` option.)
 
@@ -142,14 +147,36 @@ python -m spanet.train -of spanet_training.json --gpus 1
 Convert network to onnx:
 ```
 . software/venvs/spanet_96371da6/bin/activate
-python -m spanet.export ./spanet_output/version_XX spanet.onnx```
+python -m spanet.export ./spanet_output/version_XX spanet.onnx
 ```
 
 Evaluate netwerk:
 ```
-law run cf.MLEvaluationWrapper --ml-model spanet --version v2_Spanet  --configs 2018_v9  --dataset tt_fh_powheg
+law run cf.MLEvaluationWrapper \
+    --dataset tt_fh_powheg \
+    --version v2_Spanet \
+    --configs 2018_v9 \
+    --ml-model spanet \
+    --selector-steps spanet \
+    --cf.MLEvaluationWrapper-workflow htcondor \
+    --htcondor-memory 15000MB \
+    --htcondor-runtime 2h \
+    --workers 10
 ```
 
+Plot the results:
+```
+law run cf.PlotVariables1D \
+    --dataset tt_fh_powheg \
+    --version v2_Spanet \
+    --configs 2018_v9 \
+    --ml-models spanet \
+    --selector-steps spanet \
+    --variables spanet.mtop_best-spanet.combtype_max \
+    --categories spanet_prob_one \
+    --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching_combined \
+    --workers 3
+```
 
 ### Data Driven Background Estimation
 The phase space region of the fully hadronic decay channel is dominated by the QCD multijet background. However, the MC simulation for this background suffers from large cross sections and large event weights. This leads to jagged distribution when using the MC samples for the QCD background. Thus, a data-driven background estimation is used.
@@ -159,7 +186,7 @@ However, we can first plot the distributions of the variables including the QCD 
 law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
     --datasets tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,'data*','qcd*' \
     --selector default \
-    --producers default,kinFitMatch
+    --producers default,kinFitMatch \
     --variables fit_Top1_mass-fit_combination_type \
     --processes tt,qcd,data \
     --categories sig \
@@ -183,8 +210,8 @@ After this, we can then compare the distributions of our variables for the QCD M
 law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
     --datasets tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,'data*','qcd*' \
     --variables fit_Top1_mass \
-    --selector default\
-    --processes tt,data,qcd,qcd_est
+    --selector default \
+    --processes tt,data,qcd,qcd_est \
     --categories sig \
     --plot-function alljets.plotting.sim_vs_est.qcd_mc_vs_est \
     --hist-hook qcd
@@ -201,7 +228,7 @@ law run cf.PlotVariables1D --version v1 --configs 2017_v9 \
     --processes tt,qcd_est,data \
     --hist-hook qcd \
     --categories sig \
-    --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching 
+    --plot-function alljets.plotting.plot_hist_matching.plot_hist_matching
 ```
 
 ## CreateDatacards
@@ -210,15 +237,71 @@ A [```helper```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/in
 
 To create the 1D datacards:
 ```
-law run cf.CreateDatacards --inference-model default_1D --hist-hooks qcd   --version v2_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3
-law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling   --version v2_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3
-law run cf.CreateDatacards --inference-model peak_2D --hist-hooks qcd,unrolling   --version v2_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3
-law run cf.CreateDatacards --inference-model peak_3D --hist-hooks qcd,unrolling   --version v2_Topmass  --configs 2017_v9  --selector default --cf.MergeShiftedHistograms-workflow htcondor --cf.MergeShiftedHistograms-pilot  --htcondor-memory 1800MB --htcondor-runtime 3h --workers 10 --cf.MergeShiftedHistograms-shift-source-chunk-size 3
+law run cf.CreateDatacards \
+    --inference-model default_1D \
+    --hist-hooks qcd \
+    --version v2_Topmass \
+    --configs 2017_v9 \
+    --selector default \
+    --cf.MergeShiftedHistograms-workflow htcondor \
+    --cf.MergeShiftedHistograms-pilot \
+    --htcondor-memory 1800MB \
+    --htcondor-runtime 3h \
+    --workers 10 \
+    --cf.MergeShiftedHistograms-shift-source-chunk-size 3
+
+law run cf.CreateDatacards \
+    --inference-model default_2D \
+    --hist-hooks qcd,unrolling \
+    --version v2_Topmass \
+    --configs 2017_v9 \
+    --selector default \
+    --cf.MergeShiftedHistograms-workflow htcondor \
+    --cf.MergeShiftedHistograms-pilot \
+    --htcondor-memory 1800MB \
+    --htcondor-runtime 3h \
+    --workers 10 \
+    --cf.MergeShiftedHistograms-shift-source-chunk-size 3
+
+law run cf.CreateDatacards \
+    --inference-model peak_2D \
+    --hist-hooks qcd,unrolling \
+    --version v2_Topmass \
+    --configs 2017_v9 \
+    --selector default \
+    --cf.MergeShiftedHistograms-workflow htcondor \
+    --cf.MergeShiftedHistograms-pilot \
+    --htcondor-memory 1800MB \
+    --htcondor-runtime 3h \
+    --workers 10 \
+    --cf.MergeShiftedHistograms-shift-source-chunk-size 3
+
+law run cf.CreateDatacards \
+    --inference-model peak_3D \
+    --hist-hooks qcd,unrolling \
+    --version v2_Topmass \
+    --configs 2017_v9 \
+    --selector default \
+    --cf.MergeShiftedHistograms-workflow htcondor \
+    --cf.MergeShiftedHistograms-pilot \
+    --htcondor-memory 1800MB \
+    --htcondor-runtime 3h \
+    --workers 10 \
+    --cf.MergeShiftedHistograms-shift-source-chunk-size 3
 ```
 
 Check for missing input files:
 ```
-law run cf.CreateDatacards --inference-model default_2D --hist-hooks qcd,unrolling   --version v2_TopMass  --configs 2017_v9  --selector default --workers 8 --tasks-per-job 10 --print-status 4 | grep -A 4 "4 >" | grep -B 3 "absent"
+law run cf.CreateDatacards \
+    --inference-model default_2D \
+    --hist-hooks qcd,unrolling \
+    --version v2_TopMass \
+    --configs 2017_v9 \
+    --selector default \
+    --workers 8 \
+    --tasks-per-job 10 \
+    --print-status 4 \
+    | grep -A 4 "4 >" | grep -B 3 "absent"
 ```
 
 The produced datacard and shapes files can be copied and further processed using the combine tool in the corresponding repository: https://gitlab.cern.ch/cms-analysis/top/massrun2aj/datacards
