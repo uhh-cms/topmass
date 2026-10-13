@@ -3,6 +3,6 @@ Request_GPUs = 1
 # need at least 7.0 for SPANet
 Requirements = (GPUs_Capability == 7.0)
 # in MiB
-RequestMemory = 10000
+RequestMemory = 15000
 
 queue

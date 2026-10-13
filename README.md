@@ -133,20 +133,20 @@ law run cf.MLTraining \
     --version v2_Spanet \
     --configs 2018_v9 \
     --selector-steps spanet \
-    --branch 1
+    --worksers 2
 ```
 (Somehow I do not get any output files without the ```--branch 1``` option.)
 
 Run training on interactive GPU batch node (started with `condor_submit -i interactive_gpu.jdl`) :
 ```
-. software/venvs/spanet_96371da6/bin/activate
+. $CF_SOFTWARE_BASE/venvs/spanet_96371da6/bin/activate
 python -m spanet.train -of spanet_training.json --gpus 1 
 ```
 
 
 Convert network to onnx:
 ```
-. software/venvs/spanet_96371da6/bin/activate
+. $CF_SOFTWARE_BASE/venvs/spanet_96371da6/bin/activate
 python -m spanet.export ./spanet_output/version_XX spanet.onnx
 ```
 
@@ -159,7 +159,7 @@ law run cf.MLEvaluationWrapper \
     --ml-model spanet \
     --selector-steps spanet \
     --cf.MLEvaluationWrapper-workflow htcondor \
-    --htcondor-memory 15000MB \
+    --htcondor-memory 18000MB \
     --htcondor-runtime 2h \
     --workers 10
 ```
