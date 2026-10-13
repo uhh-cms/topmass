@@ -235,26 +235,30 @@ class SpaNetModel(MLModel):
         cls_name = self.cls_name
         for name in self.matches:
             self.config_inst.add_variable(
-                name=f"{cls_name}.{name}",
+                name=f"{cls_name}_{name}",
+                expression=f"{cls_name}.{name}",
                 null_value=-1,
                 binning=(20, -1.0, self.max_njets),
                 x_title=f"{cls_name} {name}",
             )
         for name in self.probs:
             self.config_inst.add_variable(
-                name=f"{cls_name}.{name}",
+                name=f"{cls_name}_{name}",
+                expression=f"{cls_name}.{name}",
                 null_value=0,
                 binning=(20, 0, 1),
                 x_title=f"{cls_name} {name}",
             )
         self.config_inst.add_variable(
-            name=f"{cls_name}.dRbb",
+            name=f"{cls_name}_dRbb",
+            expression=f"{cls_name}.dRbb",
             binning=(50, 0, 5),
             x_title=rf"{cls_name} $\Delta R_{{bb}}$",
         )
         for name in self.combtypes:
             self.config_inst.add_variable(
-                name=f"{cls_name}.{name}",
+                name=f"{cls_name}_{name}",
+                expression=f"{cls_name}.{name}",
                 null_value=0,
                 binning=(4, -1.5, 2.5),
                 x_title=f"{cls_name} {name}: 0: unmatched, 1: wrong, 2: correct",
@@ -269,7 +273,8 @@ class SpaNetModel(MLModel):
                 ("mass", mass_binning, "GeV"),
             ]:
                 self.config_inst.add_variable(
-                    name=f"{cls_name}.{reco}.{field}",
+                    name=f"{cls_name}_{reco}_{field}",
+                    expression=f"{cls_name}.{reco}.{field}",
                     binning=binning,
                     unit=unit,
                     x_title=f"{cls_name} {reco} {field}",
@@ -279,7 +284,7 @@ class SpaNetModel(MLModel):
         # variables computed from the columns written in evaluate
         cls_name = self.cls_name
         self.config_inst.add_variable(
-            name=f"{cls_name}.prob",
+            name=f"{cls_name}_prob",
             expression=lambda events: events[cls_name].prob1 * events[cls_name].prob2,
             aux={"inputs": {f"{cls_name}.prob1", f"{cls_name}.prob2"}},
             null_value=0,
@@ -288,7 +293,7 @@ class SpaNetModel(MLModel):
         )
         # higher of the two top assignment probabilities
         self.config_inst.add_variable(
-            name=f"{cls_name}.prob_max",
+            name=f"{cls_name}_prob_max",
             expression=lambda events: np.maximum(
                 np.asarray(events[cls_name].prob1), np.asarray(events[cls_name].prob2),
             ),
@@ -299,7 +304,7 @@ class SpaNetModel(MLModel):
         )
         # better of the two combination types
         self.config_inst.add_variable(
-            name=f"{cls_name}.combtype_max",
+            name=f"{cls_name}_combtype_max",
             expression=lambda events: np.maximum(
                 np.asarray(events[cls_name].combtype1), np.asarray(events[cls_name].combtype2),
             ),
@@ -315,7 +320,7 @@ class SpaNetModel(MLModel):
             ("mtopc_avg", "ConstrainedTop", (90, 50, 500), "constrained top"),
         ]:
             self.config_inst.add_variable(
-                name=f"{cls_name}.{name}",
+                name=f"{cls_name}_{name}",
                 expression=lambda events, reco=reco: 0.5 * (
                     events[cls_name][f"{reco}1"].mass + events[cls_name][f"{reco}2"].mass
                 ),
@@ -339,7 +344,7 @@ class SpaNetModel(MLModel):
             ("mtopc_best", "ConstrainedTop", "constrained top"),
         ]:
             self.config_inst.add_variable(
-                name=f"{cls_name}.{name}",
+                name=f"{cls_name}_{name}",
                 expression=lambda events, reco=reco: mtop_best(events, reco),
                 aux={"inputs": {
                     f"{cls_name}.prob1", f"{cls_name}.prob2", f"{cls_name}.{reco}1.mass", f"{cls_name}.{reco}2.mass",
