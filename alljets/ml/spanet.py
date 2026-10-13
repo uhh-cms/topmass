@@ -286,6 +286,17 @@ class SpaNetModel(MLModel):
             binning=(20, 0, 1),
             x_title=f"{cls_name} prob",
         )
+        # higher of the two top assignment probabilities
+        self.config_inst.add_variable(
+            name=f"{cls_name}.prob_max",
+            expression=lambda events: np.maximum(
+                np.asarray(events[cls_name].prob1), np.asarray(events[cls_name].prob2),
+            ),
+            aux={"inputs": {f"{cls_name}.prob1", f"{cls_name}.prob2"}},
+            null_value=0,
+            binning=(20, 0, 1),
+            x_title=f"{cls_name} max(prob1, prob2)",
+        )
         # better of the two combination types
         self.config_inst.add_variable(
             name=f"{cls_name}.combtype_max",
