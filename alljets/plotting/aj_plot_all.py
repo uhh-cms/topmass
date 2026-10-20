@@ -218,13 +218,12 @@ def draw_efficiency_with_fit(
         "elinewidth": 1,
     }
     defaults.update(kwargs)
-
     # calculate x error
     xerror_low = h.axes[0].edges
     xerror_low = xerror_low[:(len(xerror_low) - 1)]
     x_filled = np.where(defaults["x"] == 0, h.axes[0].centers, defaults["x"])
-    xerror_low = x_filled - xerror_low
-    xerror_high = h.axes[0].edges[1:] - x_filled
+    xerror_low = np.clip(x_filled - h.axes[0].edges[:-1], 0, None)
+    xerror_high = np.clip(h.axes[0].edges[1:] - x_filled, 0, None)
     xerrors = np.concatenate((xerror_low.reshape(xerror_low.shape[0], 1),
                              xerror_high.reshape(xerror_high.shape[0], 1)), axis=1)
     xerrors = xerrors.T
@@ -232,7 +231,8 @@ def draw_efficiency_with_fit(
     defaults.update({"xerr": xerrors})
 
     ax.errorbar(**defaults)
-    x = np.linspace(np.min(h.axes[0].edges), np.max(h.axes[0].edges), num=100)
+    x_max = max(np.max(h.axes[0].edges), np.max(defaults["x"]))
+    x = np.linspace(np.min(h.axes[0].edges), x_max, num=100)
     ax.plot(x, fit_function(x, *fit_result), color=defaults["color"])
     ax.set_xlabel("Bin")
     ax.set_ylabel("Counts")
@@ -249,10 +249,23 @@ def draw_ratio_of_fit(
     error_type: str = "poisson_unweighted",
     **kwargs,
 ) -> None:
-    error_bar_kwargs = kwargs.copy()
-    error_bar_kwargs.pop("fit_norm")
-    error_bar_kwargs.pop("linestyle")
-    draw_errorbars(ax, h, norm, error_type, **error_bar_kwargs)
+
+    # draw the points at the weighted mean x, as in the top panel (draw_errorbars would use the bin centers)
+    ratio = h.values() / norm
+    x_pts = np.where(kwargs["x"] == 0, h.axes[0].centers, kwargs["x"])
+    xerr = np.array([
+        np.clip(x_pts - h.axes[0].edges[:-1], 0, None),
+        np.clip(h.axes[0].edges[1:] - x_pts, 0, None),
+    ])
+
+    yerr = np.array(kwargs["yerr"], dtype=float)
+    yerr[~np.isfinite(yerr)] = np.nan
+    valid = np.isfinite(ratio) & (h.values() != 0)
+    ax.errorbar(
+        x=x_pts[valid], y=ratio[valid], yerr=yerr[:, valid], xerr=xerr[:, valid],
+        color=kwargs.get("color", "k"), marker="o", elinewidth=1,
+        capsize=kwargs.get("capsize", 0), linestyle="none",
+    )
 
     fit_defaults = {
         "color": "k",
@@ -261,7 +274,9 @@ def draw_ratio_of_fit(
     }
     fit_defaults.update(kwargs)
 
-    x = np.linspace(np.min(h.axes[0].edges), np.max(h.axes[0].edges), num=100)
+    # extend the curve to the rightmost point
+    x_max = max(np.max(h.axes[0].edges), np.max(x_pts))
+    x = np.linspace(np.min(h.axes[0].edges), x_max, num=100)
     ax.plot(
         x, fit_function(x, *fit_result) / fit_function(x, *fit_defaults["fit_norm"]),
         color=fit_defaults["color"], linewidth=fit_defaults["linewidth"], linestyle="solid",
@@ -298,9 +313,7 @@ def draw_ratio_hist_fit(
                 "either change the Histogram storage_type or set yerr manually",
             )
         yerr = calculate_stat_error(h, error_type)
-        # normalize yerr to the histogram = error propagation on standard deviation
         yerr = abs(yerr / fit_function(h.axes[0].centers, *fit_result))
-        # replace inf with nan for any bin where norm = 0 and calculate_stat_error returns a non zero value
         if np.any(np.isinf(yerr)):
             yerr[np.isinf(yerr)] = np.nan
         defaults["yerr"] = yerr

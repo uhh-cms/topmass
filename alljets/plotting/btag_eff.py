@@ -238,7 +238,12 @@ def btag_efficiency(
         # plot_2d's own label_options only has "pw"/"simpw", not "datapw"
         cms_label = "pw" if is_data else "simpw"
 
-    title = f"{flavor_label}-flavor jets, {wp_cat} WP"
+    if config_inst.name.endswith("v9"):
+        tagger = "DeepJet"
+    elif config_inst.name.endswith("v15"):
+        tagger = "UParT"
+
+    title = f"{flavor_label}-flavor jets, {tagger} {wp_cat} WP"
 
     default_style_config = law.util.merge_dicts(
         base_style_config,
@@ -316,6 +321,16 @@ def btag_efficiency(
 
         # Arithmetic bin centers for linear eta axis
         eta_centers = 0.5 * (eta_edges[:-1] + eta_edges[1:])
+
+        legend = ax.get_legend()
+        if legend is not None:
+            if legend.get_title() is not None:
+                legend.get_title().set_color("white")
+            # optional: white legend entries + transparent frame
+            for t in legend.get_texts():
+                t.set_color("white")
+            legend.get_frame().set_facecolor("none")
+            legend.get_frame().set_edgecolor("none")
 
         # Add efficiency values to the center of each bin
         for ix, pt_center in enumerate(pt_centers):

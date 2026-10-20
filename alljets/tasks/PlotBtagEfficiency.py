@@ -53,6 +53,12 @@ class _PlotBtagEfficiencyBase(
         brace_expand=True,
     )
 
+    # in PlotBtagEfficiency
+    wp_label = law.Parameter(
+        default="tight",
+        description="name of the b-tag working point to plot, must exist on the 'wp' axis",
+    )
+
 
 class PlotBtagEfficiency(_PlotBtagEfficiencyBase):
     """
@@ -176,7 +182,7 @@ class PlotBtagEfficiency(_PlotBtagEfficiencyBase):
         for flavor in self.PLOT_FLAVORS:
             flavor_name = self._get_flavor_name(flavor)
             outputs[f"plots_{flavor}"] = self.target(
-                f"{self.OUTPUT_BASE}_{flavor_name}{suffix_str}.pdf",
+                f"{self.OUTPUT_BASE}_{flavor_name}_{self.wp_label}{suffix_str}.pdf",
             )
 
         return outputs
@@ -262,7 +268,7 @@ class PlotBtagEfficiency(_PlotBtagEfficiencyBase):
         # Override specific parameters for b-tag efficiency plots
         plot_params.update({
             "pt_max": None,  # No pt cut for efficiency plots
-            "wp_label": "tight",  # Label for working point
+            "wp_label": self.wp_label,  # Label for working point
             "n_workers": 1,  # Avoid multiprocessing issues
         })
 

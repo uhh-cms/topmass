@@ -191,13 +191,13 @@ def _draw_block_separators(main_ax, rax, sep_positions):
     """Draw vertical separator lines between blocks in unrolled histograms."""
     # Outer separators: dashed black lines
     for pos in sep_positions["outer"]:
-        main_ax.axvline(pos, color="black", linestyle="--", linewidth=1.0, alpha=0.8, zorder=10)
+        main_ax.axvline(pos, ymax=0.7, color="black", linestyle="--", linewidth=1.0, alpha=0.8, zorder=10)
         if rax is not None:
             rax.axvline(pos, color="black", linestyle="--", linewidth=1.0, alpha=0.8, zorder=10)
 
     # Middle separators: dotted gray lines
     for pos in sep_positions["middle"]:
-        main_ax.axvline(pos, color="black", linestyle="-.", linewidth=1.0, alpha=0.8, zorder=9)
+        main_ax.axvline(pos, ymax=0.7, color="black", linestyle="-.", linewidth=1.0, alpha=0.8, zorder=9)
         if rax is not None:
             rax.axvline(pos, color="black", linestyle="-.", linewidth=1.0, alpha=0.8, zorder=9)
 
@@ -498,6 +498,7 @@ def plot_shifted_variable(
     # Add CMS label
     _update_cfg(style_config, "legend_cfg", ncols=1, loc="upper right", title="")
     _update_cfg(style_config, "cms_label_cfg", llabel=get_cms_label(None, "simpw")["llabel"])
+    _update_cfg(style_config, "annotate_cfg", text="")
 
     fig, ax = plot_all(plot_config, style_config, **kwargs)
 
