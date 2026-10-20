@@ -261,6 +261,7 @@ def add_config(
     cfg.x.selector_step_groups = {
         "cutflow_sig": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
         "spanet": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag"],
+        "default_spanet": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag20"],
         "default": ["json", "met_filter", "pv", "SignalOrBkgTrigger",
                     "Lepton_Veto", "HT", "jet", "BTag20", "LeadingSix20BTag"],
         "ht_trigger": ["json", "met_filter", "pv", "BaseTrigger", "Lepton_Veto", "jet", "SixJets", "BTag"],
@@ -294,7 +295,7 @@ def add_config(
             #     "ylim": (-10, 10),
             # },
             "rax_cfg": {
-                "ylim": (0.85, 1.15),
+                "ylim": (0.61, 1.39),
             },
             # "annotate_cfg": {
             #     "xy": (0.05, 0.95),
@@ -536,7 +537,10 @@ def add_config(
     cfg.x.btag_wp_count_config = BTagWPCountConfig(
         jet_name="Jet",
         btag_column="btagDeepFlavB",
-        btag_wps={"medium": cfg.x.btag_working_points.deepjet.medium},
+        btag_wps={
+            wp: cfg.x.btag_working_points.deepjet[wp]
+            for wp in ("medium", "tight")
+        },
         pt_edges=(20, 30, 50, 70, 100, 140, 200, 300, 600, 10_000),
         abs_eta_edges=(0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.5),
     )

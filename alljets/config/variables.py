@@ -352,6 +352,26 @@ def add_variables(cfg: od.Config) -> None:
     )
     add_variable(
         cfg,
+        name="trigjet6_pt_overflow",
+        expression="TrigJets.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        binning=(40, 0.0, 160.0),
+        aux={"overflow": True, "underflow": False},
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    add_variable(
+        cfg,
+        name="trigjet6_pt_200",
+        expression="TrigJets.pt[:,5]",
+        null_value=EMPTY_FLOAT,
+        aux={"overflow": True, "underflow": False},
+        binning=(60, 0.0, 150.0),
+        unit="GeV",
+        x_title=r"Jet 6 $p_{T}$",
+    )
+    add_variable(
+        cfg,
         name="trigjet6_eta",
         expression="TrigJets.eta[:,5]",
         null_value=EMPTY_FLOAT,
@@ -928,21 +948,21 @@ def add_variables(cfg: od.Config) -> None:
         binning=(34, -3.4, 3.4),
         x_title=r"Jet 6 $\phi$",
     )
-    add_variable(
-        cfg,
-        name="kinfitjets_eta",
-        expression="KinFitJets.eta",
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta$ of all jets",
-    )
-    add_variable(
-        cfg,
-        name="kinfitjets_phi",
-        expression="KinFitJets.phi",
-        binning=(34, -3.4, 3.4),
-        aux={"overflow": False, "underflow": False},
-        x_title=r"$\phi$ of all jets",
-    )
+    # add_variable(
+    #     cfg,
+    #     name="kinfitjets_eta",
+    #     expression="KinFitJets.eta",
+    #     binning=(30, -3.0, 3.0),
+    #     x_title=r"$\eta$ of all jets",
+    # )
+    # add_variable(
+    #     cfg,
+    #     name="kinfitjets_phi",
+    #     expression="KinFitJets.phi",
+    #     binning=(34, -3.4, 3.4),
+    #     aux={"overflow": False, "underflow": False},
+    #     x_title=r"$\phi$ of all jets",
+    # )
     ###############################################################################
     #                       KinFitJets Kinematics                                 #
     #       Leading Six Jets within |eta| < 2.4 & pt >= 40 GeV                    #
@@ -1083,6 +1103,7 @@ def add_variables(cfg: od.Config) -> None:
         expression="FitJet.reco.pt[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 400.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{b_1\,\mathrm{reco}}$",
     )
@@ -1107,7 +1128,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco2_pt",
         expression="FitJet.reco.pt[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(30, 0.0, 300.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{b_2\,\mathrm{reco}}$",
     )
@@ -1132,7 +1154,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco3_pt",
         expression="FitJet.reco.pt[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(30, 0.0, 300.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{q_1\,\mathrm{reco}}$",
     )
@@ -1157,7 +1180,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco4_pt",
         expression="FitJet.reco.pt[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(20, 0.0, 200.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{q_2\,\mathrm{reco}}$",
     )
@@ -1182,7 +1206,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco5_pt",
         expression="FitJet.reco.pt[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(30, 0.0, 300.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{q_3\,\mathrm{reco}}$",
     )
@@ -1207,7 +1232,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjetreco6_pt",
         expression="FitJet.reco.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        aux={"overflow": False, "underflow": False},
+        binning=(20, 0.0, 300.0),
         unit="GeV",
         x_title=r"$p_T^{q_4\,\mathrm{reco}}$",
     )
@@ -1227,110 +1253,6 @@ def add_variables(cfg: od.Config) -> None:
         binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{q_4\,\mathrm{reco}}$",
     )
-    # Variables for both b-jet canditates
-    add_variable(
-        cfg,
-        name="fitjetreco_B_pt",
-        expression="FitJet.reco.pt[:,0:2]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{reco}}$ of b-jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjetreco_B_eta",
-        expression="FitJet.reco.eta[:,0:2]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta^{\mathrm{reco}}$ of b-jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjetreco_B_phi",
-        expression="FitJet.reco.phi[:,0:2]",
-        null_value=EMPTY_FLOAT,
-        binning=(34, -3.4, 3.4),
-        x_title=r"$\phi^{\mathrm{reco}}$ of b-jet candidates",
-    )
-    # Variables for light quark jet candidates of W1
-    add_variable(
-        cfg,
-        name="fitjetreco_W1_pt",
-        expression="FitJet.reco.pt[:,2:4]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{reco}}$ of jet candidates for W1",
-    )
-    add_variable(
-        cfg,
-        name="fitjetreco_W1_eta",
-        expression="FitJet.reco.eta[:,2:4]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta^{\mathrm{reco}}$ of jet candidates for W1",
-    )
-    add_variable(
-        cfg,
-        name="fitjetreco_W1_phi",
-        expression="FitJet.reco.phi[:,2:4]",
-        null_value=EMPTY_FLOAT,
-        binning=(34, -3.4, 3.4),
-        x_title=r"$\phi^{\mathrm{reco}}$ of jet candidates for W1",
-    )
-    # Variables for light quark jet candidates of W2
-    add_variable(
-        cfg,
-        name="fitjetreco_W2_pt",
-        expression="FitJet.reco.pt[:,4:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{reco}}$ of jet candidates for W2",
-    )
-    add_variable(
-        cfg,
-        name="fitjetreco_W2_eta",
-        expression="FitJet.reco.eta[:,4:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta^{\mathrm{reco}}$ of jet candidates for W2",
-    )
-    add_variable(
-        cfg,
-        name="fitjetreco_W2_phi",
-        expression="FitJet.reco.phi[:,4:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(34, -3.4, 3.4),
-        x_title=r"$\phi^{\mathrm{reco}}$ of jet candidates for W2",
-    )
-    # Variables for all light quark jet candidates
-    add_variable(
-        cfg,
-        name="fitjetreco_light_pt",
-        expression="FitJet.reco.pt[:,2:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{reco}}$ of light quark jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjetreco_light_eta",
-        expression="FitJet.reco.eta[:,2:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta^{\mathrm{reco}}$ of light quark jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjetreco_light_phi",
-        expression="FitJet.reco.phi[:,2:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(34, -3.4, 3.4),
-        x_title=r"$\phi^{\mathrm{reco}}$ of light quark jet candidates",
-    )
     ###############################################################################
     #                           FitJet kinematics                                 #
     #                Fitted values of the jets that entered the fit               #
@@ -1342,6 +1264,7 @@ def add_variables(cfg: od.Config) -> None:
         expression="FitJet.pt[:,0]",
         null_value=EMPTY_FLOAT,
         binning=(40, 0.0, 400.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{b_1\,\mathrm{fit}}$",
     )
@@ -1358,7 +1281,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet1_phi",
         expression="FitJet.phi[:,0]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{b_1\,\mathrm{fit}}$",
     )
     add_variable(
@@ -1366,7 +1289,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet2_pt",
         expression="FitJet.pt[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(30, 0.0, 300.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{b_2\,\mathrm{fit}}$",
     )
@@ -1383,7 +1307,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet2_phi",
         expression="FitJet.phi[:,1]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{b_2\,\mathrm{fit}}$",
     )
     add_variable(
@@ -1391,7 +1315,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet3_pt",
         expression="FitJet.pt[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(30, 0.0, 300.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{q_1\,\mathrm{fit}}$",
     )
@@ -1408,7 +1333,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet3_phi",
         expression="FitJet.phi[:,2]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{q_1\,\mathrm{fit}}$",
     )
     add_variable(
@@ -1416,7 +1341,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet4_pt",
         expression="FitJet.pt[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(20, 0.0, 200.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{q_2\,\mathrm{fit}}$",
     )
@@ -1433,7 +1359,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet4_phi",
         expression="FitJet.phi[:,3]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{q_2\,\mathrm{fit}}$",
     )
     add_variable(
@@ -1441,7 +1367,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet5_pt",
         expression="FitJet.pt[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(30, 0.0, 300.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{q_3\,\mathrm{fit}}$",
     )
@@ -1458,7 +1385,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet5_phi",
         expression="FitJet.phi[:,4]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{q_3\,\mathrm{fit}}$",
     )
     add_variable(
@@ -1466,7 +1393,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet6_pt",
         expression="FitJet.pt[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
+        binning=(20, 0.0, 200.0),
+        aux={"overflow": False, "underflow": False},
         unit="GeV",
         x_title=r"$p_T^{q_4\,\mathrm{fit}}$",
     )
@@ -1483,112 +1411,8 @@ def add_variables(cfg: od.Config) -> None:
         name="fitjet6_phi",
         expression="FitJet.phi[:,5]",
         null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
+        binning=(34, -3.4, 3.4),
         x_title=r"$\phi^{q_4\,\mathrm{fit}}$",
-    )
-    # Variables for both b-jet canditates
-    add_variable(
-        cfg,
-        name="fitjet_B_pt",
-        expression="FitJet.pt[:,0:2]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{fit}}$ of b-jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_B_eta",
-        expression="FitJet.eta[:,0:2]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta^{\mathrm{fit}}$ of b-jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_B_phi",
-        expression="FitJet.phi[:,0:2]",
-        null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
-        x_title=r"$\phi^{\mathrm{fit}}$ of b-jet candidates",
-    )
-    # Variables for light quark jet candidates of W1
-    add_variable(
-        cfg,
-        name="fitjet_W1_pt",
-        expression="FitJet.pt[:,2:4]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{fit}}$ of jet candidates for W1",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_W1_eta",
-        expression="FitJet.eta[:,2:4]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta^{\mathrm{fit}}$ of jet candidates for W1",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_W1_phi",
-        expression="FitJet.phi[:,2:4]",
-        null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
-        x_title=r"$\phi^{\mathrm{fit}}$ of jet candidates for W1",
-    )
-    # Variables for light quark jet candidates of W2
-    add_variable(
-        cfg,
-        name="fitjet_W2_pt",
-        expression="FitJet.pt[:,4:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{fit}}$ of jet candidates for W2",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_W2_eta",
-        expression="FitJet.eta[:,4:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta^{\mathrm{fit}}$ of jet candidates for W2",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_W2_phi",
-        expression="FitJet.phi[:,4:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
-        x_title=r"$\phi^{\mathrm{fit}}$ of jet candidates for W2",
-    )
-    # Variables for all light quark jet candidates
-    add_variable(
-        cfg,
-        name="fitjet_light_pt",
-        expression="FitJet.pt[:,2:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(40, 0.0, 400.0),
-        unit="GeV",
-        x_title=r"$p_T^{\mathrm{fit}}$ of light quark jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_light_eta",
-        expression="FitJet.eta[:,2:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(30, -3.0, 3.0),
-        x_title=r"$\eta^{\mathrm{fit}}$ of light quark jet candidates",
-    )
-    add_variable(
-        cfg,
-        name="fitjet_light_phi",
-        expression="FitJet.phi[:,2:6]",
-        null_value=EMPTY_FLOAT,
-        binning=(72, -math.pi, math.pi),
-        x_title=r"$\phi^{\mathrm{fit}}$ of light quark jet candidates",
     )
     ###############################################################################
     #                            Features from kinematic fit                      #
@@ -1624,7 +1448,7 @@ def add_variables(cfg: od.Config) -> None:
         name="fit_deltaRbb",
         expression="FitRbb",
         null_value=EMPTY_FLOAT,
-        binning=(59, 0, 5.8),
+        binning=(58, 0, 5.8),
         x_title=r"$\Delta R_{b\overline{b}}$",
     )
     build_w1recojet.inputs = ["RecoW1.{x,y,z,t}"]
