@@ -51,7 +51,7 @@ def aj_trighist_create_hist(
 
 
 @aj_trighist.fill_hist
-def aj_trighist_fill_hist(self: HistProducer, h: hist.Histogram, data: dict[str, Any], task: law.Task) -> None:
+def aj_trighist_fill_hist(self: HistProducer, h: hist.Histogram, data: dict[str, Any], task: law.Task, **kwargs) -> None:
     """
     Fill the histogram with the data.
     """
@@ -168,7 +168,7 @@ def trig_all_weights(self: HistProducer, events: ak.Array, **kwargs) -> ak.Array
         # multiply weights from global config `event_weights` aux entry
         for column in self.config_inst.x.event_weights:
             weight = weight * Route(column).apply(events)
-            if not column == "trig_weight":
+            if column not in {"trig_weight", "normalized_trig_weight"}:
                 weight2 = weight2 * Route(column).apply(events)
         # multiply weights from dataset-specific `event_weights` aux entry
         for column in self.dataset_inst.x("event_weights", []):

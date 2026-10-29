@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import functools
 import os
+import glob
 
 import law
 import order as od
 import yaml
-from columnflow.columnar_util import ColumnCollection
+from columnflow.columnar_util import ColumnCollection, skip_column
 from columnflow.config_util import (add_shift_aliases,
                                     get_root_processes_from_campaign,
                                     get_shifts_from_sources,
@@ -100,23 +101,13 @@ def add_config(
     for process_name in process_names:
         # add the process
         if process_name == "qcd_est":
-            proc = cfg.add_process(name="qcd_est", id=30002)
+            cfg.add_process(name="qcd_est", id=30002)
         else:
-            proc = cfg.add_process(procs.get(process_name))
-
-        # configuration of colors, labels, etc. can happen here
-        if proc.is_mc:
-            if proc.name == "qcd_est":
-                proc.color1 = (244, 93, 244)
-            elif proc.name == "tt":
-                proc.color1 = (244, 182, 66)
-            else:
-                (244, 93, 66)
+            cfg.add_process(procs.get(process_name))
 
     # configure colors, labels, etc
-    # from aj.config.styles import stylize_processes
-
-    # stylize_processes(cfg)
+    from alljets.config.styles import stylize_processes
+    stylize_processes(cfg)
 
     ################################################################################################
     # datasets
@@ -162,20 +153,6 @@ def add_config(
                 "data_jetht_d",
             ],
         ),
-        # ttbar
-        # "tt_sl_powheg",
-        # "tt_dl_powheg",
-        # single top
-        # "st_tchannel_t_4f_powheg",
-        # "st_tchannel_tbar_4f_powheg",
-        # "st_twchannel_t_sl_powheg",
-        # "st_twchannel_tbar_sl_powheg",
-        # "st_twchannel_t_dl_powheg",
-        # "st_twchannel_tbar_dl_powheg",
-        # "st_twchannel_t_fh_powheg",
-        # "st_twchannel_tbar_fh_powheg",
-        # "st_schannel_t_lep_4f_amcatnlo",
-        # "st_schannel_tbar_lep_4f_amcatnlo",
         # qcd datasets
         # "qcd_ht50to100_madgraph",
         # "qcd_ht100to200_madgraph",
@@ -186,16 +163,17 @@ def add_config(
         "qcd_ht1000to1500_madgraph",
         "qcd_ht1500to2000_madgraph",
         "qcd_ht2000toinf_madgraph",
+        # single top
+        "st_tchannel_t_4f_powheg",
+        "st_tchannel_tbar_4f_powheg",
+        "st_twchannel_t_powheg",
+        "st_twchannel_tbar_powheg",
+        "st_schannel_lep_4f_amcatnlo",
+        "st_schannel_had_4f_amcatnlo",
         # signals
         "tt_sl_powheg",
         "tt_dl_powheg",
         "tt_fh_powheg",
-        # "tt_fh_mt166p5_powheg",
-        # "tt_fh_mt169p5_powheg",
-        # "tt_fh_mt171p5_powheg",
-        # "tt_fh_mt173p5_powheg",
-        # "tt_fh_mt175p5_powheg",
-        # "tt_fh_mt178p5_powheg",
     ]
     for dataset_name in dataset_names:
         # skip when in sync mode and not exiting
@@ -227,7 +205,7 @@ def add_config(
     # DATASET GROUPS (for efficiency calculation)
     # ---------------------------------------------------------
     cfg.x.btag_wp_eff_groups = [
-        ["tt_*"], ["qcd_*"],   # only top-like processes
+        ["tt_*"], ["st_*"], ["qcd_*"],
     ]
 
     # assign dataset tags based on these groups
@@ -252,11 +230,11 @@ def add_config(
 
     # default objects
     cfg.x.default_calibrator = "default"
-    cfg.x.default_selector = "default_trig_weight"
+    cfg.x.default_selector = "default"
     cfg.x.default_reducer = "cf_default"
     cfg.x.default_producer = ["default", "kinFitMatch"]
     cfg.x.default_ml_model = None
-    cfg.x.default_inference_model = "default_no_shifts"
+    cfg.x.default_inference_model = "default_2D"
     cfg.x.default_categories = ("incl",)
     cfg.x.default_variables = ("njet", "jet1_pt")
     cfg.x.default_hist_producer = "all_weights"
@@ -281,26 +259,30 @@ def add_config(
     # selector step groups for conveniently looping over certain steps
     # (used in cutflow tasks)
     cfg.x.selector_step_groups = {
-        "default": [],
-        "default_bkg": ["All", "SignalOrBkgTrigger", "BTag20", "jet", "HT"],
-        "ht_trigger": ["All", "BaseTrigger", "SixJets", "BTag", "jet"],
-        "trigjet6_pt": ["All", "BaseTrigger", "BTag", "HT"],
+        "cutflow_sig": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag", "LeadingSix2BTag"],
+        "spanet": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag"],
+        "default_spanet": ["json", "met_filter", "pv", "Trigger", "Lepton_Veto", "HT", "jet", "BTag20"],
+        "default": ["json", "met_filter", "pv", "SignalOrBkgTrigger",
+                    "Lepton_Veto", "HT", "jet", "BTag20", "LeadingSix20BTag"],
+        "ht_trigger": ["json", "met_filter", "pv", "BaseTrigger", "Lepton_Veto", "jet", "SixJets", "BTag"],
+        "trigjet6_pt": ["json", "met_filter", "pv", "BaseTrigger", "Lepton_Veto", "HT", "BTag"],
         "trig_eff_bjet": ["All", "BaseTrigger", "jet", "HT"],
         "trig_eff_ht_pt": ["All", "BaseTrigger", "BTag"],
     }
     cfg.x.default_selector_steps = "default"
 
     cfg.x.custom_style_config_groups = {
-        "default": {
+        "DEFAULT": {
             "legend_cfg": {
                 "ncols": 2,
-                "fontsize": 16,
+                "columnspacing": 0.5,
+                "fontsize": 20,
                 "bbox_to_anchor": (0., 0., 1., 1.),
             },
             "annotate_cfg": {
                 "xy": (0.05, 0.95),
                 "xycoords": "axes fraction",
-                "fontsize": 16,
+                "fontsize": 20,
             },
         },
         "default_rax10": {
@@ -313,7 +295,7 @@ def add_config(
             #     "ylim": (-10, 10),
             # },
             "rax_cfg": {
-                "ylim": (0.9, 1.1),
+                "ylim": (0.61, 1.39),
             },
             # "annotate_cfg": {
             #     "xy": (0.05, 0.95),
@@ -323,19 +305,32 @@ def add_config(
         },
         "shift_plots_mtop": {
             "ax_cfg": {
-                "xlim": (50, 400),
-                "ylabel": "Entries/BinWidth",
+                "xlim": (90, 410),
+                "ylabel": "Events / BinWidth",
+            },
+        },
+        "shift_plots_mtopPeak": {
+            "ax_cfg": {
+                "xlim": (90, 250),
+                "ylabel": "Events / BinWidth",
             },
         },
         "shift_plots_mwreco": {
             "ax_cfg": {
-                "ylabel": "Entries/BinWidth",
+                "xlim": (60, 110),
+                "ylabel": "Events / BinWidth",
             },
         },
         "shift_plots_rbq": {
             "ax_cfg": {
-                "xlim": (0, 2),
-                "ylabel": "Entries/BinWidth",
+                "xlim": (-0.5, 4.5),
+                "ylabel": "Events / BinWidth",
+            },
+        },
+        "shift_plots_rbq3D": {
+            "ax_cfg": {
+                "xlim": (-0.5, 4.5),
+                "ylabel": "Events / BinWidth",
             },
         },
     }
@@ -357,16 +352,18 @@ def add_config(
         cfg.x.luminosity = Number(
             19_500,
             {
-                "lumi_13TeV_2016": 0.01j,
-                "lumi_13TeV_correlated": 0.006j,
+                "lumi_13TeV_1516": 0.0118j,
+                "lumi_13TeV_151617": 0.0004j,
+                "lumi_13TeV_15161718": 0.0035j,
             },
         )
     elif year == 2016 and campaign.has_tag("notHIPM"):
         cfg.x.luminosity = Number(
             16_800,
             {
-                "lumi_13TeV_2016": 0.01j,
-                "lumi_13TeV_correlated": 0.006j,
+                "lumi_13TeV_1516": 0.0118j,
+                "lumi_13TeV_151617": 0.0004j,
+                "lumi_13TeV_15161718": 0.0035j,
             },
         )
     elif year == 2017:
@@ -375,18 +372,18 @@ def add_config(
         cfg.x.luminosity = Number(
             37_186,
             {
-                "lumi_13TeV_2017": 0.02j,
-                "lumi_13TeV_1718": 0.006j,
-                "lumi_13TeV_correlated": 0.009j,
+                "lumi_13TeV_151617": 0.0055j,
+                "lumi_13TeV_15161718": 0.0061j,
             },
         )
     elif year == 2018:
+        # Updated the lumi value for 2018 based on the latest brilcalc results for the combined triggers, see
+        # /afs/cern.ch/user/l/lgriesin/eos/BrilCal/2018/ValuesFb/HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2.csv
+        # /afs/cern.ch/user/l/lgriesin/eos/BrilCal/2018/ValuesFb/HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94.csv
         cfg.x.luminosity = Number(
-            59_830,
+            59_557,
             {
-                "lumi_13TeV_2017": 0.015j,
-                "lumi_13TeV_1718": 0.002j,
-                "lumi_13TeV_correlated": 0.02j,
+                "lumi_13TeV_15161718": 0.0084j,
             },
         )
     # minimum bias cross section in mb (milli) for creating PU weights, values from
@@ -421,7 +418,7 @@ def add_config(
             "Jet": {
                 "campaign": jec_campaign,
                 "version": jec_version,
-                "data_per_era": True,
+                "data_per_era": False,
                 "jet_type": jet_type,
                 "levels": ["L1FastJet", "L2Relative", "L2L3Residual", "L3Absolute"],
                 "levels_for_type1_met": ["L1FastJet"],
@@ -429,16 +426,21 @@ def add_config(
                     filter(
                         bool,
                         [
-                            "AbsoluteStat",
-                            "AbsoluteScale",
-                            # "AbsoluteSample",
-                            # "AbsoluteFlavMap",
                             "AbsoluteMPFBias",
+                            "AbsoluteScale",
+                            "AbsoluteStat",
                             "Fragmentation",
-                            "SinglePionECAL",
-                            "SinglePionHCAL",
-                            # "FlavorQCD",
-                            "TimePtEta",
+                            "FlavorPureGluon",
+                            "FlavorPureQuark",
+                            "FlavorPureCharm",
+                            "FlavorPureBottom",
+                            "PileUpDataMC",
+                            "PileUpPtBB",
+                            "PileUpPtEC1",
+                            "PileUpPtEC2",
+                            "PileUpPtHF",
+                            "PileUpPtRef",
+                            "RelativeFSR",
                             "RelativeJEREC1",
                             "RelativeJEREC2",
                             "RelativeJERHF",
@@ -448,18 +450,19 @@ def add_config(
                             "RelativePtHF",
                             "RelativeBal",
                             "RelativeSample",
-                            "RelativeFSR",
-                            "RelativeStatFSR",
                             "RelativeStatEC",
+                            "RelativeStatFSR",
                             "RelativeStatHF",
-                            "PileUpDataMC",
-                            "PileUpPtRef",
-                            "PileUpPtBB",
-                            "PileUpPtEC1",
-                            "PileUpPtEC2",
-                            "PileUpPtHF",
-                            "PileUpMuZero",
-                            "PileUpEnvelope",
+                            "SinglePionECAL",
+                            "SinglePionHCAL",
+                            # "TimePtEta",
+                            # "AbsoluteSample",
+                            # "AbsoluteFlavMap",
+                            # "FlavorQCD",
+                            # "FlavorZJet",
+                            # "FlavorPhotonJet",
+                            # "PileUpMuZero",
+                            # "PileUpEnvelope",
                             # "SubTotalPileUp",
                             # "SubTotalRelative",
                             # "SubTotalPt",
@@ -470,12 +473,6 @@ def add_config(
                             # "TotalNoFlavor",
                             # "TotalNoTime",
                             # "TotalNoFlavorNoTime",
-                            # "FlavorZJet",
-                            # "FlavorPhotonJet",
-                            "FlavorPureGluon",
-                            "FlavorPureQuark",
-                            "FlavorPureCharm",
-                            "FlavorPureBottom",
                             # "CorrelationGroupMPFInSitu",
                             # "CorrelationGroupIntercalibration",
                             # "CorrelationGroupbJES",
@@ -495,10 +492,20 @@ def add_config(
                 "campaign": jer_campaign,
                 "version": jer_version,
                 "jet_type": jet_type,
+                "use_jer_tool": True,
+                "uncertainty_regions": {
+                    # |eta| < 1.93, single pt bin (0, inf)
+                    "EtaLow": (
+                        lambda jets: abs(jets.eta) < 1.93
+                    ),
+                    # 1.93 <= |eta| < 2.5, single pt bin (0, inf)
+                    "EtaHigh": (
+                        lambda jets: (abs(jets.eta) >= 1.93) & (abs(jets.eta) < 2.5)
+                    ),
+                },
             },
         },
     )
-
     ################################################################################################
     # b tagging
     ################################################################################################
@@ -520,54 +527,8 @@ def add_config(
             "tight": {"2016APV": 0.8819, "2016": 0.8767, "2017": 0.7738, "2018": 0.7665}[btag_key],
         },
     })
-    # JEC uncertainty sources propagated to btag scale factors
-    # (names derived from contents in BTV correctionlib file)
-    cfg.x.btag_sf_jec_sources = [
-        "",  # same as "Total"
-        "Absolute",
-        "AbsoluteMPFBias",
-        "AbsoluteScale",
-        "AbsoluteStat",
-        f"Absolute_{year}",
-        "BBEC1",
-        f"BBEC1_{year}",
-        "EC2",
-        f"EC2_{year}",
-        "FlavorQCD",
-        "Fragmentation",
-        "HF",
-        f"HF_{year}",
-        "PileUpDataMC",
-        "PileUpPtBB",
-        "PileUpPtEC1",
-        "PileUpPtEC2",
-        "PileUpPtHF",
-        "PileUpPtRef",
-        "RelativeBal",
-        "RelativeFSR",
-        "RelativeJEREC1",
-        "RelativeJEREC2",
-        "RelativeJERHF",
-        "RelativePtBB",
-        "RelativePtEC1",
-        "RelativePtEC2",
-        "RelativePtHF",
-        "RelativeSample",
-        f"RelativeSample_{year}",
-        "RelativeStatEC",
-        "RelativeStatFSR",
-        "RelativeStatHF",
-        "SinglePionECAL",
-        "SinglePionHCAL",
-        "TimePtEta",
-    ]
 
     # https://btv-wiki.docs.cern.ch/PerformanceCalibration/SFUncertaintiesAndCorrelations/#ak4-working-point-based-sfs-fixedwp-sfs
-    # name of the btag_sf correction set and jec uncertainties to propagate through
-    # For the b/c jets consider deepJets_comb (QCD + ttbar enriched)
-    # For the light jets SF, should use deepJet_incl
-
-    cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources, "btagDeepFlavB")
     # ---------------------------------------------------------
     # BTag WP COUNT CONFIG
     # ---------------------------------------------------------
@@ -576,7 +537,10 @@ def add_config(
     cfg.x.btag_wp_count_config = BTagWPCountConfig(
         jet_name="Jet",
         btag_column="btagDeepFlavB",
-        btag_wps={"tight": cfg.x.btag_working_points.deepjet.tight},
+        btag_wps={
+            wp: cfg.x.btag_working_points.deepjet[wp]
+            for wp in ("medium", "tight")
+        },
         pt_edges=(20, 30, 50, 70, 100, 140, 200, 300, 600, 10_000),
         abs_eta_edges=(0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.5),
     )
@@ -601,11 +565,22 @@ def add_config(
         jet_name="Jet",
         btag_column="btagDeepFlavB",
         correction_set="deepJet_merged",
-        btag_wps={"tight": cfg.x.btag_working_points.deepjet.tight},
+        btag_wps={"medium": cfg.x.btag_working_points.deepjet.medium},
         dataset_groups=dataset_groups,
         pt_edges=(20, 30, 50, 70, 100, 140, 200, 300, 10_000),
         abs_eta_edges=(0.0, 0.4, 0.8, 1.2, 1.6, 2.5),
         wp_merging={},
+        systs={
+            "up_correlated_bc": "correlated_bc_up",
+            "down_correlated_bc": "correlated_bc_down",
+            "up_uncorrelated_bc": "uncorrelated_bc_up",
+            "down_uncorrelated_bc": "uncorrelated_bc_down",
+
+            "up_correlated_light": "correlated_light_up",
+            "down_correlated_light": "correlated_light_down",
+            "up_uncorrelated_light": "uncorrelated_light_up",
+            "down_uncorrelated_light": "uncorrelated_light_down",
+        },
     )
 
     ################################################################################################
@@ -615,6 +590,32 @@ def add_config(
     cfg.x.fitpgofcut = 0.1
     cfg.x.trigger_sf_variable = "trigjet6_pt"
 
+    # top pt reweighting
+    # https://twiki.cern.ch/twiki/bin/view/CMS/TopPtReweighting?rev=31
+
+    # theory-based method preferred
+    from columnflow.production.cms.top_pt_weight import TopPtWeightFromTheoryConfig
+    cfg.x.top_pt_weight = TopPtWeightFromTheoryConfig(params={
+        "a": 0.103,
+        "b": -0.0118,
+        "c": -0.000134,
+        "d": 0.973,
+    })
+
+    # data-based method preferred
+    # from columnflow.production.cms.top_pt_weight import TopPtWeightFromDataConfig
+    # cfg.x.top_pt_weight = TopPtWeightFromDataConfig(
+    #     params={
+    #         "a": 0.0615,
+    #         "a_up": 0.0615 * 1.5,
+    #         "a_down": 0.0615 * 0.5,
+    #         "b": -0.0005,
+    #         "b_up": -0.0005 * 1.5,
+    #         "b_down": -0.0005 * 0.5,
+    #     },
+    #     pt_max=500.0,
+    # )
+
     ################################################################################################
     # shifts
     ################################################################################################
@@ -622,29 +623,42 @@ def add_config(
     cfg.add_shift(name="nominal", id=0)
 
     # top mass shifts of 1GeV
-    cfg.add_shift(name="mtop1_up", id=5, type="shape", tags={"disjoint_from_nominal", "mtop1"})
-    cfg.add_shift(name="mtop1_down", id=6, type="shape", tags={"disjoint_from_nominal", "mtop1"})
+    cfg.add_shift(name="mtop1_up", id=2, type="shape", tags={"disjoint_from_nominal", "mtop1"})
+    cfg.add_shift(name="mtop1_down", id=3, type="shape", tags={"disjoint_from_nominal", "mtop1"})
 
     # top mass shifts of 3 GeV
-    cfg.add_shift(name="mtop3_up", id=12, type="shape", tags={"disjoint_from_nominal", "mtop3"})
-    cfg.add_shift(name="mtop3_down", id=13, type="shape", tags={"disjoint_from_nominal", "mtop3"})
+    cfg.add_shift(name="mtop3_up", id=4, type="shape", tags={"disjoint_from_nominal", "mtop3"})
+    cfg.add_shift(name="mtop3_down", id=5, type="shape", tags={"disjoint_from_nominal", "mtop3"})
 
     # top mass shifts of 6 GeV
-    cfg.add_shift(name="mtop6_up", id=14, type="shape", tags={"disjoint_from_nominal", "mtop6"})
-    cfg.add_shift(name="mtop6_down", id=15, type="shape", tags={"disjoint_from_nominal", "mtop6"})
+    cfg.add_shift(name="mtop6_up", id=6, type="shape", tags={"disjoint_from_nominal", "mtop6"})
+    cfg.add_shift(name="mtop6_down", id=7, type="shape", tags={"disjoint_from_nominal", "mtop6"})
 
-    # tune shifts are covered by dedicated, varied datasets, so tag the shift as "disjoint_from_nominal"
-    # (this is currently used to decide whether ML evaluations are done on the full shifted dataset)
-    cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal", "tune"})
-    cfg.add_shift(name="tune_down", id=2, type="shape", tags={"disjoint_from_nominal", "tune"})
-    add_shift_aliases(cfg, "tune", {"tune": "tune_{direction}"})
+    # hdamp shifts
+    cfg.add_shift(name="hdamp_up", id=8, type="shape", tags={"disjoint_from_nominal", "hdamp"})
+    cfg.add_shift(name="hdamp_down", id=9, type="shape", tags={"disjoint_from_nominal", "hdamp"})
 
-    cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal", "hdamp"})
-    cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal", "hdamp"})
+    # tune shifts
+    cfg.add_shift(name="tune_up", id=10, type="shape", tags={"disjoint_from_nominal", "tune"})
+    cfg.add_shift(name="tune_down", id=11, type="shape", tags={"disjoint_from_nominal", "tune"})
 
-    # fake jet energy correction shift, with aliases flaged as "selection_dependent", i.e. the aliases
-    # affect columns that might change the output of the event selection
-    # load jec sources
+    # Tune CR1 shift
+    cfg.add_shift(name="tune_cr1_up", id=12, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
+    cfg.add_shift(name="tune_cr1_down", id=13, type="shape", tags={"disjoint_from_nominal", "tune_cr1"})
+
+    # Tune CR2 shift
+    cfg.add_shift(name="tune_cr2_up", id=14, type="shape", tags={"disjoint_from_nominal", "tune_cr2"})
+    cfg.add_shift(name="tune_cr2_down", id=15, type="shape", tags={"disjoint_from_nominal", "tune_cr2"})
+
+    # Tune rtt shift
+    cfg.add_shift(name="tune_rtt_up", id=16, type="shape", tags={"disjoint_from_nominal", "tune_rtt"})
+    cfg.add_shift(name="tune_rtt_down", id=17, type="shape", tags={"disjoint_from_nominal", "tune_rtt"})
+
+    # Tune rtt shift
+    cfg.add_shift(name="tune_erdON_up", id=18, type="shape", tags={"disjoint_from_nominal", "tune_erdON"})
+    cfg.add_shift(name="tune_erdON_down", id=19, type="shape", tags={"disjoint_from_nominal", "tune_erdON"})
+
+    # JEC shifts
     with open(os.path.join(thisdir, "jec_sources.yaml"), "r") as f:
         all_jec_sources = yaml.load(f, yaml.Loader)["names"]
     for jec_source in cfg.x.jec.Jet.uncertainty_sources:
@@ -673,25 +687,13 @@ def add_config(
                 f"{cfg.x.met_name}.phi": f"{cfg.x.met_name}.phi_{{name}}",
             },
         )
-        # TODO: check the JEC de/correlation across years and the interplay with btag weights
-        if ("" if jec_source == "Total" else jec_source) in cfg.x.btag_sf_jec_sources:
-            add_shift_aliases(
-                cfg,
-                f"jec_{jec_source}",
-                {
-                    "normalized_btag_deepjet_weight": "normalized_btag_deepjet_weight_{name}",
-                    "normalized_njet_btag_deepjet_weight": "normalized_njet_btag_deepjet_weight_{name}",
-                    "normalized_btag_pnet_weight": "normalized_btag_pnet_weight_{name}",
-                    "normalized_njet_btag_pnet_weight": "normalized_njet_btag_pnet_weight_{name}",
-                },
-            )
 
-    # JER shift
-    cfg.add_shift(name="jer_up", id=6000, type="shape", tags={"jer"})
-    cfg.add_shift(name="jer_down", id=6001, type="shape", tags={"jer"})
+    # JER shift for |eta| < 1.93
+    cfg.add_shift(name="jer_EtaLow_up", id=6000, type="shape", tags={"jer"})
+    cfg.add_shift(name="jer_EtaLow_down", id=6001, type="shape", tags={"jer"})
     add_shift_aliases(
         cfg,
-        "jer",
+        "jer_EtaLow",
         {
             "Jet.pt": "Jet.pt_{name}",
             "Jet.mass": "Jet.mass_{name}",
@@ -700,14 +702,23 @@ def add_config(
         },
     )
 
-    # event weights due to muon scale factors
-    cfg.add_shift(name="mu_up", id=10, type="shape")
-    cfg.add_shift(name="mu_down", id=11, type="shape")
-    add_shift_aliases(cfg, "mu", {"muon_weight": "muon_weight_{direction}"})
+    # JER shift for 1.93 <= |eta| < 2.5
+    cfg.add_shift(name="jer_EtaHigh_up", id=6002, type="shape", tags={"jer"})
+    cfg.add_shift(name="jer_EtaHigh_down", id=6003, type="shape", tags={"jer"})
+    add_shift_aliases(
+        cfg,
+        "jer_EtaHigh",
+        {
+            "Jet.pt": "Jet.pt_{name}",
+            "Jet.mass": "Jet.mass_{name}",
+            f"{cfg.x.met_name}.pt": f"{cfg.x.met_name}.pt_{{name}}",
+            f"{cfg.x.met_name}.phi": f"{cfg.x.met_name}.phi_{{name}}",
+        },
+    )
 
     # Renormalization and scale factor shifts
-    cfg.add_shift(name="murmuf_up", id=140, type="shape")
-    cfg.add_shift(name="murmuf_down", id=141, type="shape")
+    cfg.add_shift(name="murmuf_up", id=110, type="shape")
+    cfg.add_shift(name="murmuf_down", id=111, type="shape")
     add_shift_aliases(
         cfg,
         "murmuf",
@@ -717,15 +728,27 @@ def add_config(
         },
     )
 
-    # Pdf shifts
-    cfg.add_shift(name="pdf_up", id=130, type="shape", tags="pdf")
-    cfg.add_shift(name="pdf_down", id=131, type="shape", tags="pdf")
+    # Renormalization shift
+    cfg.add_shift(name="mur_up", id=112, type="shape")
+    cfg.add_shift(name="mur_down", id=113, type="shape")
     add_shift_aliases(
         cfg,
-        "pdf",
+        "mur",
         {
-            "pdf_weight": "pdf_weight_{direction}",
-            "normalized_pdf_weight": "normalized_pdf_weight_{direction}",
+            "mur_weight": "mur_weight_{direction}",
+            "normalized_mur_weight": "normalized_mur_weight_{direction}",
+        },
+    )
+
+    # Renormalization and scale factor shifts
+    cfg.add_shift(name="muf_up", id=114, type="shape")
+    cfg.add_shift(name="muf_down", id=115, type="shape")
+    add_shift_aliases(
+        cfg,
+        "muf",
+        {
+            "muf_weight": "muf_weight_{direction}",
+            "normalized_muf_weight": "normalized_muf_weight_{direction}",
         },
     )
 
@@ -737,51 +760,386 @@ def add_config(
         "trig",
         {
             "trig_weight": "trig_weight_{direction}",
+            "normalized_trig_weight": "normalized_trig_weight_{direction}",
         },
     )
 
     # Pile-up shifts
-    cfg.add_shift(name="pu_weight_minbias_xs_up", id=150, type="shape", tags="pu_weight")
-    cfg.add_shift(name="pu_weight_minbias_xs_down", id=151, type="shape", tags="pu_weight")
+    cfg.add_shift(name="pu_weight_minbias_xs_up", id=130, type="shape", tags="pu_weight")
+    cfg.add_shift(name="pu_weight_minbias_xs_down", id=131, type="shape", tags="pu_weight")
     add_shift_aliases(
         cfg,
         "pu_weight_minbias_xs",
         {
             "pu_weight": "pu_weight_minbias_xs_{direction}",
+            "normalized_pu_weight": "normalized_pu_weight_minbias_xs_{direction}",
         },
     )
 
-    # FSR shifts
-    cfg.add_shift(name="fsr_up", id=152, type="shape", tags="pu_weight")
-    cfg.add_shift(name="fsr_down", id=153, type="shape", tags="pu_weight")
+    # Hdamp shifts based on DCTR reweighting
+    cfg.add_shift(name="hdamp_dctr_up", id=140, type="shape", tags="hdamp_dctr")
+    cfg.add_shift(name="hdamp_dctr_down", id=141, type="shape", tags="hdamp_dctr")
     add_shift_aliases(
         cfg,
-        "fsr",
-        {
-            "fsr_weight": "fsr_weight_{direction}",
+        "hdamp_dctr", {
+            "hdamp_weight": "hdamp_weight_{direction}",
+            "normalized_hdamp_weight": "normalized_hdamp_weight_{direction}",
         },
     )
 
-    # ISR shifts
-    cfg.add_shift(name="isr_up", id=154, type="shape", tags="pu_weight")
-    cfg.add_shift(name="isr_down", id=155, type="shape", tags="pu_weight")
+    # Top pt reweighting shifts
+    cfg.add_shift(name="top_pt_up", id=150, type="shape", tags="top_pt")
+    cfg.add_shift(name="top_pt_down", id=151, type="shape", tags="top_pt")
     add_shift_aliases(
         cfg,
-        "isr",
+        "top_pt",
         {
-            "isr_weight": "isr_weight_{direction}",
+            "top_pt_weight": "top_pt_weight_{direction}",
+            "normalized_top_pt_weight": "normalized_top_pt_weight_{direction}",
         },
     )
-    # Top mass sample shifts
 
+    # PDF shifts based on alpha_s variations
+    cfg.add_shift(name="alphas_up", id=170, type="shape", tags="alphas")
+    cfg.add_shift(name="alphas_down", id=171, type="shape", tags="alphas")
+    add_shift_aliases(
+        cfg,
+        "alphas",
+        {
+            "pdf_weight": "pdf_alphas_weight_{direction}",
+            "normalized_pdf_weight": "normalized_pdf_alphas_weight_{direction}",
+        },
+    )
+
+    # PDF shifts based on hessian variations, up to 100 variations
+    for i in range(100):
+        idx = i + 1
+        name = f"hessian_{idx:03d}"
+        cfg.add_shift(name=f"{name}_up", id=2000 + 2 * i, type="shape", tags="hessian")
+        cfg.add_shift(name=f"{name}_down", id=2001 + 2 * i, type="shape", tags="hessian")
+        add_shift_aliases(
+            cfg,
+            name,
+            {
+                "pdf_weight": f"pdf_hessian_{idx:03d}_weight_{{direction}}",
+                "normalized_pdf_weight": f"normalized_pdf_hessian_{idx:03d}_weight_{{direction}}",
+            },
+        )
+
+    # ISR shifts for decorrelated variations
+    cfg.add_shift(name="isr_G2GG_muR_up", id=1016, type="shape", tags="isr")
+    cfg.add_shift(name="isr_G2GG_muR_down", id=1017, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr_G2GG_muR",
+        {
+            "isr_weight": "isr_weight_G2GG_muR_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_G2GG_muR_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="isr_G2QQ_muR_up", id=1018, type="shape", tags="isr")
+    cfg.add_shift(name="isr_G2QQ_muR_down", id=1019, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr_G2QQ_muR",
+        {
+            "isr_weight": "isr_weight_G2QQ_muR_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_G2QQ_muR_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="isr_Q2QG_muR_up", id=1020, type="shape", tags="isr")
+    cfg.add_shift(name="isr_Q2QG_muR_down", id=1021, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr_Q2QG_muR",
+        {
+            "isr_weight": "isr_weight_Q2QG_muR_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_Q2QG_muR_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="isr_X2XG_muR_up", id=1022, type="shape", tags="isr")
+    cfg.add_shift(name="isr_X2XG_muR_down", id=1023, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr_X2XG_muR",
+        {
+            "isr_weight": "isr_weight_X2XG_muR_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_X2XG_muR_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="isr_G2GG_cNS_up", id=1024, type="shape", tags="isr")
+    cfg.add_shift(name="isr_G2GG_cNS_down", id=1025, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr_G2GG_cNS",
+        {
+            "isr_weight": "isr_weight_G2GG_cNS_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_G2GG_cNS_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="isr_G2QQ_cNS_up", id=1026, type="shape", tags="isr")
+    cfg.add_shift(name="isr_G2QQ_cNS_down", id=1027, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr_G2QQ_cNS",
+        {
+            "isr_weight": "isr_weight_G2QQ_cNS_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_G2QQ_cNS_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="isr_Q2QG_cNS_up", id=1028, type="shape", tags="isr")
+    cfg.add_shift(name="isr_Q2QG_cNS_down", id=1029, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr_Q2QG_cNS",
+        {
+            "isr_weight": "isr_weight_Q2QG_cNS_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_Q2QG_cNS_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="isr_X2XG_cNS_up", id=1030, type="shape", tags="isr")
+    cfg.add_shift(name="isr_X2XG_cNS_down", id=1031, type="shape", tags="isr")
+    add_shift_aliases(
+        cfg,
+        "isr_X2XG_cNS",
+        {
+            "isr_weight": "isr_weight_X2XG_cNS_{direction}",
+            "normalized_isr_weight": "normalized_isr_weight_X2XG_cNS_{direction}",
+        },
+    )
+
+    # FSR shifts for decorrelated variations
+    cfg.add_shift(name="fsr_G2GG_muR_up", id=1100, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_G2GG_muR_down", id=1101, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_G2GG_muR",
+        {
+            "fsr_weight": "fsr_weight_G2GG_muR_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_G2GG_muR_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="fsr_G2QQ_muR_up", id=1116, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_G2QQ_muR_down", id=1117, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_G2QQ_muR",
+        {
+            "fsr_weight": "fsr_weight_G2QQ_muR_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_G2QQ_muR_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="fsr_Q2QG_muR_up", id=1118, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_Q2QG_muR_down", id=1119, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_Q2QG_muR",
+        {
+            "fsr_weight": "fsr_weight_Q2QG_muR_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_Q2QG_muR_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="fsr_X2XG_muR_up", id=1120, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_X2XG_muR_down", id=1121, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_X2XG_muR",
+        {
+            "fsr_weight": "fsr_weight_X2XG_muR_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_X2XG_muR_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="fsr_G2GG_cNS_up", id=1122, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_G2GG_cNS_down", id=1123, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_G2GG_cNS",
+        {
+            "fsr_weight": "fsr_weight_G2GG_cNS_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_G2GG_cNS_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="fsr_G2QQ_cNS_up", id=1124, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_G2QQ_cNS_down", id=1125, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_G2QQ_cNS",
+        {
+            "fsr_weight": "fsr_weight_G2QQ_cNS_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_G2QQ_cNS_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="fsr_Q2QG_cNS_up", id=1126, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_Q2QG_cNS_down", id=1127, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_Q2QG_cNS",
+        {
+            "fsr_weight": "fsr_weight_Q2QG_cNS_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_Q2QG_cNS_{direction}",
+        },
+    )
+
+    cfg.add_shift(name="fsr_X2XG_cNS_up", id=1128, type="shape", tags="fsr")
+    cfg.add_shift(name="fsr_X2XG_cNS_down", id=1129, type="shape", tags="fsr")
+    add_shift_aliases(
+        cfg,
+        "fsr_X2XG_cNS",
+        {
+            "fsr_weight": "fsr_weight_X2XG_cNS_{direction}",
+            "normalized_fsr_weight": "normalized_fsr_weight_X2XG_cNS_{direction}",
+        },
+    )
+
+    # Fragmentation weights from DCRT reweighting
+    cfg.add_shift(name="rb_dctr_up", id=1200, type="shape")
+    cfg.add_shift(name="rb_dctr_down", id=1201, type="shape")
+    add_shift_aliases(
+        cfg,
+        "rb_dctr",
+        {
+            "rb_weight": "rb_weight{direction}",
+            "normalized_rb_weight": "normalized_rb_weight_{direction}",
+        },
+    )
+
+    # btag SF shifts for uncorrelated b/c uncertainties
+    cfg.add_shift(name="btag_heavy_uncor_up", id=1300, type="shape", tags="btag_sf")
+    cfg.add_shift(name="btag_heavy_uncor_down", id=1301, type="shape", tags="btag_sf")
+    add_shift_aliases(
+        cfg,
+        "btag_heavy_uncor",
+        {
+            "btag_weight": "btag_weight_uncorrelated_bc_{direction}",
+        },
+    )
+    # btag SF shifts for correlated b/c uncertainties
+    cfg.add_shift(name="btag_heavy_cor_up", id=1302, type="shape", tags="btag_sf")
+    cfg.add_shift(name="btag_heavy_cor_down", id=1303, type="shape", tags="btag_sf")
+    add_shift_aliases(
+        cfg,
+        "btag_heavy_cor",
+        {
+            "btag_weight": "btag_weight_correlated_bc_{direction}",
+        },
+    )
+
+    # btag SF shifts for uncorrelated light uncertainties
+    cfg.add_shift(name="btag_light_uncor_up", id=1304, type="shape", tags="btag_sf")
+    cfg.add_shift(name="btag_light_uncor_down", id=1305, type="shape", tags="btag_sf")
+    add_shift_aliases(
+        cfg,
+        "btag_light_uncor",
+        {
+            "btag_weight": "btag_weight_uncorrelated_light_{direction}",
+        },
+    )
+    # btag SF shifts for correlated light uncertainties
+    cfg.add_shift(name="btag_light_cor_up", id=1306, type="shape", tags="btag_sf")
+    cfg.add_shift(name="btag_light_cor_down", id=1307, type="shape", tags="btag_sf")
+    add_shift_aliases(
+        cfg,
+        "btag_light_cor",
+        {
+            "btag_weight": "btag_weight_correlated_light_{direction}",
+        },
+    )
+
+    # bfrag weight shifts (application as uncertainty)
+    cfg.add_shift(name="bfrag_up", id=1308, type="shape")
+    cfg.add_shift(name="bfrag_down", id=1309, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag",
+        {
+            "bfrag_weight": "bfrag_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_weight_{direction}",
+        },
+    )
+
+    # bfrag Lund plane weight shifts
+    cfg.add_shift(name="bfrag_lund_up", id=1310, type="shape")
+    cfg.add_shift(name="bfrag_lund_down", id=1311, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag_lund",
+        {
+            "bfrag_weight": "bfrag_lund_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_lund_weight_{direction}",
+        },
+    )
+
+    # bfrag Peterson (application as uncertainty)
+    cfg.add_shift(name="bfrag_peterson_up", id=1312, type="shape")
+    cfg.add_shift(name="bfrag_peterson_down", id=1313, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag_peterson",
+        {
+            "bfrag_weight": "bfrag_peterson_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_peterson_weight_{direction}",
+        },
+    )
+
+    # bfrag rel (up / down shifts from bfrag Producer divided by nominal)
+    cfg.add_shift(name="bfrag_rel_up", id=1314, type="shape")
+    cfg.add_shift(name="bfrag_rel_down", id=1315, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag_rel",
+        {
+            "bfrag_weight": "bfrag_rel_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_rel_weight_{direction}",
+        },
+    )
+
+    # L1Prefire weight shifts
+    cfg.add_shift(name="l1prefire_up", id=1316, type="shape")
+    cfg.add_shift(name="l1prefire_down", id=1317, type="shape")
+    add_shift_aliases(
+        cfg,
+        "l1prefire",
+        {
+            "l1_prefiring_weight": "l1_prefiring_weight{direction}",
+        },
+    )
+
+    # bfrag bdecay weight shifts
+    cfg.add_shift(name="bfrag_bdecay_up", id=1318, type="shape")
+    cfg.add_shift(name="bfrag_bdecay_down", id=1319, type="shape")
+    add_shift_aliases(
+        cfg,
+        "bfrag_bdecay",
+        {
+            "bfrag_weight": "bfrag_bdecay_weight{direction}",
+            "normalized_bfrag_weight": "normalized_bfrag_bdecay_weight_{direction}",
+        },
+    )
     ################################################################################################
     # external files
     ################################################################################################
 
     cfg.x.external_files = DotDict()
-    json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-377439e8"
-    year = 2017
-    corr_postfix = ""
+
+    central_mtop_dir = "/afs/cern.ch/user/l/lgriesin/public/mTop"
+
+    # For 2017 and 2018 don't need corr_postfix
+    # TODO corr_postfix for 2016
+    if year != 2016:
+        corr_postfix = ""
 
     # helper
     def add_external(name, value):
@@ -794,7 +1152,7 @@ def add_config(
             run=2,
             era=f"{year}{corr_postfix}-UL",
             vnano=9,
-            snapshot=CATSnapshot(btv="latest", egm="latest", jme="latest", lum="latest", muo="latest", tau="latest"),
+            snapshot=CATSnapshot(btv="latest", egm="latest", jme="2026-04-22", lum="latest", muo="latest", tau="latest"),
         )
 
     # common files
@@ -812,37 +1170,69 @@ def add_config(
             2018: ("/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json", "v1"),
         }[year],
     })
+
     # pileup weight corrections
+    # Using mc profile from CMSSW config and data profiles self-produced for corresponding years using BrilCalc)
     add_external(
-        "pu_sf", (
-            f"{json_mirror}/POG/LUM/{year}{corr_postfix}_UL/puWeights.json.gz",
-            "v1",
-        ),
+        "pu",
+        {
+            2017: {
+                "mc_profile": (
+                    "https://raw.githubusercontent.com/cms-sw/cmssw/refs/heads/master/"
+                    "SimGeneral/MixingModule/python/mix_2017_25ns_UltraLegacy_PoissonOOTPU_cfi.py",
+                    "v1",
+                ),
+                "data_profile": {
+                    "nominal": (
+                        f"{central_mtop_dir}/pileup/{year}/pileup_nominal.root",
+                        "v1",
+                    ),
+                    "minbias_xs_up": (
+                        f"{central_mtop_dir}/pileup/{year}/pileup_up.root",
+                        "v1",
+                    ),
+                    "minbias_xs_down": (
+                        f"{central_mtop_dir}/pileup/{year}/pileup_down.root",
+                        "v1",
+                    ),
+                },
+            },
+            2018: {
+                "mc_profile": (
+                    "https://raw.githubusercontent.com/cms-sw/cmssw/refs/heads/master/"
+                    "SimGeneral/MixingModule/python/mix_2018_25ns_UltraLegacy_PoissonOOTPU_cfi.py",
+                    "v1",
+                ),
+                "data_profile": {
+                    "nominal": (
+                        f"{central_mtop_dir}/pileup/{year}/pileup_nominal.root",
+                        "v1",
+                    ),
+                    "minbias_xs_up": (
+                        f"{central_mtop_dir}/pileup/{year}/pileup_up.root",
+                        "v1",
+                    ),
+                    "minbias_xs_down": (
+                        f"{central_mtop_dir}/pileup/{year}/pileup_down.root",
+                        "v1",
+                    ),
+                },
+            },
+        }[year],
+    )
 
-    )
-    # muon scale factors
-    add_external(
-        "muon_sf", (f"{json_mirror}/POG/MUO/{year}_UL/muon_Z.json.gz", "v1"),
-    )
     # jet energy correction
-    add_external(
-        "jet_jerc", (f"{json_mirror}/POG/JME/{year}{corr_postfix}_UL/jet_jerc.json.gz", "v1"),
-    )
-    # WP based btag SF
-    add_external(
-        "btag_wp_sf_corr",
-        (f"/afs/cern.ch/user/l/lgriesin/public/mTop/BTV_files/deepJet_{year}{corr_postfix}_merged.json.gz", "v1"),
-    )
+    add_external("jet_jerc", (cat_info.get_file("jme", "jet_jerc.json.gz"), "v1"))
 
-    # electron scale factors
-    add_external(
-        "electron_sf", (
-            f"{json_mirror}/POG/EGM/{year}{corr_postfix}_UL/electron.json.gz",
-            "v1",
-        ),
-    )
     # jet veto map
     add_external("jet_veto_map", (cat_info.get_file("jme", "jetvetomaps.json.gz"), "v2"))
+
+    # WP based btag SF -> Correctionlibs with the merged correction set
+    # Using the script Merge_BTV_correction_files.py provided from Marcel
+    add_external("btag_wp_sf_corr", (f"{central_mtop_dir}/BTV_files/deepJet_{year}_merged.json.gz", "v1"))
+
+    # JER smearing file
+    add_external("jer_tool", (f"{central_mtop_dir}/JER/jer_smear.json.gz", "v1"))
     ################################################################################################
     # reductions
     ################################################################################################
@@ -859,41 +1249,61 @@ def add_config(
                 "luminosityBlock",
                 "event",
                 # object info
-                "Jet.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask}",
-                "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask}",
+
+                # Jets with pt > 32 GeV and |eta| < 2.6
+                "Jet.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask,jetId,puId}",
+
+                # Jets with |eta| < 2.6
+                "TrigJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,veto_map_mask,jetId,puId}",
+
+                # Jets with pt > 40 GeV and |eta| < 2.4
                 "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
+
+                # Six Leading Jets sorted by pt with pt > 40 GeV and |eta| < 2.4
                 "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB,partonFlavour,hadronFlavour,jetId,puId,veto_map_mask}",
-                "Electron.{pt,eta,cutBased}",
-                "Muon.{pt,eta,looseId,pfIsoId}",
+
+                # Primary Vertices
                 "PV.{npvs,npvsGood}",
-                "GenPart.*",
+
+                # Columns for Pileup
+                "Pileup.nTrueInt",
+
+                # FixedGridRho columns
+                "fixedGridRho*",
+
+                # HLT Columns
                 (
-                    "HLT.{Mu50,PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
-                    "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2,PFHT380_SixPFJet32,"
-                    "IsoMu24,PFHT370,PFHT350,Physics,PFHT1050,PFHT890}"
+                    "HLT.{Mu50,Physics,IsoMu24,PFHT350,PFHT370,PFHT890,PFHT1050,"
+                    "PFHT380_SixPFJet32,PFHT400_SixPFJet32," +
+                    ("PFHT380_SixPFJet32_DoublePFBTagCSV_2p2," if year != 2018 else "") +
+                    "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2,"
+                    "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94}"
                 ),
-                # columns added during selection
-                "deterministic_seed",
-                "process_id",
-                "mc_weight",
-                "cutflow.*",
-                "pdf_weight",
-                "trig_weight",
-                "trig_weight_up",
-                "trig_weight_down",
-                "murmuf_weight",
-                "pu_weight",
-                "btag_weight",
+
+                # L1 Prefire Weights
+                "L1PreFiringWeight.*",
+
+                # Ht from trigger objects
                 "trig_ht",
-                "gen_top",
+                "xb.*",
+
+                # Generator info
                 "gen_top.{eta,phi,pt,mass,genPartIdxMother,pdgId,status,statusFlags}",
+                "GenPart.*",
+
                 ColumnCollection.ALL_FROM_SELECTOR,
+                skip_column("pdf_weights_alphas*"),
+                skip_column("pdf_weights_hessian*"),
+                skip_column("cutflow.*"),
             },
             "cf.MergeSelectionMasks": {
                 "normalization_weight",
                 "process_id",
                 "category_ids",
                 "cutflow.*",
+            },
+            "cf.ProduceColumns": {
+                ColumnCollection.ALL_FROM_PRODUCERS,
             },
             "cf.UniteColumns": {
                 "*_weight",
@@ -916,38 +1326,72 @@ def add_config(
     cfg.x.event_weights = DotDict(
         {
             "normalization_weight": [],
-            "btag_weight": [],
+            "btag_weight": get_shifts("btag_heavy_*", "btag_light_*"),
             "trig_weight": get_shifts("trig"),
-            "pdf_weight": get_shifts("pdf"),
-            "murmuf_weight": get_shifts("murmuf"),
-            "pu_weight": get_shifts("pu_weight_minbias_xs"),
-            "fsr_weight": get_shifts("fsr"),
-            "isr_weight": get_shifts("isr"),
+            "normalized_pdf_weight": get_shifts("pdf", "alphas", "hessian_*"),
+            "normalized_murmuf_weight": get_shifts("murmuf"),
+            "normalized_mur_weight": get_shifts("mur"),
+            "normalized_muf_weight": get_shifts("muf"),
+            "normalized_pu_weight": get_shifts("pu_weight_minbias_xs"),
+            "normalized_fsr_weight": get_shifts("fsr*"),
+            "normalized_isr_weight": get_shifts("isr*"),
+            "normalized_hdamp_weight": get_shifts("hdamp_dctr"),
+            "normalized_rb_weight": get_shifts("rb_dctr"),
+            "normalized_bfrag_weight": get_shifts("bfrag*"),
+            "l1_prefiring_weight": get_shifts("l1prefire"),
         },
     )
+
+    # # define per-dataset event weights
+    for dataset in cfg.datasets:
+        if dataset.has_tag("ttbar"):
+            dataset.x.event_weights = {
+                "normalized_top_pt_weight": get_shifts("top_pt"),
+            }
+
     # define per-dataset event weights
     cfg.x.shift_groups = {}
 
     ################################################################################################
     # external configs: channels, categories, met filters, triggers, variables
     ################################################################################################
+    # Trigger configurations
 
-    # names of muon correction sets and working points
-    # (used in the muon producer)
-    cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", f"{year}_UL")
+    # Signal trigger
+    # For 2017, the first trigger PFHT380_SixPFJet32_DoublePFBTagCSV_2p2 is used
+    # For 2018, we use a logical OR of both
+    # Structure of the config stays the same and exceptions for 2018 are handled in corresponing parts of the code
+    # categorization for SR as an example, etc.
     cfg.x.trigger = {
-        "tt_fh": [
-            "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
-            "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
-        ],
+        "tt_fh": {
+            2017: [
+                "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2",
+                "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+            ],
+            2018: [
+                "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94",
+                "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2",
+            ],
+        }[year],
     }
 
     cfg.x.ref_trigger = {
-        "tt_fh": ["PFHT350"],
+        "tt_fh": {
+            2017: ["PFHT350"],
+            2018: ["PFHT350"],
+        }[year],
     }
 
     cfg.x.bkg_trigger = {
-        "tt_fh": ["PFHT380_SixPFJet32"],
+        "tt_fh": {
+            2017: [
+                "PFHT380_SixPFJet32",
+            ],
+            2018: [
+                "PFHT400_SixPFJet32",
+                "PFHT380_SixPFJet32",
+            ],
+        }[year],
     }
 
     # channels
@@ -963,6 +1407,10 @@ def add_config(
 
     add_variables(cfg)
 
+    # add met filters
+    from alljets.config.met_filters import add_met_filters
+    add_met_filters(cfg)
+
     ################################################################################################
     # LFN settings
     ################################################################################################
@@ -973,4 +1421,81 @@ def add_config(
 
     # whether to validate the number of obtained LFNs in GetDatasetLFNs
     cfg.x.validate_dataset_lfns = False
+
+    def get_dataset_lfns(dataset_inst, shift_inst, dataset_key):
+
+        # Get shift name, fallback to "nominal" if not found
+        shift_name = getattr(shift_inst, "name", None)
+
+        info = None
+        if shift_name is not None:
+            info = dataset_inst.info.get(shift_name)
+
+        if info is None:
+            info = dataset_inst.info.get("nominal")
+
+        if info is None:
+            raise Exception(
+                f"No dataset info found for shift='{shift_name}' or 'nominal' "
+                f"in dataset '{dataset_key}'",
+            )
+
+        aux = getattr(info, "aux", {})
+
+        # Custom processed dataset handling
+        if aux.get("lfn_source") == "pnfs":
+
+            pnfs_version = aux.get("pnfs_version")
+            pnfs_dataset = aux.get("pnfs_dataset")
+
+            if pnfs_version is None or pnfs_dataset is None:
+                raise Exception(
+                    f"Missing pnfs_version or pnfs_dataset in aux for dataset '{dataset_key}'",
+                )
+
+            base_path = (
+                "/pnfs/desy.de/cms/tier2/store/user/stadie/nanoaod_run2/"
+                f"{pnfs_version}"
+            )
+
+            dataset_dir = os.path.join(base_path, pnfs_dataset)
+
+            if not os.path.exists(dataset_dir):
+                raise Exception(f"Dataset directory not found: {dataset_dir}")
+
+            files = glob.glob(dataset_dir + "/*.root")
+
+            if not files:
+                raise Exception(f"No ROOT files found in: {dataset_dir}")
+
+            # convert PNFS → LFN
+            files = [
+                f.replace("/pnfs/desy.de/cms/tier2", "")
+                for f in files
+            ]
+
+            skip_map = {}
+
+            skip_files = skip_map.get(pnfs_dataset, [])
+
+            if skip_files:
+                files = [
+                    f for f in files
+                    if not any(sf in f for sf in skip_files)
+                ]
+
+            return sorted(files)
+
+        # Fallback to DAS-based handling using GetDatasetLFNs
+        from columnflow.tasks.external import GetDatasetLFNs
+
+        task = GetDatasetLFNs()
+        return task.get_dataset_lfns_dasgoclient(
+            dataset_inst,
+            shift_inst,
+            dataset_key,
+        )
+
+    cfg.x.get_dataset_lfns = get_dataset_lfns
+
     return cfg

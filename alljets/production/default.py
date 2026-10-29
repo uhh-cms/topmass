@@ -29,15 +29,30 @@ from columnflow.production.util import attach_coffea_behavior
 from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
 from columnflow.columnar_util import attach_coffea_behavior as attach_coffea_behavior_fn
 
-from columnflow.production.cms.muon import muon_weights
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.btag import btag_wp_weights
+from columnflow.production.cms.seeds import deterministic_seeds
+
 from columnflow.production.cms.gen_particles import gen_top_lookup
 from columnflow.production.normalization import normalization_weights
 
-
 from alljets.production.KinFit import kinFit
 from alljets.scripts.default import combinationtype
+
+
+from alljets.production.trig_cor_weight import trig_weights
+from alljets.production.weights import normalized_hdamp_weight
+from alljets.production.weights import normalized_ps_weights
+from alljets.production.weights import normalized_pdf_weights
+from alljets.production.weights import normalized_pdf_weight
+from alljets.production.weights import normalized_trig_weight
+from alljets.production.weights import normalized_pu_weights
+from alljets.production.weights import normalized_murmuf_weight
+from alljets.production.weights import normalized_rb_weight
+from alljets.production.weights import normalized_top_pt_weight
+from alljets.production.weights import normalized_bfrag_weight
+from alljets.production.L1Prefire import l1_prefiring
+
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -50,6 +65,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         attach_coffea_behavior,
         "TrigJets.{pt,eta,phi,mass,btagDeepFlavB}",
         "SelectedJets.{pt,eta,phi,mass,btagDeepFlavB}",
+        "KinFitJets.{pt,eta,phi,mass,btagDeepFlavB}",
         "event",
         "HLT.*",
 
@@ -91,16 +107,16 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Compute jet multiplicity for the main jet collection (pT >= 40 GeV, |eta| < 2.4)
     events = set_ak_column(events, "n_jet", ak.num(events.SelectedJets.pt, axis=1), value_type=np.int32)
 
-    # Compute b-jet multiplicity using the tight working point on the SelectedJets collection
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
+    # Compute b-jet multiplicity using the medium working point on the SelectedJets collection
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
     events = set_ak_column(events, "n_bjet",
-                           ak.sum((events.SelectedJets.btagDeepFlavB >= wp_tight), axis=1), value_type=np.int32)
+                           ak.sum((events.SelectedJets.btagDeepFlavB >= wp_medium), axis=1), value_type=np.int32)
 
     # Extract max and second max b-tag scores among the SelectedJets (pT >= 40 GeV, |eta| < 2.4)
-    events = set_ak_column(events, "maxbtag", (ak.max(events.SelectedJets.btagDeepFlavB, axis=1)))
+    events = set_ak_column(events, "maxbtag", (ak.max(events.KinFitJets.btagDeepFlavB, axis=1)))
 
     # Insert dummy value for one jet events
-    secmax = ak.sort(events.SelectedJets.btagDeepFlavB, axis=1, ascending=False)
+    secmax = ak.sort(events.KinFitJets.btagDeepFlavB, axis=1, ascending=False)
     empty = ak.singletons(np.full(len(events), EMPTY_FLOAT))
     events = set_ak_column(events, "secmaxbtag", (ak.concatenate([secmax, empty, empty], axis=1)[:, 1]))
     return events
@@ -132,6 +148,9 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "RecoTop1.*",
         "RecoTop2.*",
         "fitCombinationType",
+        "FitTopMass",
+        "RecoWAvgMass",
+        "RecoRbq",
     },
 )
 def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -158,8 +177,8 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = set_ak_column(events, "gen_top", False)
 
     events = self[kinFit](events, **kwargs)
-
-    if events.gen_top.ndim > 1:
+    is_tt_fh = self.dataset_inst.has_tag("tt") and "fh" in self.dataset_inst.name
+    if events.gen_top.ndim > 1 and is_tt_fh:
         jetcollections = {
             "FitJet": {
                 "type_name": "Jet",
@@ -249,6 +268,16 @@ def kinFitMatch(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "FitTop1", Top1)
     events = set_ak_column(events, "FitTop2", Top2)
 
+    # Additional derived quantities (used for percentle binning)
+    FitTopMass = 0.5 * (Top1.mass + Top2.mass)
+    RecoWAvgMass = 0.5 * (RecoW1.mass + RecoW2.mass)
+    reco = events.FitJet.reco
+    RecoRbq = (reco[:, 0].pt + reco[:, 1].pt) / ak.sum(reco[:, 2:6].pt, axis=1)
+
+    events = set_ak_column(events, "FitTopMass", FitTopMass)
+    events = set_ak_column(events, "RecoWAvgMass", RecoWAvgMass)
+    events = set_ak_column(events, "RecoRbq", RecoRbq)
+
     return events
 
 
@@ -297,8 +326,8 @@ def cutflow_features(
     events = set_ak_column(events, "cutflow.jet1_pt", Route("Jet.pt[:,0]").apply(events, EMPTY_FLOAT))
     events = set_ak_column(events, "cutflow.jet6_pt", Route("Jet.pt[:,5]").apply(events, EMPTY_FLOAT))
 
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-    events = set_ak_column(events, "cutflow.n_bjet", ak.sum((events.Jet.btagDeepFlavB >= wp_tight), axis=1))
+    wp_medium = self.config_inst.x.btag_working_points.deepjet.medium
+    events = set_ak_column(events, "cutflow.n_bjet", ak.sum((events.Jet.btagDeepFlavB >= wp_medium), axis=1))
 
     return events
 
@@ -306,20 +335,42 @@ def cutflow_features(
 @producer(
     uses={
         features,
-        kinFitMatch,
+        # kinFitMatch,
         category_ids,
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
+        deterministic_seeds,
+        normalized_hdamp_weight,
+        normalized_ps_weights,
+        normalized_pdf_weights,
+        normalized_pu_weights,
+        normalized_murmuf_weight,
+        normalized_trig_weight,
+        normalized_rb_weight,
+        normalized_top_pt_weight,
+        normalized_bfrag_weight,
+        l1_prefiring,
         "Jet.*",
     },
     produces={
         features,
-        kinFitMatch,
+        # kinFitMatch,
         category_ids,
         btag_wp_weights,
         normalization_weights,
         attach_coffea_behavior,
+        deterministic_seeds,
+        normalized_hdamp_weight,
+        normalized_ps_weights,
+        normalized_pdf_weights,
+        normalized_pu_weights,
+        normalized_murmuf_weight,
+        normalized_trig_weight,
+        normalized_rb_weight,
+        normalized_top_pt_weight,
+        normalized_bfrag_weight,
+        l1_prefiring,
     },
     require_producers={"kinFitMatch"},
     # whether weight producers should be added and called
@@ -343,12 +394,34 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # Compute category ids used by later stages
     events = self[category_ids](events, **kwargs)
+    events = self[deterministic_seeds](events, **kwargs)
 
-    # MC-only weights
     if self.dataset_inst.is_mc:
         events = self[normalization_weights](events, **kwargs)
+
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
+
+        events = self[normalized_murmuf_weight](events, **kwargs)
+
+        events = self[normalized_hdamp_weight](events, **kwargs)
+
+        events = self[normalized_ps_weights](events, **kwargs)
+
+        events = self[normalized_pdf_weights](events, **kwargs)
+
+        events = self[normalized_pu_weights](events, **kwargs)
+
+        events = self[normalized_trig_weight](events, **kwargs)
+
+        events = self[normalized_bfrag_weight](events, **kwargs)
+
+        events = self[normalized_rb_weight](events, **kwargs)
+
+        if self.dataset_inst.has_tag("ttbar"):
+            events = self[normalized_top_pt_weight](events, **kwargs)
+
+        events = self[l1_prefiring](events, **kwargs)
 
     return events
 
@@ -360,6 +433,15 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         category_ids,
         btag_wp_weights,
         normalization_weights,
+        normalized_murmuf_weight,
+        normalized_hdamp_weight,
+        normalized_ps_weights,
+        normalized_pdf_weight,
+        normalized_pu_weights,
+        normalized_top_pt_weight,
+        normalized_rb_weight,
+        normalized_bfrag_weight,
+        l1_prefiring,
         "Jet.*",
     },
     produces={
@@ -368,10 +450,20 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         category_ids,
         btag_wp_weights,
         normalization_weights,
+        normalized_murmuf_weight,
+        normalized_hdamp_weight,
+        normalized_ps_weights,
+        normalized_pdf_weight,
+        normalized_pu_weights,
+        normalized_top_pt_weight,
+        normalized_rb_weight,
+        normalized_bfrag_weight,
+        l1_prefiring,
     },
     produce_weights=True,
+    mode="production",
 )
-def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+def trigSF_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
     Variant pipeline used when normalization shouldn't be applied.
 
@@ -398,15 +490,70 @@ def no_norm(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # Category assignment and deterministic seeds
     events = self[category_ids](events, **kwargs)
 
-    # MC: set normalization and mc weights to 1 (placeholder)
     if self.dataset_inst.is_mc:
+
         events = self[normalization_weights](events, **kwargs)
+
         events = set_ak_column(events, "normalization_weight", np.ones(len(events)), value_type=np.float32)
-        events = set_ak_column(events, "mc_weight", np.ones(len(events)), value_type=np.float32)
+
         jet_mask = (events.Jet.pt >= 40.0) & (abs(events.Jet.eta) < 2.4)
         events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
 
+        events = self[normalized_murmuf_weight](events, **kwargs)
+
+        events = self[normalized_hdamp_weight](events, **kwargs)
+
+        events = self[normalized_ps_weights](events, **kwargs)
+
+        events = self[normalized_pdf_weight](events, **kwargs)
+
+        events = self[normalized_pu_weights](events, **kwargs)
+
+        events = self[normalized_rb_weight](events, **kwargs)
+
+        events = self[normalized_bfrag_weight](events, **kwargs)
+
+        events = self[l1_prefiring](events, **kwargs)
+
+        if self.dataset_inst.has_tag("ttbar"):
+            events = self[normalized_top_pt_weight](events, **kwargs)
+
+        if self.mode == "production":
+            events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
+            events = set_ak_column(events, "trig_weight_up", np.ones(len(events)), value_type=np.float32)
+            events = set_ak_column(events, "trig_weight_down", np.ones(len(events)), value_type=np.float32)
+
+            events = set_ak_column(events, "normalized_trig_weight", np.ones(len(events)), value_type=np.float32)
+            events = set_ak_column(events, "normalized_trig_weight_up", np.ones(len(events)), value_type=np.float32)
+            events = set_ak_column(events, "normalized_trig_weight_down", np.ones(len(events)), value_type=np.float32)
+
+        elif self.mode == "evaluation":
+            events = self[trig_weights](events, **kwargs)
+            events = set_ak_column(events, "normalized_trig_weight", events.trig_weight)
+            events = set_ak_column(events, "normalized_trig_weight_up", events.trig_weight_up)
+            events = set_ak_column(events, "normalized_trig_weight_down", events.trig_weight_down)
+
     return events
+
+
+@trigSF_prod.init
+def trigSF_prod_init(self: Producer, **kwargs) -> None:
+    if not self.dataset_inst.is_mc:
+        return
+
+    mode = self.mode
+
+    if mode == "production":
+        self.produces.add("trig_weight{,_up,_down}")
+        self.produces.add("normalized_trig_weight{,_up,_down}")
+
+    elif mode == "evaluation":
+        self.uses.add(trig_weights)
+        self.produces.add(trig_weights)
+        self.produces.add("normalized_trig_weight{,_up,_down}")
+
+
+trigSF_eval = trigSF_prod.derive("trigSF_eval", cls_dict={"mode": "evaluation"})
 
 
 @producer(
@@ -463,31 +610,31 @@ def trigger_prod(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             arr_orth = ak.concatenate([arr_orth, trig_passed_orth], axis=1)
             id += 1
 
-        bkg_trig = self.config_inst.x.bkg_trigger[channel]
-        trig_passed_bkg = ak.singletons(
-            ak.flatten(
-                ak.nan_to_none(
-                    ak.unzip(ak.where(events.HLT[bkg_trig], id, np.float64(np.nan))),
-                ),
-            ),
-        )
-
-        trig_passed_bkg_orth = ak.flatten(
-            ak.singletons(
-                ak.nan_to_none(
-                    ak.where(
-                        ak.singletons(ak.flatten(ak.unzip(events.HLT[ref_trig]))) &
-                        ak.singletons(ak.flatten(ak.unzip(events.HLT[bkg_trig]))),
-                        id,
-                        np.float64(np.nan),
+        for bkg_trig_single in self.config_inst.x.bkg_trigger[channel]:
+            trig_passed_bkg = ak.singletons(
+                ak.flatten(
+                    ak.nan_to_none(
+                        ak.unzip(ak.where(events.HLT[bkg_trig_single], id, np.float64(np.nan))),
                     ),
                 ),
-            ),
-            axis=1,
-        )
-        arr = ak.concatenate([arr, trig_passed_bkg], axis=1)
-        arr_orth = ak.concatenate([arr_orth, trig_passed_bkg_orth], axis=1)
-        id += 1
+            )
+
+            trig_passed_bkg_orth = ak.flatten(
+                ak.singletons(
+                    ak.nan_to_none(
+                        ak.where(
+                            ak.singletons(ak.flatten(ak.unzip(events.HLT[ref_trig]))) &
+                            ak.singletons(ak.flatten(ak.unzip(events.HLT[bkg_trig_single]))),
+                            id,
+                            np.float64(np.nan),
+                        ),
+                    ),
+                ),
+                axis=1,
+            )
+            arr = ak.concatenate([arr, trig_passed_bkg], axis=1)
+            arr_orth = ak.concatenate([arr_orth, trig_passed_bkg_orth], axis=1)
+            id += 1
 
     events = set_ak_column(events, "trig_bits", arr)
     events = set_ak_column(events, "trig_bits_orth", arr_orth)
@@ -501,7 +648,8 @@ def trigger_prod_init(self: Producer) -> None:
         for trigger in self.config_inst.x.trigger[channel]:
             self.uses.add(f"HLT.{trigger}")
         self.uses.add(f"HLT{self.config_inst.x.ref_trigger[channel]}")
-        self.uses.add(f"HLT{self.config_inst.x.bkg_trigger[channel]}")
+        for bkg_trigger in self.config_inst.x.bkg_trigger[channel]:
+            self.uses.add(f"HLT.{bkg_trigger}")
 
 
 # producers for single channels
@@ -509,98 +657,3 @@ tt_fh_trigger_prod = trigger_prod.derive(
     "tt_fh_trigger_prod",
     cls_dict={"channel": ["tt_fh"]},
 )
-
-
-@producer(
-    uses={
-        features,
-        category_ids,
-        normalization_weights,
-        muon_weights,
-        attach_coffea_behavior,
-        "gen_top",
-        "Jet.hadronFlavour",
-    },
-    produces={
-        features,
-        category_ids,
-        normalization_weights,
-        muon_weights,
-        attach_coffea_behavior,
-        "gen_top",
-        "jets_light.*",
-        "jets_light_num",
-        "bjets_light.*",
-        "bjets_light_num",
-        "jets_c.*",
-        "jets_c_num",
-        "bjets_c.*",
-        "bjets_c_num",
-        "jets_b.*",
-        "jets_b_num",
-        "bjets_b.*",
-        "bjets_b_num",
-        "Jet.hadronFlavour",
-    },
-)
-def btag_eff(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-    """
-    Producer for the b-tagging efficiency in simulation using pre-selection.
-    """
-    # Attach coffea-style behaviour for collections
-    events = self[attach_coffea_behavior](events, **kwargs)
-
-    # Compute derived features and summaries
-    events = self[features](events, **kwargs)
-
-    wp_tight = self.config_inst.x.btag_working_points.deepjet.tight
-
-    # Mask for requirements of our pre-selection jets
-    mask = (events.Jet.pt >= 40) & (abs(events.Jet.eta) < 2.4)
-    mask_b = mask & (events.Jet.btagDeepFlavB >= wp_tight)
-
-    # Obtain the jets passing the pre-selections
-    jets_pass = events.Jet[mask]
-    bjets_pass = events.Jet[mask_b]
-
-    # Collect the jets passing the selection per flavour
-    # light: hadronFlavour == 0, c: hadronFlavour == 4, b: hadronFlavour == 5
-    # https://indico.cern.ch/event/1096988/contributions/4615134/attachments/2346047/4000529/Nov21_btaggingSFjsons.pdf
-    jets_light = jets_pass[jets_pass.hadronFlavour == 0]
-    jets_c = jets_pass[jets_pass.hadronFlavour == 4]
-    jets_b = jets_pass[jets_pass.hadronFlavour == 5]
-
-    events = set_ak_column(events, "jets_light", ak.zip({"pt": jets_light.pt, "eta": abs(jets_light.eta)}))
-    events = set_ak_column(events, "jets_light_num", ak.num(jets_light.pt, axis=1), value_type=np.int32)
-    events = set_ak_column(events, "jets_c", ak.zip({"pt": jets_c.pt, "eta": abs(jets_c.eta)}))
-    events = set_ak_column(events, "jets_c_num", ak.num(jets_c.pt, axis=1), value_type=np.int32)
-    events = set_ak_column(events, "jets_b", ak.zip({"pt": jets_b.pt, "eta": abs(jets_b.eta)}))
-    events = set_ak_column(events, "jets_b_num", ak.num(jets_b.pt, axis=1), value_type=np.int32)
-
-    # Collect the b-tagged jets passing the selection per flavour
-    bjets_light = bjets_pass[bjets_pass.hadronFlavour == 0]
-    bjets_c = bjets_pass[bjets_pass.hadronFlavour == 4]
-    bjets_b = bjets_pass[bjets_pass.hadronFlavour == 5]
-
-    events = set_ak_column(events, "bjets_light", ak.zip({"pt": bjets_light.pt, "eta": abs(bjets_light.eta)}))
-    events = set_ak_column(events, "bjets_light_num", ak.num(bjets_light.pt, axis=1), value_type=np.int32)
-    events = set_ak_column(events, "bjets_c", ak.zip({"pt": bjets_c.pt, "eta": abs(bjets_c.eta)}))
-    events = set_ak_column(events, "bjets_c_num", ak.num(bjets_c.pt, axis=1), value_type=np.int32)
-    events = set_ak_column(events, "bjets_b", ak.zip({"pt": bjets_b.pt, "eta": abs(bjets_b.eta)}))
-    events = set_ak_column(events, "bjets_b_num", ak.num(bjets_b.pt, axis=1), value_type=np.int32)
-
-    # Provide fake kinfit outputs used by other tools
-    events = set_ak_column(events, "FitChi2", 0)
-    events = set_ak_column(events, "FitPgof", 1)
-    events = set_ak_column(events, "fitCombinationType", 2)
-    events = set_ak_column(events, "FitRbb", 2.5)
-
-    # Compute category ids used by later stages
-    events = self[category_ids](events, **kwargs)
-
-    # MC-only weights
-    if self.dataset_inst.is_mc:
-        # normalization weights (luminosity, xsec, pileup, ...)
-        events = self[normalization_weights](events, **kwargs)
-
-    return events

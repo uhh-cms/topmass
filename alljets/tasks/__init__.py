@@ -4,3 +4,5 @@
 # provisioning imports
 import alljets.tasks.base
 import alljets.tasks.ProduceTriggerWeights
+import alljets.tasks.PlotBtagEfficiency
+import alljets.tasks.PrefitMatching

@@ -6,7 +6,7 @@ Configuration of the topmass_alljets analysis.
 
 from alljets.hist_hooks.bkg import add_hooks as add_qcd_hooks
 from alljets.hist_hooks.dividebybinwidth import add_hooks as add_divide_by_bin_width_hooks
-from alljets.hist_hooks.unrolling2d import add_hooks as add_unrolling_2d
+from alljets.hist_hooks.unrolling import add_hooks as add_unrolling
 
 import importlib
 import os
@@ -35,7 +35,7 @@ analysis_aj.x.hist_hooks = DotDict()
 # QCD hist hooks
 add_qcd_hooks(analysis_aj)
 add_divide_by_bin_width_hooks(analysis_aj)
-add_unrolling_2d(analysis_aj)
+add_unrolling(analysis_aj)
 
 # analysis-global versions
 # (see cfg.x.versions below for more info)
@@ -113,5 +113,14 @@ add_lazy_config(
     campaign_attr="campaign_run2_2017_nano_v9",
     config_name="2017_v9",
     config_id=2017,
+    add_limited=True,
+)
+
+# 2018,
+add_lazy_config(
+    campaign_module="cmsdb.campaigns.run2_2018_nano_v9",
+    campaign_attr="campaign_run2_2018_nano_v9",
+    config_name="2018_v9",
+    config_id=2018,
     add_limited=True,
 )

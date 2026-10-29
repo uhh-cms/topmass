@@ -15,7 +15,7 @@ import order as od
 from columnflow.tasks.framework.base import Requirements, ShiftTask
 from columnflow.tasks.framework.mixins import (
     CalibratorClassesMixin, SelectorClassMixin, ReducerClassMixin, ProducerClassesMixin, HistProducerClassMixin,
-    CategoriesMixin, HistHookMixin, MLModelsMixin,
+    CategoriesMixin, DatasetsProcessesMixin, HistHookMixin, MLModelsMixin,
 )
 from columnflow.tasks.framework.plotting import (
     PlotBase, PlotBase1D, ProcessPlotSettingMixin, VariablePlotSettingMixin,
@@ -36,6 +36,7 @@ class _ProduceTriggerWeightBase(
     MLModelsMixin,
     HistProducerClassMixin,
     CategoriesMixin,
+    DatasetsProcessesMixin,
     ProcessPlotSettingMixin,
     VariablePlotSettingMixin,
     HistHookMixin,

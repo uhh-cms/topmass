@@ -25,6 +25,8 @@ ak = maybe_import("awkward")
         "trig_weight",
         "trig_weight_up",
         "trig_weight_down",
+        "trig_weight_full_up",
+        "trig_weight_full_down",
     },
     mc_only=True,
 )
@@ -47,47 +49,53 @@ def trig_weights(
 
     The following event-level columns are produced:
     - trig_weight: nominal trigger scale-factor weight
-    - trig_weight_up: upward systematic variation
-    - trig_weight_down: downward systematic variation
+    - trig_weight_up/down: variations corresponding to ±50% of the nominal deviation from unity
+    - trig_weight_full_up/down: variations corresponding to ±100% of the nominal deviation from unity
 
-    Systematic variations are modeled as a symmetric ±50% deviation from
-    unity around the nominal weight.
-
-    For datasets without top quarks, all trigger weights are set to unity.
+    Systematic variations are defined as fractions of the nominal weight's
+    deviation from unity. The standard variations correspond to ±50% of
+    this deviation, while the full variations correspond to ±100%.
     """
 
-    if self.dataset_inst.has_tag("has_top"):
-        # Determine the pT of the 6th leading jet within |eta| < 2.6. If fewer than 6 jets are present, set to 0.
-        jet6_pt = ak.where(
-            ak.num(events.Jet[(abs(events.Jet.eta) < 2.6)], axis=1) > 5,
-            ak.sort(events.Jet[(abs(events.Jet.eta) < 2.6)].pt[:], ascending=False, axis=1),
-            np.zeros((len(events), 6)))[:, 5]
+    jet6_pt = ak.where(
+        ak.num(events.Jet[(abs(events.Jet.eta) < 2.6)], axis=1) > 5,
+        ak.sort(events.Jet[(abs(events.Jet.eta) < 2.6)].pt[:], ascending=False, axis=1),
+        np.zeros((len(events), 6)))[:, 5]
 
-        # Compute HT: scalar sum of jet pT for jets passing the trigger-like selection
-        ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) & (abs(events.Jet.eta) < 2.6)], axis=1)
+    # Compute HT: scalar sum of jet pT for jets passing the trigger-like selection
+    ht = ak.sum(events.Jet.pt[(events.Jet.pt > 32) & (abs(events.Jet.eta) < 2.6)], axis=1)
 
-        # Evaluate trigger scale factor using the configured variable
-        if self.config_inst.x.trigger_sf_variable.startswith("trigjet6_pt"):
-            # Apply the correction as a function of the 6th jet pT. Events with fewer than 6 jets receive weight = 0.
-            weight = ak.where(jet6_pt == 0, np.zeros((len(events))), self.trig_sf_corrector(jet6_pt))
+    # Evaluate trigger scale factor using the configured variable
+    if self.config_inst.x.trigger_sf_variable.startswith("trigjet6_pt"):
+        # Apply the correction as a function of the 6th jet pT. Events with fewer than 6 jets receive weight = 0.
+        weight = ak.where(jet6_pt == 0, np.zeros((len(events))), self.trig_sf_corrector(jet6_pt))
 
-        if self.config_inst.x.trigger_sf_variable.startswith("ht"):
-            # Apply the correction as a function of HT.
-            weight = self.trig_sf_corrector(ht)
-
-        # Define systematic variations around the nominal weight, corresponds to ±50% of the deviation from unity.
-        weight_up = weight + abs(1 - weight) * 0.5
-        weight_down = ak.where((weight - abs(1 - weight) * 0.5) > 0, (weight - abs(1 - weight) * 0.5), 0)
-
-        # Store the nominal and varied weights as event-level columns
-        events = set_ak_column(events, "trig_weight", weight, value_type=np.float32)
-        events = set_ak_column(events, "trig_weight_up", weight_up, value_type=np.float32)
-        events = set_ak_column(events, "trig_weight_down", weight_down, value_type=np.float32)
+    elif self.config_inst.x.trigger_sf_variable.startswith("ht"):
+        # Apply the correction as a function of HT.
+        weight = self.trig_sf_corrector(ht)
     else:
-        # For datasets without top quarks, no trigger correction is applied and all weights default to unity.
-        events = set_ak_column(events, "trig_weight", np.ones(len(events)), value_type=np.float32)
-        events = set_ak_column(events, "trig_weight_up", np.ones(len(events)), value_type=np.float32)
-        events = set_ak_column(events, "trig_weight_down", np.ones(len(events)), value_type=np.float32)
+        raise ValueError(
+            f"Unsupported trigger SF variable: " f"{self.config_inst.x.trigger_sf_variable}",
+        )
+
+    # Define systematic variations
+    # Deviation of the nominal trigger SF from unity
+    deviation = np.abs(1.0 - weight)
+
+    # Variations corresponding to 50% and 100% of the deviation
+    weight_up = weight + 0.5 * deviation
+    weight_down = np.maximum(weight - 0.5 * deviation, 0.0)
+
+    weight_full_up = weight + deviation
+    weight_full_down = np.maximum(weight - deviation, 0.0)
+
+    # Store the nominal and varied weights as event-level columns
+    events = set_ak_column(events, "trig_weight", weight, value_type=np.float32)
+    events = set_ak_column(events, "trig_weight_up", weight_up, value_type=np.float32)
+    events = set_ak_column(events, "trig_weight_down", weight_down, value_type=np.float32)
+    events = set_ak_column(events, "trig_weight_full_up", weight_full_up, value_type=np.float32)
+    events = set_ak_column(events, "trig_weight_full_down", weight_full_down, value_type=np.float32)
+
     return events
 
 
@@ -96,14 +104,16 @@ def trig_weights_requires(self: Producer, task: law.Task, reqs: dict) -> None:
     if ("external_files") in reqs:
         return
 
+    year = self.config_inst.campaign.x.year
+
     from alljets.tasks.ProduceTriggerWeights import ProduceTriggerWeight
-    pinned_version = get("versions", "cfg_2017_v9__task_cf.ProduceTriggerWeight")
+    pinned_version = get("versions", f"cfg_{year}_v9__task_cf.ProduceTriggerWeight")
     reqs["external_files"] = ProduceTriggerWeight(
         version=pinned_version,
         datasets="tt_fh_powheg,tt_sl_powheg,tt_dl_powheg,data*",
         configs=task.config,
-        selector="trigger_eff",
-        producers="no_norm,trigger_prod",
+        selector="trigger",
+        producers="trigSF_prod,trigger_prod",
         variables=self.config_inst.x.trigger_sf_variable + "-trig_bits",
         hist_producer="trig_all_weights",
         processes="data,tt",
