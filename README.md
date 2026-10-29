@@ -133,10 +133,8 @@ law run cf.MLTraining \
     --version v2_Spanet \
     --configs 2018_v9 \
     --selector-steps spanet \
-    --worksers 2
+    --workers 2
 ```
-(Somehow I do not get any output files without the ```--branch 1``` option.)
-
 Run training on interactive GPU batch node (started with `condor_submit -i interactive_gpu.jdl`) :
 ```
 . $CF_SOFTWARE_BASE/venvs/spanet_96371da6/bin/activate

@@ -17,7 +17,7 @@ from columnflow.categorization import Categorizer, categorizer
 from columnflow.config_util import add_category
 from columnflow.ml import MLModel
 from columnflow.util import maybe_import, dev_sandbox
-from columnflow.columnar_util import Route, set_ak_column
+from columnflow.columnar_util import Route, set_ak_column, has_ak_column
 from law.target.file import get_path
 from columnflow.columnar_util import attach_coffea_behavior
 from columnflow.production.util import delta_r_match
@@ -369,6 +369,10 @@ class SpaNetModel(MLModel):
             "SelectedJets.btagDeepFlavB", "gen_top.b.eta", "gen_top.b.phi", "gen_top.b.pt", "gen_top.b.mass",
             "gen_top.w_children.eta", "gen_top.w_children.phi", "gen_top.w_children.pt", "gen_top.w_children.mass",
             "category_ids",
+        } | {
+            column
+            for dataset_inst in self.datasets(config_inst)
+            for column in self._event_weight_columns(config_inst, dataset_inst)
         }
 
     def produces(self, config_inst: od.Config) -> set[Route | str]:
@@ -414,7 +418,25 @@ class SpaNetModel(MLModel):
             h5_datasets[f"TARGETS/{target}"] = create(f"TARGETS/{target}", (), "i")
         # global input, only used by SPANet if listed in the GLOBAL inputs of ttbar.yaml
         h5_datasets["INPUTS/Event/mtop_gen"] = create("INPUTS/Event/mtop_gen", (), "f")
+        h5_datasets["INPUTS/Event/weight"] = create("INPUTS/Event/weight", (), "f")
         return h5_datasets
+
+    def _event_weight_columns(self, config_inst: od.Config, dataset_inst: od.Dataset) -> list[str]:
+        # weight columns from the event_weights aux entries of the config and the dataset, as in aj_hist
+        if dataset_inst.is_data:
+            return []
+        return list(config_inst.x("event_weights", {})) + list(dataset_inst.x("event_weights", {}))
+
+    def _event_weight(self, events: ak.Array, dataset_inst: od.Dataset) -> np.ndarray:
+        # product of the nominal event weights, dataset-specific weights are skipped with a warning if missing
+        weight = np.ones(len(events), dtype=np.float32)
+        dataset_columns = set(dataset_inst.x("event_weights", {}))
+        for column in self._event_weight_columns(self.config_inst, dataset_inst):
+            if column in dataset_columns and not has_ak_column(events, column):
+                logger.warning(f"weight '{column}' for dataset {dataset_inst.name} not found")
+                continue
+            weight = weight * ak.to_numpy(Route(column).apply(events)).astype(np.float32)
+        return weight
 
     def training_shifts(self, config_inst: od.Config, dataset_inst: od.Dataset) -> set[str]:
         # top mass variations available for the dataset
@@ -446,19 +468,21 @@ class SpaNetModel(MLModel):
             self,
             task: law.Task,
             input: dict[str, Any],
-    ) -> list[tuple[law.FileSystemFileTarget, float]]:
-        # training event files with their generated top mass: the merged nominal events per fold and the prepared
-        # events of the top mass variations of the same folds
+    ) -> list[tuple[law.FileSystemFileTarget, od.Dataset, float]]:
+        # training event files with their dataset and generated top mass: the merged nominal events per fold and the
+        # prepared events of the top mass variations of the same folds
+        get_dataset = self.config_inst.get_dataset
         files = [
-            (inp["mlevents"], SPANET_MTOP_NOMINAL)
-            for dataset_files in input["events"][self.config_inst.name].values()
+            (inp["mlevents"], get_dataset(dataset), SPANET_MTOP_NOMINAL)
+            for dataset, dataset_files in input["events"][self.config_inst.name].items()
             for inp in dataset_files
         ]
-        for shift_inputs in input["model"].values():
+        for dataset, shift_inputs in input["model"].items():
             for shift, inp in shift_inputs.items():
                 for branch_output in inp["collection"].targets.values():
                     files.extend(
-                        (branch_output["mlevents"][f], SPANET_MTOP_SHIFTS[shift]) for f in task.training_folds
+                        (branch_output["mlevents"][f], get_dataset(dataset), SPANET_MTOP_SHIFTS[shift])
+                        for f in task.training_folds
                     )
         return files
 
@@ -476,7 +500,7 @@ class SpaNetModel(MLModel):
         t2_comp = 0
         with h5py.File(get_path(output), "w") as fout:
             h5_datasets = self._create_h5_datasets(fout)
-            for target, mtop_gen in self._training_files(task, input):
+            for target, dataset_inst, mtop_gen in self._training_files(task, input):
                 events = ak.from_parquet(get_path(target))
                 matches = self.get_matches(events)
                 is_complete, is_t1, is_t2 = _triplet_complete(matches)
@@ -489,6 +513,7 @@ class SpaNetModel(MLModel):
                 for i, name in enumerate(self.TARGETS):
                     values[f"TARGETS/{name}"] = matches[:, i]
                 values["INPUTS/Event/mtop_gen"] = np.full(nentries, mtop_gen, dtype=np.float32)
+                values["INPUTS/Event/weight"] = self._event_weight(events, dataset_inst)
 
                 for path, ds in h5_datasets.items():
                     ds.resize(index + nentries, axis=0)
