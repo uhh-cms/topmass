@@ -168,7 +168,7 @@ law run cf.PlotVariables1D \
     --dataset tt_fh_powheg \
     --version v2_Spanet \
     --configs 2018_v9 \
-    --ml-models spanet \
+    --ml-model spanet \
     --selector-steps spanet \
     --variables spanet.mtop_best-spanet.combtype_max \
     --categories spanet_prob_one \
@@ -235,7 +235,7 @@ A [```helper```](https://github.com/uhh-cms/topmass/blob/dev_Lennert2/alljets/in
 
 To create the 1D datacards:
 ```
-law run cf.CreateDatacards \
+law run cf.cms.CreateDatacards \
     --inference-model default_1D \
     --hist-hooks qcd \
     --version v2_Topmass \
@@ -248,7 +248,7 @@ law run cf.CreateDatacards \
     --workers 10 \
     --cf.MergeShiftedHistograms-shift-source-chunk-size 3
 
-law run cf.CreateDatacards \
+law run cf.cms.CreateDatacards \
     --inference-model default_2D \
     --hist-hooks qcd,unrolling \
     --version v2_Topmass \
@@ -261,7 +261,7 @@ law run cf.CreateDatacards \
     --workers 10 \
     --cf.MergeShiftedHistograms-shift-source-chunk-size 3
 
-law run cf.CreateDatacards \
+law run cf.cms.CreateDatacards \
     --inference-model peak_2D \
     --hist-hooks qcd,unrolling \
     --version v2_Topmass \
@@ -274,7 +274,7 @@ law run cf.CreateDatacards \
     --workers 10 \
     --cf.MergeShiftedHistograms-shift-source-chunk-size 3
 
-law run cf.CreateDatacards \
+law run cf.cms.CreateDatacards \
     --inference-model peak_3D \
     --hist-hooks qcd,unrolling \
     --version v2_Topmass \
@@ -290,7 +290,7 @@ law run cf.CreateDatacards \
 
 Check for missing input files:
 ```
-law run cf.CreateDatacards \
+law run cf.cms.CreateDatacards \
     --inference-model default_2D \
     --hist-hooks qcd,unrolling \
     --version v2_TopMass \

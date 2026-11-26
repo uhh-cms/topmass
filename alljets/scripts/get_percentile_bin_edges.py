@@ -1,5 +1,8 @@
 import argparse
+import glob
 import logging
+import os
+import re
 import numpy as np
 import awkward as ak
 import vector
@@ -212,11 +215,54 @@ def format_edges(edges):
     return "[" + ", ".join(f"{x:.6g}" for x in edges) + "]"
 
 
+def load_branch_files(pattern, columns):
+    # load parquet files of a task ordered by directory (dataset) and branch number (trailing number of the file name)
+    files = sorted(
+        glob.glob(pattern),
+        key=lambda f: (os.path.dirname(f), int(re.search(r"_(\d+)\.parquet$", f).group(1))),
+    )
+    if not files:
+        raise FileNotFoundError(f"no files found for {pattern}")
+    return files, ak.concatenate([ak.from_parquet(f, columns=columns) for f in files])
+
+
+def ml_binning(args):
+    # 1D percentile binning of the network output; the MLEvaluation output (mlcolumns_*.parquet) has no categories
+    # and weights, they are taken from the ProduceColumns output of the default producer of the same events
+    ml_files, ml = load_branch_files(args.ml_path, [args.ml_column])
+    cat_files, cat = load_branch_files(
+        args.ml_cat_path,
+        ["category_ids", "btag_weight", "normalization_weight", "normalized_trig_weight", "normalized_pu_weight"],
+    )
+    if len(ml_files) != len(cat_files) or len(ml) != len(cat):
+        raise ValueError(
+            f"MLEvaluation ({len(ml_files)} files, {len(ml)} events) and ProduceColumns ({len(cat_files)} files, "
+            f"{len(cat)} events) outputs do not match",
+        )
+
+    output = ak.to_numpy(ml[tuple(args.ml_column.split("."))])
+    # events without valid network output are filled with -1
+    goodmask = ak.to_numpy(ak.any(cat.category_ids == args.category_id, axis=1)) & (output >= 0)
+    logger.info(f"Selected events: {np.sum(goodmask)} / {len(goodmask)}")
+
+    edges = compute_edges(output[goodmask], ak.to_numpy(build_weight(cat))[goodmask], nbins=args.nbins)
+
+    logger.info("========================================")
+    logger.info(f"Variable : {args.ml_column}")
+    logger.info(f"Number of bins: {args.nbins}")
+    logger.info(f"Percentile Edges    : {format_edges(edges)}")
+    logger.info("=========================================")
+
+
 # main function
 def main(args):
+    if args.ml_path:
+        ml_binning(args)
+        return
+
     precomputed, jets, categories, weights = load_data(args.version)
 
-    mask = categories.category_ids == 502
+    mask = categories.category_ids == args.category_id
     goodmask = ak.any(mask, axis=1)
 
     logger.info(f"Selected events: {ak.sum(goodmask)} / {len(goodmask)}")
@@ -317,6 +363,31 @@ if __name__ == "__main__":
     parser.add_argument("--nbins-y3", type=int, default=3, help="avg_W bins for 3D")
 
     parser.add_argument("--nbins-z3", type=int, default=2, help="R_bq bins for 3D (all variants)")
+
+    parser.add_argument("--category-id", type=int, default=502, help="category of the selected events (502: sig)")
+
+    parser.add_argument(
+        "--ml-path",
+        type=str,
+        default="",
+        help="glob pattern of the MLEvaluation outputs (mlcolumns_*.parquet); if set, only the 1D binning of "
+        "--ml-column is computed",
+    )
+
+    parser.add_argument(
+        "--ml-column",
+        type=str,
+        default="mass_classifier_dnn_test.output",
+        help="network output column in the MLEvaluation outputs",
+    )
+
+    parser.add_argument(
+        "--ml-cat-path",
+        type=str,
+        default="",
+        help="glob pattern of the ProduceColumns outputs of the default producer (columns_*.parquet) for the same "
+        "events as --ml-path, providing category_ids and weights",
+    )
 
     args = parser.parse_args()
     main(args)

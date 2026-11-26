@@ -13,6 +13,7 @@
 *.h5
 *.hdf5
 *.json
+!alljets/config/binning_tree_*.json
 *.json.gz
 *.pb
 *.out

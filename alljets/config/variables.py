@@ -41,6 +41,7 @@ from .jet_builder import (
     build_xb_avg,
     build_R_bq,
 )
+from .binning_tree import FINE_AXES, FINE_EDGES, load_tree, build_tree_bin
 
 ak = maybe_import("awkward")
 
@@ -1844,6 +1845,49 @@ def add_variables(cfg: od.Config) -> None:
         unit="",
         x_title=r"$R^{reco}_{bq}$",
     )
+    ###############################################################################
+    #          Fine grid and tree binning of mtfit, m_W,avg and R_bq              #
+    ###############################################################################
+    # observables of the adaptive binning: builder, inputs, title and unit
+    tree_observables = {
+        "fit_Top1_mass": (partial(build_top1jet, which="mass"), build_top1jet.inputs, r"$m_{t}^{fit}$", "GeV"),
+        "reco_W_mass_avg": (build_avg_w_mass, build_avg_w_mass.inputs, r"$m_{W_{avg}}^{reco}$", "GeV"),
+        "reco_R_bq": (build_reco_R_bq, build_reco_R_bq.inputs, r"$R^{reco}_{bq}$", ""),
+    }
+    # fine grid for the datacard of the binning optimization (inference model fine_3D)
+    for axis in FINE_AXES:
+        build, inputs, title, unit = tree_observables[axis]
+        add_variable(
+            cfg,
+            name=f"{axis}_fine",
+            expression=build,
+            aux={"inputs": inputs},
+            binning=FINE_EDGES[axis],
+            unit=unit,
+            x_title=title,
+        )
+    # leaf index of the tree binnings found by alljets/scripts/optimize_binning.py
+    for tree_name in ("2D", "3D"):
+        tree = load_tree(tree_name)
+        if tree is None:
+            continue
+        n_leaves = len(tree["leaves"])
+        add_variable(
+            cfg,
+            name=f"tree_bin_{tree_name}",
+            expression=partial(
+                build_tree_bin,
+                builders=[tree_observables[axis][0] for axis in tree["axes"]],
+                tree=tree,
+            ),
+            aux={
+                "inputs": sorted({inp for axis in tree["axes"] for inp in tree_observables[axis][1]}),
+                "overflow": False,
+                "underflow": False,
+            },
+            binning=(n_leaves, -0.5, n_leaves - 0.5),
+            x_title=f"tree bin ({', '.join(tree['axes'])})",
+        )
     build_avg_R_bq.inputs = ["FitJet.reco.{pt,eta,phi,mass}"]
     add_variable(
         cfg,

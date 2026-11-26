@@ -147,6 +147,33 @@ def default_1D(self: InferenceModel) -> None:
         mc_stats=[100, 1, 1],
         flow_strategy=FlowStrategy.remove,
     )
+    self.add_category(
+        "SR_classifier_dnn_test",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="sig",
+                variable="mass_classifier_dnn_test_output_percentile",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
+    # 2D fit of the mass and syst observables, unrolled percentile bins
+    self.add_category(
+        "SR_classifier_dnn_test_2d",
+        config_data={
+            config_inst.name: self.category_config_spec(
+                category="sig",
+                variable="mass_classifier_dnn_test_unrolled",
+                data_datasets=["data_jetht*"],
+            )
+            for config_inst in self.config_insts
+        },
+        mc_stats=[100, 1, 1],
+        flow_strategy=FlowStrategy.remove,
+    )
     #
     # processes
     #
